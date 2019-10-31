@@ -1,0 +1,88 @@
+# Ignore paths that contain user-generated content.
+web/sites/*/files
+web/sites/*/private
+files/*
+
+# Avoid accidental modification of pantheon.upstream.yml in sites
+# created from this upstream
+pantheon.upstream.yml
+
+# Pantheon commits a settings.php for environment-specific settings.
+# Place local settings in settings.local.php
+web/sites/*/settings.local.php
+web/sites/*/services*.yml
+
+# Note that services.local.yml is not loaded by default. If you would like
+# to use this file add the following to your settings.local.php file:
+#   $settings['container_yamls'][] = __DIR__ . '/services.local.yml';
+web/sites/*/services.local.yml
+
+# ** Only works in OSs that support newer versions of fnmatch (Bash 4+)
+web/sites/default/**/files
+web/sites/default/**/private
+
+# Ignore SimpleTest multi-site environment.
+websites/simpletest
+
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.bz2
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.tgz
+
+# Logs and databases #
+######################
+*.log
+*.sql
+
+# OS generated files #
+######################
+.DS_Store*
+ehthumbs.db
+Icon?
+
+Thumbs.db
+._*
+
+# Vim generated files #
+######################
+*.un~
+
+# SASS #
+##########
+.sass-cache
+
+# Things in the core directory that Drupal 8 commits in the repository.
+!core/**/*.gz
+
+# Ignore non-custom parts of Drupal.
+web/core
+web/modules/contrib
+web/modules/features
+web/profiles/contrib
+web/themes/contrib
+
+# Ignore Composer-managed dependencies.
+vendor/
+
+# Ignore generated linting files
+/web/.eslintignore
+/web/.eslintrc
+
+# VS Code generated files/folders
+.vscode
+.vscode-insdiders
+.history
+
+# Lando app
+app
+mods_disabled.local
+.editorconfig
+.gitattributes
