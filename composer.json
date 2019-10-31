@@ -26,7 +26,7 @@
         "drupal/console": "^1.0.2",
         "drupal/core-composer-scaffold": "^8.8",
         "drupal/core-recommended": "^8.8",
-        "drush/drush": "^9.0.0",
+        "drush/drush": "~9",
         "fourkitchens/sous": "dev-master",
         "oomphinc/composer-installers-extender": "^1.1",
         "vlucas/phpdotenv": "^2.4",
