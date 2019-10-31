@@ -64,6 +64,7 @@ Thumbs.db
 
 # Ignore non-custom parts of Drupal.
 web/core
+web/libraries
 web/modules/contrib
 web/modules/features
 web/profiles/contrib
@@ -86,3 +87,25 @@ app
 mods_disabled.local
 .editorconfig
 .gitattributes
+.csslintrc
+.eslintignore
+.eslintrc.json
+.ht.router.php
+.htaccess
+INSTALL.txt
+README.txt
+autoload.php
+example.gitignore
+index.php
+robots.txt
+update.php
+web.config
+
+# Remove me after sous install
+README.txt
+development.services.yml
+example.settings.local.php
+example.sites.php
+default.services.yml
+default.settings.php
+settings.php
