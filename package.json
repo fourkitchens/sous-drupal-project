@@ -1,0 +1,11 @@
+{
+  "name": "sous-project",
+  "license": "MIT",
+  "scripts": {
+    "confim": "./scripts/sous/confim.sh",
+    "confex": "./scripts/sous/confex.sh",
+    "import-data": "./scripts/sous/import-data.sh",
+    "rebuild": "./scripts/sous/rebuild.sh",
+    "local-data-bak": "./scripts/sous/local-data-bak.sh"
+  }
+}
