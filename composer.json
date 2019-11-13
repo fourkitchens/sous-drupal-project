@@ -27,7 +27,7 @@
         "drupal/core-composer-scaffold": "^8.8",
         "drupal/core-recommended": "^8.8",
         "drush/drush": "~9",
-        "fourkitchens/sous": "dev-master",
+        "fourkitchens/sous": "dev-development-setup",
         "oomphinc/composer-installers-extender": "^1.1",
         "vlucas/phpdotenv": "^2.4",
         "webflo/drupal-finder": "^1.0.0",
@@ -86,6 +86,9 @@
                 "web-root": "web/"
             },
             "source": "https://git.drupalcode.org/project/drupal/raw/8.7.8/{path}",
+            "allowed-packages": [
+                "fourkitchens/sous"
+            ],
             "excludes": [
               "google123.html",
               "robots.txt"
