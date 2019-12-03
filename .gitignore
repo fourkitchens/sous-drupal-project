@@ -73,6 +73,9 @@ web/themes/contrib
 # Ignore Composer-managed dependencies.
 vendor/
 
+# Node modules.
+node_modules/
+
 # Ignore generated linting files
 /web/.eslintignore
 /web/.eslintrc
@@ -100,6 +103,10 @@ index.php
 robots.txt
 update.php
 web.config
+
+# Local reference files.
+/reference/**/*
+!/reference/.gitkeep
 
 # Remove me after sous install
 README.txt
