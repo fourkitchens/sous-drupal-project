@@ -5169,12 +5169,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:fourkitchens/sous.git",
-                "reference": "ca526e8919c59bfd2067c8b8a45bdb29f12911c6"
+                "reference": "84037a144ee394abb50abb04d74982265bf8da95"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fourkitchens/sous/zipball/ca526e8919c59bfd2067c8b8a45bdb29f12911c6",
-                "reference": "ca526e8919c59bfd2067c8b8a45bdb29f12911c6",
+                "url": "https://api.github.com/repos/fourkitchens/sous/zipball/84037a144ee394abb50abb04d74982265bf8da95",
+                "reference": "84037a144ee394abb50abb04d74982265bf8da95",
                 "shasum": ""
             },
             "require": {
@@ -5251,6 +5251,15 @@
                     "drupal/content_browser": {
                         "3089478": "https://www.drupal.org/files/issues/2019-10-22/profile-library-support-3089478-2.patch"
                     }
+                },
+                "drupal-scaffold": {
+                    "file-mapping": {
+                        "[web-root]/sites/development.services.yml": {
+                            "mode": "replace",
+                            "path": "assets/scaffold/files/development.services.yml",
+                            "overwrite": true
+                        }
+                    }
                 }
             },
             "license": [
@@ -5287,7 +5296,7 @@
                 "source": "https://github.com/fourkitchens/sous/tree/master",
                 "issues": "https://github.com/fourkitchens/sous/issues"
             },
-            "time": "2019-11-14T21:21:20+00:00"
+            "time": "2019-12-05T17:49:31+00:00"
         },
         {
             "name": "grasmash/expander",
