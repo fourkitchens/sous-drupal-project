@@ -1,20 +1,25 @@
 # Sous Project
 
-## Contributing
+This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set of contrib modules, a starting custom module for specific for the build, and a custom starting theme generated from Emulsify.
 
-1. Change the `"fourkitchens/sous": "dev-master",` line to match the name of the branch you wish to test or change into the `web/profiles/contrib/sous/` directory and checkout the branch you are looking for if you have already setup the project.
-2. `composer install` # If you do this from outside of lando you won't have to setup your composer key to access the private sous repo every time you rebuild lando.
-3. `lando start`
-4. Open the url that lando prints
-5. Follow the setup instructions
-6. Database connection information can be found with `lando info` in the database section.
-7. Finish setup and test as appropriate.
+## Install
 
-## Helper scripts
+Use this command below and replace `PROJECT_NAME` with your chosen project name.
+
+```
+composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-interaction
+
+```
+
+## Additional Tooling
+
+This package provides some additional tooling to support the build.
+
+### Helper scripts
 
 To use the helper script provided you will need to have `yarn` or `npm` installed. Then just run `yarn <command>` or `npm run <command>`. For example: `yarn import-data`. These commands are bash scripts located in the `./scripts/sous` directory and defined in `package.json`.
 
-### Configuration management scripts
+#### Configuration management scripts
 
 **confex**
 
