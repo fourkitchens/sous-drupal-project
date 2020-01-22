@@ -2,6 +2,7 @@
 
 This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set of contrib modules, a starting custom module for specific for the build, and a custom starting theme generated from Emulsify.
 
+
 ## Install
 
 Use this command below and replace `PROJECT_NAME` with your chosen project name.
@@ -10,6 +11,18 @@ Use this command below and replace `PROJECT_NAME` with your chosen project name.
 composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-interaction
 
 ```
+
+### Install custom theme & project module
+
+Install your theme
+- Follow the theme's setup instructions found in `/web/themes/contrib/emulsify-desig-system` 
+- Recommended naming for the theme is `/web/themes/custom/PROJECT_NAME`
+
+Create a new project module
+Generate a custom module at `/web/modules/custom/PROJECT_NAME` using drupal console. 
+Follow the documentation for the generate:module command [here](https://hechoendrupal.gitbooks.io/drupal-console/en/commands/generate-module.html)
+
+
 
 ## Additional Tooling
 
