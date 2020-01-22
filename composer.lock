@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c18750e307636a09883ac3e01697adf9",
+    "content-hash": "f993f2cb33f8f326b51cdafb3f32dba6",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -133,8 +133,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/desandro/matches-selector/zipball/42ee1cbab7469454d140bdab04d2ceed9c68b85e",
-                "reference": "42ee1cbab7469454d140bdab04d2ceed9c68b85e",
-                "shasum": null
+                "reference": "42ee1cbab7469454d140bdab04d2ceed9c68b85e"
             },
             "type": "bower-asset",
             "license": [
@@ -152,8 +151,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/metafizzy/ev-emitter/zipball/1baa3a03d8e07f665b0eb797661fcc2b0d2a5736",
-                "reference": "1baa3a03d8e07f665b0eb797661fcc2b0d2a5736",
-                "shasum": null
+                "reference": "1baa3a03d8e07f665b0eb797661fcc2b0d2a5736"
             },
             "type": "bower-asset",
             "license": [
@@ -171,8 +169,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/metafizzy/fizzy-ui-utils/zipball/72feb9fc3d6de25696291941121bb3ec2db8221e",
-                "reference": "72feb9fc3d6de25696291941121bb3ec2db8221e",
-                "shasum": null
+                "reference": "72feb9fc3d6de25696291941121bb3ec2db8221e"
             },
             "require": {
                 "bower-asset/desandro-matches-selector": ">=2.0.0,<3.0.0"
@@ -193,8 +190,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/desandro/get-size/zipball/6879e7f15b4b6e19ca392b6955edfa8d4aa6f787",
-                "reference": "6879e7f15b4b6e19ca392b6955edfa8d4aa6f787",
-                "shasum": null
+                "reference": "6879e7f15b4b6e19ca392b6955edfa8d4aa6f787"
             },
             "type": "bower-asset",
             "license": [
@@ -212,8 +208,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/desandro/masonry/zipball/3b0883cf4a4a046896719b9cf282ea74be7ffecd",
-                "reference": "3b0883cf4a4a046896719b9cf282ea74be7ffecd",
-                "shasum": null
+                "reference": "3b0883cf4a4a046896719b9cf282ea74be7ffecd"
             },
             "require": {
                 "bower-asset/get-size": ">=2.0.2,<3.0.0",
@@ -235,8 +230,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/metafizzy/outlayer/zipball/bf31c5748bf84fcc2c553d1199a6ecaf0ebd9878",
-                "reference": "bf31c5748bf84fcc2c553d1199a6ecaf0ebd9878",
-                "shasum": null
+                "reference": "bf31c5748bf84fcc2c553d1199a6ecaf0ebd9878"
             },
             "require": {
                 "bower-asset/ev-emitter": ">=1.0.0,<2.0.0",
@@ -3375,6 +3369,53 @@
             }
         },
         {
+            "name": "drupal/emulsify_twig",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/emulsify_twig.git",
+                "reference": "8.x-1.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/emulsify_twig-8.x-1.0.zip",
+                "reference": "8.x-1.0",
+                "shasum": "f31caba7ee80fb85203552b7d3abb7d37e5c5ca3"
+            },
+            "require": {
+                "drupal/core": "~8.0"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "branch-alias": {
+                    "dev-1.x": "1.x-dev"
+                },
+                "drupal": {
+                    "version": "8.x-1.0",
+                    "datestamp": "1573841584",
+                    "security-coverage": {
+                        "status": "not-covered",
+                        "message": "Project has not opted into security advisory coverage!"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "evanmwillhite",
+                    "homepage": "https://www.drupal.org/user/562168"
+                }
+            ],
+            "description": "BEM and Add Attributes Twig Extensions for Drupal",
+            "homepage": "https://www.drupal.org/project/emulsify_twig",
+            "support": {
+                "source": "https://git.drupalcode.org/project/emulsify_twig"
+            }
+        },
+        {
             "name": "drupal/entity_browser",
             "version": "2.2.0",
             "source": {
@@ -4207,6 +4248,69 @@
             "support": {
                 "source": "https://git.drupalcode.org/project/media_entity_browser"
             }
+        },
+        {
+            "name": "drupal/metatag",
+            "version": "dev-1.x",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/metatag.git",
+                "reference": "3d8195bd28b28fab24ad23a36f85d694738bc745"
+            },
+            "require": {
+                "drupal/core": "*",
+                "drupal/token": "^1.0"
+            },
+            "require-dev": {
+                "drupal/devel": "^2.0",
+                "drupal/metatag_dc": "*",
+                "drupal/metatag_open_graph": "*",
+                "drupal/page_manager": "^4.0",
+                "drupal/redirect": "^1.0",
+                "drupal/restui": "^1.0",
+                "drupal/schema_metatag": "^1.0",
+                "drupal/schema_web_page": "*"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "branch-alias": {
+                    "dev-1.x": "1.x-dev"
+                },
+                "drupal": {
+                    "version": "8.x-1.11+7-dev",
+                    "datestamp": "1579212483",
+                    "security-coverage": {
+                        "status": "not-covered",
+                        "message": "Dev releases are not covered by Drupal security advisories."
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "See contributors",
+                    "homepage": "https://www.drupal.org/node/640498/committers",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Dave Reid",
+                    "homepage": "https://www.drupal.org/user/53892"
+                }
+            ],
+            "description": "Manage meta tags for all entities.",
+            "homepage": "https://www.drupal.org/project/metatag",
+            "keywords": [
+                "Drupal",
+                "seo"
+            ],
+            "support": {
+                "source": "https://git.drupalcode.org/project/metatag",
+                "issues": "https://www.drupal.org/project/issues/metatag"
+            },
+            "time": "2020-01-20T10:38:41+00:00"
         },
         {
             "name": "drupal/paragraphs",
@@ -5116,6 +5220,51 @@
             "time": "2019-08-13T17:33:27+00:00"
         },
         {
+            "name": "emulsify-ds/emulsify-design-system",
+            "version": "v1.0.0-alpha.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/emulsify-ds/emulsify-design-system.git",
+                "reference": "2b0210e666129bffab3a188b5d0f7117f67fc5d8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/emulsify-ds/emulsify-design-system/zipball/2b0210e666129bffab3a188b5d0f7117f67fc5d8",
+                "reference": "2b0210e666129bffab3a188b5d0f7117f67fc5d8",
+                "shasum": ""
+            },
+            "require": {
+                "drupal/components": "^1.0",
+                "drupal/emulsify_twig": "^1.0"
+            },
+            "type": "drupal-theme",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "Brian Lewis",
+                    "email": "brian@fourkitchens.com"
+                },
+                {
+                    "name": "Chris Martin",
+                    "email": "chris.martin@fourkitchens.com"
+                },
+                {
+                    "name": "Evan Willhite",
+                    "email": "evan@fourkitchens.com"
+                },
+                {
+                    "name": "Randy Oest",
+                    "email": "randy@fourkitchens.com"
+                }
+            ],
+            "description": "Gatsby Styleguide + Storybook Pattern Library + Drupal 8 Theme",
+            "homepage": "http://emulsify.info",
+            "time": "2019-11-21T15:37:16+00:00"
+        },
+        {
             "name": "fourkitchens/emulsify",
             "version": "v3.1",
             "source": {
@@ -5297,6 +5446,142 @@
                 "issues": "https://github.com/fourkitchens/sous/issues"
             },
             "time": "2019-12-05T17:49:31+00:00"
+        },
+        {
+            "name": "fourkitchens/sous-drupal-distro",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:fourkitchens/sous-drupal-distro.git",
+                "reference": "03711de1ebe87ccd658c75abf357cdceec5380d3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fourkitchens/sous-drupal-distro/zipball/03711de1ebe87ccd658c75abf357cdceec5380d3",
+                "reference": "03711de1ebe87ccd658c75abf357cdceec5380d3",
+                "shasum": ""
+            },
+            "require": {
+                "bower-asset/masonry-layout": "^4.0.0",
+                "composer/installers": "^1.2",
+                "cweagans/composer-patches": "^1.6.5",
+                "drupal/allowed_formats": "^1.1",
+                "drupal/blazy": "^2.0",
+                "drupal/components": "^1.0",
+                "drupal/content_browser": "^1.0",
+                "drupal/core": "^8.7",
+                "drupal/crop": "^2.0",
+                "drupal/ctools": "^3.2",
+                "drupal/dropzonejs": "^2.0",
+                "drupal/easy_breadcrumb": "^1.12",
+                "drupal/entity_browser": "^2.2",
+                "drupal/entity_browser_enhanced": "^1.0",
+                "drupal/entity_embed": "^1.0",
+                "drupal/field_group": "^3.0",
+                "drupal/file_browser": "^1.2",
+                "drupal/focal_point": "^1.2",
+                "drupal/google_tag": "^1.2",
+                "drupal/libraries": "^3.0",
+                "drupal/linkit": "^4.3",
+                "drupal/media_entity_browser": "^2.0",
+                "drupal/metatag": "1.x-dev",
+                "drupal/paragraphs": "^1.9",
+                "drupal/paragraphs_features": "^1.6",
+                "drupal/pathauto": "^1.5",
+                "drupal/redirect": "^1.4",
+                "drupal/slick_browser": "2.x-dev",
+                "drupal/taxonomy_manager": "^1.0",
+                "drupal/thunder_admin": "^3.0",
+                "drupal/token": "^1.5",
+                "drupal/twig_tweak": "^2.4",
+                "emulsify-ds/emulsify-design-system": "^1.0.0-alpha.5",
+                "npm-asset/blazy": "^1.8",
+                "npm-asset/dropzone": "^5.5.1",
+                "npm-asset/imagesloaded": "^3.2.0",
+                "npm-asset/slick": "^1.12",
+                "oomphinc/composer-installers-extender": "^1.1"
+            },
+            "require-dev": {
+                "symfony/var-dumper": "4.4.x-dev"
+            },
+            "type": "drupal-profile",
+            "extra": {
+                "installer-name": "sous",
+                "installer-types": [
+                    "npm-asset",
+                    "bower-asset"
+                ],
+                "installer-paths": {
+                    "web/modules/contrib/{$name}": [
+                        "type:drupal-module"
+                    ],
+                    "web/themes/contrib/{$name}": [
+                        "type:drupal-theme"
+                    ],
+                    "drush/contrib/{$name}": [
+                        "type:drupal-drush"
+                    ],
+                    "web/libraries/masonry": [
+                        "bower-asset/masonry-layout"
+                    ],
+                    "web/libraries/{$name}": [
+                        "type:npm-asset",
+                        "type:drupal-library"
+                    ]
+                },
+                "patches": {
+                    "drupal/file_browser": {
+                        "3089470": "https://www.drupal.org/files/issues/2019-10-22/profile-library-support-3089470-9.patch"
+                    },
+                    "drupal/content_browser": {
+                        "3089478": "https://www.drupal.org/files/issues/2019-10-22/profile-library-support-3089478-2.patch"
+                    }
+                },
+                "drupal-scaffold": {
+                    "file-mapping": {
+                        "[web-root]/sites/development.services.yml": {
+                            "mode": "replace",
+                            "path": "assets/scaffold/files/development.services.yml",
+                            "overwrite": true
+                        }
+                    }
+                }
+            },
+            "license": [
+                "MIT License"
+            ],
+            "authors": [
+                {
+                    "name": "Adam Erickson",
+                    "email": "adam@fourkitchens.com"
+                },
+                {
+                    "name": "Chris Martin",
+                    "email": "chris.martin@fourkitchens.com"
+                },
+                {
+                    "name": "Callin Mullaney",
+                    "email": "callin@fourkitchens.com"
+                },
+                {
+                    "name": "Evan Willhite",
+                    "email": "evan@fourkitchens.com"
+                },
+                {
+                    "name": "Jeff Tomlinson",
+                    "email": "jeff@fourkitchens.com"
+                },
+                {
+                    "name": "Mike Goulding",
+                    "email": "mike.goulding@fourkitchens.com"
+                }
+            ],
+            "description": "A base Drupal distribution profile with a theme based on Emulsify Design System.",
+            "support": {
+                "source": "https://github.com/fourkitchens/sous-drupal-distro/tree/master",
+                "issues": "https://github.com/fourkitchens/sous-drupal-distro/issues"
+            },
+            "time": "2020-01-22T00:49:53+00:00"
         },
         {
             "name": "grasmash/expander",
@@ -5855,9 +6140,7 @@
             "version": "1.8.2",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/blazy/-/blazy-1.8.2.tgz",
-                "reference": null,
-                "shasum": null
+                "url": "https://registry.npmjs.org/blazy/-/blazy-1.8.2.tgz"
             },
             "type": "npm-asset",
             "license": [
@@ -5869,9 +6152,7 @@
             "version": "5.5.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/dropzone/-/dropzone-5.5.1.tgz",
-                "reference": null,
-                "shasum": null
+                "url": "https://registry.npmjs.org/dropzone/-/dropzone-5.5.1.tgz"
             },
             "type": "npm-asset",
             "license": [
@@ -5883,9 +6164,7 @@
             "version": "1.0.6",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/eventie/-/eventie-1.0.6.tgz",
-                "reference": null,
-                "shasum": null
+                "url": "https://registry.npmjs.org/eventie/-/eventie-1.0.6.tgz"
             },
             "type": "npm-asset",
             "license": [
@@ -5897,9 +6176,7 @@
             "version": "3.2.0",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/imagesloaded/-/imagesloaded-3.2.0.tgz",
-                "reference": null,
-                "shasum": null
+                "url": "https://registry.npmjs.org/imagesloaded/-/imagesloaded-3.2.0.tgz"
             },
             "require": {
                 "npm-asset/eventie": "~1.0.4",
@@ -5915,9 +6192,7 @@
             "version": "1.12.2",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/slick/-/slick-1.12.2.tgz",
-                "reference": null,
-                "shasum": null
+                "url": "https://registry.npmjs.org/slick/-/slick-1.12.2.tgz"
             },
             "type": "npm-asset",
             "license": [
@@ -5929,9 +6204,7 @@
             "version": "4.3.0",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/wolfy87-eventemitter/-/wolfy87-eventemitter-4.3.0.tgz",
-                "reference": null,
-                "shasum": null
+                "url": "https://registry.npmjs.org/wolfy87-eventemitter/-/wolfy87-eventemitter-4.3.0.tgz"
             },
             "type": "npm-asset",
             "license": [
@@ -8638,6 +8911,7 @@
                 "psr",
                 "psr-7"
             ],
+            "abandoned": "laminas/laminas-diactoros",
             "time": "2019-08-06T17:53:53+00:00"
         },
         {
@@ -8683,6 +8957,7 @@
                 "escaper",
                 "zf"
             ],
+            "abandoned": "laminas/laminas-escaper",
             "time": "2019-09-05T20:03:20+00:00"
         },
         {
@@ -8746,6 +9021,7 @@
                 "feed",
                 "zf"
             ],
+            "abandoned": "laminas/laminas-feed",
             "time": "2019-03-05T20:08:49+00:00"
         },
         {
@@ -8792,6 +9068,7 @@
                 "stdlib",
                 "zf"
             ],
+            "abandoned": "laminas/laminas-stdlib",
             "time": "2018-08-28T21:34:05+00:00"
         }
     ],
@@ -8799,7 +9076,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "fourkitchens/sous": 20
+        "fourkitchens/sous-drupal-distro": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

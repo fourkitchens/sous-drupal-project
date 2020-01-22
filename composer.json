@@ -10,7 +10,7 @@
         },
         {
             "type": "vcs",
-            "url": "git@github.com:fourkitchens/sous.git"
+            "url": "git@github.com:fourkitchens/sous-drupal-distro.git"
         },
         {
             "type": "composer",
@@ -28,7 +28,7 @@
         "drupal/core-composer-scaffold": "^8.8",
         "drupal/core-recommended": "^8.8",
         "drush/drush": "~9",
-        "fourkitchens/sous": "dev-master",
+        "fourkitchens/sous-drupal-distro": "dev-master",
         "oomphinc/composer-installers-extender": "^1.1",
         "vlucas/phpdotenv": "^2.4",
         "webflo/drupal-finder": "^1.0.0",
