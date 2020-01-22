@@ -1,6 +1,6 @@
 {
     "name": "fourkitchens/sous-drupal-project",
-    "description": "Starter project for Sous a Drupal distribution featureing Emulsify.",
+    "description": "Starter project for Sous a Drupal distribution featuring a theme based on Emulsify Design System.",
     "type": "project",
     "license": "GPL-2.0-or-later",
     "repositories": [
