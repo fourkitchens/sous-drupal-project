@@ -23,6 +23,16 @@ Generate a custom module at `/web/modules/custom/PROJECT_NAME` using drupal cons
 Follow the documentation for the generate:module command [here](https://hechoendrupal.gitbooks.io/drupal-console/en/commands/generate-module.html)
 
 
+### Install Sous Drupal
+
+Get a local environment oporating. You can use the included lando configuration. Requires [Lando](https://docs.lando.dev/basics/installation.html#system-requirements) 
+
+```
+lando start
+```
+
+View your local URL and follow the install.
+
 
 ## Additional Tooling
 
