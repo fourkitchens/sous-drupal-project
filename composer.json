@@ -1,6 +1,6 @@
 {
     "name": "fourkitchens/sous-drupal-project",
-    "description": "Starter repository to get up and running with the Sous profile.",
+    "description": "Starter project for Sous a Drupal distribution featureing Emulsify.",
     "type": "project",
     "license": "GPL-2.0-or-later",
     "repositories": [
