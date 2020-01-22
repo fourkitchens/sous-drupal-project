@@ -83,7 +83,7 @@
             },
             "source": "https://git.drupalcode.org/project/drupal/raw/{version}/{path}",
             "allowed-packages": [
-                "fourkitchens/sous"
+                "fourkitchens/sous-drupal-distro"
             ],
             "excludes": [
                 ".eslintrc"
