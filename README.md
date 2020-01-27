@@ -15,17 +15,17 @@ composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-inter
 ### Install custom theme & project module
 
 Install your theme
-- Follow the theme's setup instructions found in `/web/themes/contrib/emulsify-desig-system` 
+- Follow the theme's setup instructions found in `/web/themes/contrib/emulsify-desig-system`
 - Recommended naming for the theme is `/web/themes/custom/PROJECT_NAME`
 
 Create a new project module
-Generate a custom module at `/web/modules/custom/PROJECT_NAME` using drupal console. 
+Generate a custom module at `/web/modules/custom/PROJECT_NAME` using drupal console.
 Follow the documentation for the generate:module command [here](https://hechoendrupal.gitbooks.io/drupal-console/en/commands/generate-module.html)
 
 
 ### Install Sous Drupal
 
-Get a local environment oporating. You can use the included lando configuration. Requires [Lando](https://docs.lando.dev/basics/installation.html#system-requirements) 
+Get a local environment oporating. You can use the included lando configuration. Requires [Lando](https://docs.lando.dev/basics/installation.html#system-requirements)
 
 ```
 lando start
@@ -76,7 +76,7 @@ yarn local-data-back
 
 Create a local database backup. Saves the backup to the `./reference` directory.
 
-**confex**
+**rebuild**
 
 ```
 yarn rebuild
