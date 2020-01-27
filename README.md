@@ -71,7 +71,7 @@ Import a copy of the canonical database backup into your local instance. This as
 **local-data-bak**
 
 ```
-yarn local-data-back
+yarn local-data-bak
 ```
 
 Create a local database backup. Saves the backup to the `./reference` directory.
