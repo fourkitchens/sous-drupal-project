@@ -15,7 +15,7 @@ composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-inter
 ### Install custom theme & project module
 
 Install your theme
-- Follow the theme's setup instructions found in `/web/themes/contrib/emulsify-desig-system`
+- Follow the theme's setup instructions found in `/web/themes/contrib/emulsify-design-system`
 - Recommended naming for the theme is `/web/themes/custom/PROJECT_NAME`
 
 Create a new project module
