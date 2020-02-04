@@ -43,6 +43,11 @@
     "config": {
         "sort-packages": true
     },
+    "autoload": {
+        "psr-0": {
+            "Sous\\Starter" : ""
+        }
+    },
     "extra": {
         "composer-exit-on-patch-failure": true,
         "patchLevel": {
@@ -102,5 +107,8 @@
             },
             "omit-defaults": false
         }
+    },
+    "scripts": {
+        "post-create-project-cmd": "Sous\\Starter::installTheme"
     }
 }
