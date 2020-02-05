@@ -2,7 +2,6 @@
 
 namespace Sous;
 
-use Composer\Script\CommandEvent; #the event is different !
 use DrupalFinder\DrupalFinder;
 use Symfony\Component\Yaml\Yaml;
 
@@ -17,7 +16,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Starter {
 
-public static function installTheme(CommandEvent $event) {
+public static function installTheme() {
   // New DrupalFinder to get the Composer root path.
   $drupalFinder = new DrupalFinder();
   $drupalFinder->locateRoot(getcwd());
