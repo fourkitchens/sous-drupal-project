@@ -4,6 +4,8 @@ namespace Sous;
 
 use Composer\Script\CommandEvent; #the event is different !
 use DrupalFinder\DrupalFinder;
+use Symfony\Component\Yaml\Yaml;
+
 
 /**
  * Provides static functions for composer script events. See also
@@ -23,5 +25,12 @@ public static function installTheme(CommandEvent $event) {
   // Execute the Emulsify theme build based on composer create path.
   shell_exec ("cd web/themes/contrib/emulsify-design-system/ && php emulsify.php $composerRoot");
   shell_exec ("cd web/themes/contrib/emulsify-design-system/ && npm install");
+  // Generate  /web/profiles/contrib/sous/config/install/system.theme.yml
+  $system_theme_yml = [
+    "default" => $composerRoot,
+    "admin"=> "thunder_admin"
+  ];
+  $yaml = Yaml::dump($system_theme_yml);
+  file_put_contents('web/profiles/contrib/sous/config/install/system.theme.yml', $yaml);
   }
 }
