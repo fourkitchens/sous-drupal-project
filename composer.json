@@ -20,7 +20,7 @@
     "require": {
         "php": ">=7.2",
         "fourkitchens/sous-drupal-distro": "dev-master",
-        "composer/installers": "^1.2",
+        "composer/installers": "^1.7",
         "drupal/config_direct_save": "^1.0",
         "drupal/config_installer": "^1.0",
         "cweagans/composer-patches": "^1.6.5",
