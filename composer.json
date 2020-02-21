@@ -42,8 +42,8 @@
         "sort-packages": true
     },
     "autoload": {
-        "psr-0": {
-            "Sous\\Starter" : ""
+        "psr-4": {
+            "Sous\\" : "sous"
         }
     },
     "extra": {
