@@ -1,4 +1,5 @@
 [![Sous](https://circleci.com/gh/fourkitchens/sous-drupal-project.svg?style=svg)](https://app.circleci.com/github/fourkitchens/sous-drupal-project/pipelines)
+<br/>
 ![Sous featuring Emulsify](https://github.com/fourkitchens/sous-drupal-distro/blob/master/themes/sous_admin/assets/images/Sous.png "Sous featuring Emulsify")
 
 # Sous Project
