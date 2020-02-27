@@ -1,3 +1,6 @@
+[![Sous](https://circleci.com/gh/fourkitchens/sous-drupal-project.svg?style=svg)](https://app.circleci.com/github/fourkitchens/sous-drupal-project/pipelines)
+![Sous featuring Emulsify](https://github.com/fourkitchens/sous-drupal-distro/blob/master/themes/sous_admin/assets/images/Sous.png "Sous featuring Emulsify")
+
 # Sous Project
 
 This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set of contrib modules, a starting custom module for specific for the build, and a custom starting theme generated from Emulsify.
@@ -12,11 +15,7 @@ composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-inter
 
 ```
 
-### Install custom theme & project module
-
-Install your theme
-- Follow the theme's setup instructions found in `/web/themes/contrib/emulsify-design-system`
-- Recommended naming for the theme is `/web/themes/custom/PROJECT_NAME`
+### Build project module
 
 Create a new project module
 Generate a custom module at `/web/modules/custom/PROJECT_NAME` using drupal console.

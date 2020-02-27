@@ -1,0 +1,21 @@
+# PHP CircleCI 2.0 configuration file
+
+version: 2
+defaults: &defaults
+  docker:
+    - image: fourkitchens/ubuntu-1604-php72-node10-apache:latest
+      environment:
+        DATE_TIMEZONE: America/Chicago
+        TERM: xterm
+  working_directory: ~/project
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - run: composer create-project fourkitchens/sous-drupal-project sous --no-interaction
+  workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build
