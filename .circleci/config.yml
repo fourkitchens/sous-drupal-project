@@ -8,14 +8,13 @@ defaults: &defaults
         DATE_TIMEZONE: America/Chicago
         TERM: xterm
   working_directory: ~/project
-
 jobs:
   build:
     <<: *defaults
     steps:
       - run: composer create-project fourkitchens/sous-drupal-project sous --no-interaction
-  workflows:
+workflows:
   version: 2
-  build-deploy:
+  build:
     jobs:
       - build
