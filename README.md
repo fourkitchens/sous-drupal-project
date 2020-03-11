@@ -7,7 +7,7 @@
 This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set of contrib modules, a starting custom module for specific for the build, and a custom starting theme generated from Emulsify.
 
 
-## Install
+## Composer Install
 
 Use this command below and replace `PROJECT_NAME` with your chosen project name.
 
@@ -16,22 +16,26 @@ composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-inter
 
 ```
 
+## Tweak & Install project
+
+- Rename your project in `.lando.yml` file (line 1, line 10) 
+- Boot local environment and install `Lando start`
+    - Follow URL once environment is booted and proceed with Drupal Install
+
+- Create config directories and set path in settings.php
+    - Recommendation is to create a config directory at the root level
+    - Edit the `$settings['config_sync_directory']` line that was generated in settings.php
+    
+- Modify .gitignore
+    - Remove the commented block at the EOF
+    - Review ignored items you may need for your build and remove them
+
+
 ### Build project module
 
 Create a new project module
 Generate a custom module at `/web/modules/custom/PROJECT_NAME` using drupal console.
 Follow the documentation for the generate:module command [here](https://hechoendrupal.gitbooks.io/drupal-console/en/commands/generate-module.html)
-
-
-### Install Sous Drupal
-
-Get a local environment oporating. You can use the included lando configuration. Requires [Lando](https://docs.lando.dev/basics/installation.html#system-requirements)
-
-```
-lando start
-```
-
-View your local URL and follow the install.
 
 
 ## Additional Tooling
