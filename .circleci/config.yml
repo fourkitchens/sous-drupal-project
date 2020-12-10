@@ -1,0 +1,26 @@
+---
+version: 2.1
+
+executors:
+  deployer:
+    docker:
+      - image: cimg/base:2020.12
+
+jobs:
+  deploy-public-upstream:
+    executor: deployer
+    steps:
+      - checkout
+      - run:
+          name: Copy commits to destination repo
+          command: devops/scripts/deploy-public-upstream.sh
+
+workflows:
+  version: 2
+  deploy-public-upstream:
+    jobs:
+      - deploy-public-upstream:
+          filters:
+            branches:
+              only:
+                - release
