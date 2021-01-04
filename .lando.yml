@@ -1,10 +1,14 @@
 name: sous-project
-recipe: drupal8
+recipe: drupal9
 config:
   webroot: web
-  drush: 9
-  php: '7.2'
+  php: '7.3'
+services:
+  appserver:
+    build:
+      - composer install
 tooling:
   drush:
     service: appserver
-    cmd: "drush --root=/app/web --uri=https://sous-project.lndo.site"
+    env:
+      DRUSH_OPTIONS_URI: "https://sous-project.lndo.site"
