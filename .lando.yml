@@ -5,7 +5,7 @@ config:
   php: '7.3'
 services:
   appserver:
-    build:
+    run:
       - composer install
 tooling:
   drush:
