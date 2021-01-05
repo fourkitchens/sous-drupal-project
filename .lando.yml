@@ -1,5 +1,5 @@
 name: sous-project
-recipe: drupal9
+recipe: drupal8
 config:
   webroot: web
   php: '7.3'
