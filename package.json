@@ -1,6 +1,6 @@
 {
   "name": "sous-project",
-  "version": "2.x",
+  "version": "0.0.1",
   "description": "A starter kit for a Drupal project",
   "scripts": {
     "semantic-release": "semantic-release --tag-format '${version}'"
