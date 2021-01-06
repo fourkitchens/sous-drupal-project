@@ -18,14 +18,14 @@ composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-inter
 
 ## Tweak & Install project
 
-- Rename your project in `.lando.yml` file (line 1, line 10) 
+- Rename your project in `.lando.yml` file (line 1, line 10)
 - Boot local environment and install `Lando start`
     - Follow URL once environment is booted and proceed with Drupal Install
 
 - Create config directories and set path in settings.php
     - Recommendation is to create a config directory at the root level
     - Edit the `$settings['config_sync_directory']` line that was generated in settings.php
-    
+
 - Modify .gitignore
     - Remove the commented block at the EOF
     - Review ignored items you may need for your build and remove them
@@ -87,3 +87,30 @@ yarn rebuild
 ```
 
 Rebuild a fresh local instance of your site. Imports the canonical database backup and imports configuration into it.
+
+## Semantic Versioning
+
+Setup
+-----
+
+  1. This repo has the following named/maintenance branches:
+```
+stable
+rc
+beta
+alpha
+dev
+x.x
+x.x.x
+```
+  2. These branches are protected on GitHub
+  3. A personal access token was created for CircleCI.
+  4. CircleCI was setup to run on this project and tag the releases
+  5. Commit changes following the [Angular commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)
+  6. Push your change up and verify CircleCI passes and has run on your desired branch.
+
+Troubleshooting
+---------------
+
+  1. Your branch must be a named stable release branch in order to get a tag.
+  2. Use the semantic-release/github not the semantic-release/git package.
