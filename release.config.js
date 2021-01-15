@@ -17,8 +17,6 @@ module.exports = {
       },
     ],
     '@semantic-release/git',
-    ["@semantic-release/github", {
-      "githubUrl": "https://github.com/fourkitchens/sous-drupal-project"
-    }],
+    "@semantic-release/github",
   ],
 };
