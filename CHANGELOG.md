@@ -1,3 +1,16 @@
+# [0.1.0-dev.2](https://github.com/fourkitchens/sous-drupal-project/compare/0.1.0-dev.1...0.1.0-dev.2) (2021-01-15)
+
+
+### Bug Fixes
+
+* remove githubUrl in favor of environment variable ([fcd8680](https://github.com/fourkitchens/sous-drupal-project/commit/fcd8680e93118a97196dfb5b8f2204421212b47d))
+
+
+### Features
+
+* add github semantic release package ([4a43243](https://github.com/fourkitchens/sous-drupal-project/commit/4a43243f7808994946ca5c45af70a2eccd4db2b7))
+* upgrade circleci on 2.x branch ([fa9d551](https://github.com/fourkitchens/sous-drupal-project/commit/fa9d551072f4821018487a6d24fd9a7bd8b3264f))
+
 # [0.1.0-dev.1](https://github.com/fourkitchens/sous-drupal-project/compare/0.0.1...0.1.0-dev.1) (2021-01-06)
 
 
