@@ -1,3 +1,10 @@
+# [0.1.0-dev1.1](https://github.com/fourkitchens/sous-drupal-project/compare/0.1.0-dev1.0...0.1.0-dev1.1) (2021-01-15)
+
+
+### Features
+
+* empty version bump ([3508fa6](https://github.com/fourkitchens/sous-drupal-project/commit/3508fa60e13beb0e11c447056b9c8072063e0147))
+
 # [0.1.0-dev1.0](https://github.com/fourkitchens/sous-drupal-project/compare/0.1.0-dev1...0.1.0-dev1.0) (2021-01-15)
 
 
