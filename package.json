@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "A starter kit for a Drupal project",
   "scripts": {
-    "semantic-release": "semantic-release --tag-format '${version}'"
+    "semantic-release": "semantic-release --tag-format '${version}'",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
     "@semantic-release/github": "^7.2.0",
     "@semantic-release/release-notes-generator": "^9.0.1",
     "husky": "^4.2.5",
-    "semantic-release": "^17.0.7"
+    "semantic-release": "^17.0.7",
+    "patch-package": "^6.2.2"
   }
 }
