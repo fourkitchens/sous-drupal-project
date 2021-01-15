@@ -1,3 +1,10 @@
+# [0.1.0-dev.3](https://github.com/fourkitchens/sous-drupal-project/compare/0.1.0-dev.2...0.1.0-dev.3) (2021-01-15)
+
+
+### Features
+
+* add semver patch to make releases drupal compatible ([9f817c7](https://github.com/fourkitchens/sous-drupal-project/commit/9f817c7ccfe3625cad258da28bb6ac1fe4bbb7ec))
+
 # [0.1.0-dev.2](https://github.com/fourkitchens/sous-drupal-project/compare/0.1.0-dev.1...0.1.0-dev.2) (2021-01-15)
 
 
