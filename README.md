@@ -95,11 +95,7 @@ Setup
 
   1. This repo has the following named/maintenance branches:
 ```
-stable
-rc
-beta
-alpha
-dev
+main
 x.x
 x.x.x
 ```
@@ -113,4 +109,4 @@ Troubleshooting
 ---------------
 
   1. Your branch must be a named stable release branch in order to get a tag.
-  2. Use the semantic-release/github not the semantic-release/git package.
+  2. Prereleases are not supported with this package because they contain a dot.
