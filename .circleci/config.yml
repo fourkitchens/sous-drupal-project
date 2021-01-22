@@ -18,7 +18,7 @@ jobs:
       - php/install-composer:
           install-version: 2.0.8
       - php/install-packages
-  deploy:
+  release:
     executor:
       name: node/default
     steps:
@@ -34,11 +34,7 @@ workflows:
     jobs:
       - build_node
       - build_php
-  deploy:
-    jobs:
-      - build_node
-      - build_php
-      - deploy:
+      - release:
           requires:
             - build_node
             - build_php
