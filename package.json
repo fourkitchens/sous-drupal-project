@@ -6,6 +6,7 @@
     "confex": "./scripts/sous/confex.sh",
     "import-data": "./scripts/sous/import-data.sh",
     "rebuild": "./scripts/sous/rebuild.sh",
-    "local-data-bak": "./scripts/sous/local-data-bak.sh"
+    "local-data-bak": "./scripts/sous/local-data-bak.sh",
+    "build-theme": "./scripts/sous/build-theme.sh"
   }
 }

@@ -22,8 +22,8 @@ public static function installTheme() {
   $drupalFinder->locateRoot(getcwd());
   $composerRoot = str_replace('-', '_', strtolower(basename($drupalFinder->getComposerRoot())));
   // Execute the Emulsify theme build based on composer create path.
-  shell_exec ("cd web/themes/contrib/emulsify-design-system/ && php emulsify.php $composerRoot");
-  shell_exec ("cd web/themes/contrib/emulsify-design-system/ && npm install");
+  shell_exec ("cd web/themes/contrib/emulsify-design-system/ && php emulsify.php emulsify");
+  shell_exec ("cd web/themes/contrib/emulsify-design-system/ && yarn");
   // Generate  system.theme.yml and append new theme to install.
   $system_theme_yml = [
     "default" => $composerRoot,
@@ -31,6 +31,6 @@ public static function installTheme() {
   ];
   $yaml = Yaml::dump($system_theme_yml);
   file_put_contents('web/profiles/contrib/sous/config/install/system.theme.yml', $yaml);
-  file_put_contents('web/profiles/contrib/sous/sous.info.yml', '  - '.$composerRoot.PHP_EOL, FILE_APPEND | LOCK_EX);
+  file_put_contents('web/profiles/contrib/sous/sous.info.yml', '  - emulsify'.PHP_EOL, FILE_APPEND | LOCK_EX);
   }
 }
