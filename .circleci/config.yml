@@ -46,8 +46,4 @@ workflows:
             branches:
               only:
                 - '+([0-9])?(.{+([0-9]),x}).x'
-                - 'stable'
-                - 'rc'
-                - 'beta'
-                - 'alpha'
-                - 'dev'
+                - 'main'
