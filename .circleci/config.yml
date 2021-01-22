@@ -27,7 +27,7 @@ jobs:
           cache-path: ~/project/node_modules
           override-ci-command: npm install
       - run:
-          command: npm run semantic-release -t ${version}
+          command: npm run publish
 workflows:
   version: 2
   build:

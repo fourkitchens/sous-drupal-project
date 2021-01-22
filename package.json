@@ -4,7 +4,7 @@
   "description": "A starter kit for a Drupal project",
   "scripts": {
     "publish": "semantic-release --tag-format '${version}'",
-    "publish-test": "semantic-release --tag-format '${version}' --prerelease-version-format '${version}-${prereleaseBranch}${prereleaseVersion}' --no-ci --debug",
+    "publish-test": "semantic-release --tag-format '${version}' --dry-run --debug",
     "postinstall": "patch-package"
   },
   "repository": {
