@@ -25,7 +25,7 @@
     "@semantic-release/github": "^7.2.0",
     "@semantic-release/release-notes-generator": "^9.0.1",
     "husky": "^4.2.5",
-    "semantic-release": "fourkitchens/semantic-release#1582/pre-release-custom-format",
+    "semantic-release": "^17.0.7",
     "patch-package": "^6.2.2"
   }
 }
