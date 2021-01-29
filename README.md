@@ -102,7 +102,7 @@ x.x.x
   2. These branches are protected on GitHub
   3. A personal access token was created for CircleCI.
   4. CircleCI was setup to run on this project and tag the releases
-  5. Commit changes following the [Angular commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)
+  5. Commit changes following the [Conventional commit guidelines](https://www.conventionalcommits.org/en/v1.0.0/)
   6. Push your change up and verify CircleCI passes and has run on your desired branch.
 
 Troubleshooting
