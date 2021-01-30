@@ -95,7 +95,7 @@ Setup
 
   1. This repo has the following named/maintenance branches:
 ```
-main
+master
 x.x
 x.x.x
 ```
