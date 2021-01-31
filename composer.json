@@ -105,7 +105,6 @@
         }
     },
     "scripts": {
-        "post-create-project-cmd": "Sous\\Starter::installTheme",
-        "install-theme": "Sous\\Starter::installTheme"
+        "post-create-project-cmd": "Sous\\Starter::installTheme"
     }
 }
