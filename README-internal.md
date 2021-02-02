@@ -19,3 +19,17 @@ There are some atypical development and release procedures in use with this repo
     However, it means **you must not create commits that modify both .circleci and other files** in the same commit.
  2. Commit authors are rewritten to `Pantheon Automation <bot@getpantheon.com>` as a request from Product. The author
     names appear on the dashboard and this creates a more professional presentation.
+
+## Branch protections and their rationale
+
+### In pantheon-systems
+ 1. The `default` branch does not accept merge commits. This is because this branch serves as the staging area for
+    commits queued to be released to site upstreams, and the commit messages appear on customer dashboards as
+    available updates. Preventing `Merged "[CORE-1234] Added widget to branch default [#62]"`-style commit messages
+    enhances the user experience.
+
+### In pantheon-upstreams
+ 1. All branches do not accept pushes, except by GitHub user `pantheon-circleci` and owners of the `pantheon-upstreams`
+    organization, because GitHub hardcodes those users as able to push. This is just to avoid accidental direct pushes,
+    because commits to the upstreams repo are supposed to be made only from CircleCI as part of an intentional release
+    with the commit authors rewritten.
