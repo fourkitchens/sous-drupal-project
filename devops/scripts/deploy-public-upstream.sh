@@ -47,9 +47,14 @@ for commit in "${commits[@]}"; do
   if [[ -z "$commit" ]] ; then
     continue
   fi
-  git cherry-pick "$commit" 2>&1
-  git commit --amend --no-edit --author='Pantheon Automation <bot@getpantheon.com>'
+  git cherry-pick -n "$commit" 2>&1
+  # Product request - single commit per release
+  # The commit message from the last commit will be used.
+  git log --format=%B -n 1 "$commit" > /tmp/commit_message
+  # git commit --amend --no-edit --author='Pantheon Automation <bot@getpantheon.com>'
 done
+
+git commit -F /tmp/commit_message --author='Pantheon Automation <bot@getpantheon.com>'
 
 # update the release-pointer
 git tag -f -m 'Last commit set on upstream repo' release-pointer HEAD
