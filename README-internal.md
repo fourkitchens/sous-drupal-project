@@ -26,7 +26,14 @@ There are some atypical development and release procedures in use with this repo
     commit, and the message that is used for it is the one from the last commit.
     * Typically the CHANGELOG.md commit is the last one and so is the one whose commit message should be wordsmithed.
  1. Trigger the new release to `pantheon-upstreams` by `--ff-only`-merging `default` into `release` and pushing the 
-    result. A CircleCI job causes the release to be created.
+    result:
+    ```
+    git fetch
+    git checkout release && git pull
+    git merge --ff-only origin/default
+    git push origin release
+    ```
+    A CircleCI job causes the release to be created.
 
 ## Branch protections and their rationale
 
