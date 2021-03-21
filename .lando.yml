@@ -2,7 +2,7 @@ name: sous-project
 recipe: drupal9
 config:
   webroot: web
-  php: '7.3'
+  php: "7.4"
 services:
   appserver:
     run:
