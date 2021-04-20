@@ -23,8 +23,9 @@ public static function installTheme() {
   $removeChars = array("-", "_", " ");
   $composerRoot = str_replace($removeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
   // Execute the Emulsify theme build based on composer create path.
-  shell_exec ("cd web/themes/contrib/emulsify-design-system/ && php emulsify.php $composerRoot");
-  shell_exec ("cd web/themes/contrib/emulsify-design-system/ && npm install");
+  shell_exec ("cd web/themes/contrib/emulsify-drupal/ && php emulsify.php $composerRoot");
+  shell_exec ("cd web/themes/contrib/emulsify-drupal/ && npm install");
+  shell_exec ("cd web/themes/custom/$composerRoot/ && npm install");
   // Generate  system.theme.yml and append new theme to install.
   $system_theme_yml = [
     "default" => $composerRoot,
