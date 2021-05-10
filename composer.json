@@ -9,12 +9,8 @@
             "url": "https://packages.drupal.org/8"
         },
         {
-            "type": "vcs",
-            "url": "git@github.com:fourkitchens/sous-drupal-distro.git"
-        },
-        {
-            "type": "composer",
-            "url": "https://asset-packagist.org"
+            "type": "path",
+            "url": "upstream-configuration"
         }
     ],
     "require": {
@@ -32,19 +28,20 @@
         "zaporylie/composer-drupal-optimizations": "^1.0"
     },
     "conflict": {
-        "drupal/drupal": "*"
+            "drupal/drupal": "*"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "config": {
-        "sort-packages": true
-    },
-    "autoload": {
-        "psr-4": {
-            "Sous\\" : "sous"
-        }
-    },
     "extra": {
+        "installer-paths": {
+            "web/core": ["type:drupal-core"],
+            "web/libraries/{$name}": ["type:drupal-library"],
+            "web/modules/composer/{$name}": ["type:drupal-module"],
+            "web/profiles/composer/{$name}": ["type:drupal-profile"],
+            "web/themes/composer/{$name}": ["type:drupal-theme"],
+            "drush/Commands/contrib/{$name}": ["type:drupal-drush"],
+            "web/private/scripts/quicksilver/{$name}/": ["type:quicksilver-script"]
+        },
         "composer-exit-on-patch-failure": true,
         "patchLevel": {
             "drupal/core": "-p2"
@@ -105,6 +102,26 @@
         }
     },
     "scripts": {
-        "post-create-project-cmd": "Sous\\Starter::installTheme"
+        "post-create-project-cmd": "Sous\\Starter::installTheme",
+        "drupal-scaffold": {
+            "allowed-packages": [
+                "pantheon-systems/drupal-integrations"
+            ],
+            "locations": {
+                "web-root": "./web"
+            },
+            "file-mapping": {
+                "[project-root]/.editorconfig": false,
+                "[project-root]/pantheon.upstream.yml": false,
+                "[project-root]/.gitattributes": false
+            }
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "platform": {
+            "php": "7.4"
+        }
     }
 }
