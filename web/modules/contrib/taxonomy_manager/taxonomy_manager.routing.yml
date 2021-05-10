@@ -1,0 +1,71 @@
+taxonomy_manager.admin:
+  path: '/admin/structure/taxonomy_manager/voc'
+  defaults:
+    _controller: '\Drupal\taxonomy_manager\Controller\MainController::listVocabularies'
+    _title: 'Taxonomy Manager'
+  requirements:
+    _permission: 'access taxonomy manager list'
+
+taxonomy_manager.admin_vocabulary:
+  path: '/admin/structure/taxonomy_manager/voc/{taxonomy_vocabulary}'
+  defaults:
+    _form: '\Drupal\taxonomy_manager\Form\TaxonomyManagerForm'
+    _title_callback: '\Drupal\taxonomy_manager\Form\TaxonomyManagerForm::getTitle'
+  requirements:
+    _entity_create_access: 'taxonomy_term:{taxonomy_vocabulary}'
+
+taxonomy_manager.settings:
+  path: '/admin/config/user-interface/taxonomy-manager-settings'
+  defaults:
+    _title: 'Advanced settings for the Taxonomy Manager'
+    _form: '\Drupal\taxonomy_manager\Form\TaxonomyManagerAdmin'
+  requirements:
+    _permission: 'access taxonomy manager list'
+
+taxonomy_manager.subtree:
+  path: '/taxonomy_manager/subtree'
+  defaults:
+    _controller: '\Drupal\taxonomy_manager\Controller\SubTreeController::json'
+    _title: 'Sub Tree'
+  requirements:
+    _permission: 'access taxonomy manager list'
+
+taxonomy_manager.admin_vocabulary.add:
+  path: '/admin/structure/taxonomy_manager/voc/{taxonomy_vocabulary}/add'
+  defaults:
+    _form: '\Drupal\taxonomy_manager\Form\AddTermsToVocabularyForm'
+    _title: 'Add terms'
+  requirements:
+    _entity_create_access: 'taxonomy_term:{taxonomy_vocabulary}'
+
+taxonomy_manager.admin_vocabulary.delete:
+  path: '/admin/structure/taxonomy_manager/voc/{taxonomy_vocabulary}/delete'
+  defaults:
+    _form: '\Drupal\taxonomy_manager\Form\DeleteTermsForm'
+    _title: 'Delete terms'
+  requirements:
+    _entity_create_access: 'taxonomy_term:{taxonomy_vocabulary}'
+
+taxonomy_manager.admin_vocabulary.export:
+  path: '/admin/structure/taxonomy_manager/voc/{taxonomy_vocabulary}/export'
+  defaults:
+    _form: '\Drupal\taxonomy_manager\Form\ExportTermsForm'
+    _title: 'Export terms'
+  requirements:
+    _entity_create_access: 'taxonomy_term:{taxonomy_vocabulary}'
+
+taxonomy_manager.admin_vocabulary.exportlist:
+  path: '/admin/structure/taxonomy_manager/voc/{taxonomy_vocabulary}/export/list'
+  defaults:
+    _form: '\Drupal\taxonomy_manager\Form\ExportTermsMiniForm'
+    _title: 'Export terms'
+  requirements:
+    _entity_create_access: 'taxonomy_term:{taxonomy_vocabulary}'
+
+taxonomy_manager.admin_vocabulary.move:
+  path: '/admin/structure/taxonomy_manager/voc/{taxonomy_vocabulary}/move'
+  defaults:
+    _form: '\Drupal\taxonomy_manager\Form\MoveTermsForm'
+    _title: 'Move terms'
+  requirements:
+    _entity_create_access: 'taxonomy_term:{taxonomy_vocabulary}'

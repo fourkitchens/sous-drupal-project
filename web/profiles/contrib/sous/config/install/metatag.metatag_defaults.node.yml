@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies: {  }
+id: node
+label: Content
+tags:
+  description: '[node:field_teaser_text]'
+  keywords: '[node:field_tags]'
+  title: '[node:field_seo_title]'
+  canonical_url: '[node:url]'
+  og_image_type: '[node:field_teaser_media:entity:field_image:medium:mimetype]'
+  og_type: '[node:content-type]'
+  og_image_height: '[node:field_teaser_media:entity:field_image:medium:height]'
+  og_image_width: '[node:field_teaser_media:entity:field_image:medium:width]'
+  og_url: '[node:path]'
+  og_image_alt: '[node:field_teaser_media:entity:field_image:medium:alt]'
+  og_title: '[node:field_seo_title]'
+  og_description: '[node:field_teaser_text]'
+  og_updated_time: '[node:changed:html_datetime]'
+  og_image: '[node:field_teaser_media:entity:field_image:medium]'
+  twitter_cards_type: summary_large_image

@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Test module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function components_test_theme($existing, $type, $theme, $path): array {
+  $items['components_test'] = [
+    'variables' => [],
+  ];
+  return $items;
+}
+
+/**
+ * Implements hook_protected_twig_namespaces_alter().
+ */
+function components_test_protected_twig_namespaces_alter(array &$protectedNamespaces) {
+  // Allow the "system" Twig namespace to be altered.
+  unset($protectedNamespaces['system']);
+}

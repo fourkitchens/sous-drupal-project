@@ -1,0 +1,26 @@
+{
+  "name": "emulsify_twig",
+  "version": "0.0.0",
+  "description": "Emuslify Twig Extensions for Drupal 8+ theming",
+  "main": "index.js",
+  "engines": {
+    "node": ">=12"
+  },
+  "repository": "git@github.com:emulsify-ds/emulsify_twig.git",
+  "author": "techninja <james@tn42.com>",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "commitizen": "^4.1.2",
+    "cz-conventional-changelog": "3.2.0",
+    "semantic-release": "^17.0.8"
+  },
+  "scripts": {
+    "commit": "git-cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+paragraphs_features.settings_form:
+  title: 'Paragraphs features'
+  route_name: paragraphs_features.settings_form
+  description: 'Configure settings for paragraphs features module.'
+  parent: system.admin_config_content
+  weight: 99

@@ -1,0 +1,22 @@
+uuid: 6038e028-42d5-4b80-b00d-74aa733b41fe
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: frontpage
+label: Frontpage
+type: 'canonical_entities:node'
+pattern: '[node:title]'
+selection_criteria:
+  84483439-1bea-4a83-92fd-f955b510f016:
+    id: node_type
+    bundles:
+      frontpage: frontpage
+    negate: false
+    context_mapping:
+      node: node
+    uuid: 84483439-1bea-4a83-92fd-f955b510f016
+selection_logic: and
+weight: -5
+relationships: {  }

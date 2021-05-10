@@ -1,0 +1,143 @@
+/**
+ * @file
+ * Provides media integration with pure CSS fluid video wrapper.
+ */
+
+/** Ensures not affecting iframe only without media switcher */
+.media--switch iframe {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.media__icon,
+.media--ratio iframe {
+  transition: visibility 0s linear 0.5s, opacity 0.5s linear;
+}
+
+.media__icon {
+  cursor: pointer;
+  display: block;
+  opacity: 0;
+  position: absolute;
+  visibility: hidden;
+  z-index: 8;
+}
+
+.media__icon--play,
+.media__icon--close,
+.media__icon--spinner {
+  height: 80px;
+  left: 50%;
+  top: 50%;
+  -ms-transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  width: 80px;
+}
+
+.media__icon--close::before,
+.media__icon--close::after,
+.media__icon--play::before {
+  content: '';
+  display: block;
+  position: absolute;
+  pointer-events: none;
+}
+
+.media__icon--close::before,
+.media__icon--close::after {
+  background: white;
+  border-radius: 4px;
+  height: 8px;
+  left: 50%;
+  margin: -4px 0 0 -40px;
+  top: 50%;
+  width: 80px;
+  -ms-transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.media__icon--close::after {
+  -ms-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+.media__icon--close:hover::before,
+.media__icon--close:hover::after {
+  background-color: #ff6d2c;
+}
+
+.media__icon--play {
+  border: 8px solid white;
+  border-radius: 50%;
+}
+
+.media__icon--play::before {
+  border: 16px solid transparent;
+  border-left: 24px solid white;
+  left: 50%;
+  line-height: 60px;
+  margin: -16px 0 0 -6px;
+  top: 50%;
+}
+
+.media__icon--play:hover {
+  border-color: #ff6d2c;
+}
+
+.media__icon--play:hover::before {
+  border-left-color: #ff6d2c;
+}
+
+.is-playing:hover .media__icon {
+  transition-delay: 0s;
+}
+
+.is-playing .media__icon--close {
+  visibility: hidden;
+}
+
+.media__icon--play,
+.media:hover .media__icon--litebox,
+.media--switch img,
+.media--switch.is-playing iframe,
+.media--switch.is-playing:hover .media__icon--close {
+  opacity: 1;
+  visibility: visible;
+}
+
+.media--switch.is-playing img,
+.media--switch.is-playing .media__icon--play,
+.media--switch.is-playing:hover .media__icon--play {
+  opacity: 0;
+  position: absolute;
+  visibility: hidden;
+  z-index: -1;
+}
+
+.media--switch.is-playing iframe {
+  z-index: 3;
+}
+
+/** @requires coder shutup, front-end complication with inline styles. */
+/** Prevents Twitter iframe from breaking grid, even if unholy. */
+.grid .twitter-tweet-rendered {
+  margin: 0 !important; /* csslint allow: known-properties, important */
+  min-width: 1px !important; /* csslint allow: known-properties, important */
+}
+
+/** Fix for overflowing Facebook/ Twitter iframes. */
+.grid .media,
+.grid .fb_iframe_widget {
+  overflow: hidden;
+}
+
+.grid .fb_iframe_widget span {
+  width: 100% !important; /* csslint allow: known-properties, important */
+}
+
+.grid .fb_iframe_widget iframe {
+  position: relative !important; /* csslint allow: known-properties, important */
+}

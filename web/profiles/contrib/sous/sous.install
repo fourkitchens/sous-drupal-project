@@ -1,0 +1,34 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for Sous.
+ */
+
+use Drupal\node\Entity;
+use Drupal\sous\InstallHelper;
+
+/**
+ * Implements hook_install().
+ *
+ * Perform actions to set up the site for this profile.
+ *
+ * @see system_install()
+ */
+function sous_install() {
+  // First, do everything in standard profile.
+  include_once DRUPAL_ROOT . '/core/profiles/standard/standard.install';
+  standard_install();
+
+  // Importing default content into the site.
+  if (!\Drupal::service('config.installer')->isSyncing()) {
+    \Drupal::classResolver(InstallHelper::class)->importContent();
+
+    // Setting the content we set to the system defaults.
+    \Drupal::configFactory()
+      ->getEditable('system.site')
+      ->set('page.front', '/node/1')
+      ->set('page.403', '/node/2')
+      ->set('page.404', '/node/3')
+      ->save(TRUE);
+  }
+}

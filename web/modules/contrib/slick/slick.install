@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * Installation actions for Slick.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function slick_requirements($phase) {
+  if ($phase != 'runtime') {
+    return [];
+  }
+
+  $path = slick('skin')->getSlickPath();
+  $exists = $path ? is_file($path . '/slick/slick.min.js') : FALSE;
+
+  return [
+    'slick_library' => [
+      'title'       => t('Slick library'),
+      'description' => $exists ? '' : t('The <a href=":url">Slick library</a> should be installed at <strong>/libraries/slick-carousel/slick/slick.min.js</strong>, or <strong>/libraries/slick/slick/slick.min.js</strong>, or any path supported by libraries.module if installed. Check out file or folder permissions if troubled.', [':url' => 'https://github.com/kenwheeler/slick/']),
+      'severity'    => $exists ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+      'value'       => $exists ? t('Installed') : t('Not installed'),
+    ],
+  ];
+}
+
+/**
+ * Added pauseOnFocus option.
+ */
+function slick_update_8201() {
+  $config = \Drupal::configFactory()->getEditable('slick.optionset.default');
+  $config->set('options.settings.pauseOnFocus', TRUE);
+  $config->save(TRUE);
+}
+
+/**
+ * Change skins to use plugin system: https://www.drupal.org/node/3105670.
+ */
+function slick_update_8202() {
+  // Do nothing to clear cache.
+}
+
+/**
+ * Removed HTML tags from arrows due to translation issue as per #3075838.
+ */
+function slick_update_8203() {
+  // Configuration translation disallowed HTML.
+  // See https://drupal.org/node/3075838
+  $config_factory = \Drupal::configFactory();
+  foreach ($config_factory->listAll('slick.optionset.') as $optionset_name) {
+    $optionset = $config_factory->getEditable($optionset_name);
+    foreach (['prevArrow', 'nextArrow'] as $key) {
+      // Don't bother with Optimized ON, as arrows are removed already.
+      if ($value = $optionset->get('options.settings.' . $key)) {
+        $optionset->set('options.settings.' . $key, trim(strip_tags($value)));
+      }
+    }
+    $optionset->save(TRUE);
+  }
+}
+
+/**
+ * Added app.root service to SlickSkinManager.
+ */
+function slick_update_8204() {
+  // Do nothing to clear cache.
+}
+
+/**
+ * Updated SlickFormatter service to extend BlazyFormatter as per blazy:rc7+.
+ */
+function slick_update_8205() {
+  // Do nothing to clear cache.
+}
+
+/**
+ * Removing traces of the Slick media module after merging.
+ */
+function slick_update_8206() {
+  $moduleHandler = \Drupal::moduleHandler();
+  if (!$moduleHandler->moduleExists('slick_media')) {
+    $schema_store = \Drupal::keyValue('system.schema');
+    $schema_store->delete('slick_media');
+  }
+}

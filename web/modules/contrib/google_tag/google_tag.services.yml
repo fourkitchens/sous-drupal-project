@@ -1,0 +1,4 @@
+services:
+  google_tag.container_manager:
+    class: Drupal\google_tag\Entity\ContainerManager
+    arguments: ['@entity_type.manager', '@module_handler', '@file_system', '@messenger', '@logger.factory']

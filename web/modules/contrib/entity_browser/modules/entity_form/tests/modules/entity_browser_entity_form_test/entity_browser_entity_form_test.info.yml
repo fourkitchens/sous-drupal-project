@@ -1,0 +1,14 @@
+name: 'Entity browser entity form test'
+type: module
+description: 'Support module for the Entity browser entity form module tests.'
+core_version_requirement: ^8.7.7 || ^9
+package: Testing
+dependencies:
+  - entity_browser_entity_form:entity_browser_entity_form
+  - entity_browser_test:entity_browser_test
+  - drupal:views
+
+# Information added by Drupal.org packaging script on 2020-04-27
+version: '8.x-2.5'
+project: 'entity_browser'
+datestamp: 1588015349

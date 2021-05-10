@@ -1,0 +1,12 @@
+type: module
+name: Components
+description: 'Registers folders of components defined by your theme or module as Twig namespaces'
+core_version_requirement: ^8.7.7 || ^9
+components:
+  # Allow themes to reuse this module's default namespace, "components".
+  allow_default_namespace_reuse: true
+
+# Information added by Drupal.org packaging script on 2021-04-19
+version: '8.x-2.4'
+project: 'components'
+datestamp: 1618861607

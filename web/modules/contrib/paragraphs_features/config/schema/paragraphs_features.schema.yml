@@ -1,0 +1,27 @@
+paragraphs_features.settings:
+  type: config_object
+  label: 'Paragraphs features settings'
+  mapping:
+    dropdown_to_button:
+      type: boolean
+      label: 'Flag for reduce actions dropdown to a button when there is only one option'
+
+paragraphs_features_third_party:
+  type: mapping
+  label: 'Schema for Paragraphs Features options of Paragraphs Widget'
+  mapping:
+    add_in_between:
+      type: boolean
+      label: 'Flag for add in between feature'
+    delete_confirmation:
+      type: boolean
+      label: 'Flag for delete confirmation feature'
+    split_text:
+      type: boolean
+      label: 'Flag for paragraphs split text feature'
+    show_drag_and_drop:
+      type: boolean
+      label: 'Flag for showing drag & drop button'
+
+field.widget.third_party.paragraphs_features:
+  type: paragraphs_features_third_party

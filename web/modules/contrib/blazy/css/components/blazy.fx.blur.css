@@ -1,0 +1,56 @@
+/**
+ * @file
+ * Blur effect.
+ *
+ * While blurring animation impresses smoother transition, it is likely slow.
+ * You can override this file, and change animation to just transition instead.
+ */
+
+/* Without transform, this is more of formality hooking into animation event.*/
+@-webkit-keyframes blazyBlur {
+  from {
+    opacity: .3;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes blazyBlur {
+  from {
+    opacity: .3;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/**
+ * Js dynamic classes during animation to match animate.css convention.
+ */
+.animated.blur img:not(.b-blur) {
+  /* transition: opacity 500ms ease-in-out; */
+  transition: none;
+  /* The blurred image is not this actual image. */
+  -webkit-animation: blazyBlur 1s;
+  animation: blazyBlur 1s;
+}
+
+/* Supports reduced motion. */
+@media (print), (prefers-reduced-motion: reduce) {
+  .animated.blur img:not(.b-blur) {
+    -webkit-animation-duration: 1ms !important; /* csslint allow: known-properties, important */
+    animation-duration: 1ms !important; /* csslint allow: known-properties, important */
+    -webkit-transition-duration: 1ms !important; /* csslint allow: known-properties, important */
+    transition-duration: 1ms !important; /* csslint allow: known-properties, important */
+    -webkit-animation-iteration-count: 1 !important; /* csslint allow: known-properties, important */
+    animation-iteration-count: 1 !important; /* csslint allow: known-properties, important */
+  }
+
+  .media--fx-lg .b-blur {
+    filter: blur(1px);
+    opacity: .9;
+  }
+}

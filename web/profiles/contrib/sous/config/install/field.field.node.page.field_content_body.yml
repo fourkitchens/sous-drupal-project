@@ -1,0 +1,45 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_content_body
+    - node.type.page
+    - paragraphs.paragraphs_type.image
+    - paragraphs.paragraphs_type.text
+    - paragraphs.paragraphs_type.text_with_media
+    - paragraphs.paragraphs_type.video
+  module:
+    - entity_reference_revisions
+id: node.page.field_content_body
+field_name: field_content_body
+entity_type: node
+bundle: page
+label: 'Content Body'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      image: image
+      text: text
+      text_with_media: text_with_media
+      video: video
+    target_bundles_drag_drop:
+      image:
+        enabled: true
+        weight: 5
+      text:
+        enabled: true
+        weight: 6
+      text_with_media:
+        enabled: true
+        weight: 7
+      video:
+        enabled: true
+        weight: 8
+field_type: entity_reference_revisions

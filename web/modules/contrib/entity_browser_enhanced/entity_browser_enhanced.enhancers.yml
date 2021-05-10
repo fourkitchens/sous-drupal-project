@@ -1,0 +1,10 @@
+multiselect:
+  id: multiselect
+  label: 'Enhanced Multiselect'
+  form_extra_class: 'multiselect'
+  libraray: 'entity_browser_enhanced/entity_browser_enhanced.multiselect'
+autoselect:
+  id: autoselect
+  label: 'Enhanced Autoselect'
+  form_extra_class: 'autoselect'
+  libraray: 'entity_browser_enhanced/entity_browser_enhanced.autoselect'

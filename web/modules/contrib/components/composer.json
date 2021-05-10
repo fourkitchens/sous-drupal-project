@@ -1,0 +1,16 @@
+{
+    "name": "drupal/components",
+    "description": "Registers folders of components defined by your theme or module as Twig namespaces",
+    "type": "drupal-module",
+    "homepage": "https://drupal.org/project/components",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "JohnAlbin",
+            "email": "virtually.johnalbin@gmail.com"
+        }
+    ],
+    "require": {
+      "drupal/core": "^8.7.7 || ^9"
+    }
+}

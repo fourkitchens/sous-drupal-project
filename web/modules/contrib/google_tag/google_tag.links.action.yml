@@ -1,0 +1,5 @@
+entity.google_tag_container.add_form:
+  route_name: entity.google_tag_container.add_form
+  title: 'Add container'
+  appears_on:
+    - entity.google_tag_container.collection

@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall for the entity_browser_enhanced module.
+ */
+
+/**
+ * Issue #2998934: Split up config with schema refactor to have Enhancer.
+ *
+ * A Enhancer for each given entity browser widget.
+ */
+function entity_browser_enhanced_update_8101() {
+  /** @var \Drupal\Core\Config\Config $old_config */
+  $old_config = Drupal::configFactory()->getEditable('entity_browser_enhanced.widgets');
+
+  // Old config stores all widget uuids in 1 config.
+  // Need to group them by entity_browser.
+  $enhancers = [];
+  foreach (Drupal::entityTypeManager()->getStorage('entity_browser')->loadMultiple() as $entity_browser) {
+    /** @var \Drupal\entity_browser\Entity\EntityBrowser $entity_browser */
+    foreach ($entity_browser->getWidgets() as $uuid => $widget) {
+      $enhancer = $old_config->get($uuid);
+      if (!empty($enhancer)) {
+        $enhancers[$entity_browser->getName()][$uuid] = $enhancer;
+      }
+    }
+  }
+
+  // Save the enhancers config separately per entity browser.
+  /** @var \Drupal\Core\Config\Config $config */
+  foreach ($enhancers as $entity_browser_name => $widget) {
+    $config = Drupal::service('config.factory')->getEditable('entity_browser_enhanced.widgets.' . $entity_browser_name);
+    foreach ($widget as $uuid => $enhancer) {
+      $config->set($uuid, $enhancer);
+    }
+    $config->save();
+  }
+
+  $old_config->delete();
+}

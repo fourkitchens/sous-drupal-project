@@ -1,0 +1,20 @@
+/**
+ * @media-entity media_entity_browser.view.css
+ */
+
+.media-library-select-all {
+  display: none;
+}
+
+.media-library-view > .view-content {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.media-library-view > .pager {
+  margin-top: 2rem;
+}
+
+.media-library-item__content {
+  min-height: 74px;
+}

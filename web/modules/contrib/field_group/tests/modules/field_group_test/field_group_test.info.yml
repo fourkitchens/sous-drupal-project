@@ -1,0 +1,11 @@
+name: 'Field Group Test'
+description: 'Test module for Field Group'
+core_version_requirement: ^8.8 || ^9
+package: 'Fields'
+type: module
+hidden: TRUE
+
+# Information added by Drupal.org packaging script on 2020-06-10
+version: '8.x-3.1'
+project: 'field_group'
+datestamp: 1591772570

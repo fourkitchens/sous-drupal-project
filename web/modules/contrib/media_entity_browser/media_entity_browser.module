@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * The module file for media_entity_browser.
+ */
+
+/**
+ * Implements hook_preprocess_views_view().
+ */
+function media_entity_browser_preprocess_views_view(&$variables) {
+  if ($variables['view']->id() === 'media_entity_browser') {
+    $variables['view_array']['#attached']['library'][] = 'media_entity_browser/view';
+  }
+}

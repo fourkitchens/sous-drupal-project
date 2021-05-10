@@ -1,0 +1,10 @@
+taxonomy_manager.admin:
+  title: Taxonomy manager
+  description: 'Administer vocabularies with the Taxonomy Manager'
+  parent: system.admin_structure
+  route_name: taxonomy_manager.admin
+taxonomy_manager.settings:
+  title: Taxonomy manager
+  description: 'Advanced settings for the Taxonomy Manager'
+  parent: system.admin_config_ui
+  route_name: taxonomy_manager.settings

@@ -1,0 +1,34 @@
+uuid: eccdd384-9fb4-490c-9b01-261cfb6ef311
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.preview
+    - field.field.media.file.field_description
+    - field.field.media.file.field_media_file
+    - field.field.media.file.field_tags
+    - image.style.medium
+    - media.type.file
+  module:
+    - image
+id: media.file.preview
+targetEntityType: media
+bundle: file
+mode: preview
+content:
+  thumbnail:
+    type: image
+    weight: 0
+    region: content
+    label: hidden
+    settings:
+      image_style: medium
+      image_link: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  field_description: true
+  field_media_file: true
+  field_tags: true
+  name: true
+  uid: true

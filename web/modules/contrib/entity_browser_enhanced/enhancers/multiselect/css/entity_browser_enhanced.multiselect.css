@@ -1,0 +1,92 @@
+nav ul {
+  border-bottom-color: #d0d0d0;
+}
+
+nav ul li a {
+  border-radius: 1em 1em 0 0;
+}
+
+nav ul li.active {
+  border-bottom-width: 0;
+}
+
+nav.eb-tabs ul li.active a {
+  background-color: #d6d6d6;
+}
+
+.view .views-exposed-form {
+  padding: 1.5em;
+  background-color: #efefef;
+}
+
+.view .views-exposed-form .form--inline .form-item,
+.view .views-exposed-form .form--inline .form-actions {
+  margin-top: 0;
+  margin-bottom: 0;
+  display: inline-block;
+}
+
+.view .view-content {
+  margin: 2em 0;
+}
+
+.view .views-col {
+  position: relative;
+  width: 100%;
+}
+
+.view .views-col img {
+  border: 2px solid #cccccc;
+  max-width: 95%;
+  max-height: 100%;
+  height: auto;
+}
+
+.view .views-col.selected img {
+  border: 2px solid #37802f;
+}
+
+.view .views-col.selected::before {
+  content: " ";
+  width: 100%;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  position: absolute;
+  background: transparent url(../images/check.svg) no-repeat center center;
+  background-size: 40%;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+  display: block;
+  z-index: 10;
+}
+
+.view .views-col .field--name-name {
+  display: none;
+  position: absolute;
+  bottom: 8px;
+  width: 95%;
+  box-sizing: border-box;
+  z-index: 4;
+  background-color: rgba(0,0,0,.8);
+  padding: 5px;
+  margin: 0 2px;
+  color: #fff;
+  font-size: 9px;
+  word-wrap: break-word;
+}
+
+.view .views-col:hover .field--name-name {
+  display: block;
+}
+
+.view .views-col .js-form-item {
+  position: absolute !important;
+  clip: rect(1px,1px,1px,1px);
+  overflow: hidden;
+  height: 1px;
+  width: 1px;
+  word-wrap: normal;
+}

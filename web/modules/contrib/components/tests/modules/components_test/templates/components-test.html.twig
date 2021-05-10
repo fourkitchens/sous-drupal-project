@@ -1,0 +1,8 @@
+{# These templates are found using .info namespace definitions. #}
+{{ include('@components_test/components-test.twig') }}
+{{ include('@components/components-test-active-theme.twig') }}
+{{ include('@components/components-test-base-theme.twig') }}
+{{ include('@components/components-test-module.twig') }}
+
+{# This template is found using hook_protected_twig_namespaces_alter(). #}
+{{ include('@system/components-test-protected-twig-namespaces-alter.twig') }}

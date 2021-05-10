@@ -1,0 +1,42 @@
+/**
+ * @file
+ * Provides integration with core filter module.
+ *
+ * This file contains fixes when Blazy put inside core Align/ Caption images
+ * filter which may not suit your design needs, adjust it.
+ */
+
+.media-wrapper--blazy,
+.media-wrapper--blazy * {
+  box-sizing: border-box;
+}
+
+/** Without this, media--ratio will be collapsed. Adjust accordingly. */
+.media-wrapper--blazy {
+  max-width: 100%;
+  min-width: 50%;
+  position: relative;
+}
+
+.grid .media-wrapper--blazy {
+  width: 100%;
+}
+
+/** Blazy is placed after filter Align/ Caption will be collapsed. Adjust it. */
+.caption .media-wrapper--blazy,
+.align-left .media-wrapper--blazy,
+.align-right .media-wrapper--blazy,
+.align-center .media-wrapper--blazy {
+  min-width: 320px;
+}
+
+.blazy--filter .media-wrapper--blazy {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.media-wrapper--blazy.align-center img {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+}

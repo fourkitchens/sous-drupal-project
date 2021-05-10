@@ -1,0 +1,9 @@
+google_tag.container_list_tab:
+  route_name: entity.google_tag_container.collection
+  title: Containers
+  base_route: entity.google_tag_container.collection
+
+google_tag.settings_form_tab:
+  route_name: google_tag.settings_form
+  title: Settings
+  base_route: entity.google_tag_container.collection

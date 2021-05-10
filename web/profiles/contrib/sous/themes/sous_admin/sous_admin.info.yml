@@ -1,0 +1,11 @@
+name: Sous Admin
+type: theme
+core_version_requirement: ^8.8 || ^9
+base theme: seven
+description: 'Admin theme for Sous; A Drupal distribution for custom projects with Emulsify.'
+
+libraries-override:
+  seven/install-page:
+    css:
+      theme:
+        css/theme/install-page.css: css/theme/install-page.css

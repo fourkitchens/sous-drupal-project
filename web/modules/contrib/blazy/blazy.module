@@ -1,0 +1,182 @@
+<?php
+
+/**
+ * @file
+ * Provides basic Blazy integration for lazy loading and multi-serving images.
+ */
+
+use Drupal\Core\Field\FormatterInterface;
+use Drupal\editor\Entity\Editor;
+use Drupal\blazy\Blazy;
+use Drupal\blazy\BlazyAlter;
+use Drupal\blazy\BlazyDefault;
+use Drupal\blazy\BlazyViews;
+use Drupal\blazy\Utility\BlazyMarkdown;
+
+/**
+ * Provides a convenient shortcut for procedural hooks.
+ *
+ * @return class
+ *   The Blazy manager class instance.
+ */
+function blazy() {
+  static $manager;
+
+  if (!isset($manager)) {
+    $manager = \Drupal::service('blazy.manager');
+  }
+
+  return $manager;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function blazy_theme() {
+  return ['blazy' => ['render element' => 'element']];
+}
+
+/**
+ * Prepares variables for blazy.html.twig templates.
+ */
+function template_preprocess_blazy(&$variables) {
+  Blazy::preprocessBlazy($variables);
+}
+
+/**
+ * Overrides variables for responsive-image.html.twig templates.
+ */
+function blazy_preprocess_responsive_image(&$variables) {
+  if (isset($variables['attributes']['data-b-lazy'])) {
+    Blazy::preprocessResponsiveImage($variables);
+  }
+}
+
+/**
+ * Overrides variables for file-video.html.twig templates.
+ */
+function blazy_preprocess_file_video(&$variables) {
+  if (isset($variables['attributes']['data-b-lazy'])) {
+    Blazy::preprocessFileVideo($variables);
+  }
+}
+
+/**
+ * Overrides template_preprocess_media_oembed_iframe().
+ */
+function blazy_preprocess_media_oembed_iframe(array &$variables) {
+  \Drupal::service('blazy.oembed')->preprocessMediaOembedIframe($variables);
+}
+
+/**
+ * Implements hook_preprocess_field().
+ */
+function blazy_preprocess_field(array &$variables) {
+  if (isset($variables['element']['#blazy']) || !empty($variables['element']['#third_party_settings']['blazy']['blazy'])) {
+    Blazy::preprocessField($variables);
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view().
+ */
+function blazy_preprocess_views_view(array &$variables) {
+  if (!empty($variables['css_class']) && strpos($variables['css_class'], 'blazy--') !== FALSE) {
+    if ($lightboxes = blazy()->getLightboxes()) {
+      BlazyViews::preprocessViewsView($variables, $lightboxes);
+    }
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function blazy_views_pre_render($view) {
+  if (isset($view)) {
+    BlazyViews::viewsPreRender($view);
+  }
+}
+
+/**
+ * Implements hook_config_schema_info_alter().
+ */
+function blazy_config_schema_info_alter(array &$definitions) {
+  BlazyAlter::configSchemaInfoAlter($definitions, 'blazy_base');
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function blazy_library_info_alter(&$libraries, $extension) {
+  if ($extension === 'blazy' || $extension === 'media') {
+    BlazyAlter::libraryInfoAlter($libraries, $extension);
+  }
+}
+
+/**
+ * Implements hook_blazy_settings_alter().
+ */
+function blazy_blazy_settings_alter(array &$build, $items) {
+  BlazyAlter::blazySettingsAlter($build, $items);
+}
+
+/**
+ * Implements hook_field_formatter_third_party_settings_form().
+ */
+function blazy_field_formatter_third_party_settings_form(FormatterInterface $plugin) {
+  return BlazyAlter::fieldFormatterThirdPartySettingsForm($plugin);
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary_alter().
+ */
+function blazy_field_formatter_settings_summary_alter(&$summary, $context) {
+  BlazyAlter::fieldFormatterSettingsSummaryAlter($summary, $context);
+}
+
+/**
+ * Implements hook_ckeditor_css_alter().
+ */
+function blazy_ckeditor_css_alter(array &$css, Editor $editor) {
+  BlazyAlter::ckeditorCssAlter($css, $editor);
+}
+
+/**
+ * Alters blazy settings here due to static FormatterBase::defaultSettings().
+ */
+function blazy_alterable_settings(array &$settings) {
+  return BlazyDefault::getInstance()->alterableSettings($settings);
+}
+
+/**
+ * Provides a shortcut to parse the markdown string for better hook_help().
+ */
+function blazy_parse_markdown($string) {
+  return BlazyMarkdown::parse($string);
+}
+
+/**
+ * Provides a wrapper to replace deprecated libraries_get_path() at ease.
+ */
+function blazy_libraries_get_path($name, $base_path = FALSE) {
+  $function = 'libraries_get_path';
+  if (\Drupal::hasService('library.libraries_directory_file_finder')) {
+    return \Drupal::service('library.libraries_directory_file_finder')->find($name);
+  }
+  elseif (is_callable($function)) {
+    return $function($name, $base_path);
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ *
+ * @todo remove VEF/VEM from blazy:8.x-3.0 for core Media integration.
+ */
+function blazy_field_formatter_info_alter(array &$info) {
+  if (blazy()->getModuleHandler()->moduleExists('video_embed_media')) {
+    Blazy::fieldFormatterInfoAlter($info);
+  }
+}

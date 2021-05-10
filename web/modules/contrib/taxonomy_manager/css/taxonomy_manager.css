@@ -1,0 +1,28 @@
+#edit-taxonomy-manager {
+  float: left;
+  margin-right: 1px;
+  width: 30%;
+}
+
+#taxonomy-term-data-form {
+  float: right;
+  width: 65%;
+}
+
+.form-item-load-term-data,
+.taxonomy-manager-vocabulary-terms-form #edit-export,
+.taxonomy-manager-vocabulary-terms-form #edit-move {
+  display: none;
+}
+
+.taxonomy-manager-vocabulary-terms-form .js-form-type-textfield.form-type--textfield.js-form-item-load-term-data.form-item--load-term-data {
+  display: none;
+}
+
+form.taxonomy-manager-vocabulary-terms-form {
+  display: inline-block;
+}
+
+.taxonomy-manager-hidden-button {
+  display: none !important;
+}

@@ -1,0 +1,172 @@
+blazy:
+  header: true
+  remote: https://github.com/dinbror/blazy
+  version: 1.x
+  license:
+    name: MIT
+    url: https://github.com/dinbror/blazy/blob/master/LICENSE
+    gpl-compatible: true
+  js:
+    /libraries/blazy/blazy.js: { weight: -4 }
+
+base:
+  css:
+    component:
+      css/blazy.css: {}
+
+filter:
+  css:
+    component:
+      css/components/blazy.filter.css: {}
+
+loading:
+  css:
+    component:
+      css/components/blazy.loading.css: {}
+  dependencies:
+    - blazy/base
+
+fx.blur:
+  css:
+    component:
+      css/components/blazy.fx.blur.css: {}
+  dependencies:
+    - blazy/loading
+
+oembed:
+  css:
+    component:
+      css/components/blazy.oembed.css: {}
+
+preview:
+  css:
+    component:
+      css/components/blazy.preview.css: {}
+
+ratio:
+  css:
+    component:
+      css/components/blazy.ratio.css: {}
+
+grid:
+  css:
+    component:
+      css/components/blazy.grid.css: {}
+  dependencies:
+    - blazy/base
+
+column:
+  css:
+    component:
+      css/components/blazy.column.css: {}
+  dependencies:
+    - blazy/base
+
+dblazy:
+  js:
+    js/dblazy.js: { weight: -4 }
+  dependencies:
+    - blazy/base
+
+# @todo adjust weights to use hundredth decimals.
+bio:
+  js:
+    js/bio.js: { weight: -3 }
+  dependencies:
+    - blazy/dblazy
+
+bio.media:
+  js:
+    js/bio.media.js: { weight: -2 }
+  dependencies:
+    - blazy/bio
+
+load:
+  js:
+    js/blazy.load.js: { weight: -1.5 }
+  dependencies:
+    - core/drupal.debounce
+    - blazy/blazy
+    - blazy/dblazy
+    - blazy/loading
+
+bio.ajax:
+  js:
+    js/bio.ajax.js: {}
+  dependencies:
+    - core/drupal.ajax
+    - blazy/load
+
+media:
+  js:
+    js/blazy.media.js: {}
+  css:
+    component:
+      css/components/blazy.media.css: {}
+  dependencies:
+    - core/drupal
+    - blazy/ratio
+
+blazybox:
+  js:
+    js/blazy.blazybox.js: {}
+  css:
+    component:
+      css/components/blazy.blazybox.css: {}
+  dependencies:
+    - core/drupal
+    - blazy/dblazy
+    - blazy/lightbox
+
+lightbox:
+  css:
+    component:
+      css/components/blazy.lightbox.css: {}
+
+colorbox.skin:
+  css:
+    component:
+      css/components/blazy.colorbox.css: {}
+  dependencies:
+    - colorbox/colorbox
+
+colorbox:
+  js:
+    js/blazy.colorbox.js: {}
+  dependencies:
+    - core/drupal
+    - blazy/load
+    - blazy/ratio
+    - blazy/colorbox.skin
+
+photobox:
+  remote: https://github.com/yairEO/photobox/
+  version: 1.x
+  license:
+    name: MIT
+    url: https://github.com/yairEO/photobox/issues/17
+    gpl-compatible: true
+  js:
+    /libraries/photobox/photobox/jquery.photobox.js: {}
+    js/blazy.photobox.js: {}
+  css:
+    base:
+      /libraries/photobox/photobox/photobox.css: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - core/drupal
+    - blazy/load
+    # use photobox when available instead.
+    # - photobox/photobox
+
+admin:
+  js:
+    js/blazy.admin.js: {}
+  css:
+    theme:
+      css/blazy.admin.css: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - core/drupal

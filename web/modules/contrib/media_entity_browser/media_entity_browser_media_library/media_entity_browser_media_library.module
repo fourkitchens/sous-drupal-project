@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * @file
+ * The module file for media_entity_browser.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_preprocess_views_view().
+ */
+function media_entity_browser_media_library_preprocess_views_view(&$variables) {
+  if ($variables['view']->id() === 'media_entity_browser_media_library') {
+    $variables['view_array']['#attached']['library'][] = 'media_library/view';
+    $variables['view_array']['#attached']['library'][] = 'media_entity_browser_media_library/view';
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function media_entity_browser_media_library_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id === 'views_exposed_form') {
+    $view = $form_state->get('view');
+    // Add after build to fix views exposed filter's submit button.
+    if ($view->id() === 'media_entity_browser_media_library') {
+      $form['#after_build'][] = '_media_library_views_form_media_library_after_build';
+    }
+  }
+}

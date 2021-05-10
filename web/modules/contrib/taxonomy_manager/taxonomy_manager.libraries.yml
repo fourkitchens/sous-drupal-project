@@ -1,0 +1,40 @@
+jquery.fancytree:
+  remote: https://github.com/mar10/fancytree
+  version: 2.37.0
+  license:
+    name: MIT
+    url: https://github.com/mar10/fancytree/wiki/LicenseInfo
+    gpl-compatible: true
+  css:
+    component:
+      //cdn.jsdelivr.net/npm/jquery.fancytree@2.37.0/dist/skin-lion/ui.fancytree.min.css: {}
+  js:
+    //cdn.jsdelivr.net/npm/jquery.fancytree@2.37.0/dist/jquery.fancytree.min.js: { type: external, minified: true }
+  dependencies:
+    - core/jquery
+    - jquery_ui/core
+    - jquery_ui/widget
+
+tree:
+  version: 1.x
+  css:
+    component:
+      css/taxonomy_manager.fancytree.css: {}
+  js:
+    js/tree.js: {}
+  dependencies:
+    - taxonomy_manager/jquery.fancytree
+    - core/drupalSettings
+
+termData:
+  js:
+    js/termData.js: {}
+  dependencies:
+    - taxonomy_manager/jquery.fancytree
+
+form:
+  css:
+    component:
+      css/taxonomy_manager.css: {}
+  dependencies:
+    - taxonomy_manager/termData

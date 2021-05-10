@@ -1,0 +1,5 @@
+entity.google_tag_container.collection:
+  title: 'Google Tag Manager'
+  description: 'Configure the website integration with GTM and the resultant capturing of website analytics.'
+  route_name: entity.google_tag_container.collection
+  parent: system.admin_config_system

@@ -1,0 +1,220 @@
+<?php
+
+/**
+ * @file
+ * Provides primary Drupal hook implementations.
+ *
+ * Adds a JavaScript snippet to selected page responses to trigger analytics and
+ * other tracking items configured using the Google Tag Manager.
+ *
+ * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
+ */
+
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManager;
+
+/**
+ * Default for matching all items except listed.
+ */
+const GOOGLE_TAG_EXCLUDE_LISTED = 'exclude listed';
+
+/**
+ * Default for matching only listed items.
+ */
+const GOOGLE_TAG_INCLUDE_LISTED = 'include listed';
+
+/**
+ * Implements hook_help().
+ */
+function google_tag_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.google_tag':
+    case 'google_tag.settings_form':
+      return t('<a href=":url">Google Tag Manager</a> is a free service (registration required) to manage the insertion of tags for capturing website analytics.', [':url' => 'https://tagmanager.google.com/']);
+  }
+}
+
+/**
+ * Implements hook_rebuild().
+ */
+function google_tag_rebuild() {
+  _google_tag_assets_delete();
+  $rebuild_snippets = \Drupal::config('google_tag.settings')->get('rebuild_snippets');
+  if ($rebuild_snippets) {
+    _google_tag_assets_create();
+  }
+}
+
+/**
+ * Saves snippet files and data layer classes based on current settings.
+ */
+function _google_tag_assets_create() {
+  $manager = \Drupal::service('google_tag.container_manager');
+  $manager->createAllAssets();
+}
+
+/**
+ * Deletes snippet files for enabled containers.
+ */
+function _google_tag_assets_delete() {
+  $manager = \Drupal::service('google_tag.container_manager');
+  $manager->deleteAllAssets();
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function google_tag_page_attachments(array &$attachments) {
+  $manager = \Drupal::service('google_tag.container_manager');
+  $manager->getScriptAttachments($attachments);
+}
+
+/**
+ * Implements hook_page_top().
+ */
+function google_tag_page_top(array &$page) {
+  $manager = \Drupal::service('google_tag.container_manager');
+  $manager->getNoScriptAttachments($page);
+}
+
+/**
+ * Implements hook_plugin_filter_TYPE_alter().
+ *
+ * @see ContainerForm::conditionsForm()
+ */
+function google_tag_plugin_filter_condition_alter(array &$definitions, array $extra, $consumer) {
+  if ($consumer == 'google_tag') {
+    // Remove condition plugins defined by core and domain.
+    $definitions = array_diff_key($definitions, array_flip([
+      'current_theme', 'language', 'node_type', 'request_path', 'user_role',
+      'domain',
+    ]));
+
+    $language_manager = \Drupal::service('language_manager');
+    if (!$language_manager->isMultilingual()) {
+      // Omit the language condition until multiple languages.
+      unset($definitions['gtag_language']);
+    }
+  }
+  else {
+    foreach ($definitions as $id => $definition) {
+      if (substr($id, 0, 5) == 'gtag_') {
+        // Prevent use of custom plugins by other consumers.
+        unset($definitions[$id]);
+      }
+    }
+  }
+}
+
+/**
+ * Checks that the directory exists and is writable.
+ *
+ * @todo Remove this function if core is updated to check the executable bit.
+ *
+ * @see file_prepare_directory()
+ */
+function _file_prepare_directory(&$directory, $options = FileSystemInterface::MODIFY_PERMISSIONS) {
+  $file_system = \Drupal::service('file_system');
+  if (!\Drupal::service('stream_wrapper_manager')->isValidScheme(StreamWrapperManager::getScheme($directory))) {
+    // Only trim if we're not dealing with a stream.
+    $directory = rtrim($directory, '/\\');
+  }
+
+  // Check if directory exists.
+  if (!is_dir($directory)) {
+    // Let mkdir() recursively create directories and use the default directory
+    // permissions.
+    if ($options & FileSystemInterface::CREATE_DIRECTORY) {
+      return @$file_system->mkdir($directory, NULL, TRUE);
+    }
+    return FALSE;
+  }
+  // The directory exists, so check to see if it is writable.
+  $writable = _google_tag_is_writable($directory) && _google_tag_is_executable($directory);
+  if (!$writable && ($options & FileSystemInterface::MODIFY_PERMISSIONS)) {
+    return $file_system->chmod($directory);
+  }
+
+  return $writable;
+}
+
+/**
+ * Determines whether a directory is writable.
+ *
+ * Remove this if PHP is_writable() is changed to respect ACLS on a 'local'
+ * stream wrapper other than the local file wrapper provided by PHP.
+ *
+ * @param string $uri
+ *   A directory path or stream wrapper URI.
+ *
+ * @return bool
+ *   Whether the directory is writable.
+ */
+function _google_tag_is_writable($uri) {
+  // Use the local path, if applicable, since PHP only checks ACLs on its local
+  // file wrapper.
+  $realpath = \Drupal::service('file_system')->realpath($uri);
+  return is_writable($realpath ? $realpath : $uri);
+}
+
+/**
+ * Determines whether a directory is searchable.
+ *
+ * Remove this if PHP is_executable() is changed to not return FALSE simply
+ * because the URI points to a directory (not a file) in a stream wrapper other
+ * than the local file wrapper provided by PHP.
+ *
+ * @param string $uri
+ *   A directory path or stream wrapper URI.
+ *
+ * @return bool
+ *   Whether the directory is searchable.
+ */
+function _google_tag_is_executable($uri) {
+  if ($realpath = \Drupal::service('file_system')->realpath($uri)) {
+    // The URI is a local stream wrapper or a local path.
+    // Use the local path since PHP only checks ACLs on its local file wrapper.
+    // Remove the OS check if PHP is_executable() is changed to not return FALSE
+    // simply because the URI points to a directory (not a file) on Windows.
+    return _google_tag_is_windows() || is_executable($realpath);
+  }
+  if ($wrapper = \Drupal::service('stream_wrapper_manager')->getViaUri($uri)) {
+    // The URI is a remote stream wrapper.
+    if (!($stat = $wrapper->url_stat($uri, 0))) {
+      return FALSE;
+    }
+
+    if (!function_exists('posix_getuid') || !function_exists('posix_getgid')) {
+      // These functions are never defined on Windows and the extension that
+      // provides them may not be included on a Linux distribution.
+      // If directory is not searchable, then fault the site deployment process.
+      // @todo Is it worse to return true or false at this point?
+      return TRUE;
+    }
+
+    // Determine the appropriate permissions bit mask as an octal.
+    // The stat array is likely to have uid=gid=0 so that the mask is octal 01.
+    // This is true for Amazon S3 and Google Cloud Storage.
+    $mask = 1;
+    if ($stat['uid'] == posix_getuid()) {
+      $mask = $mask << 6;
+    }
+    elseif ($stat['gid'] == posix_getgid()) {
+      $mask = $mask << 3;
+    }
+    return ($stat['mode'] & $mask) != 0;
+  }
+  return FALSE;
+}
+
+/**
+ * Determines whether the operating system is Windows.
+ *
+ * @return bool
+ *   Whether the operating system is Windows.
+ */
+function _google_tag_is_windows() {
+  return (defined('PHP_OS_FAMILY') && PHP_OS_FAMILY == 'Windows') ||
+    (defined('PHP_OS') && strcasecmp(substr(PHP_OS, 0, 3), 'win') == 0);
+}

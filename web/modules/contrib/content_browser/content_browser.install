@@ -1,0 +1,190 @@
+<?php
+
+/**
+ * @file
+ * Defines install routines for Content Browser.
+ */
+
+use Drupal\views\Entity\View;
+use Drupal\node\Entity\NodeType;
+use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\File\FileSystemInterface;
+
+/**
+ * Implements hook_install().
+ */
+function content_browser_install() {
+  // Add an icon for Content Browser if we aren't installing from configuration.
+  if (!\Drupal::isConfigSyncing()) {
+    $data = file_get_contents(dirname(__FILE__) . '/content_browser_icon.png');
+    /** @var \Drupal\file\FileInterface $file */
+    $file = file_save_data($data, 'public://content_browser_icon.png', FileSystemInterface::EXISTS_REPLACE);
+    if ($file) {
+      // Set file uuid same as default config.
+      $uuid = Yaml::decode(file_get_contents(dirname(__FILE__) . '/config/install/embed.button.content_browser.yml'))['icon_uuid'];
+      $file->set('uuid', $uuid);
+      $file->save();
+      \Drupal::service('file.usage')->add($file, 'embed', 'embed_button', 'content_browser');
+    }
+  }
+
+  // Copy the teaser view mode for every Content Type so that our View makes
+  // some level of sense initially.
+  $bundles = array_keys(node_type_get_names());
+  $teaser_ids = [];
+  $existing_ids = [];
+  foreach ($bundles as $bundle) {
+    $teaser_ids[] = 'node.' . $bundle . '.teaser';
+    $existing_ids[] = 'node.' . $bundle . '.content_browser';
+  }
+
+  // Get a list of existing Node teaser displays.
+  $results = \Drupal::entityQuery('entity_view_display')
+    ->condition('id', $teaser_ids)
+    ->condition('status', TRUE)
+    ->execute();
+  // Also get a list of existing Node content browser displays, to prevent
+  // installation errors if a bundle already has a display defined.
+  $existing_results = \Drupal::entityQuery('entity_view_display')
+    ->condition('id', $existing_ids)
+    ->execute();
+
+  // Load the selected teaser displays.
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_view_display');
+  /** @var \Drupal\Core\Entity\Entity\EntityViewDisplay[] $displays */
+  $displays = $storage->loadMultiple($results);
+
+  // Clone each display and save it.
+  foreach ($displays as $display) {
+    $copy = $display->createCopy('content_browser');
+    // Check if the display already exists.
+    if (!in_array($copy->id(), $existing_results)) {
+      $copy->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function content_browser_uninstall() {
+  \Drupal::configFactory()->getEditable('embed.button.content_browser')->delete();
+  \Drupal::configFactory()->getEditable('core.entity_view_mode.node.content_browser')->delete();
+  /** @var \Drupal\node\Entity\NodeType[] $types */
+  $types = NodeType::loadMultiple();
+  foreach ($types as $type) {
+    if ($config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.' . $type->id() . '.content_browser')) {
+      $config->delete();
+    }
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function content_browser_requirements($phase) {
+  $requirements = [];
+
+  // Optionally use the Libraries module to determine our library path.
+  if (\Drupal::moduleHandler()->moduleExists('libraries')) {
+    $masonry_path = libraries_get_path('masonry') . '/dist/masonry.pkgd.min.js';
+  }
+  else {
+    $masonry_path = DRUPAL_ROOT . '/libraries/masonry/dist/masonry.pkgd.min.js';
+  }
+
+  if (!file_exists($masonry_path)) {
+    $requirements['masonry'] = [
+      'title' => t('Masonry library missing'),
+      'description' => t(
+        'Content Browser requires the Masonry library. Download the newest release from
+https://github.com/desandro/masonry/releases and place it in /libraries'
+      ),
+      'severity' => REQUIREMENT_ERROR,
+    ];
+  }
+
+  return $requirements;
+}
+
+/**
+ * Updates entity browser configuration to remove outdated values.
+ */
+function content_browser_update_8001() {
+  /** @var \Drupal\Core\Config\ConfigFactoryInterface $config_factory */
+  $config_factory = \Drupal::service('config.factory');
+  $list = $config_factory->listAll('entity_browser.browser');
+
+  foreach (['entity_browser.browser.browse_content_iframe', 'entity_browser.browser.browse_content'] as $name) {
+    if (in_array($name, $list, TRUE)) {
+      $entity_browser = $config_factory->getEditable($name);
+      if ($text = $entity_browser->get('display_configuration.widget_ids')) {
+        $entity_browser->clear('display_configuration.widget_ids');
+      }
+      if ($name === 'entity_browser.browser.browse_content') {
+        $entity_browser->set('display_configuration.auto_open', FALSE);
+      }
+      $entity_browser->save();
+    }
+  }
+}
+
+/**
+ * Updates the content browser view to contextually filter by allowed bundles.
+ */
+function content_browser_update_8002() {
+  /** @var \Drupal\views\Entity\View $view */
+  if (($view = View::load('content_browser')) && class_exists('Drupal\entity_browser\Plugin\views\argument_default\EntityBrowserWidgetContext')) {
+    $display = &$view->getDisplay('default');
+    $display['display_options']['arguments']['type'] = [
+      'id' => 'type',
+      'table' => 'node_field_data',
+      'field' => 'type',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'default_action' => 'default',
+      'exception' => [
+        'value' => 'all',
+        'title_enable' => FALSE,
+        'title' => 'All',
+      ],
+      'title_enable' => FALSE,
+      'title' => '',
+      'default_argument_type' => 'entity_browser_widget_context',
+      'default_argument_options' => [
+        'context_key' => 'target_bundles',
+        'fallback' => 'all',
+        'multiple' => 'or',
+      ],
+      'default_argument_skip_url' => FALSE,
+      'summary_options' => [
+        'base_path' => '',
+        'count' => TRUE,
+        'items_per_page' => 25,
+        'override' => FALSE,
+      ],
+      'summary' => [
+        'sort_order' => 'asc',
+        'number_of_records' => 0,
+        'format' => 'default_summary',
+      ],
+      'specify_validation' => FALSE,
+      'validate' => [
+        'type' => 'none',
+        'fail' => 'not found',
+      ],
+      'validate_options' => [],
+      'glossary' => FALSE,
+      'limit' => 0,
+      'case' => 'none',
+      'path_case' => 'none',
+      'transform_dash' => FALSE,
+      'break_phrase' => TRUE,
+      'entity_type' => 'node',
+      'entity_field' => 'type',
+      'plugin_id' => 'node_type',
+    ];
+    $view->save();
+  }
+}

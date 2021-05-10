@@ -1,0 +1,7 @@
+# This is an example info file of a library used for testing purposes.
+name: Example info file
+
+# Information added by Drupal.org packaging script on 2021-01-04
+version: '8.x-3.0-beta1'
+project: 'libraries'
+datestamp: 1609758296

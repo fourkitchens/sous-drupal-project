@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * Provides Slick carousel configuration entity UI.
+ */
+
+/**
+ * Implements hook_entity_type_build().
+ */
+function slick_ui_entity_type_build(array &$entity_types) {
+  /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_types */
+  $slick = $entity_types['slick'];
+  $slick->setListBuilderClass('Drupal\slick_ui\Controller\SlickListBuilder');
+  $slick->setFormClass('add', 'Drupal\slick_ui\Form\SlickForm');
+  $slick->setFormClass('edit', 'Drupal\slick_ui\Form\SlickForm');
+  $slick->setFormClass('delete', 'Drupal\slick_ui\Form\SlickDeleteForm');
+  $slick->setFormClass('duplicate', 'Drupal\slick_ui\Form\SlickForm');
+
+  $slick->set('admin_permission', 'administer slick');
+
+  $slick->setLinkTemplate('add-form', '/admin/config/media/slick/add');
+  $slick->setLinkTemplate('edit-form', '/admin/config/media/slick/{slick}');
+  $slick->setLinkTemplate('delete-form', '/admin/config/media/slick/{slick}/delete');
+  $slick->setLinkTemplate('duplicate-form', '/admin/config/media/slick/{slick}/duplicate');
+  $slick->setLinkTemplate('collection', '/admin/config/media/slick');
+}
+
+/**
+ * Implements hook_help().
+ */
+function slick_ui_help($route_name) {
+  if ($route_name == 'help.page.slick_ui') {
+    $output = file_get_contents(dirname(dirname(__FILE__)) . '/docs/README.md');
+    $output .= file_get_contents(dirname(dirname(__FILE__)) . '/docs/FAQS.md');
+    $output .= file_get_contents(dirname(dirname(__FILE__)) . '/docs/TROUBLESHOOTING.md');
+    $output .= file_get_contents(dirname(dirname(__FILE__)) . '/docs/CONTRIBUTION.md');
+    $output .= file_get_contents(dirname(dirname(__FILE__)) . '/docs/MAINTAINERS.md');
+    return function_exists('blazy_parse_markdown') ? blazy_parse_markdown($output) : '<pre>' . $output . '</pre>';
+  }
+  return '';
+}

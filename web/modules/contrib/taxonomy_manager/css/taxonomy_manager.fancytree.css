@@ -1,0 +1,7 @@
+#edit-taxonomy-manager ul.fancytree-container,
+#edit-taxonomy-manager .fancytree-container:focus {
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+  -moz-outline-style: none;
+}

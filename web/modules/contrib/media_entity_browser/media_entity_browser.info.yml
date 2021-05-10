@@ -1,0 +1,34 @@
+name: Media Entity Browser
+type: module
+description: 'This module provides an Entity Browser for Media.'
+package: Media
+core: '8.x'
+core_version_requirement: ^8 || ^9
+
+dependencies:
+  - inline_entity_form:inline_entity_form
+  - entity_browser:entity_browser
+  - entity_browser:entity_browser_entity_form
+  - drupal:media
+  - drupal:views
+
+test_dependencies:
+  - inline_entity_form (>=8.x-1.x)
+  - entity_browser (>=8.x-2.x)
+  - entity_browser:entity_browser_entity_form (>=8.x-2.x)
+  - video_embed_field:video_embed_field (>=8.x-2.x)
+  - drupal:media (>=8.4)
+  - ctools:ctools
+
+# To export this config, make sure config_devel is installed, cache is rebuilt
+# then run "drush config-devel-export media_entity_browser".
+config_devel:
+  - views.view.media_entity_browser
+  - image.style.media_entity_browser_thumbnail
+  - entity_browser.browser.media_entity_browser
+  - embed.button.media_entity_embed
+
+# Information added by Drupal.org packaging script on 2020-07-03
+version: '8.x-2.0-alpha3'
+project: 'media_entity_browser'
+datestamp: 1593747597

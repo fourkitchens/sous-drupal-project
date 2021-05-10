@@ -1,0 +1,16 @@
+name: 'Entity browser test configuration'
+type: module
+description: 'Test Configuration Forms.'
+core_version_requirement: ^8.7.7 || ^9
+package: Testing
+dependencies:
+  - entity_browser:entity_browser
+  - drupal:node
+  - drupal:path
+  - drupal:views
+  - drupal:user
+
+# Information added by Drupal.org packaging script on 2020-04-27
+version: '8.x-2.5'
+project: 'entity_browser'
+datestamp: 1588015349

@@ -1,0 +1,7 @@
+entity_browser_enhanced.widgets.*:
+  type: mapping
+  label: 'Enhancers configuration for entity browser'
+  mapping:
+    uuid:
+      type: string
+      label: 'Enhancer for given widget'

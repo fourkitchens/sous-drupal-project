@@ -1,0 +1,8 @@
+taxonomy_manager.settings:
+  type: mapping
+  label: Settings
+  mapping:
+    taxonomy_manager_disable_mouseover:
+      type: integer
+    taxonomy_manager_pager_tree_page_size:
+      type: integer

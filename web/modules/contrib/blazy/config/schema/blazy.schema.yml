@@ -1,0 +1,132 @@
+blazy.settings:
+  type: config_object
+  label: 'Blazy settings'
+  mapping:
+    admin_css:
+      type: boolean
+      label: 'Admin CSS'
+    fx:
+      type: string
+      label: 'Image effect'
+    native:
+      type: boolean
+      label: 'Native lazy load'
+    noscript:
+      type: boolean
+      label: 'Add noscript'
+    one_pixel:
+      type: boolean
+      label: 'One pixel placeholder'
+    placeholder:
+      type: string
+      label: Placeholder
+    unstyled_extensions:
+      type: string
+      label: 'Extensions without image styles'
+    responsive_image:
+      type: boolean
+      label: 'Support Responsive image'
+    blazy:
+      type: mapping
+      label: Blazy
+      mapping:
+        loadInvisible:
+          type: boolean
+          label: 'Load invisible'
+        offset:
+          type: integer
+          label: Offset
+        saveViewportOffsetDelay:
+          type: integer
+          label: 'Save viewport offset delay'
+        validateDelay:
+          type: integer
+          label: 'Set validate delay'
+        container:
+          type: string
+          label: 'Scrolling container'
+    io:
+      type: mapping
+      label: IO
+      mapping:
+        enabled:
+          type: boolean
+          label: 'Enable IO'
+        unblazy:
+          type: boolean
+          label: 'Unload bLazy'
+        rootMargin:
+          type: string
+          label: rootMargin
+        threshold:
+          type: string
+          label: threshold
+        disconnect:
+          type: boolean
+          label: Disconnect
+    extras:
+      type: blazy_base
+      label: Extras
+
+blazy_base:
+  type: mapping
+  label: 'Blazy image base display format settings'
+  mapping:
+    caption:
+      type: sequence
+      label: Captions
+      sequence:
+        - type: string
+          label: Caption
+    optionset:
+      type: string
+      label: Optionset
+
+field.formatter.settings.blazy:
+  type: blazy_base
+  label: 'Blazy image display format settings'
+
+field.formatter.settings.blazy_file:
+  type: blazy_base
+  label: 'Blazy image with ME display format settings'
+
+field.formatter.settings.blazy_video:
+  type: blazy_base
+  label: 'Blazy image with VEF display format settings'
+
+field.formatter.settings.blazy_media:
+  type: blazy_base
+  label: 'Blazy media display format settings'
+
+field.formatter.settings.blazy_oembed:
+  type: blazy_base
+  label: 'Blazy oembed display format settings'
+
+field.formatter.settings.blazy_text:
+  type: blazy_base
+  label: 'Blazy text display format settings'
+
+field.formatter.third_party.blazy:
+  type: mapping
+  label: 'Blazy third party display format settings'
+  mapping:
+    blazy:
+      type: boolean
+      label: Blazy
+
+filter_settings.blazy_filter:
+  type: filter
+  label: 'Blazy filter'
+  mapping:
+    filter_tags:
+      type: sequence
+      label: 'HTML tags'
+      sequence:
+        - type: string
+          label: tag
+    media_switch:
+      type: string
+      label: 'Media switcher'
+    use_data_uri:
+      type: string
+      label: 'Trust data URI'

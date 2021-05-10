@@ -1,0 +1,16 @@
+{
+  "name": "drupal/taxonomy_manager",
+  "type": "drupal-module",
+  "description": "This module provides a powerful interface for managing taxonomies.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/taxonomy_manager",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/taxonomy_manager",
+    "source": "https://git.drupalcode.org/project/taxonomy_manager"
+  },
+  "require": {
+    "drupal/jquery_ui":"^1.4"
+  }
+}

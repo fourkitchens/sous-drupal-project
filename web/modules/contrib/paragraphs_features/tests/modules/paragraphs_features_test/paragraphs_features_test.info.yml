@@ -1,0 +1,13 @@
+name: 'Paragraphs Features Test'
+type: module
+description: 'Provides Test scaffolds for Paragraphs Features module.'
+core_version_requirement: ^8.7.7 || ^9
+package: Paragraphs
+dependencies:
+  - drupal:ckeditor
+  - paragraphs_features:paragraphs_features
+
+# Information added by Drupal.org packaging script on 2020-09-17
+version: '8.x-1.11'
+project: 'paragraphs_features'
+datestamp: 1600331590

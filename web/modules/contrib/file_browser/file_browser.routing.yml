@@ -1,0 +1,14 @@
+file_browser.preview:
+  path: '/admin/file-browser-preview/{file}/{image_style}'
+  defaults:
+    _title: 'Preview'
+    _controller: '\Drupal\file_browser\Controller\FileBrowserController::preview'
+    image_style: ''
+  requirements:
+    _entity_access: 'file.view'
+    file: \d+
+  # Who knows why this isn't converted normally...
+  options:
+    parameters:
+      file:
+        type: entity:file

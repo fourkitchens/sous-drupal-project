@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Install file for media entity browser  module.
+ */
+
+use Drupal\image\Entity\ImageStyle;
+
+/**
+ * Implements hook_uninstall().
+ */
+function media_entity_browser_uninstall() {
+  $imageStyle = ImageStyle::load('media_entity_browser_thumbnail');
+  if (!empty($imageStyle)) {
+    $imageStyle->delete();
+  }
+}
+
+/**
+ * Update default configuration for new Views CSS class.
+ */
+function media_entity_browser_update_8100() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('views.view.media_entity_browser');
+  $config->set('display.default.display_options.css_class', 'view-media-entity-browser-view');
+  $config->save();
+}

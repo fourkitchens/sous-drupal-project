@@ -1,0 +1,91 @@
+<?php
+
+/**
+ * @file
+ * Installation actions for Blazy.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function blazy_requirements($phase) {
+  $requirements = [];
+
+  if ($phase === 'runtime') {
+    $path = blazy_libraries_get_path('blazy') ?: \Drupal::root() . '/libraries/blazy';
+    $exists = is_file($path . '/blazy.js');
+
+    $requirements['blazy_library'] = [
+      'title'       => t('Blazy library'),
+      'description' => $exists ? '' : t('The <a href=":url">Blazy library</a> should be installed at <strong>/libraries/blazy/blazy.js</strong>, or any path supported by libraries.module if installed. Check out file or folder permissions if troubled.', [':url' => 'https://github.com/dinbror/blazy']),
+      'severity'    => $exists ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+      'value'       => $exists ? t('Installed') : t('Not installed'),
+    ];
+  }
+
+  if ($phase === 'update') {
+
+    // If updating from Blazy 1.x to 2.x, Media module may not being installed
+    // and as it is now a dependency we need to let the administrator know it
+    // will be installed.
+    if (!\Drupal::moduleHandler()->moduleExists('media')) {
+      $requirements['blazy_media'] = [
+        'title'       => t('Blazy requires Media core module'),
+        'description' => t('Blazy now requires core Media module, which is currently not installed. By continuing the update the module will be installed.'),
+        'severity'    => REQUIREMENT_WARNING,
+      ];
+    }
+
+  }
+
+  return $requirements;
+}
+
+/**
+ * Added new services blazy.oembed and blazy.entity.
+ */
+function blazy_update_8201() {
+  // Do nothing to clear cache.
+}
+
+/**
+ * Added a new argument date.formatter to blazy.admin.base service.
+ */
+function blazy_update_8202() {
+  // Do nothing to clear cache.
+}
+
+/**
+ * Added a new argument @entity.repository to blazy.manager.base service.
+ */
+function blazy_update_8203() {
+  // Do nothing to clear cache.
+}
+
+/**
+ * Added new classes: BlazyUtil, BlazyBreakpoint to declutter Blazy.
+ */
+function blazy_update_8204() {
+  // Do nothing to clear cache.
+}
+
+/**
+ * Removed deprecated or no longer in use classes, settings, etc.
+ */
+function blazy_update_8205() {
+  $config = \Drupal::configFactory()->getEditable('blazy.settings');
+  foreach (['native', 'unbreakpoints'] as $key) {
+    $config->clear($key);
+  }
+  $config->save(TRUE);
+}
+
+/**
+ * Install core Media module if not already enabled.
+ */
+function blazy_update_8206() {
+  if (!\Drupal::moduleHandler()->moduleExists('media')) {
+    \Drupal::service('module_installer')->install(['media']);
+    return t('Blazy has installed core "Media" module.');
+  }
+}

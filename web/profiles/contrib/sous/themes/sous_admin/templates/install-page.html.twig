@@ -1,0 +1,47 @@
+{#
+/**
+ * @file
+ * Seven theme implementation to display a Drupal installation page.
+ *
+ * All available variables are mirrored in page.html.twig.
+ * Some may be blank but they are provided for consistency.
+ *
+ * @see template_preprocess_install_page()
+ */
+#}
+<div class="layout-container">
+
+  {% if page.sidebar_first %}
+    <aside class="layout-sidebar-first" role="complementary">
+      <h1 class="page-title">
+        <img src="/profiles/contrib/sous/themes/sous_admin/assets/images/Sous.png" alt="Sous featuring Emulsify">
+      </h1>
+      <span class="site-version">{{ site_version }}</span>
+      {{ page.sidebar_first }}
+      <div class="branding">
+        <img src="/profiles/contrib/sous/themes/sous_admin/assets/images/Four_Kitchens.png" alt="A Product of Four Kitchens">
+      </div>
+    </aside>{# /.layout-sidebar-first #}
+  {% endif %}
+
+  <main role="main">
+    {% if title %}
+      <h2 class="heading-a">{{ title }}</h2>
+    {% endif %}
+    {{ page.highlighted }}
+    {{ page.content }}
+  </main>
+
+  {% if page.sidebar_second %}
+    <aside class="layout-sidebar-second" role="complementary">
+      {{ page.sidebar_second }}
+    </aside>{# /.layout-sidebar-second #}
+  {% endif %}
+
+  {% if page.page_bottom %}
+    <footer role="contentinfo">
+      {{ page.page_bottom }}
+    </footer>
+  {% endif %}
+
+</div>{# /.layout-container #}

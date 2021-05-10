@@ -1,0 +1,49 @@
+/**
+ * @file
+ * The CSS and class names below are based on Slick media for easy migration.
+ */
+
+/**
+ * Aspect ratio element wrapper. So can use dynamic/fluid ratio via JS which is
+ * not possible using ::pseudo selector approach.
+ */
+.media.media--ratio {
+  display: block;
+  height: 0;
+  /* Fixed for overflowing video with hard-coded width like lightboxes. */
+  max-width: 100%;
+  min-height: 1px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+/* Trying to be nice to minimize abrupt changes. */
+.media--ratio.is-b-loaded {
+  transition: padding-bottom .2s;
+}
+
+/* 1:1 ratio */
+.media--ratio--11 {
+  padding-bottom: 100%;
+}
+
+/* 3:2 ratio */
+.media--ratio--32 {
+  padding-bottom: 66.66%;
+}
+
+/* 4:3 ratio */
+.media--ratio--43 {
+  padding-bottom: 75%;
+}
+
+/* 8:5 ratio */
+.media--ratio--85 {
+  padding-bottom: 62.5%;
+}
+
+/* 16:9 ratio */
+.media--ratio--169 {
+  padding-bottom: 56.25%;
+}

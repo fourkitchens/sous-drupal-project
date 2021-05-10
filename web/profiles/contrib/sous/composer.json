@@ -1,0 +1,126 @@
+{
+    "name": "fourkitchens/sous-drupal-distro",
+    "description": "A base Drupal distribution profile with a theme based on Emulsify Design System.",
+    "type": "drupal-profile",
+    "license": "MIT License",
+    "authors": [
+        {
+            "name": "Adam Erickson",
+            "email": "adam@fourkitchens.com"
+        },
+        {
+            "name": "Chris Martin",
+            "email": "chris.martin@fourkitchens.com"
+        },
+        {
+            "name": "Callin Mullaney",
+            "email": "callin@fourkitchens.com"
+        },
+        {
+            "name": "Evan Willhite",
+            "email": "evan@fourkitchens.com"
+        },
+        {
+            "name": "Jeff Tomlinson",
+            "email": "jeff@fourkitchens.com"
+        },
+        {
+            "name": "Mike Goulding",
+            "email": "mike.goulding@fourkitchens.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        },
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "require": {
+        "composer/installers": "^1.2",
+        "oomphinc/composer-installers-extender": "^2.0",
+        "cweagans/composer-patches": "^1.6.5",
+        "drupal/core": "^9.1.0",
+        "drupal/blazy": "^2.0",
+        "drupal/allowed_formats": "^1.1",
+        "drupal/easy_breadcrumb": "^1.12",
+        "drupal/ctools": "^3.2",
+        "drupal/taxonomy_manager": "^2.0",
+        "drupal/field_group": "^3.0",
+        "drupal/linkit": "^5.0-beta12",
+        "drupal/libraries": "^3.0",
+        "drupal/pathauto": "^1.5",
+        "drupal/token": "^1.5",
+        "drupal/components": "^2.0",
+        "drupal/twig_tweak": "^2.4",
+        "drupal/google_tag": "^1.2",
+        "drupal/redirect": "^1.4",
+        "drupal/paragraphs": "^1.9",
+        "drupal/paragraphs_features": "^1.6",
+        "drupal/entity_browser": "^2.2",
+        "drupal/file_browser": "^1.2",
+        "drupal/entity_embed": "^1.0",
+        "drupal/dropzonejs": "^2.0",
+        "drupal/content_browser": "^1.0",
+        "drupal/media_entity_browser": "^2.0",
+        "drupal/entity_browser_enhanced": "^1.0",
+        "drupal/slick_browser": "2.x-dev",
+        "drupal/focal_point": "^1.2",
+        "drupal/crop": "^2.0",
+        "drupal/metatag": "1.x-dev",
+        "npm-asset/blazy": "^1.8",
+        "npm-asset/dropzone": "^5.5.1",
+        "npm-asset/imagesloaded": "^3.2.0",
+        "bower-asset/masonry-layout": "^4.0.0",
+        "npm-asset/slick": "^1.12",
+        "emulsify-ds/emulsify-drupal": "^2.0.1",
+        "drupal/menu_block": "1.x-dev",
+        "drupal/admin_toolbar": "2.x-dev"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "4.4.x-dev"
+    },
+    "extra": {
+        "installer-name": "sous",
+        "installer-types": ["npm-asset", "bower-asset"],
+        "installer-paths": {
+            "web/modules/contrib/{$name}": [
+                "type:drupal-module"
+            ],
+            "web/themes/contrib/{$name}": [
+                "type:drupal-theme"
+            ],
+            "drush/contrib/{$name}": [
+                "type:drupal-drush"
+            ],
+            "web/libraries/masonry": [
+                "bower-asset/masonry-layout"
+            ],
+            "web/libraries/{$name}": [
+                "type:npm-asset",
+                "type:drupal-library"
+            ]
+        },
+        "patches": {
+            "drupal/file_browser": {
+                "3089470": "https://www.drupal.org/files/issues/2021-01-11/3089470.21.patch"
+            },
+            "drupal/content_browser": {
+                "3089478": "https://www.drupal.org/files/issues/2019-10-22/profile-library-support-3089478-2.patch"
+            }
+        },
+        "drupal-scaffold": {
+            "file-mapping": {
+                "[web-root]/sites/development.services.yml": {
+                  "mode": "replace",
+                  "path": "assets/scaffold/files/development.services.yml",
+                  "overwrite": true
+                }
+            }
+        }
+    }
+}

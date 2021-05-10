@@ -1,0 +1,10 @@
+views.field.content_browser_preview:
+  type: views_field
+  label: 'Content Browser Preview'
+  mapping:
+    view_mode:
+      type: string
+      label: 'View Mode'
+    exposed_view_mode:
+      type: boolean
+      label: 'Exposed view mode'

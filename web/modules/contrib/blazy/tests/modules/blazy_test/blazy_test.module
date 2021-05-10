@@ -1,0 +1,101 @@
+<?php
+
+/**
+ * @file
+ * Testing various Blazy hooks, etc.
+ */
+
+use Drupal\blazy\BlazyDefault;
+use Drupal\blazy\BlazyAlter;
+use Drupal\blazy_test\BlazyTestAlter;
+
+/**
+ * Implements hook_theme().
+ */
+function blazy_test_theme() {
+  return ['blazy_test' => ['render element' => 'element']];
+}
+
+/**
+ * Prepares variables for blazy-test.html.twig templates.
+ */
+function template_preprocess_blazy_test(&$variables) {
+  $element = $variables['element'];
+
+  $variables['content'] = $element['#children'];
+  $variables['settings'] = isset($element['#settings']) ? $element['#settings'] : [];
+}
+
+/**
+ * Implements hook_blazy_attach_alter().
+ */
+function blazy_test_blazy_attach_alter(array &$load, array $settings = []) {
+  if (!empty($settings['blazy_test'])) {
+    $load['library'][] = 'foo/fake_library';
+
+    $manager = \Drupal::service('blazy.manager');
+    $template = ['#theme' => 'blazy_test'];
+    $load['drupalSettings']['blazy_test'] = [
+      'options' => ['slideshow' => TRUE],
+      'container' => $manager->getRenderer()->renderPlain($template),
+    ];
+  }
+}
+
+/**
+ * Implements hook_blazy_lightboxes_alter().
+ */
+function blazy_test_blazy_lightboxes_alter(array &$lightboxes) {
+  $lightboxes[] = 'blazy_test';
+}
+
+/**
+ * Implements hook_blazy_alter().
+ */
+function blazy_test_blazy_alter(array &$image, array $settings = []) {
+  if (!empty($settings['media_switch']) && $settings['media_switch'] == 'blazy_test') {
+    $image['#pre_render'][] = [BlazyTestAlter::class, 'preRender'];
+  }
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function blazy_test_library_info_alter(array &$libraries, $extension) {
+  if ($extension !== 'blazy') {
+    return;
+  }
+
+  $path = \Drupal::root() . '/libraries/blazy/blazy.js';
+  if (!is_file($path)) {
+    $libraries['blazy']['js'] = [
+      'https://cdn.jsdelivr.net/npm/blazy/blazy.js' => [
+        'type' => 'external',
+        'weight' => -4,
+      ],
+    ];
+    unset($libraries['blazy']['js']['/libraries/blazy/blazy.js']);
+  }
+}
+
+/**
+ * Implements hook_config_schema_info_alter().
+ */
+function blazy_test_config_schema_info_alter(array &$definitions) {
+  $extra = ['thumbnail' => ''] + BlazyDefault::gridSettings();
+  BlazyAlter::configSchemaInfoAlter($definitions, 'blazy_base', BlazyDefault::extendedSettings() + $extra);
+}
+
+/**
+ * Attempts to satisfy the tests for <= D8.7.
+ */
+if (!function_exists('file_valid_uri')) {
+
+  /**
+   * Dummy function.
+   */
+  function file_valid_uri() {
+    // Empty block to satisfy coder.
+  }
+
+}

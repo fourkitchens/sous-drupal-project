@@ -1,0 +1,21 @@
+uuid: 20aa5fee-641f-41e5-85dd-716483f75ded
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_metadata
+    - node.type.frontpage
+  module:
+    - metatag
+id: node.frontpage.field_metadata
+field_name: field_metadata
+entity_type: node
+bundle: frontpage
+label: Metadata
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: metatag

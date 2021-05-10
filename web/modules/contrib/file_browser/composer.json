@@ -1,0 +1,16 @@
+{
+  "name": "drupal/file_browser",
+  "description": "This module provides a default Entity Browser that lets you browse and select your files in a nice-looking, mobile-ready Masonry based interface, and upload files using the Dropzonejs module.",
+  "type": "drupal-module",
+  "license": "GPL-2.0",
+  "require": {
+    "drupal/core": "~8 || ~9",
+    "drupal/entity_browser": "^2 || ^1",
+    "drupal/dropzonejs": "^2",
+    "drupal/embed": "^1",
+    "drupal/entity_embed": "^1"
+  },
+  "require-dev": {
+    "drupal/coder": "~8.3"
+  }
+}

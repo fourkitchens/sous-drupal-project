@@ -1,0 +1,82 @@
+name: Sous
+type: profile
+description: 'A base Drupal distribution profile with a theme based on Emulsify Design System.'
+project: sous
+core_version_requirement: ^8.8 || ^9
+version: '2.x'
+
+distribution:
+  name: Sous
+  install:
+    theme: sous_admin
+
+# Required modules
+dependencies:
+   - drupal:media
+   - drupal:node
+   - drupal:views
+   - drupal:field
+   - drupal:taxonomy
+   - drupal:user
+
+install:
+  # core
+  - drupal:automated_cron
+  - drupal:block
+  - drupal:block_content
+  - drupal:breakpoint
+  - drupal:ckeditor
+  - drupal:config
+  - drupal:contextual
+  - drupal:dynamic_page_cache
+  - drupal:field_ui
+  - drupal:filter
+  - drupal:inline_form_errors
+  - drupal:menu_link_content
+  - drupal:menu_ui
+  - drupal:options
+  - drupal:path
+  - drupal:responsive_image
+  - drupal:shortcut
+  - drupal:system
+  - drupal:editor
+  - drupal:toolbar
+  - drupal:update
+  - drupal:views_ui
+  # contrib
+  - admin_toolbar:admin_toolbar
+  - allowed_formats:allowed_formats
+  - blazy:blazy
+  - components:components
+  - content_browser:content_browser
+  - crop:crop
+  - ctools:ctools
+  - dropzonejs:dropzonejs
+  - easy_breadcrumb:easy_breadcrumb
+  - entity_browser:entity_browser
+  - entity_browser_enhanced:entity_browser_enhanced
+  - entity_embed:entity_embed
+  - field_group:field_group
+  - file_browser:file_browser
+  - focal_point:focal_point
+  - google_tag:google_tag
+  - libraries:libraries
+  - linkit:linkit
+  - media_entity_browser:media_entity_browser
+  - menu_block:menu_block
+  - metatag:metatag
+  - metatag:metatag_open_graph
+  - metatag:metatag_twitter_cards
+  - paragraphs:paragraphs
+  - paragraphs_features:paragraphs_features
+  - pathauto:pathauto
+  - redirect:redirect
+  - taxonomy_manager:taxonomy_manager
+  - token:token
+  - twig_tweak:twig_tweak
+  - emulsify_twig:emulsify_twig
+
+themes:
+  - seven
+  - claro
+  - sous_admin

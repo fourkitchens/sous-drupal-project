@@ -1,0 +1,9 @@
+name: 'Components twig extension test'
+type: module
+description: 'Support module for Components twig extension testing.'
+package: Testing
+
+# Information added by Drupal.org packaging script on 2021-04-19
+version: '8.x-2.4'
+project: 'components'
+datestamp: 1618861607

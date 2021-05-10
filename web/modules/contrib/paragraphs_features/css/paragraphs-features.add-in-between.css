@@ -1,0 +1,14 @@
+/*
+ * 1. "+ Add" button is left aligned and we want it in middle.
+ */
+.js .paragraphs-features__add-in-between__wrapper .paragraphs-features__add-in-between__button {
+  margin: 0 auto; /* 1 */
+}
+@media screen and (max-width: 600px) {
+  /*
+   * 1. The button text is not vertically aligned for mobile view.
+   */
+  .js .paragraphs-features__add-in-between__wrapper .paragraphs-features__add-in-between__button {
+    padding-top: 5px; /* 1 */
+  }
+}

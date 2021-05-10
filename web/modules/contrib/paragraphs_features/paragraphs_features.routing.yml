@@ -1,0 +1,9 @@
+paragraphs_features.settings_form:
+  path: '/admin/config/content/paragraphs_features'
+  defaults:
+    _form: '\Drupal\paragraphs_features\Form\SettingsForm'
+    _title: 'Paragraphs features settings'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

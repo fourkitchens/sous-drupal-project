@@ -1,0 +1,132 @@
+/**
+ * @file content_browser.view.css
+ */
+
+/* Theme overrides to prevent flicker on load .*/
+
+body {
+  background: white !important;
+  display: none;
+}
+
+/* Generic styles */
+
+.pager {
+  padding: 20px;
+}
+
+.content-browser-form {
+  position: relative;
+  padding-bottom: 50px;
+}
+
+.content-browser-form .eb-tabs {
+  display: none;
+}
+
+.content-browser-form input[type="submit"][name="filter"] {
+  margin-left: 10px;
+  margin-top: 30px;
+}
+
+.layout-container {
+  margin: 0;
+}
+
+/* Hide contextual links when using Content Browser. */
+.content-browser-form .contextual {
+  display: none;
+}
+
+/* Reduce width of Author(s) field. */
+.content-browser-form .form-item-uid {
+  max-width: 250px;
+}
+
+/* Keep the second row below the first. */
+.content-browser-form .second-row {
+  margin-left: 0;
+  clear: left;
+}
+
+/* Do some fancy things to allow users to click on content, not checkboxes. */
+.content-browser-form .views-row {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 5px;
+  margin: 0 0 10px 0;
+  transition: .2s;
+  width: 345px;
+  height: 345px;
+  background: transparent;
+  border: 1px solid lightgray;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.13);
+}
+
+.content-browser-form .views-row:after {
+  content: " ";
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  position: absolute;
+  background: transparent url("/core/misc/icons/73b355/check.svg") no-repeat center center;
+  background-size: 0;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+}
+
+.content-browser-form .views-row:hover {
+  background: rgba(142, 222, 142, 0.16);
+}
+
+.content-browser-form .views-row.checked {
+  background: rgba(142, 222, 142, 0.47);
+  border: 1px solid rgba(1, 97, 15, 0.67);
+}
+
+.content-browser-form .views-row.checked:after {
+  background-size: 80px 80px;
+}
+
+.content-browser-form .views-field-entity-browser-select {
+  cursor: pointer;
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.content-browser-form .views-field-entity-browser-select .field-content {
+  display: none;
+}
+
+.content-browser-form .views-exposed-form .form-actions {
+  display: inline-block;
+  margin: 1.5em 0 0 0;
+}
+
+.content-browser-form .content-browser-actions {
+  position: fixed;
+  z-index: 1;
+  bottom: 0;
+  padding: 0;
+  background: white;
+  width: 100%;
+  border-top: 1px solid lightgray;
+}
+
+.content-browser-form .content-browser-actions .form-actions {
+  margin: 0;
+}
+
+.content-browser-page {
+  background: white;
+}
+
+.content-browser-page .page-title {
+  display: none;
+}

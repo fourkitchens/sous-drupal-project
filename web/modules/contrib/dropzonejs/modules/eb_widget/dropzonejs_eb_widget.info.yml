@@ -1,0 +1,15 @@
+name: DropzoneJS entity browser widget
+type: module
+description: 'DropzoneJS Entity browser widget.'
+core_version_requirement: ^8.8 || ^9
+package: Media
+dependencies:
+  - drupal:file
+  - dropzonejs:dropzonejs
+  - entity_browser:entity_browser
+
+
+# Information added by Drupal.org packaging script on 2021-03-01
+version: '8.x-2.5'
+project: 'dropzonejs'
+datestamp: 1614606378

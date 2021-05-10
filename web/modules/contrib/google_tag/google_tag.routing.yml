@@ -1,0 +1,82 @@
+# default settings
+google_tag.settings_form:
+  path: '/admin/config/system/google-tag/settings'
+  defaults:
+    _title: 'Google Tag Manager settings'
+    _form: '\Drupal\google_tag\Form\SettingsForm'
+  requirements:
+    _permission: 'administer google tag manager'
+
+# container management
+entity.google_tag_container.collection:
+  path: '/admin/config/system/google-tag'
+  defaults:
+    #_title: 'Google Tag Manager'
+    #_form: '\Drupal\google_tag\Form\ContainerListBuilder'
+    _entity_list: 'google_tag_container'
+    _title: 'Google Tag Manager containers'
+  requirements:
+    _permission: 'administer google tag manager'
+
+entity.google_tag_container.add_form:
+  path: '/admin/config/system/google-tag/add'
+  defaults:
+    #_title_arguments are only used with a _title..go figure
+    #see Drupal\Core\Controller\TitleResolver->getTitle()
+    #with a _title_callback
+    #Drupal\Core\Controller\ControllerResolver::doGetArguments()
+    #expects the argument to be top level in this defaults array
+    _entity_form: 'google_tag_container'
+    _title: 'Add Google Tag container'
+    #_title_arguments:
+      #entity_type_id: 'entity.google_tag_container'
+    _title_callback: '\Drupal\google_tag\ContainerController::addTitle'
+    entity_type_id: 'google_tag_container' # 'entity.google_tag_container argument'
+  requirements:
+    _permission: 'administer google tag manager'
+
+#the next two require the method parameter to be named google_tag_container
+entity.google_tag_container.enable:
+  path: '/admin/config/system/google-tag/manage/{google_tag_container}/enable'
+  defaults:
+    _controller: '\Drupal\google_tag\ContainerController::enable'
+    entity_type: 'google_tag_container'
+  requirements:
+    _permission: 'administer google tag manager'
+
+entity.google_tag_container.disable:
+  path: '/admin/config/system/google-tag/manage/{google_tag_container}/disable'
+  defaults:
+    _controller: '\Drupal\google_tag\ContainerController::disable'
+    entity_type: 'google_tag_container'
+  requirements:
+    _permission: 'administer google tag manager'
+
+#according to documentation this should work but does not
+#https://www.drupal.org/docs/8/api/routing-system/parameter-upcasting-in-routes
+#entity.google_tag_container.disable:
+  #path: '/admin/config/system/google-tag/manage/{container}/disable'
+  #defaults:
+    #_controller: '\Drupal\google_tag\ContainerController::disable'
+    #entity_type: 'google_tag_container'
+  #requirements:
+    #_permission: 'administer google tag manager'
+  #options:
+    #parameters:
+      #container:
+        #type: entity:google_tag_container
+
+entity.google_tag_container.edit_form:
+  path: '/admin/config/system/google-tag/manage/{google_tag_container}'
+  defaults:
+    _entity_form: google_tag_container
+    _title_callback: '\Drupal\google_tag\ContainerController::editTitle'
+  requirements:
+    _permission: 'administer google tag manager'
+
+entity.google_tag_container.delete_form:
+  path: '/admin/config/system/google-tag/manage/{google_tag_container}/delete'
+  defaults:
+    _entity_form: 'google_tag_container.delete'
+  requirements:
+    _permission: 'administer google tag manager'

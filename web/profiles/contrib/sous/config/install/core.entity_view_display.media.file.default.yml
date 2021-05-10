@@ -1,0 +1,31 @@
+uuid: 55daffce-0384-47dd-abf6-1bee3948d151
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.media.file.field_description
+    - field.field.media.file.field_media_file
+    - field.field.media.file.field_tags
+    - media.type.file
+  module:
+    - file
+id: media.file.default
+targetEntityType: media
+bundle: file
+mode: default
+content:
+  field_media_file:
+    label: visually_hidden
+    weight: 0
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    type: file_default
+    region: content
+hidden:
+  created: true
+  field_description: true
+  field_tags: true
+  name: true
+  thumbnail: true
+  uid: true

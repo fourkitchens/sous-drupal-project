@@ -1,0 +1,133 @@
+<?php
+
+/**
+ * @file
+ * Allows to have an enhanced entity browser.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\entity_browser\Plugin\EntityBrowser\Widget\View;
+use Drupal\entity_browser\Form\EntityBrowserForm;
+
+/**
+ * Implements hook_help().
+ */
+function entity_browser_enhanced_help($route_name, RouteMatchInterface $route_match) {
+  if ($route_name === 'help.page.entity_browser_enhanced') {
+    $readme_file = file_exists(__DIR__ . '/README.md') ? __DIR__ . '/README.md' : __DIR__ . '/README.txt';
+    if (!file_exists($readme_file)) {
+      return NULL;
+    }
+    $text = file_get_contents($readme_file);
+    if (!\Drupal::moduleHandler()->moduleExists('markdown')) {
+      return '<pre>' . $text . '</pre>';
+    }
+    else {
+      // Use the Markdown filter to render the README.
+      $filter_manager = \Drupal::service('plugin.manager.filter');
+      $settings = \Drupal::configFactory()->get('markdown.settings')->getRawData();
+      $config = ['settings' => $settings];
+      $filter = $filter_manager->createInstance('markdown', $config);
+      return $filter->process($text, 'en');
+    }
+  }
+  return NULL;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function entity_browser_enhanced_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id === "entity_browser_widgets_config_form") {
+
+    $enhancers_list = \Drupal::service('plugin.manager.entity_browser_enhanced_plugin')
+      ->getDefinitions();
+
+    $enhancers = [
+      '_none_' => t('- None -'),
+    ];
+
+    foreach ($enhancers_list as $enhancer_item) {
+      $enhancers[$enhancer_item['id']] = $enhancer_item['label'];
+    }
+
+    $entity_browser = $form_state->getFormObject()->getEntity();
+
+    foreach ($entity_browser->getWidgets() as $uuid => $widget) {
+
+      if (!$widget instanceof View) {
+        continue;
+      }
+
+      $form['widgets']['table'][$uuid]['form']['enhancer'] = [
+        '#type' => 'select',
+        '#title' => t('Select enhancer'),
+        '#default_value' => \Drupal::config('entity_browser_enhanced.widgets.' . $entity_browser->getName())->get($uuid, '_none_'),
+        '#options' => $enhancers,
+      ];
+    }
+
+    $form['#submit'][] = 'entity_browser_enhanced_submit';
+  }
+  elseif ($form_state->getFormObject() instanceof EntityBrowserForm) {
+
+    $enhancers_list = \Drupal::service('plugin.manager.entity_browser_enhanced_plugin')
+      ->getDefinitions();
+
+    $entity_browser = $form_state->getFormObject()->getEntityBrowser();
+
+    foreach ($entity_browser->getWidgets() as $uuid => $widget) {
+      $enhancer_id = \Drupal::config('entity_browser_enhanced.widgets.' . $entity_browser->getName())->get($uuid, '_none_');
+
+      foreach ($enhancers_list as $enhancer_item) {
+        if ($enhancer_id === $enhancer_item['id']) {
+          // Attach Entity Browser Enhanced library.
+          $form['#attached']['library'][] = $enhancer_item['libraray'];
+
+          $field_storage = $form_state->getStorage();
+          if (!empty($field_storage['entity_browser']['validators']['cardinality']['cardinality'])) {
+            $field_cardinality = $field_storage['entity_browser']['validators']['cardinality']['cardinality'];
+            $form['#attached']['drupalSettings']['entity_browser_enhanced'][$enhancer_item['id']]['cardinality'] = $field_cardinality;
+          }
+
+          // Mark the form with entity-browser-enhanced classes.
+          $form['#attributes']['class'][] = 'entity-browser-enhanced';
+          $form['#attributes']['class'][] = $enhancer_item['form_extra_class'];
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Entity browser enhanced submit.
+ */
+function entity_browser_enhanced_submit(&$form, FormStateInterface $form_state) {
+  $entity_browser = $form_state->getFormObject()->getEntity();
+
+  foreach ($entity_browser->getWidgets() as $uuid => $widget) {
+
+    if (!$widget instanceof View) {
+      continue;
+    }
+
+    $widget_values = $form_state->getValues()['table'][$widget->uuid()]['form'];
+
+    if (!empty($widget_values['enhancer'])) {
+      \Drupal::service('config.factory')->getEditable('entity_browser_enhanced.widgets.' . $entity_browser->getName())
+        ->set($uuid, $widget_values['enhancer'])
+        ->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function entity_browser_enhanced_library_info_alter(&$libraries, $extension) {
+  // Removed the browser.style library which lightning media use as static code.
+  if ($extension == 'lightning_media' && isset($libraries['browser.styling'])) {
+    unset($libraries['browser.styling']);
+  }
+}

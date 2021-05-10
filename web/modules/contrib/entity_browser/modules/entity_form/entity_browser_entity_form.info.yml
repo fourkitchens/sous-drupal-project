@@ -1,0 +1,13 @@
+name: Entity Browser IEF
+description: 'Entity browser inline entity form integration.'
+type: module
+package: Media
+core_version_requirement: ^8.7.7 || ^9
+dependencies:
+  - entity_browser:entity_browser
+  - inline_entity_form:inline_entity_form
+
+# Information added by Drupal.org packaging script on 2020-04-27
+version: '8.x-2.5'
+project: 'entity_browser'
+datestamp: 1588015349

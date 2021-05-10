@@ -1,0 +1,21 @@
+uuid: ed2640f1-c2cf-401e-a292-4ee709037c25
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_metadata
+    - node.type.page
+  module:
+    - metatag
+id: node.page.field_metadata
+field_name: field_metadata
+entity_type: node
+bundle: page
+label: Metadata
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: metatag

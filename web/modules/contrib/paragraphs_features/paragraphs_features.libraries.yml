@@ -1,0 +1,22 @@
+
+drupal.paragraphs_features.add_in_between:
+  js:
+    js/paragraphs-features.add-in-between.js: {}
+  css:
+    theme:
+      css/paragraphs-features.add-in-between.css: {}
+  dependencies:
+    - core/drupal
+    - core/jquery.once
+    - paragraphs/drupal.paragraphs.modal
+
+drupal.paragraphs_features.delete_confirmation:
+  js:
+    js/paragraphs-features.delete-confirmation.js: {}
+
+drupal.paragraphs_features.split_text:
+  js:
+    js/paragraphs-features.split-text.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery.once

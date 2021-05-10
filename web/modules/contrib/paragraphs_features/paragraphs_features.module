@@ -1,0 +1,78 @@
+<?php
+
+/**
+ * @file
+ * Contains hooks for Paragraphs Feature module.
+ */
+
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\WidgetInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+use Drupal\paragraphs\Plugin\Field\FieldWidget\ParagraphsWidget;
+use Drupal\paragraphs_features\ParagraphsFeatures;
+
+/**
+ * Implements hook_field_widget_multivalue_form_alter().
+ */
+function paragraphs_features_field_widget_multivalue_form_alter(array &$elements, FormStateInterface $form_state, array $context) {
+  /** @var \Drupal\paragraphs\Plugin\Field\FieldWidget\ParagraphsWidget $widget */
+  $widget = $context['widget'];
+  if (!($widget instanceof ParagraphsWidget)) {
+    return;
+  }
+
+  $fieldWrapperId = ParagraphsFeatures::getWrapperId($context['form']['#parents'], $elements['#field_name']);
+  ParagraphsFeatures::registerFormWidgetFeatures($elements, $widget, $fieldWrapperId);
+}
+
+/**
+ * Implements hook_field_widget_third_party_settings_form().
+ */
+function paragraphs_features_field_widget_third_party_settings_form(WidgetInterface $plugin, FieldDefinitionInterface $field_definition, $form_mode, $form, FormStateInterface $form_state) {
+  $elements = [];
+
+  if ($plugin instanceof ParagraphsWidget) {
+    $elements = ParagraphsFeatures::getThirdPartyForm($plugin, $field_definition->getName());
+  }
+
+  return $elements;
+}
+
+/**
+ * Implements hook_paragraphs_widget_actions_alter().
+ */
+function paragraphs_features_paragraphs_widget_actions_alter(array &$widget_actions, array &$context) {
+  /** @var \Drupal\paragraphs\Entity\Paragraph $paragraphs_entity */
+  $paragraphs_entity = $context['paragraphs_entity'];
+
+  foreach ($widget_actions as $grouping => $buttons) {
+    foreach ($buttons as $button_id => $button_element) {
+      if ($button_id === 'remove_button') {
+        $widget_actions[$grouping][$button_id]['#attributes']['data-paragraphs-split-text-type'] = $paragraphs_entity->getType();
+
+        break 2;
+      }
+    }
+  }
+
+  /* Render single option for dropdown as button. */
+
+  // Get configuration setting for reducing dropdown to button on single option.
+  $dropdown_to_button = \Drupal::config('paragraphs_features.settings')->get('dropdown_to_button');
+  if (!$dropdown_to_button) {
+    return;
+  }
+
+  // "Add above" feature is added by JS and we don't have it in actions list.
+  if ($context['element']['top']['#attributes']['class'] && in_array('add-above-on', $context['element']['top']['#attributes']['class'])) {
+    return;
+  }
+
+  $visible_actions = Element::getVisibleChildren($widget_actions['dropdown_actions']);
+  if (count($visible_actions) === 1) {
+    $visible_actions = reset($visible_actions);
+    $widget_actions['actions'][$visible_actions] = $widget_actions['dropdown_actions'][$visible_actions];
+    $widget_actions['dropdown_actions'] = [];
+  }
+}

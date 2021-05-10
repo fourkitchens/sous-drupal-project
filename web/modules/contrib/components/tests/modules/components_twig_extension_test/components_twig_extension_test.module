@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Test module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function components_twig_extension_test_theme($existing, $type, $theme, $path): array {
+  $items['components_twig_extension_test_add_filter'] = [
+    'render element' => 'element',
+  ];
+  $items['components_twig_extension_test_add_filter_named_arguments'] = [
+    'render element' => 'element',
+  ];
+  $items['components_twig_extension_test_add_filter_plural_named_arguments'] = [
+    'render element' => 'element',
+  ];
+  $items['components_twig_extension_test_add_filter_deprecated_named_arguments'] = [
+    'render element' => 'element',
+  ];
+  $items['components_twig_extension_test_recursive_merge_filter'] = [
+    'render element' => 'element',
+  ];
+  $items['components_twig_extension_test_recursive_merge_filter_named_arguments'] = [
+    'render element' => 'element',
+  ];
+  $items['components_twig_extension_test_set_filter'] = [
+    'render element' => 'element',
+  ];
+  $items['components_twig_extension_test_set_filter_named_arguments'] = [
+    'render element' => 'element',
+  ];
+  $items['components_twig_extension_test_set_filter_deprecated_named_argument'] = [
+    'render element' => 'element',
+  ];
+  $items['components_twig_extension_test_set_filter_deprecated_named_arguments'] = [
+    'render element' => 'element',
+  ];
+  $items['components_twig_extension_test_template_function'] = [
+    'variables' => [
+      'items' => [],
+    ],
+  ];
+  return $items;
+}

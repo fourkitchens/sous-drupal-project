@@ -1,0 +1,11 @@
+name: Entity Browser
+description: 'Provide a generic entity browser/picker/selector.'
+type: module
+package: Media
+core_version_requirement: ^8.8 || ^9
+configure: entity.entity_browser.collection
+
+# Information added by Drupal.org packaging script on 2020-04-27
+version: '8.x-2.5'
+project: 'entity_browser'
+datestamp: 1588015349

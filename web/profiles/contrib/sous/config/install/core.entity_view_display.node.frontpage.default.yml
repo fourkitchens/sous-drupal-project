@@ -1,0 +1,23 @@
+uuid: c2b458a9-bf06-46fa-9f34-4680034320a3
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.frontpage.field_metadata
+    - field.field.node.frontpage.field_seo_title
+    - field.field.node.frontpage.field_teaser_media
+    - field.field.node.frontpage.field_teaser_text
+    - node.type.frontpage
+  module:
+    - user
+id: node.frontpage.default
+targetEntityType: node
+bundle: frontpage
+mode: default
+content: {  }
+hidden:
+  field_metadata: true
+  field_seo_title: true
+  field_teaser_media: true
+  field_teaser_text: true
+  links: true

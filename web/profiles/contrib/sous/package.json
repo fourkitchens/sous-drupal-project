@@ -1,0 +1,31 @@
+{
+  "name": "sous-distro",
+  "version": "0.0.1",
+  "description": "A starter kit for a Drupal project",
+  "scripts": {
+    "publish": "semantic-release --tag-format '${version}'",
+    "publish-test": "semantic-release --tag-format '${version}' --dry-run --debug",
+    "postinstall": "patch-package"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:fourkitchens/sous-drupal-distro.git"
+  },
+  "keywords": [
+    "sous"
+  ],
+  "author": "Four Kitchens",
+  "license": "GPL-2.0-or-later",
+  "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/commit-analyzer": "^8.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/github": "^7.2.0",
+    "@semantic-release/release-notes-generator": "^9.0.1",
+    "husky": "^4.2.5",
+    "semantic-release": "^17.0.7",
+    "patch-package": "^6.2.2"
+  }
+}

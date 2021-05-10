@@ -1,0 +1,21 @@
+uuid: b6a1cb9d-8113-475f-a502-2e33d463b4b4
+langcode: en
+status: true
+dependencies:
+  module:
+    - crop
+third_party_settings:
+  crop:
+    image_field: _none
+id: file
+label: File
+description: ''
+source: file
+queue_thumbnail_downloads: false
+new_revision: true
+source_configuration:
+  source_field: field_media_file
+field_map:
+  name: name
+  mimetype: field_media_file
+  filesize: field_media_file

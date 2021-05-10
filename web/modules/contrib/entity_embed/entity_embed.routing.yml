@@ -1,0 +1,14 @@
+entity_embed.dialog:
+  path: '/entity-embed/dialog/{editor}/{embed_button}'
+  defaults:
+    _form: '\Drupal\entity_embed\Form\EntityEmbedDialog'
+    _title: 'Embed entity'
+  requirements:
+    _embed_button_editor_access: 'TRUE'
+
+entity_embed.preview:
+  path: '/entity-embed/preview/{filter_format}'
+  defaults:
+    _controller: '\Drupal\entity_embed\Controller\PreviewController::preview'
+  requirements:
+    _entity_access: 'filter_format.use'

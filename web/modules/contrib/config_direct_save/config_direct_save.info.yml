@@ -1,0 +1,11 @@
+name: Config Direct Save
+core: 8.x
+core_version_requirement: ^8 || ^9
+description: This module allow you to export configuration after changes
+type: module
+package: Deployment
+
+# Information added by Drupal.org packaging script on 2020-06-09
+version: '8.x-1.2'
+project: 'config_direct_save'
+datestamp: 1591743070

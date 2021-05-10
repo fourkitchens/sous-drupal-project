@@ -1,0 +1,47 @@
+/**
+ * @file
+ * Provides CKEditor preview mode overrides.
+ */
+
+/** Disable interactive elements such as file video within CKEditor preview. */
+.cke_widget_element .blazy {
+  position: relative;
+}
+
+.cke_widget_element .blazy::after {
+  background: transparent;
+  content: '';
+  display: block;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 9;
+}
+
+.cke_widget_element .blazy iframe {
+  pointer-events: none;
+  z-index: -2;
+}
+
+/** Fixed for file video. */
+.cke_widget_element .blazy .media__element {
+  object-fit: cover;
+  width: 100%;
+}
+
+/** Fixed for shrink media due to parent display: flex or inline-block. */
+.cke_widget_element .media {
+  min-width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+  .cke_widget_element .media {
+    min-width: 50%;
+  }
+
+  .cke_widget_element .media--switch--media {
+    min-width: 640px;
+  }
+}

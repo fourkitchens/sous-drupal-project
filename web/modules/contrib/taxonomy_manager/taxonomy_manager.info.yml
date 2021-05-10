@@ -1,0 +1,14 @@
+name: 'Taxonomy Manager'
+description: 'Tool for administrating taxonomy terms.'
+core_version_requirement: ^8.8 || ^9
+dependencies:
+  - drupal:taxonomy
+  - jquery_ui:jquery_ui
+package: Taxonomy
+type: module
+configure: taxonomy_manager.settings
+
+# Information added by Drupal.org packaging script on 2021-02-11
+version: '2.0.4'
+project: 'taxonomy_manager'
+datestamp: 1613054278
