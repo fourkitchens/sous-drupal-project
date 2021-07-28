@@ -3,6 +3,11 @@
   "version": "0.0.1",
   "description": "A starter kit for a Drupal project",
   "scripts": {
+    "confim": "./scripts/sous/confim.sh",
+    "confex": "./scripts/sous/confex.sh",
+    "import-data": "./scripts/sous/import-data.sh",
+    "rebuild": "./scripts/sous/rebuild.sh",
+    "local-data-bak": "./scripts/sous/local-data-bak.sh",
     "publish": "semantic-release --tag-format '${version}'",
     "publish-test": "semantic-release --tag-format '${version}' --dry-run --debug",
     "postinstall": "patch-package"
