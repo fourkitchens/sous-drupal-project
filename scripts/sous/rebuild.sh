@@ -1,6 +1,7 @@
 #!/bin/bash
 
-composer install
-yarn import-data
-yarn confim
+lando composer install
+npm run import-data
+npm run confim
+lando drush user:unblock superuser_1
 lando drush uli
