@@ -16,7 +16,7 @@ jobs:
     steps:
       - checkout
       - php/install-composer:
-          install-version: 2.0.8
+          install-version: 2.1.9
       - php/install-packages
   release:
     executor:
