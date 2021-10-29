@@ -1,6 +1,6 @@
 module.exports = {
   branches: [
-    '+([0-9])?(.{+([0-9]),x}).x',
+    '2.x',
     'master'
   ],
   plugins: [
