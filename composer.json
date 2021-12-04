@@ -57,6 +57,9 @@
             "web/core": [
                 "type:drupal-core"
             ],
+            "web/libraries/masonry": [
+                "bower-asset/masonry-layout"
+            ],
             "web/libraries/{$name}": [
                 "type:drupal-library",
                 "type:bower-asset",
