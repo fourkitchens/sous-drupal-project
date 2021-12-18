@@ -6,6 +6,14 @@
 
 This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set of contrib modules, a starting custom module for specific for the build, and a custom starting theme generated from Emulsify.
 
+# Installation
+
+## Requirements
+Without these you will have difficulty installing this project.
+
+1. [PHP 7.4](http://www.php.net/)
+2. [Node ~12.13.0 \(we recommend NVM\)](https://github.com/creationix/nvm)
+3. [Composer](https://getcomposer.org/)
 
 ## Composer Install
 
@@ -31,16 +39,29 @@ composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-inter
     - Review ignored items you may need for your build and remove them
 
 
-### Build project module
+## Working with Emulsify
+The [Emulsify](https://emulsify.info/) theme is installed as part of this project.
 
-Create a new project module
-Generate a custom module at `/web/modules/custom/PROJECT_NAME` using drupal console.
-Follow the documentation for the generate:module command [here](https://hechoendrupal.gitbooks.io/drupal-console/en/commands/generate-module.html)
+Full documentation can be found in the official [Emulsify Documentation](https://docs.emulsify.info/).
+
+### Basic Emulsify Setup
+
+1. Move into the Emulsify theme `cd web/themes/contrib/gatsby-starter-emulsify-drupal/`
+2. Create your new theme by cloning emulsify `lando php emulsify.php "THEME NAME"` \(Run `lando php emulsify.php -h` for other available options\)
+3. Move into your theme directory `cd web/themes/custom/THEME_NAME/`
+4. Install the theme dependencies `yarn` or `npm install`
+5. Enable your theme and its dependencies `lando drush then THEME_NAME -y && lando drush en components emulsify_twig -y`
 
 
 ## Additional Tooling
 
 This package provides some additional tooling to support the build.
+
+### Build project module
+
+Create a new project module
+Generate a custom module at `/web/modules/custom/PROJECT_NAME` using drupal console.
+Follow the documentation for the generate:module command [here](https://hechoendrupal.gitbooks.io/drupal-console/en/commands/generate-module.html)
 
 ### Helper scripts
 
