@@ -29,7 +29,7 @@ public static function installTheme() {
   // Generate  system.theme.yml and append new theme to install.
   $system_theme_yml = [
     "default" => $composerRoot,
-    "admin"=> "claro"
+    "admin"=> "gin"
   ];
   $yaml = Yaml::dump($system_theme_yml);
   file_put_contents('web/profiles/contrib/sous/config/install/system.theme.yml', $yaml);
