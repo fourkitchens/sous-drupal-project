@@ -19,7 +19,7 @@
     ],
     "require": {
         "php": ">=7.4",
-        "fourkitchens/sous-drupal-distro": "2.x-dev",
+        "fourkitchens/sous-drupal-distro": "4.x-dev",
         "drupal/config_direct_save": "^1.0",
         "cweagans/composer-patches": "^1.6.5",
         "drupal/console": "^1.9.7",
@@ -41,7 +41,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Sous\\" : "sous"
+            "Sous\\": "sous"
         }
     },
     "extra": {
