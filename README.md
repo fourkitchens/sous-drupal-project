@@ -6,7 +6,14 @@
 
 This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set of contrib modules, a starting custom module for specific for the build, and a custom starting theme generated from Emulsify.
 
-## Composer Install
+# Installation
+
+## Requirements
+Without these you will have difficulty installing this project.
+
+1. [PHP ^7.4](http://www.php.net/)
+2. [Node ~12.13.0 || ^16.4 \(we recommend NVM\)](https://github.com/creationix/nvm)
+3. [Composer 2.x](https://getcomposer.org/)
 
 Use this command below and replace `PROJECT_NAME` with your chosen project name.
 
@@ -31,15 +38,13 @@ composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-inter
   - Remove the commented block at the EOF
   - Review ignored items you may need for your build and remove them
 
-### Build project module
-
-Create a new project module
-Generate a custom module at `/web/modules/custom/PROJECT_NAME` using drupal console.
-Follow the documentation for the generate:module command [here](https://hechoendrupal.gitbooks.io/drupal-console/en/commands/generate-module.html)
+## Working with Emulsify
+The [Emulsify](https://emulsify.info/) theme is installed as part of this project.
 
 ## Additional Tooling
 
 This package provides some additional tooling to support the build.
+
 
 ### Helper scripts
 
