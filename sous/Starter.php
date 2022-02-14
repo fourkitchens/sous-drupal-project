@@ -38,7 +38,6 @@ public static function installTheme() {
   // Remove contrib theme after theme generation.
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
   // Write config folder location.
-  shell_exec ("echo 'web/profiles/contrib/sous/assets/scaffold/additions-default.settings.php' >> web/sites/default/default.settings.php"
-  );
+  shell_exec ("cat web/profiles/contrib/sous/assets/scaffold/default/additions-default.settings.txt >> web/sites/default/default.settings.php");
   }
 }
