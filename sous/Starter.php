@@ -35,9 +35,8 @@ public static function installTheme() {
   file_put_contents('web/profiles/contrib/sous/sous.info.yml', '  - '.$composerRoot.PHP_EOL, FILE_APPEND | LOCK_EX);
   // Remove contrib theme after theme generation.
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
-  // Write config folder location.
-  shell_exec ("cat web/profiles/contrib/sous/assets/scaffold/default/additions-default.settings.txt >> web/sites/default/default.settings.php");
   shell_exec ("sed -i 's/sous-project/$composerRoot/' .lando.yml");
-  shell_exec ("lando start");
+  // Write config folder location.
+  shell_exec ("cat web/profiles/contrib/sous/assets/scaffold/default/additions-default.settings.txt >> web/sites/default/settings.php");
   }
 }
