@@ -24,7 +24,7 @@ public static function installTheme() {
   $composerRoot = str_replace($removeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
   // Execute the Emulsify theme build based on composer create path.
   shell_exec ("emulsify init $composerRoot --platform drupal");
-  shell_exec ("cd web/themes/custom/$composerRoot/ && emulsify system install --repository https://github.com/emulsify-ds/compound.git");
+  shell_exec ("cd web/themes/custom/$composerRoot/ && emulsify system install compound");
   // Generate  system.theme.yml and append new theme to install.
   $system_theme_yml = [
     "default" => $composerRoot,
@@ -38,5 +38,6 @@ public static function installTheme() {
   // Write config folder location.
   shell_exec ("cat web/profiles/contrib/sous/assets/scaffold/default/additions-default.settings.txt >> web/sites/default/default.settings.php");
   shell_exec ("sed -i 's/sous-project/$composerRoot/' .lando.yml");
+  shell_exec ("lando start");
   }
 }
