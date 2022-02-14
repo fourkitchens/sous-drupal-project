@@ -23,7 +23,7 @@ public static function installTheme() {
   $removeChars = array("-", ".", " ");
   $composerRoot = str_replace($removeChars, '_', strtolower(basename($drupalFinder->getComposerRoot())));
   // Execute the Emulsify theme build based on composer create path.
-  shell_exec ("emulsify init $composerRoot ./web/themes/custom/$composerRoot --platform drupal");
+  shell_exec ("emulsify init $composerRoot --platform drupal");
   shell_exec ("cd web/themes/custom/$composerRoot/ && emulsify system install --repository https://github.com/emulsify-ds/compound.git");
   // Generate  system.theme.yml and append new theme to install.
   $system_theme_yml = [
