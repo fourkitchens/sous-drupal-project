@@ -20,8 +20,8 @@ public static function installTheme() {
   // New DrupalFinder to get the Composer root path.
   $drupalFinder = new DrupalFinder();
   $drupalFinder->locateRoot(getcwd());
-  $removeChars = array("-", ".", " ");
-  $composerRoot = str_replace($removeChars, '_', strtolower(basename($drupalFinder->getComposerRoot())));
+  $removeChars = array("-", ".", " ", "_");
+  $composerRoot = str_replace($removeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
   // Execute the Emulsify theme build based on composer create path.
   shell_exec ("emulsify init $composerRoot --platform drupal");
   shell_exec ("cd web/themes/custom/$composerRoot/ && emulsify system install --repository https://github.com/emulsify-ds/compound.git");
