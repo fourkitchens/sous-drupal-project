@@ -2,6 +2,10 @@
   "name": "sous-project",
   "version": "0.0.1",
   "description": "A starter kit for a Drupal project",
+  "engines": {
+    "npm": ">=6.0.0",
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "confim": "./scripts/sous/confim.sh",
     "confex": "./scripts/sous/confex.sh",
@@ -30,7 +34,6 @@
     "@semantic-release/github": "^7.2.0",
     "@semantic-release/release-notes-generator": "^9.0.1",
     "husky": "^4.2.5",
-    "node": ">=16.0.0",
     "semantic-release": "^17.0.7",
     "patch-package": "^6.2.2",
   }
