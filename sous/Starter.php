@@ -38,6 +38,12 @@ public static function installTheme() {
   // Remove contrib theme after theme generation.
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
   // Write config folder location.
-  echo '$settings['config_sync_directory']' >> web/sites/default/default.settings.php
+  shell_exec ("
+    /**
+     * Set config sync directory.
+     */
+    \$settings['config_sync_directory'] = '../config/default;'
+    >> web/sites/default/default.settings.php
+  ");
   }
 }
