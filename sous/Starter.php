@@ -37,6 +37,6 @@ public static function installTheme() {
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
   shell_exec ("sed -i 's/sous-project/$composerRoot/' .lando.yml");
   // Write config folder location.
-  shell_exec ("cat web/profiles/contrib/sous/assets/scaffold/default/additions-default.settings.txt >> web/sites/default/settings.php");
+  shell_exec ("cat web/profiles/contrib/sous/assets/scaffold/default/additions-default.settings.txt >> web/sites/default/default.settings.php");
   }
 }
