@@ -20,8 +20,8 @@ public static function installTheme() {
   // New DrupalFinder to get the Composer root path.
   $drupalFinder = new DrupalFinder();
   $drupalFinder->locateRoot(getcwd());
-  $removeChars = array("-", "_", " ");
-  $composerRoot = str_replace($removeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
+  $removeChars = array("-", ".", " ");
+  $composerRoot = str_replace($removeChars, '_', strtolower(basename($drupalFinder->getComposerRoot())));
   // Execute the Emulsify theme build based on composer create path.
   shell_exec ("cd web/themes/contrib/emulsify-drupal/ && php emulsify.php $composerRoot");
   shell_exec ("cd web/themes/contrib/emulsify-drupal/ && npm install");
@@ -34,10 +34,10 @@ public static function installTheme() {
   $yaml = Yaml::dump($system_theme_yml);
   file_put_contents('web/profiles/contrib/sous/config/install/system.theme.yml', $yaml);
   file_put_contents('web/profiles/contrib/sous/sous.info.yml', '  - '.$composerRoot.PHP_EOL, FILE_APPEND | LOCK_EX);
-  shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
   // Remove contrib theme after theme generation.
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
   // Write config folder location.
   shell_exec ("cat web/profiles/contrib/sous/assets/scaffold/default/additions-default.settings.txt >> web/sites/default/default.settings.php");
+  shell_exec ("sed -i 's/sous-project/$composerRoot/' .lando.yml");
   }
 }
