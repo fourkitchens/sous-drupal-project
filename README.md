@@ -1,6 +1,6 @@
 [![Sous](https://circleci.com/gh/fourkitchens/sous-drupal-project.svg?style=svg)](https://app.circleci.com/github/fourkitchens/sous-drupal-project/pipelines)
 <br/>
-<img style="max-width: 400px;" src="https://github.com/fourkitchens/sous-drupal-distro/blob/master/themes/sous_admin/assets/images/sous.svg" alt="Sous featuring Emulsify">
+<img style="max-width: 400px;" src="https://github.com/fourkitchens/sous-drupal-distro/blob/4.x-beta/themes/sous_admin/assets/images/sous.svg" alt="Sous featuring Emulsify">
 
 # Sous Project
 
@@ -24,15 +24,9 @@ composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-inter
 
 ## Tweak & Install project
 
-- Rename your project in `.lando.yml` file (line 1, line 10)
 - Boot local environment and install `Lando start`
 
   - Follow URL once environment is booted and proceed with Drupal Install
-
-- Create config directories and set path in settings.php
-
-  - Recommendation is to create a config directory at the root level
-  - Edit the `$settings['config_sync_directory']` line that was generated in settings.php
 
 - Modify .gitignore
   - Remove the commented block at the EOF
@@ -48,7 +42,7 @@ This package provides some additional tooling to support the build.
 
 ### Helper scripts
 
-To use the helper script provided you will need to have `yarn` or `npm` installed. Then just run `yarn <command>` or `npm run <command>`. For example: `yarn import-data`. These commands are bash scripts located in the `./scripts/sous` directory and defined in `package.json`.
+To use the helper script provided you will need to have `npm` installed. Then just run `npm run <command>`. For example: `npm run import-data`. These commands are bash scripts located in the `./scripts/sous` directory and defined in `package.json`.
 
 #### Configuration management scripts
 
