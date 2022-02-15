@@ -49,7 +49,7 @@ To use the helper script provided you will need to have `npm` installed. Then ju
 **confex**
 
 ```
-yarn confex
+npm run confex
 ```
 
 Export active configuration to the config directory.
@@ -57,7 +57,7 @@ Export active configuration to the config directory.
 **confim**
 
 ```
-yarn confim
+npm run confim
 ```
 
 Import the configuration to the database.
@@ -65,7 +65,7 @@ Import the configuration to the database.
 **import-data**
 
 ```
-yarn import-data
+npm run import-data
 ```
 
 Import a copy of the canonical database backup into your local instance. This assumes the database backup is located in `./reference/db.sql.gz`.
@@ -73,7 +73,7 @@ Import a copy of the canonical database backup into your local instance. This as
 **local-data-bak**
 
 ```
-yarn local-data-bak
+npm run local-data-bak
 ```
 
 Create a local database backup. Saves the backup to the `./reference` directory.
@@ -81,7 +81,7 @@ Create a local database backup. Saves the backup to the `./reference` directory.
 **rebuild**
 
 ```
-yarn rebuild
+npm run rebuild
 ```
 
 Rebuild a fresh local instance of your site. Imports the canonical database backup and imports configuration into it.
