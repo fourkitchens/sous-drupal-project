@@ -29,6 +29,11 @@ composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-inter
 
   - Follow URL once environment is booted and proceed with Drupal Install
 
+- Create config directories and set path in settings.php
+
+  - Recommendation is to create a config directory at the root level
+  - Edit the `$settings['config_sync_directory']` line that was generated in settings.php
+
 - Modify .gitignore
   - Remove the commented block at the EOF
   - Review ignored items you may need for your build and remove them
