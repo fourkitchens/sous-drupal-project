@@ -12,7 +12,7 @@ This will provide you with a starting Drupal project that is managed with Compos
 Without these you will have difficulty installing this project.
 
 1. [PHP ^7.4](http://www.php.net/)
-2. [Node ^16.4 \(we recommend NVM\)](https://github.com/creationix/nvm)
+2. [Node ^16.13 \(we recommend NVM\)](https://github.com/creationix/nvm)
 3. [Composer 2.x](https://getcomposer.org/)
 4. [Lando ^3.6](https://docs.lando.dev/basics/installation.html)
 
