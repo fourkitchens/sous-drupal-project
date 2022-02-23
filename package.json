@@ -24,6 +24,7 @@
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
+    "@emulsify/cli": "^1.5.0",
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/commit-analyzer": "^8.0.1",
     "@semantic-release/git": "^9.0.0",
@@ -32,8 +33,5 @@
     "husky": "^4.2.5",
     "patch-package": "^6.2.2",
     "semantic-release": "^17.0.7"
-  },
-  "dependencies": {
-    "@emulsify/cli": "^1.5.0"
   }
 }
