@@ -23,8 +23,7 @@ public static function installTheme() {
   $removeChars = array("-", ".", " ", "_");
   $composerRoot = str_replace($removeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
   // Install node dependencies which include EmulsifyCLI for commands below.
-  shell_exec ("nvm use");
-  shell_exec ("npm install");
+  shell_exec ("nvm use lts/erbium && npm install");
   // Execute the Emulsify theme build based on composer create path.
   shell_exec ("emulsify init $composerRoot --platform drupal");
   shell_exec ("cd web/themes/custom/$composerRoot/ && emulsify system install compound");
@@ -39,7 +38,5 @@ public static function installTheme() {
   // Remove contrib theme after theme generation.
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
   shell_exec ("sed -i 's/sous-project/$composerRoot/' .lando.yml");
-  // Write config folder location.
-  shell_exec ("cat web/profiles/contrib/sous/assets/scaffold/default/additions-default.settings.txt >> web/sites/default/default.settings.php");
   }
 }
