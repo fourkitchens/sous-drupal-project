@@ -23,7 +23,7 @@ public static function installTheme() {
   $removeChars = array("-", ".", " ", "_");
   $composerRoot = str_replace($removeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
   // Install node dependencies which include EmulsifyCLI for commands below.
-  shell_exec ('[ -s "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh" && nvm use');
+  shell_exec ('[ -s "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh" && nvm install lts/gallium');
   shell_exec ("npm install");
   // Execute the Emulsify theme build based on composer create path.
   shell_exec ("emulsify init $composerRoot --platform drupal");
