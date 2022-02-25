@@ -23,10 +23,10 @@ public static function installTheme() {
   $removeChars = array("-", ".", " ", "_");
   $composerRoot = str_replace($removeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
   // Install node dependencies which include EmulsifyCLI for commands below.
-  shell_exec ('[ -s "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh" && nvm install lts/gallium && nvm use && npm install');
+  shell_exec ('[ -s "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh" && nvm install 16 && nvm use && npm ci');
   // Execute the Emulsify theme build based on composer create path.
-  shell_exec ("npx emulsify init $composerRoot --platform drupal");
-  shell_exec ("cd web/themes/custom/$composerRoot/ && npx emulsify system install compound");
+  shell_exec ("[ -s "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh" && nvm install 16 && nvm use && npx emulsify init $composerRoot --platform drupal");
+  shell_exec ("[ -s "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh" && nvm install 16 && nvm use && cd web/themes/custom/$composerRoot/ && npx emulsify system install compound");
   // Generate  system.theme.yml and append new theme to install.
   $system_theme_yml = [
     "default" => $composerRoot,
