@@ -19,7 +19,11 @@ Without these you will have difficulty installing this project.
 Use this command below and replace `PROJECT_NAME` with your chosen project name.
 
 ```
-composer create-project fourkitchens/sous-drupal-project PROJECT_NAME --no-interaction
+composer create-project fourkitchens/sous-drupal-project [PROJECT_NAME] --no-interaction
+
+cd [PROJECT_NAME]
+
+lando start
 
 ```
 
