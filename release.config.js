@@ -1,6 +1,6 @@
 module.exports = {
   branches: [
-    '2.x',
+    '4.x',
     'master'
   ],
   plugins: [
