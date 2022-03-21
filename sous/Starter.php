@@ -37,6 +37,6 @@ public static function installTheme() {
   file_put_contents('web/profiles/contrib/sous/sous.info.yml', '  - '.$composerRoot.PHP_EOL, FILE_APPEND | LOCK_EX);
   // Remove contrib theme after theme generation.
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
-  shell_exec ("sed -i 's/sous-project/$composerRoot/g' .lando.yml");
+  shell_exec ("sed -i '' 's/sous-project/$composerRoot/g' .lando.yml");
   }
 }
