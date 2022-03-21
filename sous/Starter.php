@@ -20,8 +20,8 @@ public static function installTheme() {
   // New DrupalFinder to get the Composer root path.
   $drupalFinder = new DrupalFinder();
   $drupalFinder->locateRoot(getcwd());
-  $removeChars = array("-", ".", " ");
-  $composerRoot = str_replace('__', '_', str_replace($removeChars, '_', strtolower(basename($drupalFinder->getComposerRoot()))));
+  $removeChars = array("-", ".", "_", " ");
+  $composerRoot = str_replace($removeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
   // Install node dependencies which include EmulsifyCLI for commands below.
   shell_exec ('[ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh" && nvm install lts/gallium && nvm use && npm ci');
   // Execute the Emulsify theme build based on composer create path.
