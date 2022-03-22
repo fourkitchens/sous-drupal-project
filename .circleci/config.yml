@@ -41,5 +41,11 @@ workflows:
           filters:
             branches:
               only:
-                - '2.x'
-                - 'master'
+                - '/^4.*/'
+                - '/^3.*/'
+                - '/^2.*/'
+                - main
+                - next
+                - next-major
+                - '/^*-alpha'
+                - '/^*-beta'
