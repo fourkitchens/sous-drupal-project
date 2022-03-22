@@ -18,11 +18,8 @@ jobs:
       - php/install-composer:
           install-version: 2.1.9
       - run:
-          command: composer config -g github-oauth.github.com COMPOSER_TOKEN
+          command: composer config -g github-oauth.github.com $COMPOSER_TOKEN
       - php/install-packages
-    env:
-      - GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - COMPOSER_TOKEN: ${{ secrets.COMPOSER_TOKEN }}
   release:
     executor:
       name: node/default
