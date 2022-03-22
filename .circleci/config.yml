@@ -49,5 +49,5 @@ workflows:
                 - main
                 - next
                 - next-major
-                - '/^*-alpha'
-                - '/^*-beta'
+                - alpha
+                - beta
