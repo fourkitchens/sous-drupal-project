@@ -41,5 +41,4 @@ workflows:
           filters:
             branches:
               only:
-                - '2.x'
-                - 'master'
+                - '4.x'
