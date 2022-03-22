@@ -18,7 +18,7 @@ jobs:
       - php/install-composer:
           install-version: 2.1.9
       - run:
-          command: composer config -g github-oauth.github.com ${{ secrets.COMPOSER_TOKEN }}
+          command: composer config -g github-oauth.github.com COMPOSER_TOKEN
       - php/install-packages
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
