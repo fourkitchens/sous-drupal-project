@@ -11,13 +11,13 @@ jobs:
       - node/install-packages:
           cache-path: ~/project/node_modules
           override-ci-command: npm ci
-#  build_php:
-#    executor: php/default
-#    steps:
-#      - checkout
-#      - php/install-composer:
-#          install-version: 2.1.9
-#      - php/install-packages
+  build_php:
+    executor: php/default
+    steps:
+      - checkout
+      - php/install-composer:
+          install-version: 2.1.9
+      - php/install-packages
   release:
     executor:
       name: node/default
@@ -33,11 +33,11 @@ workflows:
   build:
     jobs:
       - build_node
-#      - build_php
+      - build_php
       - release:
           requires:
             - build_node
-#            - build_php
+            - build_php
           filters:
             branches:
               only:
