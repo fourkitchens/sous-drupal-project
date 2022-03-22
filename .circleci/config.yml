@@ -44,3 +44,8 @@ workflows:
                 - '/^4.*/'
                 - '/^3.*/'
                 - '/^2.*/'
+                - main
+                - next
+                - next-major
+                - '/^*-alpha'
+                - '/^*-beta'
