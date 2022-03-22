@@ -1,4 +1,5 @@
 [![Sous](https://circleci.com/gh/fourkitchens/sous-drupal-project.svg?style=svg)](https://app.circleci.com/github/fourkitchens/sous-drupal-project/pipelines)
+[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 <br/>
 <img style="max-width: 400px;" src="https://github.com/fourkitchens/sous-drupal-distro/blob/4.x-beta/themes/sous_admin/assets/images/sous.svg" alt="Sous featuring Emulsify">
 
