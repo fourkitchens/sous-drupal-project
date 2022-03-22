@@ -20,6 +20,9 @@ jobs:
       - run:
           command: composer config -g github-oauth.github.com ${{ secrets.COMPOSER_TOKEN }}
       - php/install-packages
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      COMPOSER_TOKEN: ${{ secrets.COMPOSER_TOKEN }}
   release:
     executor:
       name: node/default
