@@ -1,3 +1,10 @@
+## [4.1.1](https://github.com/fourkitchens/sous-drupal-project/compare/4.1.0...4.1.1) (2022-05-03)
+
+
+### Bug Fixes
+
+* **docs:** add semantic release angular badge to readme ([5be1e76](https://github.com/fourkitchens/sous-drupal-project/commit/5be1e762d8adabb9dad9b5d013afb1b2665508ab))
+
 # [4.1.0](https://github.com/fourkitchens/sous-drupal-project/compare/4.0.1...4.1.0) (2022-03-22)
 
 
