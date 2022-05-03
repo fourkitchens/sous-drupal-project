@@ -1,4 +1,5 @@
 [![Sous](https://circleci.com/gh/fourkitchens/sous-drupal-project.svg?style=svg)](https://app.circleci.com/github/fourkitchens/sous-drupal-project/pipelines)
+[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 <br/>
 <img style="max-width: 400px;" src="https://github.com/fourkitchens/sous-drupal-distro/blob/4.x-beta/themes/sous_admin/assets/images/sous.svg" alt="Sous featuring Emulsify">
 
@@ -127,3 +128,15 @@ The composer command above can be adjusted to account for a new branch you're wo
 composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJECT_NAME --no-interaction
 
 ```
+
+## Contributing without create-project or creating a project with a custom theme
+1. Clone this repository
+2. Checkout the 4.x-beta branch (if it hasn't been released yet)
+3. `composer install` (you must have greater than PHP 7.4 installed locally)
+4. `npm ci` (at the project root)
+5. `npx emulsify init theme-name` (change theme-name to your theme name)
+6. Change the name of the lando project if you haven't already
+7. `lando start`
+8. Go to the install page in your browser and install your Drupal site
+9. `lando drush user:unblock superuser_1` (if you want to use drush uli)
+10. Go forth and contribute!
