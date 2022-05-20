@@ -11,7 +11,7 @@ use Symfony\Component\Yaml\Yaml;
  * scripts needed by projects that include drupal/core. Scripts that
  * are only needed by drupal/drupal go here.
  *
- * @see https://getcomposer.org/doc/articles/scripts.md
+ * @see https://getcomposer.org/doc/articles/scripts.md@beck
  */
 class Starter {
 
@@ -20,22 +20,25 @@ public static function installTheme() {
   // New DrupalFinder to get the Composer root path.
   $drupalFinder = new DrupalFinder();
   $drupalFinder->locateRoot(getcwd());
-  $removeChars = array("-", ".", " ");
-  $composerRoot = str_replace($removeChars, '_', strtolower(basename($drupalFinder->getComposerRoot())));
+  $unsafeChars = array(".", " ");
+  $spacingChars = array("-", "_");
+  $composerRoot = str_replace($unsafeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
+  $emulsify_project_name = str_replace($spacingChars, '', $composerRoot);
+  $underscored_project_name = str_replace('-', '_', $composerRoot);
   $dashed_project_name = str_replace('_', '-', $composerRoot);
   // Install node dependencies which include EmulsifyCLI for commands below.
   shell_exec ('[ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh" && nvm install lts/gallium && nvm use && npm ci');
   // Execute the Emulsify theme build based on composer create path.
-  shell_exec ("[ -s \"\$HOME/.nvm/nvm.sh\" ] && . \"\$HOME/.nvm/nvm.sh\" && nvm install lts/gallium && nvm use && npx emulsify init $composerRoot --platform drupal");
-  shell_exec ("[ -s \"\$HOME/.nvm/nvm.sh\" ] && . \"\$HOME/.nvm/nvm.sh\" && nvm install lts/gallium && nvm use && cd web/themes/custom/$composerRoot/ && npx emulsify system install compound");
+  shell_exec ("[ -s \"\$HOME/.nvm/nvm.sh\" ] && . \"\$HOME/.nvm/nvm.sh\" && nvm install lts/gallium && nvm use && npx emulsify init $emulsify_project_name --platform drupal");
+  shell_exec ("[ -s \"\$HOME/.nvm/nvm.sh\" ] && . \"\$HOME/.nvm/nvm.sh\" && nvm install lts/gallium && nvm use && cd web/themes/custom/$emulsify_project_name/ && npx emulsify system install compound");
   // Generate  system.theme.yml and append new theme to install.
   $system_theme_yml = [
-    "default" => $composerRoot,
+    "default" => $underscored_project_name,
     "admin"=> "gin"
   ];
   $yaml = Yaml::dump($system_theme_yml);
   file_put_contents('web/profiles/contrib/sous/config/install/system.theme.yml', $yaml);
-  file_put_contents('web/profiles/contrib/sous/sous.info.yml', '  - '.$composerRoot.PHP_EOL, FILE_APPEND | LOCK_EX);
+  file_put_contents('web/profiles/contrib/sous/sous.info.yml', '  - '.$underscored_project_name.PHP_EOL, FILE_APPEND | LOCK_EX);
   // Remove contrib theme after theme generation.
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
   shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .lando.yml && rm -f .lando.yml.bak");
