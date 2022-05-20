@@ -19,7 +19,7 @@
     ],
     "require": {
         "php": ">=7.4",
-        "fourkitchens/sous-drupal-distro": "dev-4.x-beta",
+        "fourkitchens/sous-drupal-distro": "4.x-dev",
         "drupal/config_direct_save": "^1.0",
         "cweagans/composer-patches": "^1.6.5",
         "drupal/console": "^1.9.7",
