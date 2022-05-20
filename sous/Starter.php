@@ -20,8 +20,9 @@ public static function installTheme() {
   // New DrupalFinder to get the Composer root path.
   $drupalFinder = new DrupalFinder();
   $drupalFinder->locateRoot(getcwd());
-  $removeChars = array("-", ".", "_", " ");
-  $composerRoot = str_replace($removeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
+  $removeChars = array("-", ".", " ");
+  $composerRoot = str_replace($removeChars, '_', strtolower(basename($drupalFinder->getComposerRoot())));
+  $dashed_project_name = str_replace('_', '-', $composerRoot);
   // Install node dependencies which include EmulsifyCLI for commands below.
   shell_exec ('[ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh" && nvm install lts/gallium && nvm use && npm ci');
   // Execute the Emulsify theme build based on composer create path.
@@ -37,6 +38,6 @@ public static function installTheme() {
   file_put_contents('web/profiles/contrib/sous/sous.info.yml', '  - '.$composerRoot.PHP_EOL, FILE_APPEND | LOCK_EX);
   // Remove contrib theme after theme generation.
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
-  shell_exec ("sed -i.bak 's/sous-project/$composerRoot/g' .lando.yml && rm -f .lando.yml.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .lando.yml && rm -f .lando.yml.bak");
   }
 }
