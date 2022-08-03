@@ -44,6 +44,7 @@
             "drupal/console-extend-plugin": true,
             "drupal/core-composer-scaffold": true,
             "zaporylie/composer-drupal-optimizations": true
+            "oomphinc/composer-installers-extender": true
         }
     },
     "autoload": {
