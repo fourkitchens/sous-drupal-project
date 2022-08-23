@@ -1,3 +1,11 @@
+## [4.1.2](https://github.com/fourkitchens/sous-drupal-project/compare/4.1.1...4.1.2) (2022-08-23)
+
+
+### Bug Fixes
+
+* remove change that is in a different PR ([5d5f3cc](https://github.com/fourkitchens/sous-drupal-project/commit/5d5f3ccc57e05308fa11d5f15935975b67caa83f))
+* removed drupal console ([ff52a72](https://github.com/fourkitchens/sous-drupal-project/commit/ff52a725b49ca193fe714f537ad541c5ae19ad87))
+
 ## [4.1.1](https://github.com/fourkitchens/sous-drupal-project/compare/4.1.0...4.1.1) (2022-05-03)
 
 
