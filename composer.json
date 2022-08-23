@@ -22,7 +22,6 @@
         "fourkitchens/sous-drupal-distro": "dev-4.x-beta",
         "drupal/config_direct_save": "^1.0",
         "cweagans/composer-patches": "^1.6.5",
-        "drupal/console": "^1.9.7",
         "drupal/core-recommended": "^9",
         "drupal/core-composer-scaffold": "^9",
         "drush/drush": "^10.0",
@@ -41,7 +40,6 @@
         "allow-plugins": {
             "composer/installers": true,
             "cweagans/composer-patches": true,
-            "drupal/console-extend-plugin": true,
             "drupal/core-composer-scaffold": true,
             "zaporylie/composer-drupal-optimizations": true
         }
