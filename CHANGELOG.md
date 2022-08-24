@@ -1,3 +1,11 @@
+## [4.1.3](https://github.com/fourkitchens/sous-drupal-project/compare/4.1.2...4.1.3) (2022-08-24)
+
+
+### Bug Fixes
+
+* adds oomphinc to allow-plugins ([d5af40a](https://github.com/fourkitchens/sous-drupal-project/commit/d5af40a072a541412bf68f6ae99cf48333b7c707))
+* syntax error ([5783323](https://github.com/fourkitchens/sous-drupal-project/commit/5783323738ed8eb30433f5431b23f3e98a955508))
+
 ## [4.1.2](https://github.com/fourkitchens/sous-drupal-project/compare/4.1.1...4.1.2) (2022-08-23)
 
 
