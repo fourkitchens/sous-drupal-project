@@ -32,6 +32,6 @@
     "@semantic-release/release-notes-generator": "^9.0.1",
     "husky": "^4.2.5",
     "patch-package": "^6.2.2",
-    "semantic-release": "^17.0.7"
+    "semantic-release": "^19.0.3"
   }
 }
