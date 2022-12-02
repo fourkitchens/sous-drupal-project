@@ -1,3 +1,20 @@
+# [4.2.0](https://github.com/fourkitchens/sous-drupal-project/compare/4.1.3...4.2.0) (2022-12-02)
+
+
+### Bug Fixes
+
+* php version update and rename master to main ([d269388](https://github.com/fourkitchens/sous-drupal-project/commit/d269388b0f8f3c76308a8ac9dbae3e61aae30ba2))
+* readme, ignore ide generated files ([2f2808e](https://github.com/fourkitchens/sous-drupal-project/commit/2f2808efcdf6c00b9008108c55193978f7db8d99))
+* update node orb ([fb9179f](https://github.com/fourkitchens/sous-drupal-project/commit/fb9179fdadf447faa8eb8993b82d11f5032ccd37))
+* update package-lock.json ([809093e](https://github.com/fourkitchens/sous-drupal-project/commit/809093e06dfdfadf9d03dc0f79a0979811f8d8a5))
+* update readme ([10efa52](https://github.com/fourkitchens/sous-drupal-project/commit/10efa52a2cbd89597b1fdb4ceed57e9bed29d8a6))
+
+
+### Features
+
+* pulled main and fixed conflicts ([9df602d](https://github.com/fourkitchens/sous-drupal-project/commit/9df602dcd40b9450aca11f462476af5b9944f6f1))
+* resolved conflicts and updated all packages ([402a753](https://github.com/fourkitchens/sous-drupal-project/commit/402a753f322e6bd456d5d67aa2521cae24aa9e69))
+
 ## [4.1.3](https://github.com/fourkitchens/sous-drupal-project/compare/4.1.2...4.1.3) (2022-08-24)
 
 
