@@ -104,7 +104,7 @@ Rebuild a fresh local instance of your site. Imports the canonical database back
 1. This repo has the following named/maintenance branches:
 
 ```
-master
+main
 x.x
 x.x.x
 ```
