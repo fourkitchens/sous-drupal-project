@@ -82,8 +82,9 @@ node_modules/
 
 # VS Code generated files/folders
 .vscode
-.vscode-insdiders
-.history
+
+# PHPStorm generated files/folders
+.idea
 
 # Lando app
 app
@@ -117,11 +118,3 @@ default.services.yml
 default.settings.php
 settings.php
 composer.lock
-
-# VS Code generated files/folders
-.vscode
-.vscode-insdiders
-.history
-
-# PHPStorm generated files/folders
-.idea
