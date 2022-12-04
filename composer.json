@@ -111,7 +111,7 @@
                 "sites/example.sites.php": "sites/example.sites.php"
             },
             "file-mapping": {
-                "[web-root]/sites/settings.php": {
+                "[web-root]/sites/default/settings.php": {
                     "mode": "replace",
                     "path": "assets/scaffold/files/settings.php",
                     "overwrite": true
