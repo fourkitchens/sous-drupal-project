@@ -33,6 +33,7 @@ lando start
 - Boot local environment and install `Lando start`
 
   - Follow URL once environment is booted and proceed with Drupal Install
+  - Please note, when installing the database you must enter "drupal9" as the password on the install screen to proceed.
 
 - Create config directories and set path in settings.php
 
