@@ -1,3 +1,11 @@
+## [4.2.1](https://github.com/fourkitchens/sous-drupal-project/compare/4.2.0...4.2.1) (2022-12-07)
+
+
+### Bug Fixes
+
+* add database password instructions ([3458456](https://github.com/fourkitchens/sous-drupal-project/commit/3458456a53675b25d27c0e7d862ad2154bece51b))
+* added database install instruction ([d0a0f2e](https://github.com/fourkitchens/sous-drupal-project/commit/d0a0f2e913914d8f0d2239c4f3981714ef0b1e6c))
+
 # [4.2.0](https://github.com/fourkitchens/sous-drupal-project/compare/4.1.3...4.2.0) (2022-12-02)
 
 
