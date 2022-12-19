@@ -1,3 +1,13 @@
+## [4.2.2](https://github.com/fourkitchens/sous-drupal-project/compare/4.2.1...4.2.2) (2022-12-19)
+
+
+### Bug Fixes
+
+* distro version and find-and-replace command for linux ([13ae175](https://github.com/fourkitchens/sous-drupal-project/commit/13ae175ab4b6dbd277b4e77775be65faeeae5fdd))
+* match emulisfycli naming convension ([29e1154](https://github.com/fourkitchens/sous-drupal-project/commit/29e11541b6feca27ddbbb786fc813b558ee76150))
+* no need for underscore project name ([bc79220](https://github.com/fourkitchens/sous-drupal-project/commit/bc79220e372b4142dec7bfe7c8a23c98f2d23883))
+* use dashed project name for lando and underscore everything else ([f18a398](https://github.com/fourkitchens/sous-drupal-project/commit/f18a398bb8be886bba99408b3452731832bd4e2a))
+
 ## [4.2.1](https://github.com/fourkitchens/sous-drupal-project/compare/4.2.0...4.2.1) (2022-12-07)
 
 
