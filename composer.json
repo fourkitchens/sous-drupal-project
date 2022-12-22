@@ -98,14 +98,20 @@
             "includes": [
                 "sites/default/example.settings.my.php"
             ],
-            "initial": {
-                ".eslintignore": ".eslintignore",
-                ".eslintrc.json": ".eslintrc.json",
-                ".gitattributes": ".gitattributes",
-                ".htaccess": ".htaccess",
-                "robots.txt": "robots.txt",
-                "sites/example.settings.local.php": "sites/example.settings.local.php",
-                "sites/example.sites.php": "sites/example.sites.php"
+            "file-mapping": {
+                "[project-root]/.editorconfig": false,
+                "[project-root]/pantheon.upstream.yml": false,
+                "[project-root]/.gitattributes": false,
+                "[web-root]/sites/development.services.yml": {
+                    "mode": "replace",
+                    "path": "assets/scaffold/files/development.services.yml",
+                    "overwrite": false
+                },
+                "[web-root]/sites/default/settings.local.php": {
+                    "mode": "replace",
+                    "path": "assets/scaffold/files/example.settings.local.php",
+                    "overwrite": false
+                }
             },
             "omit-defaults": false
         }
