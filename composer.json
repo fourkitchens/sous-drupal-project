@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "php": ">=8.0",
+        "php": ">=8.1",
         "fourkitchens/sous-drupal-distro": "4.x-dev",
         "drupal/config_direct_save": "^1.0",
         "cweagans/composer-patches": "^1.6.5",
@@ -112,5 +112,8 @@
     },
     "scripts": {
         "post-create-project-cmd": "Sous\\Starter::installTheme"
+    },
+    "require-dev": {
+        "phpcompatibility/php-compatibility": "^9.3"
     }
 }
