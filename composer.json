@@ -112,8 +112,5 @@
     },
     "scripts": {
         "post-create-project-cmd": "Sous\\Starter::installTheme"
-    },
-    "require-dev": {
-        "phpcompatibility/php-compatibility": "^9.3"
     }
 }
