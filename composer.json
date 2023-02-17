@@ -99,7 +99,6 @@
                 "sites/default/example.settings.my.php"
             ],
             "file-mapping": {
-                "[web-root]/.gitattributes": "web/core/assets/scaffold/files/gitattributes",
                 "[web-root]/sites/default/settings.local.php": {
                     "mode": "replace",
                     "path": "web/core/assets/scaffold/files/example.settings.local.php",
