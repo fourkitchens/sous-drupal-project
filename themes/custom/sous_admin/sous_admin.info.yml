@@ -1,4 +1,4 @@
-name: Gin Custom
+name: Sous admin
 type: theme
 core: 8.x
 core_version_requirement: ^8 || ^9 || ^10
@@ -15,4 +15,4 @@ libraries:
 
 libraries-extend:
   gin/gin_base:
-    - gin_custom/gin_custom
+    - sous_admin/sous_admin
