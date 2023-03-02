@@ -70,6 +70,10 @@ web/modules/features
 web/profiles/contrib
 web/themes/contrib
 
+# Not ignore custom parts of Drupal.
+!web/modules/custom/*
+!web/themes/custom/*
+
 # Ignore Composer-managed dependencies.
 vendor/
 
