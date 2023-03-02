@@ -1,4 +1,0 @@
-gin_custom:
-  css:
-    base:
-      css/gin-custom.css: { }

@@ -15,4 +15,4 @@ libraries:
 
 libraries-extend:
   gin/gin_base:
-    - sous_admin/sous_admin
+    - sous_custom/sous_custom
