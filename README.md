@@ -133,7 +133,7 @@ composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJE
 ## Contributing without create-project or creating a project with a custom theme
 1. Clone this repository
 2. Checkout the 4.x-beta branch (if it hasn't been released yet)
-3. `lando composer install` (you must have greater than PHP 8.1 installed locally)
+3. `lando composer install`
 4. `npm ci` (at the project root)
 5. `npx emulsify init theme-name` (change theme-name to your theme name)
 6. Change the name of the lando project if you haven't already
