@@ -1,0 +1,4 @@
+sous_custom:
+  css:
+    base:
+      css/sous_custom.css: { }

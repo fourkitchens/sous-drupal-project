@@ -1,0 +1,6 @@
+name: Sous module
+type: module
+description: The description of sous module.
+package: Custom
+core: 8.x
+core_version_requirement: ^8 || ^9 || ^10

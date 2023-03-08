@@ -1,0 +1,18 @@
+name: Sous admin
+type: theme
+core: 8.x
+core_version_requirement: ^8 || ^9 || ^10
+base theme: gin
+description: 'Overrides for the Gin theme.'
+alt text: 'Screenshot of SubThemeGin, Drupal administration subtheme of claro.'
+package: Custom
+version: '8.x'
+experimental: true
+
+libraries:
+  - gin/gin
+  - claro/global-styling
+
+libraries-extend:
+  gin/gin_base:
+    - sous_custom/sous_custom
