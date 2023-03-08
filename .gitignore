@@ -71,8 +71,8 @@ web/profiles/contrib
 web/themes/contrib
 
 # Not ignore custom parts of Drupal.
-!web/modules/custom/*
-!web/themes/custom/*
+!web/modules/custom/sous_custom
+!web/themes/custom/sous_custom
 
 # Ignore Composer-managed dependencies.
 vendor/
