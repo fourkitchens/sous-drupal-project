@@ -160,6 +160,9 @@
                     "mode": "replace",
                     "path": "assets/scaffold/files/development.services.yml",
                     "overwrite": false
+                },
+                "[web-root]/sites/default/settings.php": {
+                    "append": "assets/scaffold/files/additions-default.settings.txt"
                 }
             },
             "omit-defaults": false
