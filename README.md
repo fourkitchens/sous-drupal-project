@@ -7,6 +7,10 @@
 
 This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set of contrib modules, a starting custom module for specific for the build, and a custom starting theme generated from Emulsify.
 
+## Features and Configurations
+
+Sous not only generates a custom theme based on Emulsify, it also builds upon Drupal's default configuration to help streamline the project setup process. See the feature set documentation [here](docs/features.md).
+
 # Installation
 
 ## Requirements
