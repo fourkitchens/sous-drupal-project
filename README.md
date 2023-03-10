@@ -44,19 +44,19 @@ lando start
   - Remove the commented block at the EOF
   - Review ignored items you may need for your build and remove them
 
-## Working with Emulsify
+# Working with Emulsify
 The [Emulsify](https://emulsify.info/) theme is installed as part of this project.
 
-## Additional Tooling
+# Additional Tooling
 
 This package provides some additional tooling to support the build.
 
 
-### Helper scripts
+## Helper scripts
 
 To use the helper script provided you will need to have `npm` installed. Then just run `npm run <command>`. For example: `npm run import-data`. These commands are bash scripts located in the `./scripts/sous` directory and defined in `package.json`.
 
-#### Configuration management scripts
+## Configuration management scripts
 
 **confex**
 
@@ -98,7 +98,7 @@ npm run rebuild
 
 Rebuild a fresh local instance of your site. Imports the canonical database backup and imports configuration into it.
 
-## Semantic Versioning
+# Semantic Versioning
 
 ## Setup
 
@@ -121,7 +121,7 @@ x.x.x
 1. Your branch must be a named stable release branch in order to get a tag.
 2. Prereleases are not supported with this package because they contain a dot.
 
-## Contributing
+# Contributing
 
 The composer command above can be adjusted to account for a new branch you're working on.
 
