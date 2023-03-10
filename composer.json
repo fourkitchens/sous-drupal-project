@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.1",
         "cweagans/composer-patches": "^1.6.5",
         "drupal/config_direct_save": "^1.0",
         "drupal/core-composer-scaffold": "^9",
@@ -99,14 +99,12 @@
             "includes": [
                 "sites/default/example.settings.my.php"
             ],
-            "initial": {
-                ".eslintignore": ".eslintignore",
-                ".eslintrc.json": ".eslintrc.json",
-                ".gitattributes": ".gitattributes",
-                ".htaccess": ".htaccess",
-                "robots.txt": "robots.txt",
-                "sites/example.settings.local.php": "sites/example.settings.local.php",
-                "sites/example.sites.php": "sites/example.sites.php"
+            "file-mapping": {
+                "[web-root]/sites/default/settings.local.php": {
+                    "mode": "replace",
+                    "path": "web/core/assets/scaffold/files/example.settings.local.php",
+                    "overwrite": false
+                }
             },
             "omit-defaults": false
         }
