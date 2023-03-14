@@ -4,8 +4,8 @@
 
 ## Themes
 
-The installation process creates a starter [Emulsify](https://emulsify.info/) theme with your project name. This theme will be installed and enabled.
-It won't look like much at first, but it's ready for your delightful designs!
+The installation process creates a starter [Emulsify](https://emulsify.info/) theme with your project name. This theme will
+be installed and enabled. It won't look like much at first, but it's ready for your delightful designs!
 
 The Gin Admin theme will be installed for your admin pages.
 
@@ -64,7 +64,7 @@ a new "sous_chef" user with this role. This improves security for the site.
 The Role Delegation module is enabled so that when you create custom roles, you can easily assign permissions for other
 roles to manage users without allowing them to create high level admins.
 
-## Contributed Module
+## Contributed Modules
 
 Several contributed modules are installed with basic configuration. These add commonly used features to the site and
 improve the administrative experience.

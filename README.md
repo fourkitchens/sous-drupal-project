@@ -5,7 +5,8 @@
 
 # Sous Project
 
-This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set of contrib modules, a starting custom module for specific for the build, and a custom starting theme generated from Emulsify.
+This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set
+of contrib modules, a starting custom module specific for the build, and a custom starting theme generated from Emulsify.
 
 ## Features and Configurations
 
