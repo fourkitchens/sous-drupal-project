@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/fourkitchens/sous-drupal-project/compare/4.2.2...4.3.0) (2023-03-15)
+
+
+### Features
+
+* set up docs structure ([1f58022](https://github.com/fourkitchens/sous-drupal-project/commit/1f5802200cfeb80f20995aa26f98328388e91b15))
+
 ## [4.2.2](https://github.com/fourkitchens/sous-drupal-project/compare/4.2.1...4.2.2) (2022-12-19)
 
 
