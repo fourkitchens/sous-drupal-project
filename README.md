@@ -5,7 +5,12 @@
 
 # Sous Project
 
-This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set of contrib modules, a starting custom module for specific for the build, and a custom starting theme generated from Emulsify.
+This will provide you with a starting Drupal project that is managed with Composer. The install will include a small set
+of contrib modules, a starting custom module specific for the build, and a custom starting theme generated from Emulsify.
+
+## Features and Configurations
+
+Sous not only generates a custom theme based on Emulsify, it also builds upon Drupal's default configuration to help streamline the project setup process. See the feature set documentation [here](docs/features.md).
 
 # Installation
 
@@ -44,19 +49,19 @@ lando start
   - Remove the commented block at the EOF
   - Review ignored items you may need for your build and remove them
 
-## Working with Emulsify
+# Working with Emulsify
 The [Emulsify](https://emulsify.info/) theme is installed as part of this project.
 
-## Additional Tooling
+# Additional Tooling
 
 This package provides some additional tooling to support the build.
 
 
-### Helper scripts
+## Helper scripts
 
 To use the helper script provided you will need to have `npm` installed. Then just run `npm run <command>`. For example: `npm run import-data`. These commands are bash scripts located in the `./scripts/sous` directory and defined in `package.json`.
 
-#### Configuration management scripts
+## Configuration management scripts
 
 **confex**
 
@@ -98,7 +103,7 @@ npm run rebuild
 
 Rebuild a fresh local instance of your site. Imports the canonical database backup and imports configuration into it.
 
-## Semantic Versioning
+# Semantic Versioning
 
 ## Setup
 
@@ -121,7 +126,7 @@ x.x.x
 1. Your branch must be a named stable release branch in order to get a tag.
 2. Prereleases are not supported with this package because they contain a dot.
 
-## Contributing
+# Contributing
 
 The composer command above can be adjusted to account for a new branch you're working on.
 
