@@ -152,6 +152,9 @@
                     "path": "web/core/assets/scaffold/files/example.settings.local.php",
                     "overwrite": false
                 },
+                "[web-root]/sites/default/default.settings.php": {
+                    "append": "assets/scaffold/files/additions-default.settings.txt"
+                },
                 "[web-root]/sites/development.services.yml": {
                     "mode": "replace",
                     "path": "assets/scaffold/files/development.services.yml",
@@ -162,7 +165,6 @@
         }
     },
     "scripts": {
-        "post-drupal-scaffold-cmd": "patch -p1 < assets/scaffold/files/default.settings.patch",
         "post-create-project-cmd": "Sous\\Starter::installTheme"
     }
 }
