@@ -2,11 +2,12 @@ name: sous-project
 recipe: drupal9
 config:
   webroot: web
-  php: "7.4"
+  php: "8.1"
 services:
   appserver:
-    run:
+    build:
       - composer install
+      - cp web/sites/default/default.settings.php web/sites/default/settings.php
 tooling:
   drush:
     service: appserver

@@ -12,9 +12,11 @@ jobs:
           cache-path: ~/project/node_modules
           override-ci-command: npm ci
   build_php:
-    executor: php/default
+    docker:
+      - image: 'cimg/php:8.1'
     steps:
       - checkout
+      - run: php --version
       - php/install-composer:
           install-version: 2.1.9
       - run:
