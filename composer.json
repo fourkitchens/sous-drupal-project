@@ -150,11 +150,6 @@
                 "[web-root]/sites/example.settings.local.php": {
                     "append": "assets/scaffold/files/additions-example.settings.local.txt"
                 },
-                "[web-root]/sites/default/settings.local.php": {
-                    "mode": "replace",
-                    "path": "web/sites/example.settings.local.php",
-                    "overwrite": false
-                },
                 "[web-root]/sites/default/default.settings.php": {
                     "append": "assets/scaffold/files/additions-default.settings.txt"
                 },
@@ -168,6 +163,7 @@
         }
     },
     "scripts": {
+        "post-drupal-scaffold-cmd": "cp web/sites/example.settings.local.php web/sites/default/settings.local.php",
         "post-create-project-cmd": "Sous\\Starter::installTheme"
     }
 }
