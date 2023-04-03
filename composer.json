@@ -147,9 +147,12 @@
                 "sites/default/example.settings.my.php"
             ],
             "file-mapping": {
+                "[web-root]/sites/example.settings.local.php": {
+                    "append": "assets/scaffold/files/additions-example.settings.local.txt"
+                },
                 "[web-root]/sites/default/settings.local.php": {
                     "mode": "replace",
-                    "path": "web/core/assets/scaffold/files/example.settings.local.php",
+                    "path": "web/sites/example.settings.local.php",
                     "overwrite": false
                 },
                 "[web-root]/sites/default/default.settings.php": {
