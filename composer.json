@@ -165,18 +165,15 @@
         }
     },
     "scripts": {
-        "post-create-project-cmd": [
-            "Sous\\Starter::startLando",
-            "Sous\\Starter::installTheme"
-        ],
+        "post-create-project-cmd": "Sous\\Starter::sousSetup",
         "build-assets": [
             "composer install --optimize-autoloader --no-dev",
             "@build-theme",
             "@build-storybook"
         ],
         "build-theme": [
-            "npm ci --prefix web/themes/custom/smith",
-            "npm run build --prefix web/themes/custom/smith"
+            "npm ci --prefix web/themes/custom/sous-project",
+            "npm run build --prefix web/themes/custom/sous-project"
         ],
         "build-storybook": [
             "npm run storybook-build --prefix web/themes/custom/smith",

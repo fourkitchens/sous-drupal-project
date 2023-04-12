@@ -26,7 +26,7 @@ public static function startLando() {
   shell_exec ("lando start");
 }
 
-public static function installTheme() {
+public static function sousSetup() {
 
   // New DrupalFinder to get the Composer root path.
   $drupalFinder = new DrupalFinder();
@@ -53,5 +53,10 @@ public static function installTheme() {
   file_put_contents('web/profiles/contrib/sous/sous.info.yml', '  - '.$emulsify_project_name.PHP_EOL, FILE_APPEND | LOCK_EX);
   // Remove contrib theme after theme generation.
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
+  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .lando.yml && rm -f .lando.yml.bak");
+  // Theme scripts.
+  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' ./scripts/theme-build.sh && rm -f ./scripts/theme-build.sh.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' ./scripts/theme-watch.sh && rm -f ./scripts/theme-watch.sh.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .composer.json && rm -f .composer.json.sh.bak");
   }
 }
