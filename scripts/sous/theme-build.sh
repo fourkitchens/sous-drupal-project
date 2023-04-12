@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd web/themes/custom/smith
+cd web/themes/custom/sous-project
 lando npm ci
 lando npm run storybook:build

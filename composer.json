@@ -176,8 +176,8 @@
             "npm run build --prefix web/themes/custom/sous-project"
         ],
         "build-storybook": [
-            "npm run storybook-build --prefix web/themes/custom/smith",
-            "mv ./web/themes/custom/smith/.out ./web/storybook"
+            "npm run storybook-build --prefix web/themes/custom/sous-project",
+            "mv ./web/themes/custom/sous-project/.out ./web/storybook"
         ],
         "lint": "npm run lint",
         "code-sniff": [
