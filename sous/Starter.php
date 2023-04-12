@@ -26,7 +26,7 @@ public static function startLando() {
   shell_exec ("lando start");
 }
 
-public static function sousSetup() {
+public static function sousPrep() {
 
   // New DrupalFinder to get the Composer root path.
   $drupalFinder = new DrupalFinder();
@@ -53,6 +53,6 @@ public static function sousSetup() {
   shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' scripts/sous/setup.sh && rm -f scripts/sous/setup.sh.bak");
   // Composer project name replace
   shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' composer.json && rm -f composer.json.bak");
-  shell_exec ("sed -i.bak 's:fourkitchens/sous-drupal-project:$dashed_project_name:g' composer.json && rm -f composer.json.bak");
+  shell_exec ("sed -i.bak 's:fourkitchens/sous-drupal-project:project/$dashed_project_name:g' composer.json && rm -f composer.json.bak");
   }
 }
