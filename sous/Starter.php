@@ -15,19 +15,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Starter {
 
-public static function startLando() {
-  $drupalFinder = new DrupalFinder();
-  $drupalFinder->locateRoot(getcwd());
-  $unsafeChars = array(".", "!", "=", "|", "<", ">", "/");
-  $spacingChars = array("-", "_", " ");
-  $composerRoot = str_replace($unsafeChars, '', strtolower(basename($drupalFinder->getComposerRoot())));
-  $dashed_project_name = str_replace(' ','-', str_replace('_', '-', $composerRoot));
-  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .lando.yml && rm -f .lando.yml.bak");
-  shell_exec ("lando start");
-}
-
 public static function sousPrep() {
-
   // New DrupalFinder to get the Composer root path.
   $drupalFinder = new DrupalFinder();
   $drupalFinder->locateRoot(getcwd());
@@ -38,11 +26,6 @@ public static function sousPrep() {
   // the theme. We need to replicate this output.
   $emulsify_project_name = str_replace($spacingChars, '', $composerRoot);
   $dashed_project_name = str_replace(' ','-', str_replace('_', '-', $composerRoot));
-  // Install node dependencies which include EmulsifyCLI for commands below.
-  shell_exec ('[ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh" && nvm install lts/gallium && nvm use && npm ci');
-  // Execute the Emulsify theme build based on composer create path.
-  shell_exec ("[ -s \"\$HOME/.nvm/nvm.sh\" ] && . \"\$HOME/.nvm/nvm.sh\" && nvm install lts/gallium && nvm use && npx emulsify init $emulsify_project_name --platform drupal");
-  shell_exec ("[ -s \"\$HOME/.nvm/nvm.sh\" ] && . \"\$HOME/.nvm/nvm.sh\" && nvm install lts/gallium && nvm use && cd web/themes/custom/$emulsify_project_name/ && npx emulsify system install compound");
   // Remove contrib theme after theme generation.
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
   shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .lando.yml && rm -f .lando.yml.bak");
