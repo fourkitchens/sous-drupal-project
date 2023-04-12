@@ -165,7 +165,10 @@
         }
     },
     "scripts": {
-        "post-create-project-cmd": "Sous\\Starter::installTheme",
+        "post-create-project-cmd": [
+            "Sous\\Starter::startLando",
+            "Sous\\Starter::installTheme"
+        ],
         "build-assets": [
             "composer install --optimize-autoloader --no-dev",
             "@build-theme",
