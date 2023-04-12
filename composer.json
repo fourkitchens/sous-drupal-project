@@ -21,7 +21,7 @@
         "drupal/allowed_formats": "^1.3",
         "drupal/blazy": "^2.1",
         "drupal/ckeditor_browser_context_menu": "^1.2",
-        "drupal/components": "^2.0",
+        "drupal/components": "^2.4",
         "drupal/config_direct_save": "^1.0",
         "drupal/content_browser": "^1.0",
         "drupal/core-composer-scaffold": "^9",
@@ -31,6 +31,7 @@
         "drupal/diff": "^1.0",
         "drupal/dropzonejs": "^2.5",
         "drupal/easy_breadcrumb": ">=1.15 <3.0.0",
+        "drupal/emulsify_twig": "^4.0",
         "drupal/entity_browser": "^2.2",
         "drupal/entity_browser_enhanced": "^1.0",
         "drupal/entity_embed": "^1.1",
@@ -147,10 +148,8 @@
                 "sites/default/example.settings.my.php"
             ],
             "file-mapping": {
-                "[web-root]/sites/default/settings.local.php": {
-                    "mode": "replace",
-                    "path": "web/core/assets/scaffold/files/example.settings.local.php",
-                    "overwrite": false
+                "[web-root]/sites/example.settings.local.php": {
+                    "append": "assets/scaffold/files/additions-example.settings.local.txt"
                 },
                 "[web-root]/sites/default/default.settings.php": {
                     "append": "assets/scaffold/files/additions-default.settings.txt"
@@ -165,6 +164,7 @@
         }
     },
     "scripts": {
+        "post-drupal-scaffold-cmd": "cp web/sites/example.settings.local.php web/sites/default/settings.local.php",
         "post-create-project-cmd": "Sous\\Starter::installTheme"
     }
 }
