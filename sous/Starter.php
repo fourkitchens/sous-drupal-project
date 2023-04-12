@@ -47,8 +47,8 @@ public static function sousSetup() {
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
   shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .lando.yml && rm -f .lando.yml.bak");
   // Theme scripts.
-  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' ./scripts/theme-build.sh && rm -f ./scripts/theme-build.sh.bak");
-  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' ./scripts/theme-watch.sh && rm -f ./scripts/theme-watch.sh.bak");
-  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .composer.json && rm -f .composer.json.sh.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' scripts/theme-build.sh && rm -f scripts/theme-build.sh.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' scripts/theme-watch.sh && rm -f scripts/theme-watch.sh.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' composer.json && rm -f composer.json.sh.bak");
   }
 }
