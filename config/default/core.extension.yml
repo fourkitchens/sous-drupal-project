@@ -17,6 +17,7 @@ module:
   field_ui: 0
   file: 0
   filter: 0
+  gin_toolbar: 0
   image: 0
   inline_form_errors: 0
   jquery_ui: 0
