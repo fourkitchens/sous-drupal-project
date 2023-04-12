@@ -166,6 +166,10 @@
     },
     "scripts": {
         "post-create-project-cmd": "Sous\\Starter::sousSetup",
+        "setup": [
+            "lando start",
+            "./scripts/sous/setup.sh"
+        ],
         "build-assets": [
             "composer install --optimize-autoloader --no-dev",
             "@build-theme",
