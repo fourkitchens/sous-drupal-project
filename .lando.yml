@@ -8,8 +8,12 @@ services:
     build:
       - composer install
       - cp web/sites/default/default.settings.php web/sites/default/settings.php
+  node:
+    type: node:16
 tooling:
   drush:
     service: appserver
     env:
       DRUSH_OPTIONS_URI: "https://sous-project.lndo.site"
+  npm:
+    service: node

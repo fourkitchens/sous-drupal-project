@@ -165,6 +165,36 @@
         }
     },
     "scripts": {
-        "post-create-project-cmd": "Sous\\Starter::installTheme"
+        "post-create-project-cmd": "Sous\\Starter::installTheme",
+        "build-assets": [
+            "composer install --optimize-autoloader --no-dev",
+            "@build-theme",
+            "@build-storybook"
+        ],
+        "build-theme": [
+            "npm ci --prefix web/themes/custom/smith",
+            "npm run build --prefix web/themes/custom/smith"
+        ],
+        "build-storybook": [
+            "npm run storybook-build --prefix web/themes/custom/smith",
+            "mv ./web/themes/custom/smith/.out ./web/storybook"
+        ],
+        "lint": "npm run lint",
+        "code-sniff": [
+            "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,info,txt,md --ignore=node_modules,bower_components,vendor ./web/modules/custom",
+            "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,info --ignore=node_modules,dist,bower_components,vendor ./web/themes/custom"
+        ],
+        "pre-update-cmd": [
+            "DrupalComposerManaged\\ComposerScripts::preUpdate"
+        ],
+        "upstream-require": [
+            "DrupalComposerManaged\\ComposerScripts::upstreamRequire"
+        ],
+        "post-install-cmd": [
+            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
+        ],
+        "post-update-cmd": [
+            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
+        ]
     }
 }
