@@ -30,13 +30,12 @@ public static function sousPrep() {
   shell_exec ("rm -rf web/themes/contrib/emulsify-drupal/");
   shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .lando.yml && rm -f .lando.yml.bak");
   // Theme scripts.
-  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' scripts/sous/theme-build.sh && rm -f scripts/sous/theme-build.sh.bak");
-  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' scripts/sous/theme-watch.sh && rm -f scripts/sous/theme-watch.sh.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$emulsify_project_name/g' scripts/sous/theme-build.sh && rm -f scripts/sous/theme-build.sh.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$emulsify_project_name/g' scripts/sous/theme-watch.sh && rm -f scripts/sous/theme-watch.sh.bak");
   // Setup script.
-  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' scripts/sous/setup.sh && rm -f scripts/sous/setup.sh.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$emulsify_project_name/g' scripts/sous/setup.sh && rm -f scripts/sous/setup.sh.bak");
   // Composer project name replace
-  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' composer.json && rm -f composer.json.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$emulsify_project_name/g' composer.json && rm -f composer.json.bak");
   shell_exec ("sed -i.bak 's:fourkitchens/sous-drupal-project:project/$dashed_project_name:g' composer.json && rm -f composer.json.bak");
-  shell_exec ("cd $dashed_project_name");
   }
 }
