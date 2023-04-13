@@ -1,7 +1,6 @@
 #!/bin/bash
 
 lando start
-lando emulsify init test-sous-remove --platform drupal
-lando npm --prefix ./web/themes/custom/test-sous-remove install
-lando emulsify --prefix ./web/themes/custom/test-sous-remove system install compound
-lando info
+lando emulsify init sous-project --platform drupal
+lando npm --prefix ./web/themes/custom/sous-project install
+lando emulsify --prefix ./web/themes/custom/sous-project system install compound
