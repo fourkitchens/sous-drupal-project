@@ -164,9 +164,8 @@
         }
     },
     "scripts": {
-        "post-create-project-cmd": "Sous\\Starter::sousPrep",
-        "setup": [
-            "lando start",
+        "post-create-project-cmd": [
+            "Sous\\Starter::sousPrep",
             "./scripts/sous/setup.sh"
         ],
         "build-assets": [
