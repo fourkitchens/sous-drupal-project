@@ -14,6 +14,7 @@ module:
   config: 0
   contextual: 0
   crop: 0
+  ctools: 0
   dblog: 0
   dropzonejs: 0
   dynamic_page_cache: 0

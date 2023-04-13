@@ -1,0 +1,43 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.restricted_html
+  module:
+    - ckeditor
+format: restricted_html
+editor: ckeditor
+settings:
+  toolbar:
+    rows:
+      - 
+        - 
+          name: Formatting
+          items:
+            - Bold
+            - Italic
+        - 
+          name: Links
+          items:
+            - DrupalLink
+            - DrupalUnlink
+        - 
+          name: Tools
+          items:
+            - Source
+  plugins:
+    drupallink:
+      linkit_enabled: true
+      linkit_profile: default
+    language:
+      language_list: un
+    stylescombo:
+      styles: ""
+image_upload:
+  status: false
+  scheme: public
+  directory: inline-images
+  max_size: ""
+  max_dimensions:
+    width: null
+    height: null
