@@ -28,6 +28,7 @@ public static function sousPrep() {
   $dashed_project_name = str_replace(' ','-', str_replace('_', '-', $composerRoot));
   // Remove contrib theme after theme generation.
   shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .lando.yml && rm -f .lando.yml.bak");
+  shell_exec ("sed -i.bak 's/sous-project-theme/$emulsify_project_name/g' .lando.yml && rm -f .lando.yml.bak");
   // Theme scripts.
   shell_exec ("sed -i.bak 's/sous-project/$emulsify_project_name/g' scripts/sous/theme-build.sh && rm -f scripts/sous/theme-build.sh.bak");
   shell_exec ("sed -i.bak 's/sous-project/$emulsify_project_name/g' scripts/sous/theme-watch.sh && rm -f scripts/sous/theme-watch.sh.bak");
