@@ -191,6 +191,8 @@
         "post-update-cmd": [
             "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
         ],
-        "post-drupal-scaffold-cmd": "cp web/sites/example.settings.local.php web/sites/default/settings.local.php",
+        "post-drupal-scaffold-cmd": [
+            "cp web/sites/example.settings.local.php web/sites/default/settings.local.php"
+        ]
     }
 }
