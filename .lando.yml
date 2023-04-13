@@ -25,4 +25,4 @@ tooling:
   compound-install:
     service: node
     description: "Install Compound component library"
-    cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-project-theme && emulsify system install compound
+    cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
