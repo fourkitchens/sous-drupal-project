@@ -37,5 +37,6 @@ public static function sousPrep() {
   // Composer project name replace
   shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' composer.json && rm -f composer.json.bak");
   shell_exec ("sed -i.bak 's:fourkitchens/sous-drupal-project:project/$dashed_project_name:g' composer.json && rm -f composer.json.bak");
+  shell_exec ("cd $dashed_project_name");
   }
 }
