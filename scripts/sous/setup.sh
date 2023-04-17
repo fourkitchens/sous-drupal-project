@@ -1,5 +1,6 @@
 #!/bin/bash
 
+git init
 lando start
 lando npm --prefix ./ install
 lando emulsify init sous-project --platform drupal
