@@ -3,6 +3,9 @@ recipe: drupal9
 config:
   webroot: web
   php: "8.1"
+  index: false
+  edge: false
+  cache: false
 services:
   appserver:
     build:
@@ -10,6 +13,9 @@ services:
       - cp web/sites/default/default.settings.php web/sites/default/settings.php
   node:
     type: node:16
+    overrides:
+      ports:
+        - 6006:6006
     build:
       - npm install
       - npm install @emulsify/cli
@@ -29,4 +35,4 @@ tooling:
   sous-builder-install:
     service: appserver
     description: "Install Sous Builder module and theme demo"
-    cmd: composer config repositories.2 git https://github.com/fourkitchens/sous-builder.git && composer require fourkitchens/sous-builder && drush pm:enable sous_builder -y
+    cmd: composer config repositories.2 git https://github.com/fourkitchens/sous-builder.git && composer config repositories.3 git https://github.com/fourkitchens/sousdemo.git && composer require fourkitchens/sous-builder && composer require fourkitchens/sousdemo && drush pm:enable sous_builder -y && drush theme:enable sousdemo -y && drush config-set system.theme default sousdemo
