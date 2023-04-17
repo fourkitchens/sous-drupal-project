@@ -1,4 +1,4 @@
-name: test-sous-project
+name: sous-project
 recipe: drupal9
 config:
   webroot: web
@@ -23,7 +23,7 @@ tooling:
   drush:
     service: appserver
     env:
-      DRUSH_OPTIONS_URI: "https://test-sous-project.lndo.site"
+      DRUSH_OPTIONS_URI: "https://sous-project.lndo.site"
   npm:
     service: node
   emulsify:
@@ -31,7 +31,7 @@ tooling:
   compound-install:
     service: node
     description: "Install Compound component library"
-    cmd: cd $LANDO_MOUNT && cd web/themes/custom/testsousproject && emulsify system install compound
+    cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
   sous-builder-install:
     service: appserver
     description: "Install Sous Builder module and theme demo"

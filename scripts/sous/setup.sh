@@ -1,5 +1,6 @@
 #!/bin/bash
 
+git config --global init.defaultBranch main
 git init
 lando start
 lando npm --prefix ./ install
