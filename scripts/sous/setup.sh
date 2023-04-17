@@ -1,7 +1,7 @@
 #!/bin/bash
 
 lando start
-lando npm ci
+lando npm --prefix ./ install
 lando emulsify init sous-project --platform drupal
 lando npm --prefix ./web/themes/custom/sous-project install
 lando compound-install
