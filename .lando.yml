@@ -35,4 +35,4 @@ tooling:
   sous-builder-install:
     service: appserver
     description: "Install Sous Builder module and theme demo"
-    cmd: composer config repositories.2 git https://github.com/fourkitchens/sous-builder.git && composer config repositories.3 git https://github.com/fourkitchens/sousdemo.git && composer require fourkitchens/sous-builder && composer require fourkitchens/sousdemo && drush pm:enable sous_builder -y && drush theme:enable sousdemo -y && drush config-set system.theme default sousdemo
+    cmd: composer config repositories.2 git https://github.com/fourkitchens/sous-builder.git && composer config repositories.3 git https://github.com/fourkitchens/sousdemo.git && composer require fourkitchens/sous-builder && composer require fourkitchens/sousdemo && drush pm:enable sous_builder -y && drush theme:enable sousdemo -y && drush config-set system.theme default sousdemo -y
