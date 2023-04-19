@@ -3,6 +3,7 @@ recipe: drupal9
 config:
   webroot: web
   php: "8.1"
+  xdebug: false
   index: false
   edge: false
   cache: false
@@ -13,12 +14,21 @@ services:
       - cp web/sites/default/default.settings.php web/sites/default/settings.php
   node:
     type: node:16
-    overrides:
-      ports:
-        - 6006:6006
     build:
       - npm install
       - npm install @emulsify/cli
+  chromedriver:
+    type: compose
+    services:
+      image: robcherry/docker-chromedriver:latest
+      expose:
+        - "4444"
+      environment:
+        CHROMEDRIVER_WHITELISTED_IPS: ""
+        CHROMEDRIVER_URL_BASE: "/wd/hub"
+      security_opt:
+        - seccomp:unconfined
+      command: ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf"]
 tooling:
   drush:
     service: appserver
