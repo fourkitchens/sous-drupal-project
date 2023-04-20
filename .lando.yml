@@ -15,13 +15,13 @@ services:
       - composer install
       - cp web/sites/default/default.settings.php web/sites/default/settings.php
     build_as_root:
-      - apt-get update -y && apt-get install -y apt-transport-https build-essential unzip
+      - apt-get -qq update -y && apt-get -qq install -y apt-transport-https build-essential unzip
       - curl -sL https://deb.nodesource.com/setup_16.x | bash -
-      - apt-get install -y nodejs
+      - apt-get -qq install -y nodejs
       - chown -R www-data /usr/lib/node_modules
       - chown -R www-data /usr/bin
-      - npm install -g npm
-      - npm install -g @emulsify/cli
+      - npm --silent install -g npm
+      - npm --silent install -g @emulsify/cli
 tooling:
   drush:
     service: appserver
