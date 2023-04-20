@@ -37,7 +37,7 @@ tooling:
   #   service: node
   #   description: "Install Compound component library"
   #   cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
-  sous-builder-install:
+  sous-demo-install:
     service: appserver
-    description: "Install Sous Builder module and theme demo"
+    description: "Install Sous Builder module and demo theme"
     cmd: composer config repositories.2 git https://github.com/fourkitchens/sous-builder.git && composer config repositories.3 git https://github.com/fourkitchens/sousdemo.git && composer require fourkitchens/sous-builder && composer require fourkitchens/sousdemo && drush pm:enable sous_builder -y && drush theme:enable sousdemo -y && drush config-set system.theme default sousdemo -y
