@@ -15,7 +15,7 @@ services:
       - composer install
       - cp web/sites/default/default.settings.php web/sites/default/settings.php
     build_as_root:
-      - apt update -y && apt install -y apt-transport-https build-essential unzip
+      - apt-get update -y && apt-get install -y apt-transport-https build-essential unzip
       - curl -sL https://deb.nodesource.com/setup_16.x | bash -
       - apt-get install -y nodejs
       - chown -R www-data /usr/lib/node_modules
