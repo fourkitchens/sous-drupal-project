@@ -5,12 +5,21 @@
   "scripts": {
     "confim": "./scripts/sous/confim.sh",
     "confex": "./scripts/sous/confex.sh",
+    "husky:commit-msg": "commitlint --edit $1",
+    "husky:pre-commit": "npm run lint",
     "import-data": "./scripts/sous/import-data.sh",
-    "rebuild": "./scripts/sous/rebuild.sh",
+    "lint:js": "eslint --color --no-error-on-unmatched-pattern --format stylish {web/modules/custom,web/themes/custom}/**/*.js",
+    "lint:php": "find web/modules/custom web/themes/custom -name '*.php' -exec php -l {} \\;",
+    "lint:styles": "stylelint --color {web/modules/custom,web/themes/custom}/**/*.scss",
+    "prettier": "prettier '{docs,web/modules/custom,web/themes/custom}/**/*.{json,md,js,html,scss,html}' --ignore-unknown --list-different",
     "local-data-bak": "./scripts/sous/local-data-bak.sh",
+    "prepare": "husky install",
     "publish": "semantic-release --tag-format '${version}'",
     "publish-test": "semantic-release --tag-format '${version}' --dry-run --debug",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "rebuild": "./scripts/sous/rebuild.sh",
+    "theme-build": "./scripts/sous/theme-build.sh",
+    "theme-watch": "./scripts/sous/theme-watch.sh"
   },
   "repository": {
     "type": "git",
@@ -22,16 +31,16 @@
   "author": "Four Kitchens",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
-    "@commitlint/cli": "^17.1.2",
-    "@commitlint/config-conventional": "^17.1.0",
+    "@commitlint/cli": "^17.4.0",
+    "@commitlint/config-conventional": "^17.4.0",
     "@emulsify/cli": "^1.6.0",
-    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/changelog": "^6.0.2",
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^8.0.6",
+    "@semantic-release/github": "^8.0.7",
     "@semantic-release/release-notes-generator": "^10.0.3",
-    "husky": "^4.2.5",
+    "husky": "^8.0.3",
     "patch-package": "^6.2.2",
-    "semantic-release": "^19.0.3"
+    "semantic-release": "^19.0.5"
   }
 }

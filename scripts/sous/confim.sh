@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 lando drush updatedb -y
 lando drush cache-rebuild

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 lando composer install
 npm run import-data
