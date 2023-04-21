@@ -18,7 +18,6 @@ Sous not only generates a custom theme based on Emulsify, it also builds upon Dr
 Without these you will have difficulty installing this project.
 
 1. [PHP ^8.1](http://www.php.net/)
-2. [Node ^16.13 \(we recommend NVM\)](https://github.com/creationix/nvm)
 3. [Composer 2.x](https://getcomposer.org/)
 4. [Lando ^3.6](https://docs.lando.dev/basics/installation.html)
 
@@ -26,10 +25,6 @@ Use this command below and replace `PROJECT_NAME` with your chosen project name.
 
 ```
 composer create-project fourkitchens/sous-drupal-project [PROJECT-NAME] --no-interaction
-
-cd [PROJECT-NAME]
-
-lando start
 
 ```
 
