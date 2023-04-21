@@ -16,6 +16,7 @@ services:
       - cp web/sites/default/default.settings.php web/sites/default/settings.php
     build_as_root:
       - apt-get update -qq -y && apt-get install -qq -y apt-transport-https build-essential unzip
+      - apt-get install -qq chromium-browser
       - curl -sL https://deb.nodesource.com/setup_16.x | bash -
       - apt-get install -qq -y nodejs
       - chown -R www-data /usr/lib/node_modules
