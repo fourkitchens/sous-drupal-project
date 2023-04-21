@@ -12,9 +12,14 @@ lando emulsify init midcamp2 --platform drupal
 echo "Install theme dependencies"
 lando npm --silent --prefix ./web/themes/custom/midcamp2 install
 lando drush site:install --existing-config --account-name=midcamp2 --account-name=superuser_1 -y
+lando drush user:block superuser_1
 lando drush role:create 'superuser' 'Super User'
-echo "//////////////"
-echo "Creating your new admin user account"
 lando drush user:create sous_chef --mail="sous_chef@fourkitchens.com"
+lando drush user:role:add 'superuser' superuser_1
 lando drush user:role:add 'superuser' sous_chef
+echo ""
 echo "//////////////"
+echo "ORDERS UP!"
+echo "Use the following link to log into your new site"
+echo "//////////////"
+lando drush uli --name=sous_chef
