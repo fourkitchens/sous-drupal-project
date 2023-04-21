@@ -1,0 +1,150 @@
+uuid: 05ca0e05-b971-4e2f-86fb-136c5fa2c1eb
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.basic_html
+    - filter.format.full_html
+    - filter.format.restricted_html
+  module:
+    - block
+    - block_content
+    - config
+    - contextual
+    - crop
+    - dropzonejs
+    - embed
+    - entity_browser
+    - entity_reference_revisions
+    - entity_usage
+    - field_ui
+    - file
+    - filter
+    - image
+    - linkit
+    - login_history
+    - media
+    - metatag
+    - node
+    - paragraphs
+    - paragraphs_ee
+    - path
+    - pathauto
+    - redirect
+    - responsive_image
+    - role_delegation
+    - shortcut
+    - system
+    - taxonomy
+    - taxonomy_manager
+    - toolbar
+    - update
+    - views_ui
+id: superuser
+label: 'Super User'
+weight: 2
+is_admin: null
+permissions:
+  - 'access administration pages'
+  - 'access content overview'
+  - 'access contextual links'
+  - 'access entity usage statistics'
+  - 'access files overview'
+  - 'access media overview'
+  - 'access shortcuts'
+  - 'access site in maintenance mode'
+  - 'access site reports'
+  - 'access taxonomy manager list'
+  - 'access taxonomy overview'
+  - 'access toolbar'
+  - 'access user profiles'
+  - 'administer account settings'
+  - 'administer block_content display'
+  - 'administer block_content fields'
+  - 'administer block_content form display'
+  - 'administer blocks'
+  - 'administer content types'
+  - 'administer crop'
+  - 'administer crop types'
+  - 'administer display modes'
+  - 'administer embed buttons'
+  - 'administer entity browsers'
+  - 'administer entity usage'
+  - 'administer filters'
+  - 'administer image styles'
+  - 'administer linkit profiles'
+  - 'administer media'
+  - 'administer media display'
+  - 'administer media fields'
+  - 'administer media form display'
+  - 'administer media types'
+  - 'administer menu'
+  - 'administer meta tags'
+  - 'administer modules'
+  - 'administer node display'
+  - 'administer node fields'
+  - 'administer node form display'
+  - 'administer nodes'
+  - 'administer paragraph display'
+  - 'administer paragraph fields'
+  - 'administer paragraph form display'
+  - 'administer paragraphs categories'
+  - 'administer paragraphs settings'
+  - 'administer paragraphs types'
+  - 'administer pathauto'
+  - 'administer permissions'
+  - 'administer redirect settings'
+  - 'administer redirects'
+  - 'administer responsive images'
+  - 'administer shortcuts'
+  - 'administer site configuration'
+  - 'administer software updates'
+  - 'administer taxonomy'
+  - 'administer taxonomy_term display'
+  - 'administer taxonomy_term fields'
+  - 'administer taxonomy_term form display'
+  - 'administer themes'
+  - 'administer url aliases'
+  - 'administer user display'
+  - 'administer user fields'
+  - 'administer user form display'
+  - 'administer users'
+  - 'administer views'
+  - 'assign all roles'
+  - 'assign superuser role'
+  - 'bypass node access'
+  - 'cancel account'
+  - 'change own username'
+  - 'create media'
+  - 'create url aliases'
+  - 'customize shortcut links'
+  - 'delete all revisions'
+  - 'delete any media'
+  - 'delete media'
+  - 'delete orphan revisions'
+  - 'dropzone upload files'
+  - 'edit behavior plugin settings'
+  - 'export configuration'
+  - 'import configuration'
+  - 'link to any page'
+  - 'notify of path changes'
+  - 'perform batch updates entity usage'
+  - 'revert all revisions'
+  - 'select account cancellation method'
+  - 'switch shortcut sets'
+  - 'synchronize configuration'
+  - 'update any media'
+  - 'update media'
+  - 'use text format basic_html'
+  - 'use text format full_html'
+  - 'use text format restricted_html'
+  - 'view all login histories'
+  - 'view all media revisions'
+  - 'view all revisions'
+  - 'view own login history'
+  - 'view own unpublished content'
+  - 'view own unpublished media'
+  - 'view the administration theme'
+  - 'view unpublished paragraphs'
+  - 'view update notifications'
+  - 'view user email addresses'
