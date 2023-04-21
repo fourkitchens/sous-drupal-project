@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/fourkitchens/sous-drupal-project/compare/4.4.0...5.0.0) (2023-04-21)
+
+
+### Bug Fixes
+
+* major version bump ([b2fd228](https://github.com/fourkitchens/sous-drupal-project/commit/b2fd22871b13233a8b25ac59ebd9f040bc7c0a09))
+
+
+### BREAKING CHANGES
+
+* Remove the distro
+
 # [4.4.0](https://github.com/fourkitchens/sous-drupal-project/compare/4.3.0...4.4.0) (2023-04-21)
 
 
