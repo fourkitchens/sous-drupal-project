@@ -3,7 +3,7 @@ recipe: drupal9
 config:
   webroot: web
   php: "8.1"
-  composer_version: '2.5.5'
+  composer_version: '2'
   # M1/2 Mac settings
   xdebug: false
   index: false

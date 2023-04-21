@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "Initializing your project as a git repository and set the default branch to main"
 git config --global init.defaultBranch main
