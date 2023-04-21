@@ -15,18 +15,24 @@ Sous not only generates a custom theme based on Emulsify, it also builds upon Dr
 # Installation
 
 ## Requirements
+
 Without these you will have difficulty installing this project.
 
 1. [PHP ^8.1](http://www.php.net/)
-3. [Composer 2.x](https://getcomposer.org/)
-4. [Lando ^3.6](https://docs.lando.dev/basics/installation.html)
+2. [Composer 2.x](https://getcomposer.org/)
+3. [Lando ^3.6](https://docs.lando.dev/basics/installation.html)
 
 Use this command below and replace `PROJECT_NAME` with your chosen project name.
 
 ```
 composer create-project fourkitchens/sous-drupal-project [PROJECT-NAME] --no-interaction
-
 ```
+
+## Tweak project
+
+- Modify .gitignore
+  - Remove the commented block at the EOF
+  - Review ignored items you may need for your build and remove them
 
 ## Optional Demo content and theme
 
@@ -35,6 +41,7 @@ Sous can optionally install some demo content and a fully styled and wired theme
 `lando sous-demo-install`
 
 # Working with Emulsify
+
 The [Emulsify](https://emulsify.info/) theme is installed as part of this project.
 
 # Additional Tooling
@@ -88,6 +95,30 @@ npm run rebuild
 
 Rebuild a fresh local instance of your site. Imports the canonical database backup and imports configuration into it.
 
+**setup**
+
+```
+npm run setup
+```
+
+This is run during the installation process of composer create project.
+
+**theme-build**
+
+```
+npm run theme-build
+```
+
+Builds the emulsify based theme.
+
+**theme-watch**
+
+```
+npm run theme-watch
+```
+
+Used for theme development.
+
 # Semantic Versioning
 
 ## Setup
@@ -117,12 +148,11 @@ The composer command above can be adjusted to account for a new branch you're wo
 
 ```
 composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJECT_NAME --no-interaction
-
 ```
 
 ## Contributing without create-project or creating a project with a custom theme
 1. Clone this repository
-2. Checkout the 4.x-beta branch (if it hasn't been released yet)
+2. Checkout the `main` branch
 3. `lando composer install`
 4. `npm ci` (at the project root)
 5. `npx emulsify init theme-name` (change theme-name to your theme name)
