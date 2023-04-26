@@ -1,7 +1,6 @@
 #!/bin/sh
 
-lando composer install
+composer install
 npm run import-data
 npm run confim
-lando drush user:unblock superuser_1
-lando drush uli
+drush uli --name=sous_chef

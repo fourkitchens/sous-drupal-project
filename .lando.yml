@@ -34,10 +34,39 @@ tooling:
     service: appserver
   emulsify:
     service: appserver
-  # compound-install:
-  #   service: node
-  #   description: "Install Compound component library"
-  #   cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
+  # Simplify and run scripts through lando
+  confex:
+    service: appserver
+    description: "Export active configuration"
+    cmd: npm run confex
+  confim:
+    service: appserver
+    description: "Import configuration"
+    cmd: npm run confim
+  import-data:
+    service: appserver
+    description: "Install Compound component library"
+    cmd: npm run import-data
+  local-data-bak:
+    service: appserver
+    description: "Install Compound component library"
+    cmd: npm run local-data-bak
+  rebuild:
+    service: appserver
+    description: "Install Compound component library"
+    cmd: npm run rebuild
+  theme-build:
+    service: appserver
+    description: "Install Compound component library"
+    cmd: npm run theme-build
+  theme-watch:
+    service: appserver
+    description: "Install Compound component library"
+    cmd: npm run theme-watch
+  compound-install:
+    service: appserver
+    description: "Install Compound component library"
+    cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
   sous-demo-install:
     service: appserver
     description: "Install Sous Builder module and demo theme"
