@@ -1,3 +1,10 @@
+# [5.1.0](https://github.com/fourkitchens/sous-drupal-project/compare/5.0.0...5.1.0) (2023-04-27)
+
+
+### Features
+
+* add npm scripts to lando so ci and lando can run both seperately ([#102](https://github.com/fourkitchens/sous-drupal-project/issues/102)) ([412d607](https://github.com/fourkitchens/sous-drupal-project/commit/412d6073ea7b010c814748fc9cd6eadaa24db8d1))
+
 # [5.0.0](https://github.com/fourkitchens/sous-drupal-project/compare/4.4.0...5.0.0) (2023-04-21)
 
 
