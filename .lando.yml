@@ -10,7 +10,7 @@ config:
   edge: false
   cache: false
 proxy:
-  node:
+  appserver:
     - sous-project.lndo.site:6006
 services:
   appserver:
@@ -26,52 +26,50 @@ services:
       - chown -R www-data /usr/bin
       - npm install --silent -g npm
       - npm install --silent -g @emulsify/cli
-  node:
-    type: node
 tooling:
   drush:
     service: appserver
     env:
       DRUSH_OPTIONS_URI: "https://sous-project.lndo.site"
   node:
-    service: node
+    service: appserver
   npm:
-    service: node
+    service: appserver
   npx:
-    service: node
+    service: appserver
   emulsify:
-    service: node
+    service: appserver
   # Simplify and run scripts through lando
   confex:
-    service: node
+    service: appserver
     description: "Export active configuration"
     cmd: npm run confex
   confim:
-    service: node
+    service: appserver
     description: "Import configuration"
     cmd: npm run confim
   import-data:
-    service: node
+    service: appserver
     description: "Import local database file"
     cmd: npm run import-data
   local-data-bak:
-    service: node
+    service: appserver
     description: "Create a backup of the local database"
     cmd: npm run local-data-bak
   project-rebuild:
-    service: node
+    service: appserver
     description: "Rebuild your project using a fresh database"
     cmd: npm run rebuild
   theme-build:
-    service: node
+    service: appserver
     description: "Compile your theme files"
     cmd: npm run theme-build
   theme-watch:
-    service: node
+    service: appserver
     description: "Watch for any theme changes and recompile"
     cmd: npm run theme-watch
   compound-install:
-    service: node
+    service: appserver
     description: "Install Compound component library"
     cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
   sous-demo-install:
