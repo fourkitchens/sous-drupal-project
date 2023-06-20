@@ -158,6 +158,7 @@ composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJE
 4. `lando start`
 5. `lando composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
+7. `lando drush config-set system.theme default theme-name -y` (_theme-name_ is the name of your project)
 
 After running the above steps you should have a fully functioning Drupal site with a custom Emulsify theme named after your project.
 
@@ -165,6 +166,6 @@ After running the above steps you should have a fully functioning Drupal site wi
 
 If you would like to generate another custom theme follow the steps below.
 
-1. npm ci
-2. npx emulsify init theme-name
-3. lando drush config-set system.theme default theme-name -y
+1. `npm ci`
+2. `npx emulsify init theme-name`
+3. `lando drush config-set system.theme default theme-name -y`
