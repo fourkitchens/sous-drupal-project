@@ -139,7 +139,7 @@ x.x.x
 
 ## Troubleshooting
 
-1. Your branch must be a named stable release branch in order to get a tag.gst
+1. Your branch must be a named stable release branch in order to get a tag.
 2. Prereleases are not supported with this package because they contain a dot.
 
 # Contributing
