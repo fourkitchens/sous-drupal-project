@@ -144,20 +144,28 @@ x.x.x
 
 # Contributing
 
-The composer command above can be adjusted to account for a new branch you're working on.
+The composer command can be adjusted to account for a new branch you're working on.
 
 ```
 composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJECT_NAME --no-interaction
 ```
 
-## Contributing without create-project or creating a project with a custom theme
-1. Clone this repository
-2. Checkout the `main` branch
-3. `lando composer install`
-4. `npm ci` (at the project root)
-5. `npx emulsify init theme-name` (change theme-name to your theme name)
-6. Change the name of the lando project if you haven't already
-7. `lando start`
-8. Go to the install page in your browser and install your Drupal site
-9. `lando drush user:unblock superuser_1` (if you want to use drush uli)
-10. Go forth and contribute!
+## Contribute without create-project
+
+1. clone repo `gh repo clone fourkitchens/sous-drupal-project [directory]`
+2. `cd` to your project directory
+3. change the name of your project in .lando.yml
+4. `lando start`
+5. `lando composer install`
+6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
+7. `lando drush config-set system.theme default theme-name -y` (_theme-name_ is the name of your project)
+
+After running the above steps you should have a fully functioning Drupal site with a custom Emulsify theme named after your project.
+
+### Create a custom theme. (Change theme-name to your theme name.)
+
+If you would like to generate another custom theme follow the steps below.
+
+1. `npm ci`
+2. `npx emulsify init theme-name`
+3. `lando drush config-set system.theme default theme-name -y`
