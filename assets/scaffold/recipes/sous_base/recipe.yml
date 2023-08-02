@@ -1,0 +1,14 @@
+name: 'Sous Base'
+description: 'A recipe to install a base Sous Drupal project.'
+type: 'Site'
+
+install:
+  - node
+  - user
+
+config:
+  actions:
+    system.theme:
+      simple_config_update:
+        admin: 'claro'
+        default: 'sousdrupalrecipe'

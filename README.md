@@ -169,3 +169,26 @@ If you would like to generate another custom theme follow the steps below.
 1. `npm ci`
 2. `npx emulsify init theme-name`
 3. `lando drush config-set system.theme default theme-name -y`
+
+## Recipe update
+
+Here is what's been done:
+
+### Composer update
+1. Removed the normal Sous Drupal dependencies
+2. Upgraded to Drupal 10
+3. Added patch that allows recipes to be applied
+4. Added post update script to scaffold recipes from assets to web/recipes (scripts/recipe-scaffold.sh)
+
+### Assets
+1. Added sous_base recipe
+
+### Scripts
+1. Added script that installs a recipe using lando (scripts/install-recipe.sh)
+2. Modified setups.sh script to install the Minimal profile without existing config (we will use recipes to install config)
+
+### Lando
+1. Added command that installs a recipe using a script (see above)
+
+### Issues
+1. With the name of the custom emulsify theme being variable we will have to figure out how to account for this in the recipe somehow
