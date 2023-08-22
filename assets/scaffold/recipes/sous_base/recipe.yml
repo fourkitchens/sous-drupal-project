@@ -3,12 +3,14 @@ description: 'A recipe to install a base Sous Drupal project.'
 type: 'Site'
 
 install:
-  - node
-  - user
-
+  - help
+  - gin
+  - gin_toolbar
 config:
+  import:
+    gin: '*'
   actions:
     system.theme:
       simple_config_update:
-        admin: 'claro'
-        default: 'sousdrupalrecipe'
+        default: sous-theme
+        admin: gin
