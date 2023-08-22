@@ -13,14 +13,15 @@ echo "Installing theme dependencies..."
 lando npm --prefix ./web/themes/custom/sousdrupalrecipe install --silent
 lando drush site:install minimal --account-name=sousdrupalrecipe --account-name=superuser_1 -y
 #lando drush site:install --existing-config --account-name=sousdrupalrecipe --account-name=superuser_1 -y
-lando drush user:block superuser_1
-lando drush user:create sous_chef --mail="sous_chef@fourkitchens.com"
-lando drush user:role:add 'superuser' superuser_1
-lando drush user:role:add 'superuser' sous_chef
+#lando drush user:block superuser_1
+#lando drush user:create sous_chef --mail="sous_chef@fourkitchens.com"
+#lando drush user:role:add 'superuser' superuser_1
+#lando drush user:role:add 'superuser' sous_chef
 echo ""
 echo "//////////////"
 echo " ORDERS UP!"
 echo " Use the following link to log into your new site"
 echo "//////////////"
 echo ""
-lando drush uli --name=sous_chef
+#lando drush uli --name=sous_chef
+lando drush uli

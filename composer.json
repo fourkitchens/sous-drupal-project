@@ -3,16 +3,24 @@
     "description": "Starter project for Sous a Drupal distribution featuring a theme based on Emulsify Design System.",
     "type": "project",
     "license": "GPL-2.0-or-later",
-    "repositories": [
-        {
+    "repositories": {
+        "3": {
+            "type": "git",
+            "url": "https://github.com/fourkitchens/sousdemo.git"
+        },
+        "2": {
+            "type": "git",
+            "url": "https://github.com/fourkitchens/sous-builder.git"
+        },
+        "0": {
             "type": "composer",
             "url": "https://packages.drupal.org/8"
         },
-        {
+        "1": {
             "type": "composer",
             "url": "https://asset-packagist.org"
         }
-    ],
+    },
     "require": {
         "php": ">=8.1",
         "composer/installers": "^1.2",
@@ -21,20 +29,20 @@
         "drupal/allowed_formats": "^1.3",
         "drupal/blazy": "^2.1",
         "drupal/components": "^3.0@beta",
-        "drupal/config_direct_save": "^1.0",
-        "drupal/content_browser": "^1.0",
         "drupal/core-composer-scaffold": "^10",
         "drupal/core-recommended": "^10",
+        "drupal/crop": "^2.1",
+        "drupal/ctools": "^4.0",
+        "drupal/dropzonejs": "^2.5",
+        "drupal/emulsify_twig": "^4.0",
+        "drupal/field_group": "^3.1",
+        "drupal/gin": "^3.0@alpha",
+        "drupal/gin_toolbar": "^1.0@beta",
+        "drupal/libraries": "^4.0",
         "drush/drush": "^12.1",
-        "npm-asset/blazy": "^1.8",
-        "npm-asset/dropzone": "^5.5.1",
-        "npm-asset/imagesloaded": "^3.2.0",
-        "npm-asset/slick": "^1.12",
+        "fourkitchens/sous-builder": "dev-sous-content-recipe",
         "oomphinc/composer-installers-extender": "^2.0",
-        "pantheon-systems/drupal-integrations": "^9.0",
-        "vlucas/phpdotenv": "^2.4",
-        "webflo/drupal-finder": "^1.0.0",
-        "webmozart/path-util": "^2.3",
+        "webflo/drupal-finder": "^1.2",
         "zaporylie/composer-drupal-optimizations": "^1.0"
     },
     "conflict": {
@@ -90,7 +98,7 @@
             "web/profiles/contrib/{$name}": [
                 "type:drupal-profile"
             ],
-            "web/recipes/contrib/{$name}": [
+            "web/recipes/{$name}": [
                 "type:drupal-recipe"
             ]
         },
@@ -132,7 +140,8 @@
     "scripts": {
         "post-create-project-cmd": [
             "Sous\\Starter::sousPrep",
-            "./scripts/sous/setup.sh"
+            "./scripts/sous/setup.sh",
+            "bash ./scripts/sous/recipe-scaffold.sh"
         ],
         "build-assets": [
             "composer install --optimize-autoloader --no-dev",
@@ -154,9 +163,6 @@
         ],
         "post-drupal-scaffold-cmd": [
             "cp web/sites/example.settings.local.php web/sites/default/settings.local.php"
-        ],
-        "post-update-cmd": [
-            "bash ./scripts/sous/recipe-scaffold.sh"
         ]
     }
 }
