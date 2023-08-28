@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/bin/sh
 
-lando drush config-export -y
+drush config-export -y

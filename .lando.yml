@@ -3,12 +3,76 @@ recipe: drupal9
 config:
   webroot: web
   php: "8.1"
+  composer_version: '2'
+  # M1/2 Mac settings
+  xdebug: false
+  index: false
+  edge: false
+  cache: false
+# proxy:
+#   appserver:
+#     - sous-project.lndo.site:6006
 services:
   appserver:
-    run:
+    build:
       - composer install
+      - cp web/sites/default/default.settings.php web/sites/default/settings.php
+    build_as_root:
+      - apt-get update -qq -y && apt-get install -qq -y apt-transport-https build-essential unzip
+      - apt-get install -qq chromium
+      - curl -sL https://deb.nodesource.com/setup_16.x | bash -
+      - apt-get install -qq -y nodejs
+      - chown -R www-data /usr/lib/node_modules
+      - chown -R www-data /usr/bin
+      - npm install --silent -g npm
+      - npm install --silent -g @emulsify/cli
 tooling:
   drush:
     service: appserver
     env:
       DRUSH_OPTIONS_URI: "https://sous-project.lndo.site"
+  node:
+    service: appserver
+  npm:
+    service: appserver
+  npx:
+    service: appserver
+  emulsify:
+    service: appserver
+  # Simplify and run scripts through lando
+  confex:
+    service: appserver
+    description: "Export active configuration"
+    cmd: npm run confex
+  confim:
+    service: appserver
+    description: "Import configuration"
+    cmd: npm run confim
+  import-data:
+    service: appserver
+    description: "Import local database file"
+    cmd: npm run import-data
+  local-data-bak:
+    service: appserver
+    description: "Create a backup of the local database"
+    cmd: npm run local-data-bak
+  project-rebuild:
+    service: appserver
+    description: "Rebuild your project using a fresh database"
+    cmd: npm run rebuild
+  # theme-build:
+  #   service: appserver
+  #   description: "Compile your theme files"
+  #   cmd: npm run theme-build
+  # theme-watch:
+  #   service: appserver
+  #   description: "Watch for any theme changes and recompile"
+  #   cmd: npm run theme-watch
+  compound-install:
+    service: appserver
+    description: "Install Compound component library"
+    cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
+  sous-demo-install:
+    service: appserver
+    description: "Install Sous Builder module and demo theme"
+    cmd: composer config repositories.2 git https://github.com/fourkitchens/sous-builder.git && composer config repositories.3 git https://github.com/fourkitchens/sousdemo.git && composer require fourkitchens/sous-builder && composer require fourkitchens/sousdemo && drush pm:enable sous_builder -y && drush theme:enable sousdemo -y && drush config-set system.theme default sousdemo -y

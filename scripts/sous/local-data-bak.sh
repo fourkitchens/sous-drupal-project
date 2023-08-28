@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/bin/sh
 
-lando drush sql-dump --result-file=../reference/db-`date +%Y-%m-%d-%H%M`.sql --gzip
+drush sql-dump --result-file=../reference/db-`date +%Y-%m-%d-%H%M`.sql --gzip

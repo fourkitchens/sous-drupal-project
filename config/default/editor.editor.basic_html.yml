@@ -1,0 +1,62 @@
+uuid: 55f81770-47d5-40f3-be47-91748b34188b
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.basic_html
+  module:
+    - ckeditor5
+format: basic_html
+editor: ckeditor5
+settings:
+  toolbar:
+    items:
+      - heading
+      - '|'
+      - bold
+      - italic
+      - '|'
+      - link
+      - '|'
+      - bulletedList
+      - numberedList
+      - '|'
+      - sourceEditing
+  plugins:
+    ckeditor5_heading:
+      enabled_headings:
+        - heading2
+        - heading3
+        - heading4
+        - heading5
+        - heading6
+    ckeditor5_sourceEditing:
+      allowed_tags:
+        - '<cite>'
+        - '<dl>'
+        - '<dt>'
+        - '<dd>'
+        - '<h3 id>'
+        - '<h4 id>'
+        - '<h5 id>'
+        - '<h6 id>'
+        - '<span class>'
+        - '<img src alt data-entity-type data-entity-uuid data-align data-caption width height>'
+        - '<drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title>'
+        - '<h2 id>'
+        - '<blockquote cite>'
+        - '<ul type>'
+        - '<ol type>'
+        - '<drupal-media data-entity-embed-display data-entity-embed-display-settings data-embed-button data-langcode title>'
+        - '<a hreflang data-entity-substitution data-entity-type data-entity-uuid title class>'
+    ckeditor5_list:
+      reversed: false
+      startIndex: true
+image_upload:
+  status: true
+  scheme: public
+  directory: inline-images
+  max_size: ''
+  max_dimensions:
+    width: null
+    height: null
