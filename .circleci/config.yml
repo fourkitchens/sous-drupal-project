@@ -1,55 +1,633 @@
 version: 2.1
-orbs:
-  node: circleci/node@5.0.3
-  php: circleci/php@1.1.0
+
+# To easily configure jobs here, parameters are set up below. Since we are
+# typically not calling this workflow via pipelines, consider changing the
+# defaults here for any permanent configuration you need to do on a project
+# by project basis.
+parameters:
+  php-version:
+    description: major.minor version number for php version to use.
+    type: string
+    # This value must be only a major.minor version is pantheon is the
+    # host-variant as the build-tool images do not support major.minor.patch
+    # version numbers.
+    default: "8.2"
+  tz:
+    description: The timezone definition.
+    type: string
+    default: "America/Chicago"
+  host-variant:
+    description: A string representing a site's host. EX acquia, pantheon
+    type: string
+    default: "pantheon"
+  docroot:
+    description: "Where composer installs drupal."
+    default: "web"
+    type: string
+  artifact_workspace:
+    description: "Where the build stores the built artifact temporarily."
+    default: "~/project"
+    type: string
+
+# These are the directories that will be saved between builds and deploys.
+# Change these if the list below needs different folders. Directory names are
+# relative to the project root.
+persisting_dirs: &persisting_dirs
+  - << pipeline.parameters.docroot >>
+  - vendor
+  - drush
+  - .gitignore
+# - node_modules
+
+
+env: &env
+  #########################
+  # MANDITORY CONFIGURATION
+  #
+  # Set these either here in your config.yml or in CircleCI project Enviornment
+  # variables.
+  #########################
+
+  # A github access token so the bot user can comment back on the commit.
+  #
+  # GITHUB_TOKEN: 12345678790abcdef
+
+  ############################
+  # ACQUIA SPECIFIC SETTINGS
+  ############################
+
+  # Acquia git repo url.
+  #
+  # ACQUIA_REPO: sitename@svn-21939.prod.hosting.acquia.com:sitename.git
+
+  # Cloud API Realm. Usually "prod" or "devcloud".
+  #
+  # See: https://docs.acquia.com/acquia-cloud/api#realm
+  #
+  # ACQUIA_REALM: prod
+
+  ############################
+  # PANTHEON SPECIFIC SETTINGS
+  ############################
+
+  # TERMINUS_TOKEN: The Pantheon machine token
+
+  ########################
+  # OPTIONAL CONFIGURATION
+  ########################
+
+  # An arbitrary email that will be used as the committer when building the
+  # artifact.
+  #
+  # Default: bender@fourkitchens.com
+  #
+  # GIT_EMAIL: bender@fourkitchens.com
+
+  # Name of the Acquia or Pantheon site to deploy to.
+  #
+  # Default: github repo name
+  #
+  # SITE_NAME: my_site
+
+  # Environment to get canonical database and files from
+  #
+  # Possible Values:
+  # For Acquia: dev, test prod
+  # For Pantheon: dev, test, live
+  #
+  # Default: "prod" on Acquia. "live" on Pantheon
+  #
+  # CANONICAL_ENV: dev
+
+  # Script used to sanatize databases. Only used when CANONICAL_ENV is not dev.
+  #
+  # Default: empty
+  #
+  # SANATIZE_SCRIPT: ./vendor/fourkitchens/project_ci/scripts/sanatize-db
+
+  # Sync Configuration
+  #
+  # We can't identify the sync directory here, so we make an assumption it's
+  # that if we have the unique (not usually config ignored) system.site.yml
+  # somewhere in the ./config directory, that you likely want configuration to
+  # be synced. You can manually turn it off here though.
+  #
+  # Possible Values YES, NO
+  # Default: Yes if Any directory in the ./config directory (inclusive) contains
+  #          system.site.yml. Ex: YES if ./config/system.site.yml or
+  #          ./config/default/system.site.yml or ./config/sync/system.site.yml
+  #          exists.
+  #
+  # SYNC_CONFIG: NO
+
+  #####################################
+  # OPTIONAL CONFIGURATION FOR PANTHEON
+  #####################################
+
+  # Build CI multidevs on every commit on Pantheon. This way you get the ci-*
+  # environments. This may be useful for visual regression testing or workflows
+  # without PRs.
+  #
+  # Possible Values: YES, NO
+  #
+  # Default: NO
+  #
+  # CI_BUILD: YES
+
+  # Define the main branch releases are cut from.
+  #
+  # Default: "main" if the branch it exists, "master" otherwise.
+  #
+  # MAIN_BRANCH: master
+
+  # Define the development branch where active development happens on github.
+  # This branch is used most in gitflow development patterns.
+  #
+  # Default: develop
+  #
+  # DEVELOPMENT_BRANCH: dev
+
+  # Re-sync content for multidevs every time a push is made to Pantheon.
+  #
+  # Possible Values: NO, YES
+  #
+  # Default: NO
+  #
+  # REBUILD_MULTIDEV_ENV_EVERY_PUSH: YES
+
+  # Re-sync content for the Github development multidev every time a push is
+  # made to Pantheon.
+  #
+  # Possible Values: NO, YES
+  #
+  # Default: NO
+  #
+  # REBUILD_DEVELOPMENT_ENV_EVERY_PUSH: YES
+
+
+  # Define the name of the multidev used for the Github development branch. Must
+  # follow the multidev naming conventions for Pantheon.
+  #
+  # Default: github-dev
+  #
+  # DEVELOPMENT_ENV: circleci
+
+
+  ###########################
+  # STUFF THAT DOESN'T CHANGE
+  ###########################
+  HOST_VARIANT: << pipeline.parameters.host-variant >>
+  DATE_TIMEZONE: << pipeline.parameters.tz >>
+  DOCROOT: << pipeline.parameters.docroot >>
+  TERM: xterm
+
+defaults: &defaults
+  executor:
+    name: php/default
+    tag: << pipeline.parameters.php-version >>
+  working_directory: ~/project
+  resource_class: small
+  environment:
+    <<: *env
+
 jobs:
-  build_node:
-    executor:
-      name: node/default
+  # Static Testing. This will run independently of a build to fail quickly.
+  static_tests:
+    <<: *defaults
     steps:
-      - checkout
-      - node/install-packages:
-          cache-path: ~/project/node_modules
-          override-ci-command: npm ci
-  build_php:
+      - setup-project
+      - run:
+          name: run static tests
+          command: |
+            if [ -f "./.circleci/scripts/test/static" ]; then
+              ./.circleci/scripts/test/static
+            else
+              ./vendor/fourkitchens/project_ci/scripts/test/static
+            fi
+
+  # Job used to create what will be committed to the Artifact.
+  #
+  # You will have all the dependency managers installed here in case you need
+  # them.
+  build:
+    <<: *defaults
+    resource_class: medium+
+    steps:
+      - setup-project
+      - run:
+          name: run PHP build step
+          command: |
+            if [ -f "./.circleci/scripts/build/php" ]; then
+              ./.circleci/scripts/build/php
+            else
+              ./vendor/fourkitchens/project_ci/scripts/build/php
+            fi
+      - run:
+          name: run theme build step
+          command: |
+            if [ -f "./.circleci/scripts/build/theme" ]; then
+              ./.circleci/scripts/build/theme
+            else
+              ./vendor/fourkitchens/project_ci/scripts/build/theme
+            fi
+      - persist_to_workspace:
+          root: .
+          paths: *persisting_dirs
+
+  # Job used to deploy to a remote environment.
+  #
+  # This could be as simple as pushing the artifact to a remote git repo or as
+  # complicated as building a remote environment to push to. This job will not
+  # be run if the host-variant parameter is set to "pantheon"
+  deploy:
+    <<: *defaults
+
+    steps:
+      - restore-project:
+          workspace_root: << pipeline.parameters.artifact_workspace >>
+      - run:
+          name: Deploy the code
+          command: |
+            if [ -f "./.circleci/scripts/deploy" ]; then
+              ./.circleci/scripts/deploy
+            else
+              ./vendor/fourkitchens/project_ci/scripts/deploy
+            fi
+
+  # Job used to deploy to pantheon.
+  #
+  # This job is special because pantheon employs a special docker container and
+  # the use of terminus with build tools which expect a very specific
+  # environment configuration. To enable this job, set the host-variant
+  # parameter to "pantheon".
+  deploy_to_pantheon:
+    <<: *defaults
     docker:
-      - image: 'cimg/php:8.1'
+      # quay.io/pantheon-public/build-tools-ci:8.x-php${PHPVERSION}
+      - image: quay.io/pantheon-public/build-tools-ci:8.x-php<< pipeline.parameters.php-version >>
+    environment:
+      <<: *env
+      TZ: /usr/share/zoneinfo/<< pipeline.parameters.tz >>
+      TERM: dumb
+      # BUILD_TOOLS_VERSION: ^2.0.0-alpha4
     steps:
       - checkout
-      - run: php --version
-      - php/install-composer:
-          install-version: 2.1.9
+      - restore-project:
+          workspace_root: << pipeline.parameters.artifact_workspace >>
       - run:
-          command: composer config -g github-oauth.github.com $COMPOSER_TOKEN
-      - php/install-packages
+          name: setup-environment-vars
+          command: |
+            if [ -f "./.circleci/scripts/set-environment" ]; then
+              ./.circleci/scripts/set-environment
+            else
+              ./vendor/fourkitchens/project_ci/scripts/set-environment
+            fi
+      - run:
+          name: deploy to Pantheon
+          command: |
+            if [ -f "./.circleci/scripts/deploy" ]; then
+              ./.circleci/scripts/deploy
+            else
+              ./vendor/fourkitchens/project_ci/scripts/pantheon/deploy
+            fi
+          no_output_timeout: 30m
+
+  deploy_to_pantheon_to_test:
+    <<: *defaults
+    docker:
+      # quay.io/pantheon-public/build-tools-ci:8.x-php${PHPVERSION}
+      - image: quay.io/pantheon-public/build-tools-ci:8.x-php<< pipeline.parameters.php-version >>
+    environment:
+      <<: *env
+      TZ: /usr/share/zoneinfo/<< pipeline.parameters.tz >>
+      TERM: dumb
+    steps:
+      - restore-project:
+          workspace_root: << pipeline.parameters.artifact_workspace >>
+      - run:
+          name: setup-environment-vars
+          command: |
+            if [ -f "./.circleci/scripts/set-environment" ]; then
+              ./.circleci/scripts/set-environment
+            else
+              ./vendor/fourkitchens/project_ci/scripts/set-environment
+            fi
+      - run:
+          name: deploy to Pantheon
+          command: |
+            if [ -f "./.circleci/scripts/deploy-to-test" ]; then
+              ./.circleci/scripts/deploy-to-test
+            else
+              ./vendor/fourkitchens/project_ci/scripts/pantheon/deploy-to-test
+            fi
+
+  deploy_to_pantheon_to_live:
+    <<: *defaults
+    docker:
+      # quay.io/pantheon-public/build-tools-ci:8.x-php${PHPVERSION}
+      - image: quay.io/pantheon-public/build-tools-ci:8.x-php<< pipeline.parameters.php-version >>
+    environment:
+      <<: *env
+      TZ: /usr/share/zoneinfo/<< pipeline.parameters.tz >>
+      TERM: dumb
+    steps:
+      - restore-project:
+          workspace_root: << pipeline.parameters.artifact_workspace >>
+      - run:
+          name: setup-environment-vars
+          command: |
+            if [ -f "./.circleci/scripts/set-environment" ]; then
+              ./.circleci/scripts/set-environment
+            else
+              ./vendor/fourkitchens/project_ci/scripts/set-environment
+            fi
+      - run:
+          name: deploy to Pantheon
+          command: |
+            if [ -f "./.circleci/scripts/deploy-to-live" ]; then
+              ./.circleci/scripts/deploy-to-live
+            else
+              ./vendor/fourkitchens/project_ci/scripts/pantheon/deploy-to-live
+            fi
+  # Run this on one of the main branches to push a release back to github.
+  #
+  # This usually will do things like create a change log and bump the version
+  # on the source repository.
   release:
-    executor:
-      name: node/default
+    <<: *defaults
     steps:
-      - checkout
-      - node/install-packages:
-          cache-path: ~/project/node_modules
-          override-ci-command: npm ci
+      - setup-project
       - run:
-          command: npm run publish
+          name: Publish a Release
+          command: |
+            if [ -f "./.circleci/scripts/release" ]; then
+              ./.circleci/scripts/release
+            else
+              ./vendor/fourkitchens/project_ci/scripts/release
+            fi
+
 workflows:
   version: 2
-  build:
+  build-deploy-pantheon:
+    when:
+      equal: [ pantheon, << pipeline.parameters.host-variant >> ]
     jobs:
-      - build_node
-      - build_php
-      - release:
+      - static_tests
+      - build
+      # This is doesn't set the branch restraints because multidevs can be
+      # created using any branch.
+      - deploy_to_pantheon:
           requires:
-            - build_node
-            - build_php
+            - static_tests
+            - build
+      - hold-dev:
+          type: approval
+          requires:
+            - deploy_to_pantheon
           filters:
             branches:
               only:
-                - '/^4.*/'
-                - '/^3.*/'
-                - '/^2.*/'
+                - 'main'
+                - 'master'
+      - deploy_to_pantheon_to_test:
+          requires:
+            - hold-dev
+          filters:
+            branches:
+              only:
+                - 'main'
+                - 'master'
+      - hold-test:
+          type: approval
+          requires:
+            - deploy_to_pantheon_to_test
+          filters:
+            branches:
+              only:
+                - 'main'
+                - 'master'
+      - deploy_to_pantheon_to_live:
+          requires:
+            - hold-test
+          filters:
+            branches:
+              only:
+                - 'main'
+                - 'master'
+
+      - release:
+          requires:
+          - deploy_to_pantheon
+          filters:
+            branches:
+              only:
+                - 'main'
+                - 'master'
+  build-deploy-acquia:
+    when:
+      not:
+        equal: [ pantheon, << pipeline.parameters.host-variant >> ]
+    jobs:
+      - static_tests
+      - build
+      - deploy:
+          requires:
+            - static_tests
+            - build
+          filters:
+            branches:
+              only:
                 - main
-                - next
-                - next-major
-                - alpha
-                - beta
+                - master
+                - develop
+                - /release-.*/
+      - release:
+          requires:
+          - deploy
+          filters:
+            branches:
+              only:
+                - 'main'
+                - 'master'
+
+###### Please do not change things in the commands without contributing back.
+node-install-parameters: &node-install-parameters
+  install-yarn:
+      default: false
+      description: Install Yarn?
+      type: boolean
+  node-install-dir:
+      default: /usr/local
+      description: |
+          Where should Node.js be installed?
+      type: string
+  node-version:
+      default: ""
+      description: |
+          Specify the full version tag to install. To install the latest version, set the version to `latest`. If unspecified, the version listed in .nvmrc will be installed. If no .nvmrc file exists the active LTS version of Node.js will be installed by default. For a full list of releases, see the following: https://nodejs.org/en/download/releases
+      type: string
+  yarn-version:
+      default: ""
+      description: |
+          Pick a version of Yarn to install (if no version is specified, the latest stable version will be installed): https://github.com/yarnpkg/yarn/releases
+      type: string
+node-install-packages-parameters: &node-install-packages-parameters
+  node-app-dir:
+    default: .
+    description: >-
+      Path to the directory containing your package.json file. Not needed if
+      package.json lives in the root.
+    type: string
+  node-cache-only-lockfile:
+    default: true
+    description: >
+      If true, package.json will be ignored in the cache key. Useful for
+      projects where package.json changes do not always invalidate dependencies.
+
+      Note: package.json will still be the final fallback key incase a project
+      is not configured with a lock file.
+    type: boolean
+  node-cache-path:
+    default: ''
+    description: >
+      By default, this orb will utilize 'npm ci' and cache the '~/.npm'
+      directory. Override which path to cache with this parameter.
+    type: string
+  node-cache-version:
+    default: v1
+    description: >-
+      Change the default cache version if you need to clear the cache for any
+      reason.
+    type: string
+  node-check-cache:
+    default: never
+    description: |
+      Yarn berry only for Zero install support -
+      Use 'always' to always --check-cache argument to yarn install.
+      Use 'detect' to enable caching of yarn.lock and to only add when required.
+    enum:
+      - never
+      - always
+      - detect
+    type: enum
+  node-include-branch-in-cache-key:
+    default: true
+    description: |
+      If true, this cache bucket will only apply to jobs within the same branch.
+    type: boolean
+  node-override-ci-command:
+    default: ''
+    description: >
+      By default, packages will be installed with "npm ci", "yarn install
+      --frozen-lockfile" or "yarn install --immutable".
+
+      Optionally supply a custom package installation command, with any
+      additional flags needed.
+    type: string
+  node-pkg-manager:
+    default: npm
+    description: Select the default node package manager to use. NPM v5+ Required.
+    enum:
+      - npm
+      - yarn
+      - yarn-berry
+    type: enum
+  node-with-cache:
+    default: true
+    description: Cache your node packages automatically for faster install times.
+    type: boolean
+orbs:
+  node: circleci/node@5.0.3
+  php: circleci/php@1.1.0
+commands:
+  install-project-dependency-managers:
+    description: setup composer and npm.
+    parameters:
+      <<: *node-install-parameters
+    steps:
+      # Most projects require both composer and npm to be installed to do
+      # anything.
+      - php/install-composer
+      - run:
+          name: Set up Github Token
+          command: |
+            # Configure the GitHub Oauth token if it is available
+            if hash composer 2>/dev/null && [[ -n "$GITHUB_TOKEN" ]]; then
+              composer -n config --global github-oauth.github.com $GITHUB_TOKEN
+            fi
+      - node/install:
+          install-yarn: << parameters.install-yarn >>
+          node-install-dir: << parameters.node-install-dir >>
+          node-version: << parameters.node-version >>
+          yarn-version: << parameters.yarn-version >>
+      - run: node --version
+  install-project-dependencies:
+    description: install both npm and composer dependencies
+    parameters:
+      <<: *node-install-packages-parameters
+    steps:
+      - php/install-packages
+      - node/install-packages:
+          app-dir: << parameters.node-app-dir >>
+          cache-only-lockfile: << parameters.node-cache-only-lockfile >>
+          cache-path: << parameters.node-cache-path >>
+          cache-version: << parameters.node-cache-version >>
+          check-cache: << parameters.node-check-cache >>
+          include-branch-in-cache-key: << parameters.node-include-branch-in-cache-key >>
+          override-ci-command: << parameters.node-override-ci-command >>
+          pkg-manager: << parameters.node-pkg-manager >>
+          with-cache: << parameters.node-with-cache >>
+  install-rsync:
+    description: install rsync
+    steps:
+      - run:
+          name: Install rsync
+          command: |
+            if ! command -v rsync &> /dev/null
+            then
+              sudo apt-get update -y
+              sudo apt-get -y install rsync
+            fi
+  setup-project:
+    description: setup php and node and download all dependencies for the project.
+    parameters:
+      <<: *node-install-packages-parameters
+      <<: *node-install-parameters
+    steps:
+      - checkout
+      - install-rsync
+      - install-project-dependency-managers:
+          install-yarn: << parameters.install-yarn >>
+          node-install-dir: << parameters.node-install-dir >>
+          node-version: << parameters.node-version >>
+          yarn-version: << parameters.yarn-version >>
+      - install-project-dependencies:
+          node-app-dir: << parameters.node-app-dir >>
+          node-cache-only-lockfile: << parameters.node-cache-only-lockfile >>
+          node-cache-path: << parameters.node-cache-path >>
+          node-cache-version: << parameters.node-cache-version >>
+          node-check-cache: << parameters.node-check-cache >>
+          node-include-branch-in-cache-key: << parameters.node-include-branch-in-cache-key >>
+          node-override-ci-command: << parameters.node-override-ci-command >>
+          node-pkg-manager: << parameters.node-pkg-manager >>
+          node-with-cache: << parameters.node-with-cache >>
+      - run:
+          name: Set up environment variables
+          command: |
+            if [ -f "./.circleci/scripts/set-environment" ]; then
+              ./.circleci/scripts/set-environment
+            elif [ -f "./vendor/fourkitchens/project_ci/set-environment" ]; then
+              ./vendor/fourkitchens/project_ci/set-environment
+            fi
+  restore-project:
+    description: Restore a Drupal project that was persisted from another job.
+    parameters:
+      workspace_root:
+        description: "Where to copy the workspace to"
+        default: "/tmp/build"
+        type: string
+    steps:
+      - checkout
+      - attach_workspace:
+          at: << parameters.workspace_root >>
+##### Feel free to alter the tasks below to point to your own tasks.
