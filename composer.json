@@ -11,6 +11,18 @@
         {
             "type": "composer",
             "url": "https://asset-packagist.org"
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "emulsify/emulsify-drupal",
+                "version": "5.0",
+                "type": "drupal-theme",
+                "dist": {
+                    "url": "https://github.com/emulsify-ds/emulsify-drupal/archive/refs/heads/release-base-theme.zip",
+                    "type": "zip"
+                }
+            }
         }
     ],
     "require": {
@@ -62,6 +74,7 @@
         "drupal/twig_tweak": "^3.1",
         "drupal/views_ajax_history": "^1.6",
         "drush/drush": "^10.0",
+        "emulsify/emulsify-drupal": "^5.0",
         "npm-asset/blazy": "^1.8",
         "npm-asset/dropzone": "^5.5.1",
         "npm-asset/imagesloaded": "^3.2.0",
