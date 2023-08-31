@@ -77,6 +77,7 @@ module:
   paragraphs_ee: 15
   minimal: 1000
 theme:
+  stable9: 0
   stark: 0
   claro: 0
   gin: 0
