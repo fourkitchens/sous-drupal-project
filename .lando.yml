@@ -20,8 +20,8 @@ services:
     build_as_root:
       - apt-get update -qq -y && apt-get install -qq -y apt-transport-https build-essential unzip
       - apt-get install -qq chromium
-      - sudo apt-get install -y ca-certificates curl gnupg
-      - sudo mkdir -p /etc/apt/keyrings
+      - apt-get install -y ca-certificates curl gnupg
+      - mkdir -p /etc/apt/keyrings
       - curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
       - NODE_MAJOR=16
       - apt-get install -qq -y nodejs
