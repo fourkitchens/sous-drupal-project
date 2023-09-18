@@ -200,10 +200,8 @@ Note: we may want to automate this process of installing/unpacking/removing (TBD
 
 ### Scripts
 1. Added script that installs a recipe using lando (scripts/install-recipe.sh)
-2. Modified setups.sh script to install the Minimal profile without existing config (we will use recipes to install config)
+2. Modified setup.sh script to install the Minimal profile without existing config (we will use recipes to install config)
+3. Modified sous/Starter.php script to rewrite the theme name in the recipe to match the installed theme.
 
 ### Lando
 1. Added command that installs a recipe using a script (see above)
-
-### Issues
-1. With the name of the custom emulsify theme being variable we will have to figure out how to account for this in the recipe somehow
