@@ -8,9 +8,10 @@ install:
   - gin_toolbar
 config:
   import:
-    gin: '*'
+    gin:
+      - gin.settings
   actions:
     system.theme:
       simple_config_update:
-        default: sous-theme
+        default: sous-project
         admin: gin

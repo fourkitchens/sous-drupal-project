@@ -38,6 +38,6 @@ public static function sousPrep() {
   shell_exec ("sed -i.bak 's/sous-project/$emulsify_project_name/g' composer.json && rm -f composer.json.bak");
   shell_exec ("sed -i.bak 's:fourkitchens/sous-drupal-project:project/$dashed_project_name:g' composer.json && rm -f composer.json.bak");
   // Recipe
-  shell_exec ("sed -i.bak 's/sous-theme/$emulsify_project_name/g' assets/scaffold/recipes/sous_base/recipe.yml && rm -f assets/scaffold/recipes/sous_base/recipe.yml.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$emulsify_project_name/g' assets/scaffold/recipes/sous_base/recipe.yml && rm -f assets/scaffold/recipes/sous_base/recipe.yml.bak");
   }
 }

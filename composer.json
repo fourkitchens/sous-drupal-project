@@ -4,6 +4,10 @@
     "type": "project",
     "license": "GPL-2.0-or-later",
     "repositories": {
+        "4": {
+            "type": "vcs",
+            "url": "https://gitlab.ewdev.ca/yonas.legesse/drupal-recipe-unpack.git"
+        },
         "3": {
             "type": "git",
             "url": "https://github.com/fourkitchens/sousdemo.git"
@@ -40,7 +44,7 @@
         "drupal/gin_toolbar": "^1.0@beta",
         "drupal/libraries": "^4.0",
         "drush/drush": "^12.1",
-        "fourkitchens/sous-builder": "dev-sous-content-recipe",
+        "ewcomposer/unpack": "dev-master",
         "oomphinc/composer-installers-extender": "^2.0",
         "webflo/drupal-finder": "^1.2",
         "zaporylie/composer-drupal-optimizations": "^1.0"
@@ -57,7 +61,8 @@
             "cweagans/composer-patches": true,
             "drupal/core-composer-scaffold": true,
             "zaporylie/composer-drupal-optimizations": true,
-            "oomphinc/composer-installers-extender": true
+            "oomphinc/composer-installers-extender": true,
+            "ewcomposer/unpack": true
         },
         "process-timeout": 0
     },
