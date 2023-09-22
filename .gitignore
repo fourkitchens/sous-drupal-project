@@ -137,8 +137,7 @@ app
 # Local reference files.
 /reference/**/*
 !/reference/.gitkeep
-!/reference/civicrm-sample-files.tar.gz
-!/reference/civicrm-sample.sql.gz
 
 # puppeteer images
 .local-chromium
+/.editorconfig
