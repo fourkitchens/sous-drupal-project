@@ -65,7 +65,6 @@ files/*
 # Pantheon commits a settings.php for environment-specific settings.
 # Place local settings in settings.local.php
 web/sites/*/settings.local.php
-web/sites/*/civicrm.settings.local.php
 web/sites/*/services*.yml
 
 # Note that services.local.yml is not loaded by default. If you would like
