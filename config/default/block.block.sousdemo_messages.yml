@@ -1,0 +1,22 @@
+uuid: ed0ef878-1de6-4595-b6c3-f99f32993d2b
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - sousdemo
+_core:
+  default_config_hash: tcDf6u1580tjSti0OKeiHpZYiCeRRXhkZghyNKs5AuE
+id: sousdemo_messages
+theme: sousdemo
+region: header
+weight: -1
+provider: null
+plugin: system_messages_block
+settings:
+  id: system_messages_block
+  label: 'Status messages'
+  label_display: '0'
+  provider: system
+visibility: {  }

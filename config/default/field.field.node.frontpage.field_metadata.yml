@@ -1,0 +1,23 @@
+uuid: 0bca813e-514f-4c4b-9ce0-e7b127bdfd8e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_metadata
+    - node.type.frontpage
+  module:
+    - metatag
+_core:
+  default_config_hash: jexpv2WcqDdeYmuuYvRji_StuxiUo9KmY2hdisYlkM8
+id: node.frontpage.field_metadata
+field_name: field_metadata
+entity_type: node
+bundle: frontpage
+label: Metadata
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: metatag

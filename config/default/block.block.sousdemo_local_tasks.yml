@@ -1,0 +1,22 @@
+uuid: b3eadee3-df20-4f70-9238-c6ade77e23a6
+langcode: en
+status: true
+dependencies:
+  theme:
+    - sousdemo
+_core:
+  default_config_hash: w9DVV4tm9VLlx8xl0Nf9OmenesIlbxom1rejBaXKSy4
+id: sousdemo_local_tasks
+theme: sousdemo
+region: content
+weight: -3
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: Tabs
+  label_display: '0'
+  provider: core
+  primary: true
+  secondary: true
+visibility: {  }

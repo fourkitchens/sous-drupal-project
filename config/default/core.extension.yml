@@ -19,11 +19,9 @@ module:
   dropzonejs: 0
   dynamic_page_cache: 0
   editor: 0
-  entity_browser: 0
-  entity_browser_enhanced: 0
-  entity_embed: 0
   embed: 0
   emulsify_twig: 0
+  entity_embed: 0
   entity_reference_revisions: 0
   entity_usage: 0
   field: 0
@@ -80,4 +78,7 @@ theme:
   stark: 0
   claro: 0
   gin: 0
+  stable9: 0
+  sousdrupalproject: 0
+  sousdemo: 0
 profile: minimal
