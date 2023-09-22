@@ -6,6 +6,7 @@
     "confim": "./scripts/sous/confim.sh",
     "confex": "./scripts/sous/confex.sh",
     "husky:commit-msg": "commitlint --edit $1",
+    "husky:pre-commit": "npm run lint",
     "import-data": "./scripts/sous/import-data.sh",
     "lint:js": "eslint --color --no-error-on-unmatched-pattern --format stylish {web/modules/custom,web/themes/custom}/**/*.js",
     "lint:php": "find web/modules/custom web/themes/custom -name '*.php' -exec php -l {} \\;",
