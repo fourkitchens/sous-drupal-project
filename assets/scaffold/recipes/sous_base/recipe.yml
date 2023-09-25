@@ -3,15 +3,65 @@ description: 'A recipe to install a base Sous Drupal project.'
 type: 'Site'
 
 install:
-  - help
+  - automated_cron
+  - block
+  - block_content
+  - ckeditor5
+  - claro
+  - config_ignore
+  - csp
+  - ctools
+  - dblog
+  - diff
+  - dynamic_page_cache
+  - editor
+  - field_group
+  - field_ui
+  - libraries
+  - login_history
+  - menu_block
+  - metatag
+  - metatag_open_graph
+  - metatag_verification
+  - node
   - gin
   - gin_toolbar
+  - pathauto
+  - redirect
+  - robotstxt
+  - role_delegation
+  - link
+  - simple_sitemap
+  - spamspan
+  - taxonomy
+  - taxonomy_manager
+  - text
+  - token
+  - toolbar
+  - twig_tweak
+  - user
+  - views
+  - views_ajax_history
+  - views_ui
 config:
   import:
+    dblog: '*'
     gin:
       - gin.settings
+      - block.block.gin_breadcrumbs
+      - block.block.gin_content
+      - block.block.gin_local_actions
+      - block.block.gin_messages
+      - block.block.gin_page_title
+      - block.block.gin_primary_local_tasks
+      - block.block.gin_secondary_local_tasks
+  pathauto: '*'
+  redirect:
+    - redirect.settings
+    - system.action.redirect_delete_action
+    - views.view.redirect
   actions:
     system.theme:
       simple_config_update:
-        default: sous-project
+        default: sousproject
         admin: gin

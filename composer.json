@@ -1,5 +1,5 @@
 {
-    "name": "fourkitchens/sous-drupal-recipe",
+    "name": "fourkitchens/sous-drupal-project",
     "description": "Starter project for Sous a Drupal distribution featuring a theme based on Emulsify Design System.",
     "type": "project",
     "license": "GPL-2.0-or-later",
@@ -29,20 +29,30 @@
         "php": ">=8.1",
         "composer/installers": "^1.2",
         "cweagans/composer-patches": "^1.6.5",
-        "drupal/admin_toolbar": "^3.1",
-        "drupal/allowed_formats": "^1.3",
-        "drupal/blazy": "^2.1",
         "drupal/components": "^3.0@beta",
+        "drupal/config_ignore": "^2.4",
         "drupal/core-composer-scaffold": "^10",
         "drupal/core-recommended": "^10",
-        "drupal/crop": "^2.1",
+        "drupal/csp": "^1.21",
         "drupal/ctools": "^4.0",
-        "drupal/dropzonejs": "^2.5",
+        "drupal/diff": "^1.1",
         "drupal/emulsify_twig": "^4.0",
         "drupal/field_group": "^3.1",
         "drupal/gin": "^3.0@alpha",
         "drupal/gin_toolbar": "^1.0@beta",
         "drupal/libraries": "^4.0",
+        "drupal/login_history": "^2.0@alpha",
+        "drupal/menu_block": "^1.0",
+        "drupal/metatag": "^1.0",
+        "drupal/pathauto": "^1.0",
+        "drupal/redirect": "^1.0",
+        "drupal/robotstxt": "^1.0",
+        "drupal/role_delegation": "^1.2",
+        "drupal/simple_sitemap": "^4.1",
+        "drupal/spamspan": "^3.1",
+        "drupal/taxonomy_manager": "^2.0",
+        "drupal/twig_tweak": "^3.2",
+        "drupal/views_ajax_history": "^1.7",
         "drush/drush": "^12.1",
         "ewcomposer/unpack": "dev-master",
         "oomphinc/composer-installers-extender": "^2.0",
@@ -138,7 +148,8 @@
         },
         "patches": {
             "drupal/core": {
-                "Allow application of recipes": "https://git.drupalcode.org/project/distributions_recipes/-/raw/patch/recipe.patch"
+                "Allow application of recipes": "https://git.drupalcode.org/project/distributions_recipes/-/raw/patch/recipe.patch",
+                "#3322547: Set a default message when extensions are missing": "https://git.drupalcode.org/project/distributions_recipes/-/merge_requests/45.patch"
             }
         }
     },
