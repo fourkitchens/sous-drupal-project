@@ -11,7 +11,7 @@ config:
   cache: false
 # proxy:
 #   appserver:
-#     - sous-drupal-recipe.lndo.site:6006
+#     - sous-project.lndo.site:6006
 services:
   appserver:
     build:
@@ -35,7 +35,7 @@ tooling:
   drush:
     service: appserver
     env:
-      DRUSH_OPTIONS_URI: "https://sous-drupal-recipe.lndo.site"
+      DRUSH_OPTIONS_URI: "https://sous-project.lndo.site"
   node:
     service: appserver
   npm:
@@ -76,7 +76,7 @@ tooling:
   compound-install:
     service: appserver
     description: "Install Compound component library"
-    cmd: cd $LANDO_MOUNT && cd web/themes/custom/sousproject && emulsify system install compound
+    cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
   install-recipe:
     service: appserver
     cmd: bash ./scripts/sous/install-recipe.sh

@@ -172,20 +172,17 @@ If you would like to generate another custom theme follow the steps below.
 
 ## Recipe update
 
-Right now these are experimental recipes so that we can get the hang of building them.
+There is a base recipe included and scaffolded called sous_base that includes a basic set of modules for administration and security.
 
-1. There is a base recipe included and scaffolded called sous_base
-2. You can try installing a secondary recipe that is in the sous_builder project
-
-To run setup + install the sous-builder recipe:
+To run setup + install the sous-base recipe:
 1. `lando start`
 2. `lando composer install`
 3. `composer run-script post-create-project-cmd` 
 4. `lando composer require fourkitchens/sous-builder:dev-sous-content-recipe`
-5. `lando install-recipe sous-builder`
+5. `lando install-recipe sous_base`
    
-The following unpacks the composer dependencies to the main composer file so that we can remove the recipe 
-6. `lando composer unpack fourkitchens/sous-builder`
+In the case where we are using an external recipe, the following unpacks the composer dependencies to the main composer file so that we can remove the recipe 
+6. `lando composer unpack fourkitchens/[recipe]`
 
 Note: we may want to automate this process of installing/unpacking/removing (TBD).
 

@@ -63,5 +63,5 @@ config:
   actions:
     system.theme:
       simple_config_update:
-        default: sousproject
+        default: sous-theme
         admin: gin

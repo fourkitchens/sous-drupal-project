@@ -12,13 +12,10 @@ lando emulsify init sous-project --platform drupal
 echo "Installing theme dependencies..."
 lando npm --prefix ./web/themes/custom/sous-project install --silent
 lando drush site:install minimal --account-name=sous-project --account-name=superuser_1 -y
-
-# Commenting this for now to allow for non-interference with recipe until we are ready to add it back.
-#lando drush site:install --existing-config --account-name=sous-project --account-name=superuser_1 -y
-#lando drush user:block superuser_1
-#lando drush user:create sous_chef --mail="sous_chef@fourkitchens.com"
-#lando drush user:role:add 'superuser' superuser_1
-#lando drush user:role:add 'superuser' sous_chef
+lando drush user:block superuser_1
+lando drush user:create sous_chef --mail="sous_chef@fourkitchens.com"
+lando drush user:role:add 'superuser' superuser_1
+lando drush user:role:add 'superuser' sous_chef
 
 echo ""
 echo "//////////////"
@@ -26,5 +23,4 @@ echo " ORDERS UP!"
 echo " Use the following link to log into your new site"
 echo "//////////////"
 echo ""
-#lando drush uli --name=sous_chef
-lando drush uli
+lando drush uli --name=sous_chef
