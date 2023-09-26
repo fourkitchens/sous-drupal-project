@@ -142,6 +142,10 @@
             "drupal/core": {
                 "Allow application of recipes": "https://git.drupalcode.org/project/distributions_recipes/-/raw/patch/recipe.patch",
                 "#3322547: Set a default message when extensions are missing": "https://git.drupalcode.org/project/distributions_recipes/-/merge_requests/45.patch"
+            },
+            "drupal/field_group": {
+                "2969051 - HTML5 Validation Prevents Submission in Tabs": "https://www.drupal.org/files/issues/2023-04-24/2969051-99.patch",
+                "2787179 - Ensure visibility of invalid fields (JS)": "https://www.drupal.org/files/issues/2023-04-07/2787179-highlight-html5-validation-85.patch"
             }
         }
     },
