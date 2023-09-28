@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -eo pipefail
+
+#
+# This is used for static testing and linting. We don't have any right now.
+#
+
+echo "Nothing to do for now"
