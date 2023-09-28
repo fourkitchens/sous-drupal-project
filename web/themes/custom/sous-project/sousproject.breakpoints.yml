@@ -1,0 +1,15 @@
+sousproject.small:
+  label: small
+  mediaQuery: 'all and (min-width: 25em)'
+sousproject.small-med:
+  label: small-med
+  mediaQuery: 'all and (min-width: 26em)'
+sousproject.small-large:
+  label: small-large
+  mediaQuery: 'all and (min-width: 41em)'
+sousproject.medium:
+  label: medium
+  mediaQuery: 'all and (min-width: 48em)'
+sousproject.large:
+  label: large
+  mediaQuery: 'all and (min-width: 61.25em)'
