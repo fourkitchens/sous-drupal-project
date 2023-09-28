@@ -1,0 +1,46 @@
+uuid: ee1c96c0-c5c5-47f7-852f-d49bfe025fff
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.full_html
+  module:
+    - ckeditor5
+format: full_html
+editor: ckeditor5
+settings:
+  toolbar:
+    items:
+      - bold
+      - italic
+      - underline
+      - strikethrough
+      - superscript
+      - subscript
+      - '|'
+      - link
+      - '|'
+      - bulletedList
+      - numberedList
+      - horizontalLine
+      - blockQuote
+      - '|'
+      - insertTable
+      - '|'
+      - sourceEditing
+  plugins:
+    ckeditor5_sourceEditing:
+      allowed_tags: {  }
+    ckeditor5_list:
+      reversed: true
+      startIndex: true
+    media_media:
+      allow_view_mode_override: false
+image_upload:
+  status: true
+  scheme: public
+  directory: inline-images
+  max_size: ''
+  max_dimensions:
+    width: null
+    height: null
