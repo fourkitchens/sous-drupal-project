@@ -75,10 +75,13 @@
         "zaporylie/composer-drupal-optimizations": "^1.0"
     },
     "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "drupal/coder": "^8.3",
         "drupal/devel": "^4.1",
         "drupal/stage_file_proxy": "^1.1",
+        "drupal/upgrade_rector": "^1.0@alpha",
         "drupal/upgrade_status": "^3.11",
-        "drupal/upgrade_rector": "^1.0@alpha"
+        "phpcompatibility/php-compatibility": "^9.3"
     },
     "conflict": {
         "drupal/drupal": "*"
@@ -92,7 +95,8 @@
             "cweagans/composer-patches": true,
             "drupal/core-composer-scaffold": true,
             "zaporylie/composer-drupal-optimizations": true,
-            "oomphinc/composer-installers-extender": true
+            "oomphinc/composer-installers-extender": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
         },
         "process-timeout": 0
     },
@@ -189,8 +193,8 @@
         ],
         "lint": "npm run lint",
         "code-sniff": [
-            "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,info,txt,md --ignore=node_modules,bower_components,vendor ./web/modules/custom",
-            "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,info --ignore=node_modules,dist,bower_components,vendor ./web/themes/custom"
+            "./vendor/bin/phpcs",
+            "./vendor/bin/phpcbf"
         ],
         "post-drupal-scaffold-cmd": [
             "cp web/sites/example.settings.local.php web/sites/default/settings.local.php"

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Drupal Project">
+    <arg name="extensions" value="inc,info,install,module,php,profile,test,theme" />
+    <file>./web/modules</file>
+    <file>./web/themes</file>
+    <file>./web/profiles</file>
+    <exclude-pattern>vendor</exclude-pattern>
+    <exclude-pattern>contrib</exclude-pattern>
+    <exclude-pattern>tests</exclude-pattern>
+    <exclude-pattern>pattern-lab</exclude-pattern>
+    <exclude-pattern>node_modules</exclude-pattern>
+    <rule ref="Drupal"/>
+    <rule ref="DrupalPractice"/>
+    <rule ref="PHPCompatibility"/>
+    <config name="testVersion" value="8.1"/>
+</ruleset>

@@ -7,5 +7,3 @@ set -eo pipefail
 #
 
 echo "Running static tests"
-
-composer phpcs
