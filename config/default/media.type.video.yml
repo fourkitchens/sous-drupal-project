@@ -1,0 +1,22 @@
+uuid: c04922e9-73d5-42a7-b59c-526bc4f56fae
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: pPXg7WP1swVThpAiMSmDgwkNvv9iivGNjA3wDXnDQ3k
+id: video
+label: Video
+description: ''
+source: 'oembed:video'
+queue_thumbnail_downloads: false
+new_revision: true
+source_configuration:
+  source_field: field_media_oembed_video
+  thumbnails_directory: 'public://oembed_thumbnails'
+  providers:
+    - YouTube
+    - Vimeo
+field_map:
+  type: field_media_oembed_video
+  title: name
+  url: field_media_oembed_video

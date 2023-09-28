@@ -1,0 +1,12 @@
+uuid: 89abaaf7-f9d1-4905-aa44-631a8c1f5948
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: 0fwsIK-BokgicSD4KwSeXfdcyKWWZ9C2OyJj7HNJ96M
+id: node.preview
+label: Preview
+targetEntityType: node
+cache: true

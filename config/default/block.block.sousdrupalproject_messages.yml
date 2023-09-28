@@ -1,0 +1,22 @@
+uuid: d076b3fc-7db1-43bf-987a-dfe74bf8935f
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - sousdrupalproject
+_core:
+  default_config_hash: aeqlWs7HwctZeZC7ADcbxfqehJzBRfZKmuZz3DsH3_4
+id: sousdrupalproject_messages
+theme: sousdrupalproject
+region: header
+weight: 0
+provider: null
+plugin: system_messages_block
+settings:
+  id: system_messages_block
+  label: 'Status messages'
+  label_display: '0'
+  provider: system
+visibility: {  }

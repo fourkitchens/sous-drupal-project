@@ -1,0 +1,22 @@
+uuid: f3c39305-72bd-442f-803e-dc7795533885
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+    - paragraphs
+_core:
+  default_config_hash: CIPbqmeNyk7G1WDaUy1sB8nB0htDa1ReRZXmZft6Dw0
+id: paragraph.field_video
+field_name: field_video
+entity_type: paragraph
+type: entity_reference
+settings:
+  target_type: media
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

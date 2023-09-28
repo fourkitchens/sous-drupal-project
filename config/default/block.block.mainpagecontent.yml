@@ -1,0 +1,22 @@
+uuid: fcd199f6-6e77-46d1-bea3-a892ec1fee0c
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - sousdemo
+_core:
+  default_config_hash: qiwsSS9lDwkj8bCspoVBNPrbDRCnHPbn7IcJz2gXyfk
+id: mainpagecontent
+theme: sousdemo
+region: content
+weight: 1
+provider: null
+plugin: system_main_block
+settings:
+  id: system_main_block
+  label: 'Main page content'
+  label_display: '0'
+  provider: system
+visibility: {  }

@@ -1,0 +1,36 @@
+uuid: 4aac87fa-8ae6-4d66-9b93-95090b3de42a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.text_with_media.field_media
+    - field.field.paragraph.text_with_media.field_media_alignment
+    - field.field.paragraph.text_with_media.field_text
+    - paragraphs.paragraphs_type.text_with_media
+  module:
+    - text
+_core:
+  default_config_hash: 5HA2-4-z_A1th7eXYefWrksM7ud6uyMWBu7HL87X4B0
+id: paragraph.text_with_media.default
+targetEntityType: paragraph
+bundle: text_with_media
+mode: default
+content:
+  field_media:
+    type: entity_reference_entity_view
+    weight: 1
+    label: hidden
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
+    region: content
+  field_text:
+    weight: 0
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+hidden:
+  field_media_alignment: true

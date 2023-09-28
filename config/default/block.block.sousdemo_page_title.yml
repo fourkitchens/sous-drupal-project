@@ -1,0 +1,20 @@
+uuid: 0bd1b4d0-bf55-40ff-9e10-1359e6d94ff0
+langcode: en
+status: true
+dependencies:
+  theme:
+    - sousdemo
+_core:
+  default_config_hash: 5iXcSMlN-gdDQNk6oIeFmcT5LOu2zjIuEez3AHbEaeQ
+id: sousdemo_page_title
+theme: sousdemo
+region: content
+weight: -2
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  label_display: '0'
+  provider: core
+visibility: {  }
