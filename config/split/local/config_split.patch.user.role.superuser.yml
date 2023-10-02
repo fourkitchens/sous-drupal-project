@@ -1,0 +1,26 @@
+adding:
+  dependencies:
+    module:
+      - block_content
+      - field_ui
+  permissions:
+    - 'administer block_content display'
+    - 'administer block_content fields'
+    - 'administer block_content form display'
+    - 'administer display modes'
+    - 'administer media display'
+    - 'administer media fields'
+    - 'administer media form display'
+    - 'administer node display'
+    - 'administer node fields'
+    - 'administer node form display'
+    - 'administer paragraph display'
+    - 'administer paragraph fields'
+    - 'administer paragraph form display'
+    - 'administer taxonomy_term display'
+    - 'administer taxonomy_term fields'
+    - 'administer taxonomy_term form display'
+    - 'administer user display'
+    - 'administer user fields'
+    - 'administer user form display'
+removing: {  }

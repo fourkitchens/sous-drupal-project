@@ -1,0 +1,18 @@
+uuid: 1da071f5-13ec-41dd-861b-8551514f423f
+langcode: en
+status: false
+dependencies: {  }
+id: local
+label: Local
+description: ''
+weight: 0
+stackable: false
+storage: folder
+folder: ../config/split/local
+module:
+  devel: 0
+  field_ui: 0
+theme: {  }
+complete_list:
+  - core.extension
+partial_list: {  }

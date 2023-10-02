@@ -23,6 +23,8 @@
         "drupal/ckeditor_browser_context_menu": "^1.2",
         "drupal/components": "^3.0@beta",
         "drupal/config_direct_save": "^1.0",
+        "drupal/config_filter": "^2.4",
+        "drupal/config_split": "^2.0@RC",
         "drupal/content_browser": "^1.0",
         "drupal/core-composer-scaffold": "^9",
         "drupal/core-recommended": "^9",
@@ -74,10 +76,10 @@
         "zaporylie/composer-drupal-optimizations": "^1.0"
     },
     "require-dev": {
-        "drupal/devel": "^4.1",
+        "drupal/devel": "4.2.1",
         "drupal/stage_file_proxy": "^1.1",
-        "drupal/upgrade_status": "^3.11",
-        "drupal/upgrade_rector": "^1.0@alpha"
+        "drupal/upgrade_rector": "^1.0@alpha",
+        "drupal/upgrade_status": "^3.11"
     },
     "conflict": {
         "drupal/drupal": "*"
