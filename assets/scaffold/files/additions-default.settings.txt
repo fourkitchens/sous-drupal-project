@@ -9,3 +9,23 @@ $settings['config_sync_directory'] = '../config/default';
 if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
   include $app_root . '/' . $site_path . '/settings.local.php';
 }
+
+/**
+ * Enable configuration split depending on the environment.
+ */
+if (in_array($settings['server_environment'], ['live'])) {
+  // Placeholder for live server environment.
+  // Currently here to prevent loading any of the dev config below.
+}
+// Config for test.
+elseif (in_array($settings['server_environment'], ['test'])) {
+  $config["config_split.config_split.test"]["status"] = TRUE;
+}
+// Config for dev.
+elseif (in_array($settings['server_environment'], ['dev'])) {
+  $config["config_split.config_split.dev"]["status"] = TRUE;
+}
+// Config for local development environment.
+else {
+  $config["config_split.config_split.local"]["status"] = TRUE;
+}
