@@ -154,7 +154,6 @@
         "post-create-project-cmd": [
             "Sous\\Starter::sousPrep",
             "./scripts/sous/setup.sh",
-            "bash ./scripts/sous/recipe-scaffold.sh"
         ],
         "build-assets": [
             "composer install --optimize-autoloader --no-dev",

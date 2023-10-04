@@ -11,6 +11,7 @@ echo "Initializing your custom project theme based on Emulsify... (this may take
 lando emulsify init sous-project --platform drupal
 echo "Installing theme dependencies..."
 lando npm --prefix ./web/themes/custom/sous-project install --silent
+bash ./scripts/sous/recipe-scaffold.sh
 lando drush site:install minimal --account-name=sous-project --account-name=superuser_1 -y
 lando install-recipe sous_base
 lando drush user:block superuser_1
