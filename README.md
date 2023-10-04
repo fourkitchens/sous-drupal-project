@@ -152,34 +152,18 @@ composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJE
 
 ## Contribute without create-project
 
+## Recipe update
+
+There is a base recipe included and scaffolded called sous_base that includes a basic set of modules for administration and security.
+
+To run setup + install the sous-base recipe:
 1. clone repo `gh repo clone fourkitchens/sous-drupal-project [directory]`
 2. `cd` to your project directory
 3. change the name of your project in .lando.yml
 4. `lando start`
 5. `lando composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
-7. `lando drush config-set system.theme default theme-name -y` (_theme-name_ is the name of your project)
-
-After running the above steps you should have a fully functioning Drupal site with a custom Emulsify theme named after your project.
-
-### Create a custom theme. (Change theme-name to your theme name.)
-
-If you would like to generate another custom theme follow the steps below.
-
-1. `npm ci`
-2. `npx emulsify init theme-name`
-3. `lando drush config-set system.theme default theme-name -y`
-
-## Recipe update
-
-There is a base recipe included and scaffolded called sous_base that includes a basic set of modules for administration and security.
-
-To run setup + install the sous-base recipe:
-1. `lando start`
-2. `lando composer install`
-3. `composer run-script post-create-project-cmd` 
-4. `lando composer require fourkitchens/sous-builder:dev-sous-content-recipe`
-5. `lando install-recipe sous_base`
+7. `lando install-recipe sous_base`
    
 In the case where we are using an external recipe, the following unpacks the composer dependencies to the main composer file so that we can remove the recipe 
 6. `lando composer unpack fourkitchens/[recipe]`
