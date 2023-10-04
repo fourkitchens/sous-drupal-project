@@ -163,12 +163,9 @@ To run setup + install the sous-base recipe:
 4. `lando start`
 5. `lando composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
-7. `lando install-recipe sous_base`
    
 In the case where we are using an external recipe, the following unpacks the composer dependencies to the main composer file so that we can remove the recipe 
 6. `lando composer unpack fourkitchens/[recipe]`
-
-Note: we may want to automate this process of installing/unpacking/removing (TBD).
 
 ### Composer update
 1. Removed the normal Sous Drupal dependencies
@@ -181,8 +178,8 @@ Note: we may want to automate this process of installing/unpacking/removing (TBD
 
 ### Scripts
 1. Added script that installs a recipe using lando (scripts/install-recipe.sh)
-2. Modified setup.sh script to install the Minimal profile without existing config (we will use recipes to install config)
-3. Modified sous/Starter.php script to rewrite the theme name in the recipe to match the installed theme.
+2. Modified setup.sh script to install the Minimal profile without existing config (we will use recipes to install config) and install sous_base recipe
+3. Modified sous/Starter.php script to rewrite the theme name in the recipe to match the installed theme
 
 ### Lando
 1. Added command that installs a recipe using a script (see above)
