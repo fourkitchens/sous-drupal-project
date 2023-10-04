@@ -77,7 +77,6 @@ permissions:
   - 'administer users'
   - 'administer views'
   - 'assign all roles'
-  - 'assign superuser role'
   - 'bypass node access'
   - 'cancel account'
   - 'change own username'
