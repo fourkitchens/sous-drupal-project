@@ -62,7 +62,11 @@ config:
         default: sous-theme
         admin: gin
     block.block.gin_admin:
+      simple_config_update:
+        status: false
     block.block.gin_branding:
+      simple_config_update:
+        status: false
     block.block.gin_tools:
       simple_config_update:
         status: false
