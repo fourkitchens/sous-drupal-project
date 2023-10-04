@@ -8,6 +8,7 @@ install:
   - block_content
   - ckeditor5
   - claro
+  - components
   - config_ignore
   - csp
   - ctools
@@ -15,6 +16,7 @@ install:
   - diff
   - dynamic_page_cache
   - editor
+  - emulsify_twig
   - field_group
   - field_ui
   - libraries
@@ -32,6 +34,7 @@ install:
   - role_delegation
   - link
   - simple_sitemap
+  - sous-theme
   - spamspan
   - taxonomy
   - taxonomy_manager
