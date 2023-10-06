@@ -1,0 +1,37 @@
+uuid: f96528be-c0e8-4fb0-b115-30824e63f63c
+langcode: en
+status: true
+dependencies:
+  module: {  }
+name: 'Restricted HTML'
+format: restricted_html
+weight: 1
+filters:
+  filter_html:
+    id: filter_html
+    provider: filter
+    status: true
+    weight: -10
+    settings:
+      allowed_html: '<br> <p> <a hreflang alt data-entity-substitution data-entity-type data-entity-uuid title href> <strong> <em>'
+      filter_html_help: true
+      filter_html_nofollow: false
+  filter_autop:
+    id: filter_autop
+    provider: filter
+    status: true
+    weight: 0
+    settings: {  }
+  filter_url:
+    id: filter_url
+    provider: filter
+    status: true
+    weight: 0
+    settings:
+      filter_url_length: 72
+  filter_htmlcorrector:
+    id: filter_htmlcorrector
+    provider: filter
+    status: true
+    weight: 10
+    settings: {  }
