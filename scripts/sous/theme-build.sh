@@ -1,3 +1,5 @@
 #!/bin/sh
 
-composer -n build-assets
+cd web/themes/custom/sous-project
+npm ci
+npm run storybook:build
