@@ -14,7 +14,6 @@ dependencies:
     - crop
     - dropzonejs
     - embed
-    - entity_browser
     - entity_reference_revisions
     - entity_usage
     - field_ui
@@ -68,7 +67,6 @@ permissions:
   - 'administer crop types'
   - 'administer display modes'
   - 'administer embed buttons'
-  - 'administer entity browsers'
   - 'administer entity usage'
   - 'administer filters'
   - 'administer image styles'

@@ -19,6 +19,7 @@ settings:
       - subscript
       - '|'
       - link
+      - drupalMedia
       - '|'
       - bulletedList
       - numberedList
@@ -36,6 +37,8 @@ settings:
       startIndex: true
     media_media:
       allow_view_mode_override: false
+    linkit_extension:
+      linkit_enabled: false
 image_upload:
   status: true
   scheme: public
