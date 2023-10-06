@@ -188,13 +188,13 @@
             "npm run storybook-build --prefix web/themes/custom/sous-project",
             "mv ./web/themes/custom/sous-project/.out ./web/storybook"
         ],
+        "post-drupal-scaffold-cmd": [
+            "cp web/sites/example.settings.local.php web/sites/default/settings.local.php"
+        ],
         "lint": "npm run lint",
         "code-sniff": [
             "./vendor/bin/phpcs",
             "./vendor/bin/phpcbf"
-        ],
-        "post-drupal-scaffold-cmd": [
-            "cp web/sites/example.settings.local.php web/sites/default/settings.local.php"
         ]
     }
 }

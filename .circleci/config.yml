@@ -8,7 +8,7 @@ parameters:
   php-version:
     description: major.minor version number for php version to use.
     type: string
-    # This value must be only a major.minor version is pantheon is the
+    # This value must be only a major.minor version if pantheon is the
     # host-variant as the build-tool images do not support major.minor.patch
     # version numbers.
     default: "8.2"
@@ -103,11 +103,11 @@ env: &env
   #
   # Default: empty
   #
-  # SANATIZE_SCRIPT: ./vendor/fourkitchens/project_ci/scripts/sanatize-db
+  # SANATIZE_SCRIPT: ./vendor/fourkitchens/pots/scripts/sanatize-db
 
   # Sync Configuration
   #
-  # We can't identify the sync directory here, so we make an assumption it's
+  # We can't identify the sync directory here, so we make an assumption
   # that if we have the unique (not usually config ignored) system.site.yml
   # somewhere in the ./config directory, that you likely want configuration to
   # be synced. You can manually turn it off here though.
@@ -155,8 +155,9 @@ env: &env
   #
   # REBUILD_MULTIDEV_ENV_EVERY_PUSH: YES
 
-  # Re-sync content for the Github development multidev every time a push is
-  # made to Pantheon.
+  # Re-sync content for the Github
+  # development multidev on Pantheon every time a push is made to
+  # DEVELOPMENT_BRANCH branch.
   #
   # Possible Values: NO, YES
   #
@@ -202,7 +203,7 @@ jobs:
             if [ -f "./.circleci/scripts/test/static" ]; then
               ./.circleci/scripts/test/static
             else
-              ./vendor/fourkitchens/project_ci/scripts/test/static
+              ./vendor/fourkitchens/pots/scripts/test/static
             fi
 
   # Job used to create what will be committed to the Artifact.
@@ -220,7 +221,7 @@ jobs:
             if [ -f "./.circleci/scripts/build/php" ]; then
               ./.circleci/scripts/build/php
             else
-              ./vendor/fourkitchens/project_ci/scripts/build/php
+              ./vendor/fourkitchens/pots/scripts/build/php
             fi
       - run:
           name: run theme build step
@@ -228,7 +229,7 @@ jobs:
             if [ -f "./.circleci/scripts/build/theme" ]; then
               ./.circleci/scripts/build/theme
             else
-              ./vendor/fourkitchens/project_ci/scripts/build/theme
+              ./vendor/fourkitchens/pots/scripts/build/theme
             fi
       - persist_to_workspace:
           root: .
@@ -251,7 +252,7 @@ jobs:
             if [ -f "./.circleci/scripts/deploy" ]; then
               ./.circleci/scripts/deploy
             else
-              ./vendor/fourkitchens/project_ci/scripts/deploy
+              ./vendor/fourkitchens/pots/scripts/deploy
             fi
 
   # Job used to deploy to pantheon.
@@ -271,26 +272,11 @@ jobs:
       TERM: dumb
       # BUILD_TOOLS_VERSION: ^2.0.0-alpha4
     steps:
-      - checkout
       - restore-project:
           workspace_root: << pipeline.parameters.artifact_workspace >>
-      - run:
-          name: setup-environment-vars
-          command: |
-            if [ -f "./.circleci/scripts/set-environment" ]; then
-              ./.circleci/scripts/set-environment
-            else
-              ./vendor/fourkitchens/project_ci/scripts/set-environment
-            fi
-      - run:
-          name: deploy to Pantheon
-          command: |
-            if [ -f "./.circleci/scripts/deploy" ]; then
-              ./.circleci/scripts/deploy
-            else
-              ./vendor/fourkitchens/project_ci/scripts/pantheon/deploy
-            fi
-          no_output_timeout: 30m
+      # This says "dev" but it also handles Multidev instances too.
+      - deploy-to-pantheon-env:
+          environment: 'dev'
 
   deploy_to_pantheon_to_test:
     <<: *defaults
@@ -302,24 +288,8 @@ jobs:
       TZ: /usr/share/zoneinfo/<< pipeline.parameters.tz >>
       TERM: dumb
     steps:
-      - restore-project:
-          workspace_root: << pipeline.parameters.artifact_workspace >>
-      - run:
-          name: setup-environment-vars
-          command: |
-            if [ -f "./.circleci/scripts/set-environment" ]; then
-              ./.circleci/scripts/set-environment
-            else
-              ./vendor/fourkitchens/project_ci/scripts/set-environment
-            fi
-      - run:
-          name: deploy to Pantheon
-          command: |
-            if [ -f "./.circleci/scripts/deploy-to-test" ]; then
-              ./.circleci/scripts/deploy-to-test
-            else
-              ./vendor/fourkitchens/project_ci/scripts/pantheon/deploy-to-test
-            fi
+      - deploy-to-pantheon-env:
+          environment: 'test'
 
   deploy_to_pantheon_to_live:
     <<: *defaults
@@ -331,24 +301,9 @@ jobs:
       TZ: /usr/share/zoneinfo/<< pipeline.parameters.tz >>
       TERM: dumb
     steps:
-      - restore-project:
-          workspace_root: << pipeline.parameters.artifact_workspace >>
-      - run:
-          name: setup-environment-vars
-          command: |
-            if [ -f "./.circleci/scripts/set-environment" ]; then
-              ./.circleci/scripts/set-environment
-            else
-              ./vendor/fourkitchens/project_ci/scripts/set-environment
-            fi
-      - run:
-          name: deploy to Pantheon
-          command: |
-            if [ -f "./.circleci/scripts/deploy-to-live" ]; then
-              ./.circleci/scripts/deploy-to-live
-            else
-              ./vendor/fourkitchens/project_ci/scripts/pantheon/deploy-to-live
-            fi
+      - deploy-to-pantheon-env:
+          environment: 'live'
+
   # Run this on one of the main branches to push a release back to github.
   #
   # This usually will do things like create a change log and bump the version
@@ -363,7 +318,7 @@ jobs:
             if [ -f "./.circleci/scripts/release" ]; then
               ./.circleci/scripts/release
             else
-              ./vendor/fourkitchens/project_ci/scripts/release
+              ./vendor/fourkitchens/pots/scripts/release
             fi
 
 workflows:
@@ -380,7 +335,7 @@ workflows:
           requires:
             - static_tests
             - build
-      - hold-dev:
+      - approve_deploy_to_test:
           type: approval
           requires:
             - deploy_to_pantheon
@@ -391,13 +346,13 @@ workflows:
                 - 'master'
       - deploy_to_pantheon_to_test:
           requires:
-            - hold-dev
+            - approve_deploy_to_test
           filters:
             branches:
               only:
                 - 'main'
                 - 'master'
-      - hold-test:
+      - approve_deploy_to_live:
           type: approval
           requires:
             - deploy_to_pantheon_to_test
@@ -408,7 +363,7 @@ workflows:
                 - 'master'
       - deploy_to_pantheon_to_live:
           requires:
-            - hold-test
+            - approve_deploy_to_live
           filters:
             branches:
               only:
@@ -616,8 +571,8 @@ commands:
           command: |
             if [ -f "./.circleci/scripts/set-environment" ]; then
               ./.circleci/scripts/set-environment
-            elif [ -f "./vendor/fourkitchens/project_ci/set-environment" ]; then
-              ./vendor/fourkitchens/project_ci/set-environment
+            elif [ -f "./vendor/fourkitchens/pots/set-environment" ]; then
+              ./vendor/fourkitchens/pots/set-environment
             fi
   restore-project:
     description: Restore a Drupal project that was persisted from another job.
@@ -630,4 +585,63 @@ commands:
       - checkout
       - attach_workspace:
           at: << parameters.workspace_root >>
+  deploy-to-pantheon-env:
+    description: Do the work to deploy to a pantheon environment.
+    parameters:
+      environment:
+        description: "The environment: dev, test, live. Dev will make accommodations for Multidev workflow"
+        default: "dev"
+        type: string
+    steps:
+      - run:
+          name: Prep Terminus Token for Cache Key
+          command: echo "$TERMINUS_TOKEN" > terminus-cache-key.txt
+      - restore-project:
+          workspace_root: << pipeline.parameters.artifact_workspace >>
+      - restore_cache:
+          keys:
+            - terminus-cache-v1-{{ checksum "terminus-cache-key.txt" }}
+            - terminus-cache-v1-
+      - run:
+          name: setup-environment-vars
+          command: |
+            if [ -f "./.circleci/scripts/set-environment" ]; then
+              ./.circleci/scripts/set-environment
+            else
+              ./vendor/fourkitchens/pots/scripts/set-environment
+            fi
+      - when:
+          condition:
+            and:
+              - equal: [ dev, << parameters.environment >> ]
+          steps:
+            - run:
+                name: deploy to Pantheon
+                command: |
+                  if [ -f "./.circleci/scripts/deploy-to-live" ]; then
+                    ./.circleci/scripts/deploy
+                  else
+                    ./vendor/fourkitchens/pots/scripts/pantheon/deploy
+                  fi
+                no_output_timeout: 30m
+      - when:
+          condition:
+            and:
+              - not:
+                  equal: [ dev, << parameters.environment >> ]
+          steps:
+            - run:
+                name: deploy to Pantheon
+                command: |
+                  if [ -f "./.circleci/scripts/deploy-to-<< parameters.environment >>" ]; then
+                    ./.circleci/scripts/deploy-to-<< parameters.environment >>
+                  else
+                    ./vendor/fourkitchens/pots/scripts/pantheon/deploy-to-<< parameters.environment >>
+                  fi
+                no_output_timeout: 30m
+      - save_cache:
+          key: terminus-cache-v1-{{ checksum "terminus-cache-key.txt" }}
+          paths:
+            - ~/.terminus
+
 ##### Feel free to alter the tasks below to point to your own tasks.
