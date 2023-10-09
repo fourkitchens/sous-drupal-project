@@ -37,6 +37,7 @@ dependencies:
     - taxonomy_manager
     - toolbar
     - update
+    - views_ui
 id: superuser
 label: 'Super User'
 weight: 2
