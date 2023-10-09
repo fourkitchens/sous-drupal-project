@@ -6,13 +6,14 @@ id: local
 label: Local
 description: ''
 weight: 0
-stackable: false
-storage: folder
 folder: ../config/split/local
 module:
   devel: 0
   field_ui: 0
+  stage_file_proxy: 0
+  views_ui: 0
 theme: {  }
-complete_list:
-  - core.extension
-partial_list: {  }
+blacklist: {  }
+graylist: {  }
+graylist_dependents: true
+graylist_skip_equal: true

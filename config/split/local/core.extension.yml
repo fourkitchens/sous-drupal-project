@@ -64,6 +64,7 @@ module:
   responsive_image: 0
   role_delegation: 0
   shortcut: 0
+  stage_file_proxy: 0
   system: 0
   taxonomy: 0
   taxonomy_manager: 0
