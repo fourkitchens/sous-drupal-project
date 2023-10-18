@@ -1,29 +1,3 @@
-// Possible values: local, dev, test, live.
-// Configuration further in this file sets different settings for different
-// environments.
-if (defined('PANTHEON_ENVIRONMENT')) {
-  if (isset($_SERVER['PRESSFLOW_SETTINGS'])) {
-    // This is only set for web, not CLI PHP.
-    // This can only happen at the top of settings.php because it
-    // recreates $conf.
-    extract(json_decode($_SERVER['PRESSFLOW_SETTINGS'], TRUE));
-  }
-  switch (PANTHEON_ENVIRONMENT) {
-    case 'kalabox':
-    case 'lando':
-      $settings['server_environment'] = 'local';
-      break;
-
-    case 'dev':
-    case 'test':
-    case 'live':
-      $settings['server_environment'] = PANTHEON_ENVIRONMENT;
-      break;
-  }
-} else {
-  $settings['server_environment'] = 'local';
-}
-
 /**
  * Set config sync directory.
  */
@@ -36,22 +10,4 @@ if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
   include $app_root . '/' . $site_path . '/settings.local.php';
 }
 
-/**
- * Enable configuration split depending on the environment.
- */
-if (in_array($settings['server_environment'], ['live'])) {
-  // Placeholder for live server environment.
-  // Currently here to prevent loading any of the dev config below.
-}
-// Config for test.
-elseif (in_array($settings['server_environment'], ['test'])) {
-  $config["config_split.config_split.test"]["status"] = TRUE;
-}
-// Config for dev.
-elseif (in_array($settings['server_environment'], ['dev'])) {
-  $config["config_split.config_split.dev"]["status"] = TRUE;
-}
-// Config for local development environment.
-else {
-  $config["config_split.config_split.local"]["status"] = TRUE;
-}
+

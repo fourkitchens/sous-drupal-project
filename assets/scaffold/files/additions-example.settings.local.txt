@@ -1,4 +1,9 @@
 /**
+ * Enable configuration split in local.
+ */
+$config["config_split.config_split.local"]["status"] = TRUE;
+
+/**
  * Salt for one-time login links, cancel links, form tokens, etc.
  */
 $settings['hash_salt'] = 'local';
