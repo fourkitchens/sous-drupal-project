@@ -13,6 +13,7 @@ dependencies:
     - crop
     - dropzonejs
     - embed
+    - entity_browser
     - entity_reference_revisions
     - entity_usage
     - file
@@ -36,6 +37,7 @@ dependencies:
     - taxonomy_manager
     - toolbar
     - update
+    - views_ui
 id: superuser
 label: 'Super User'
 weight: 2
@@ -60,6 +62,7 @@ permissions:
   - 'administer crop'
   - 'administer crop types'
   - 'administer embed buttons'
+  - 'administer entity browsers'
   - 'administer entity usage'
   - 'administer filters'
   - 'administer image styles'
