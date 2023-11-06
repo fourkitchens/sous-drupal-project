@@ -15,6 +15,10 @@
         {
             "type": "vcs",
             "url": "https://gitlab.ewdev.ca/yonas.legesse/drupal-recipe-unpack.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/fourkitchens/sous-builder.git"
         }
     ],
     "require": {
