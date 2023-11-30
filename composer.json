@@ -19,6 +19,18 @@
         {
             "type": "vcs",
             "url": "https://github.com/fourkitchens/sous-builder.git"
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "fourkitchens/cookbook",
+                "version": "1.0.0",
+                "type": "drupal-recipe",
+                "dist": {
+                    "url": "git@github.com:fourkitchens/cookbook.git",
+                    "type": "git"
+                }
+            }
         }
     ],
     "require": {
