@@ -15,10 +15,6 @@
         {
             "type": "vcs",
             "url": "https://gitlab.ewdev.ca/yonas.legesse/drupal-recipe-unpack.git"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/fourkitchens/cookbook.git"
         }
     ],
     "require": {
