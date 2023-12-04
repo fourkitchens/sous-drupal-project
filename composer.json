@@ -19,10 +19,6 @@
         {
             "type": "vcs",
             "url": "https://github.com/fourkitchens/sous-builder.git"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/fourkitchens/cookbook.git"
         }
     ],
     "require": {

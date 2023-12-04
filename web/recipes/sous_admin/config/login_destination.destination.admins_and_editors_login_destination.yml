@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies: {  }
+name: admins_and_editors_login_destination
+label: 'Admins and Editors Login Destination'
+triggers:
+  registration: registration
+  login: login
+  one-time-login: one-time-login
+destination_path: 'internal:/admin/content'
+pages_type: 0
+pages: ''
+language: ''
+roles:
+  superuser: superuser
+  editor: editor
+weight: 0
+enabled: true
