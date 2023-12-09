@@ -5,24 +5,16 @@ dependencies:
   module:
     - block
     - block_content
-    - csp
+    - config
+    - components
     - field_ui
-    - file
     - filter
-    - login_history
-    - metatag
+    - link
     - node
-    - path
-    - pathauto
-    - redirect
-    - robotstxt
-    - role_delegation
-    - simple_sitemap
     - system
-    - taxonomy
-    - taxonomy_manager
-    - toolbar
-    - update
+    - text
+    - user
+    - views
     - views_ui
 id: superuser
 label: Superuser
@@ -35,9 +27,6 @@ permissions:
   - 'access files overview'
   - 'access site in maintenance mode'
   - 'access site reports'
-  - 'access taxonomy manager list'
-  - 'access taxonomy overview'
-  - 'access toolbar'
   - 'access user profiles'
   - 'administer account settings'
   - 'administer block content'
@@ -47,50 +36,33 @@ permissions:
   - 'administer block_content form display'
   - 'administer blocks'
   - 'administer content types'
-  - 'administer csp configuration'
   - 'administer display modes'
   - 'administer filters'
   - 'administer menu'
-  - 'administer meta tags'
   - 'administer modules'
   - 'administer node display'
   - 'administer node fields'
   - 'administer node form display'
   - 'administer nodes'
-  - 'administer pathauto'
   - 'administer permissions'
-  - 'administer redirect settings'
-  - 'administer redirects'
-  - 'administer robots.txt'
   - 'administer site configuration'
-  - 'administer sitemap settings'
   - 'administer software updates'
-  - 'administer taxonomy'
-  - 'administer taxonomy_term display'
-  - 'administer taxonomy_term fields'
-  - 'administer taxonomy_term form display'
   - 'administer themes'
-  - 'administer url aliases'
   - 'administer user display'
   - 'administer user fields'
   - 'administer user form display'
   - 'administer users'
   - 'administer views'
-  - 'assign all roles'
   - 'bypass node access'
   - 'cancel account'
   - 'change own username'
-  - 'create url aliases'
   - 'delete all revisions'
   - 'delete any file'
   - 'delete own files'
   - 'link to any page'
-  - 'notify of path changes'
   - 'revert all revisions'
   - 'select account cancellation method'
-  - 'view all login histories'
   - 'view all revisions'
-  - 'view own login history'
   - 'view own unpublished content'
   - 'view the administration theme'
   - 'view update notifications'

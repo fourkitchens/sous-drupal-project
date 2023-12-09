@@ -1,5 +1,5 @@
 {
-    "name": "fourkitchens/sous-drupal-project",
+    "name": "project/sous-drupal-recipe",
     "description": "Starter project for Sous a Drupal distribution featuring a theme based on Emulsify Design System.",
     "type": "project",
     "license": "GPL-2.0-or-later",
@@ -15,10 +15,6 @@
         {
             "type": "vcs",
             "url": "https://gitlab.ewdev.ca/yonas.legesse/drupal-recipe-unpack.git"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/fourkitchens/sous-builder.git"
         }
     ],
     "require": {
@@ -26,29 +22,9 @@
         "composer/installers": "^1.9",
         "cweagans/composer-patches": "^1.7",
         "drupal/components": "^3.0@beta",
-        "drupal/config_ignore": "^2.4",
         "drupal/core-composer-scaffold": "^10",
         "drupal/core-recommended": "^10",
-        "drupal/csp": "^1.21",
-        "drupal/ctools": "^4.0",
-        "drupal/diff": "^1.1",
         "drupal/emulsify_twig": "^4.0",
-        "drupal/field_group": "^3.1",
-        "drupal/gin": "^3.0@alpha",
-        "drupal/gin_toolbar": "^1.0@beta",
-        "drupal/libraries": "^4.0",
-        "drupal/login_history": "^2.0@alpha",
-        "drupal/menu_block": "^1.0",
-        "drupal/metatag": "^1.0",
-        "drupal/pathauto": "^1.0",
-        "drupal/redirect": "^1.0",
-        "drupal/robotstxt": "^1.0",
-        "drupal/role_delegation": "^1.2",
-        "drupal/simple_sitemap": "^4.1",
-        "drupal/spamspan": "^3.1",
-        "drupal/taxonomy_manager": "^2.0",
-        "drupal/twig_tweak": "^3.2",
-        "drupal/views_ajax_history": "^1.7",
         "drush/drush": "^12.1",
         "ewcomposer/unpack": "dev-master",
         "oomphinc/composer-installers-extender": "^2.0",
@@ -145,8 +121,7 @@
         },
         "patches": {
             "drupal/core": {
-                "Allow application of recipes": "https://git.drupalcode.org/project/distributions_recipes/-/raw/patch/recipe.patch",
-                "#3322547: Set a default message when extensions are missing": "https://git.drupalcode.org/project/distributions_recipes/-/merge_requests/45.patch"
+                "Allow application of recipes": "https://git.drupalcode.org/project/distributions_recipes/-/raw/patch/recipe.patch"
             },
             "drupal/field_group": {
                 "2969051 - HTML5 Validation Prevents Submission in Tabs": "https://www.drupal.org/files/issues/2023-04-24/2969051-99.patch",
