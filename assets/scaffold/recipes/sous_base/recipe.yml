@@ -3,70 +3,23 @@ description: 'A recipe to install a base Sous Drupal project.'
 type: 'Site'
 
 install:
-  - automated_cron
   - block
   - block_content
-  - ckeditor5
-  - claro
+  - config
   - components
-  - config_ignore
-  - csp
-  - ctools
-  - dblog
-  - diff
-  - dynamic_page_cache
-  - editor
   - emulsify_twig
-  - field_group
   - field_ui
-  - libraries
-  - login_history
-  - menu_block
-  - metatag
-  - metatag_open_graph
-  - metatag_verification
-  - node
-  - gin
-  - gin_toolbar
-  - pathauto
-  - redirect
-  - robotstxt
-  - role_delegation
+  - filter
   - link
-  - simple_sitemap
-  - sous-theme
-  - spamspan
-  - taxonomy
-  - taxonomy_manager
+  - node
+  - sousdrupalrecipe
+  - system
   - text
-  - token
-  - toolbar
-  - twig_tweak
   - user
   - views
-  - views_ajax_history
   - views_ui
 config:
-  import:
-    dblog: '*'
-    gin:
-      - gin.settings
-  pathauto: '*'
-  redirect:
-    - redirect.settings
-    - system.action.redirect_delete_action
-    - views.view.redirect
   actions:
     system.theme:
       simple_config_update:
-        default: sous-theme
-        admin: gin
-    block.block.gin_admin:
-      simple_config_update:
-        status: false
-    block.block.gin_branding:
-      simple_config_update:
-        status: false
-    block.block.gin_tools:
-      simple_config_update:
-        status: false
+        default: sousdrupalrecipe
