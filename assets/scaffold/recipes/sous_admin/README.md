@@ -1,5 +1,5 @@
 # Sous Admin Drupal Recipe
-A recipe that contains modules, themes, and configuration for Sous's administration experience.
+A recipe that contains modules, themes, and configuration for the Sous administration experience.
 
 ## Configuring Drupal for Recipes
 

@@ -1,6 +1,6 @@
 {
     "name": "fourkitchens/sous_admin",
-    "description": "A recipe that contains modules, themes, and configuration for Sous's administration experience.",
+    "description": "A recipe that contains modules, themes, and configuration for the Sous administration experience.",
     "keywords": ["recipe", "Drupal recipes", "drupal recipe"],
     "type": "drupal-recipe",
     "license": "GPL-2.0-or-later",
