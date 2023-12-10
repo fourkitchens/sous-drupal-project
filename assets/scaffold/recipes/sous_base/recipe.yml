@@ -12,7 +12,7 @@ install:
   - filter
   - link
   - node
-  - sousdrupalrecipe
+  - sous-theme
   - system
   - text
   - user
@@ -22,4 +22,4 @@ config:
   actions:
     system.theme:
       simple_config_update:
-        default: sousdrupalrecipe
+        default: sous-theme
