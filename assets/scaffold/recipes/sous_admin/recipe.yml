@@ -61,7 +61,6 @@ config:
       - block.block.gin_messages
       - block.block.gin_page_title
       - block.block.gin_primary_local_tasks
-    gin_login: '*'
     login_destination:
       - login_destination.destination.admins_and_editors_login_destination
       - login_destination.settings
