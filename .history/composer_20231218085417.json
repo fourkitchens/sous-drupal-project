@@ -54,7 +54,7 @@
         "drupal/paragraphs_features": "^2.0@beta",
         "drupal/pathauto": "^1.8",
         "drupal/redirect": "^1.6",
-        "drupal/role_delegation": "1.2",
+        "drupal/role_delegation": "1.x-dev",
         "drupal/simple_sitemap": "^4.0@alpha",
         "drupal/slick_browser": "2.x-dev",
         "drupal/spamspan": "^1.2",
@@ -62,7 +62,7 @@
         "drupal/token": "^1.9",
         "drupal/twig_tweak": "^3.1",
         "drupal/views_ajax_history": "^1.6",
-        "drush/drush": "^12",
+        "drush/drush": "^10.0",
         "npm-asset/blazy": "^1.8",
         "npm-asset/dropzone": "^5.5.1",
         "npm-asset/imagesloaded": "^3.2.0",
@@ -75,9 +75,10 @@
         "zaporylie/composer-drupal-optimizations": "^1.0"
     },
     "require-dev": {
-        "drupal/devel": "^5.0.2",
-        "drupal/devel_kint_extras": "^1.1",
-        "drupal/stage_file_proxy": "^2.1",
+        "drupal/devel": "^4.1",
+        "drupal/stage_file_proxy": "^1.1",
+        "drupal/upgrade_status": "^3.11",
+        "drupal/upgrade_rector": "^1.0@alpha"
     },
     "conflict": {
         "drupal/drupal": "*"

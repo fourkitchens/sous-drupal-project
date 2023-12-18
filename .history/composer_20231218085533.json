@@ -75,9 +75,10 @@
         "zaporylie/composer-drupal-optimizations": "^1.0"
     },
     "require-dev": {
-        "drupal/devel": "^5.0.2",
-        "drupal/devel_kint_extras": "^1.1",
-        "drupal/stage_file_proxy": "^2.1",
+        "drupal/devel": "^4.1",
+        "drupal/stage_file_proxy": "^1.1",
+        "drupal/upgrade_status": "^3.11",
+        "drupal/upgrade_rector": "^1.0@alpha"
     },
     "conflict": {
         "drupal/drupal": "*"
