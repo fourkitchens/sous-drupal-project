@@ -77,7 +77,7 @@
     "require-dev": {
         "drupal/devel": "^5.0.2",
         "drupal/devel_kint_extras": "^1.1",
-        "drupal/stage_file_proxy": "^2.1",
+        "drupal/stage_file_proxy": "^2.1"
     },
     "conflict": {
         "drupal/drupal": "*"
