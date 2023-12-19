@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/fourkitchens/sous-drupal-project/compare/5.1.0...5.2.0) (2023-12-19)
+
+
+### Features
+
+* Upgrade Sous to D10 and it's various dependencies to D10-compatible versions ([#110](https://github.com/fourkitchens/sous-drupal-project/issues/110)) ([6034b8e](https://github.com/fourkitchens/sous-drupal-project/commit/6034b8e29d7a668d4aa88cd39de1467a34a8aa97))
+
 # [5.1.0](https://github.com/fourkitchens/sous-drupal-project/compare/5.0.0...5.1.0) (2023-04-27)
 
 
