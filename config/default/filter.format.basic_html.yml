@@ -12,6 +12,36 @@ name: 'Basic HTML'
 format: basic_html
 weight: 0
 filters:
+  editor_file_reference:
+    id: editor_file_reference
+    provider: editor
+    status: false
+    weight: 11
+    settings: {  }
+  entity_embed:
+    id: entity_embed
+    provider: entity_embed
+    status: true
+    weight: 100
+    settings: {  }
+  filter_align:
+    id: filter_align
+    provider: filter
+    status: false
+    weight: 7
+    settings: {  }
+  filter_autop:
+    id: filter_autop
+    provider: filter
+    status: true
+    weight: 0
+    settings: {  }
+  filter_caption:
+    id: filter_caption
+    provider: filter
+    status: false
+    weight: 8
+    settings: {  }
   filter_html:
     id: filter_html
     provider: filter
@@ -21,23 +51,11 @@ filters:
       allowed_html: '<br> <p> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <cite> <dl> <dt> <dd> <span class> <img src alt data-entity-type data-entity-uuid data-align data-caption width height> <drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title> <blockquote cite> <ul type> <ol type start> <drupal-media data-entity-embed-display data-entity-embed-display-settings data-embed-button data-langcode title> <a hreflang data-entity-substitution data-entity-type data-entity-uuid title class href> <strong> <em> <li>'
       filter_html_help: false
       filter_html_nofollow: false
-  filter_align:
-    id: filter_align
+  filter_htmlcorrector:
+    id: filter_htmlcorrector
     provider: filter
-    status: false
-    weight: 7
-    settings: {  }
-  filter_caption:
-    id: filter_caption
-    provider: filter
-    status: false
-    weight: 8
-    settings: {  }
-  editor_file_reference:
-    id: editor_file_reference
-    provider: editor
-    status: false
-    weight: 11
+    status: true
+    weight: 10
     settings: {  }
   filter_url:
     id: filter_url
@@ -57,21 +75,3 @@ filters:
         full: full
       allowed_media_types:
         image: image
-  entity_embed:
-    id: entity_embed
-    provider: entity_embed
-    status: true
-    weight: 100
-    settings: {  }
-  filter_autop:
-    id: filter_autop
-    provider: filter
-    status: true
-    weight: 0
-    settings: {  }
-  filter_htmlcorrector:
-    id: filter_htmlcorrector
-    provider: filter
-    status: true
-    weight: 10
-    settings: {  }

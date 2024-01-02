@@ -1,0 +1,11 @@
+uuid: e24a2ae5-4807-4168-85cc-d1030c875e8d
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+id: media.preview
+label: Preview
+description: ''
+targetEntityType: media
+cache: true

@@ -1,0 +1,34 @@
+uuid: 5202ad56-13f5-4db2-8c9c-627066bfbd07
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.preview
+    - field.field.media.file.field_description
+    - field.field.media.file.field_media_file
+    - field.field.media.file.field_tags
+    - image.style.medium
+    - media.type.file
+  module:
+    - image
+id: media.file.preview
+targetEntityType: media
+bundle: file
+mode: preview
+content:
+  thumbnail:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: medium
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_description: true
+  field_media_file: true
+  field_tags: true
+  name: true
+  uid: true
