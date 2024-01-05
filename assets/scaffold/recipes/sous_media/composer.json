@@ -1,0 +1,18 @@
+{
+    "name": "fourkitchens/sous_media",
+    "description": "A recipe that contains modules and configuration for the Sous media experience.",
+    "keywords": ["recipe", "Drupal recipes", "drupal recipe"],
+    "type": "drupal-recipe",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Laura Johnson",
+            "role": "Maintainer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "drupal/media_library_edit": "^3.0",
+        "drupal/focal_point": "^2.0"
+    }
+}
