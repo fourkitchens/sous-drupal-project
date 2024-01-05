@@ -7,9 +7,9 @@ $settings['hash_salt'] = 'local';
  * Local database configuration.
  */
 $databases['default']['default'] = array (
-  'database' => 'drupal9',
-  'username' => 'drupal9',
-  'password' => 'drupal9',
+  'database' => 'drupal10',
+  'username' => 'drupal10',
+  'password' => 'drupal10',
   'prefix' => '',
   'host' => 'database',
   'port' => '3306',
