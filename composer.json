@@ -15,6 +15,10 @@
         {
             "type": "vcs",
             "url": "https://gitlab.ewdev.ca/yonas.legesse/drupal-recipe-unpack.git"
+        },
+        {
+            "type": "path",
+            "url": "assets/scaffold/recipes/sous_admin"
         }
     ],
     "require": {
@@ -27,6 +31,7 @@
         "drupal/emulsify_twig": "^4.0",
         "drush/drush": "^12.1",
         "ewcomposer/unpack": "dev-master",
+        "fourkitchens/sous_admin": "*",
         "oomphinc/composer-installers-extender": "^2.0",
         "webflo/drupal-finder": "^1.2",
         "zaporylie/composer-drupal-optimizations": "^1.0"
@@ -94,9 +99,6 @@
                 "web-root": "web/"
             },
             "source": "https://git.drupalcode.org/project/drupal/raw/{version}/{path}",
-            "allowed-packages": [
-                "fourkitchens/sous-drupal-distro"
-            ],
             "excludes": [
                 ".eslintrc"
             ],
@@ -120,7 +122,7 @@
         },
         "patches": {
             "drupal/core": {
-                "Allow application of recipes": "https://git.drupalcode.org/project/distributions_recipes/-/raw/patch/recipe.patch"
+                "Allow application of recipes": "https://git.drupalcode.org/project/distributions_recipes/-/raw/patch/recipe-10.2.x.patch"
             },
             "drupal/field_group": {
                 "2969051 - HTML5 Validation Prevents Submission in Tabs": "https://www.drupal.org/files/issues/2023-04-24/2969051-99.patch",
