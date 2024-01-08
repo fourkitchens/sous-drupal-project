@@ -67,6 +67,15 @@ config:
     save_edit:
       - save_edit.settings
   actions:
+    # Update admin_toolbar settings
+    admin_toolbar.settings:
+      simple_config_update:
+        menu_depth: 3
+    # Update admin_toolbar_tools settings
+    admin_toolbar_tools.settings:
+      simple_config_update:
+        max_bundle_number: 3
+        hoverintent_functionality: false
     # Set and unset Gin blocks.
     block.block.gin_admin:
       simple_config_update:
@@ -92,10 +101,31 @@ config:
     block.block.gin_tools:
       simple_config_update:
         status: false
-    # Update the admin theme to Gin in Theme settings.
+    # Update entity_usage
+    entity_usage.settings:
+      simple_config_update:
+        track_enabled_base_fields: true
+        local_task_enabled_entity_types:
+          - media
+    # Update gin settings      -
+    gin.settings:
+      simple_config_update:
+        preset_accent_color: 'green'
+        classic_toolbar: 'horizontal'
+    # Update login_destination settings
+    login_destination.settings:
+      simple_config_update:
+        preserve_destination: TRUE
+    # Update the node settings to use the admin theme.
     node.settings:
       simple_config_update:
         use_admin_theme: true
+    # Update save_edit settings
+    save_edit.settings:
+      simple_config_update:
+        button_value: ''
+        button_weight: '-10'
+    # Update the admin theme to Gin in Theme settings.
     system.theme:
       simple_config_update:
         admin: gin
