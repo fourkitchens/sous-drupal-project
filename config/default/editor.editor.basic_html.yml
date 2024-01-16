@@ -30,6 +30,11 @@ settings:
         - heading4
         - heading5
         - heading6
+    ckeditor5_list:
+      properties:
+        reversed: false
+        startIndex: true
+      multiBlock: true
     ckeditor5_sourceEditing:
       allowed_tags:
         - '<cite>'
@@ -49,9 +54,6 @@ settings:
         - '<ol type>'
         - '<drupal-media data-entity-embed-display data-entity-embed-display-settings data-embed-button data-langcode title>'
         - '<a hreflang data-entity-substitution data-entity-type data-entity-uuid title class>'
-    ckeditor5_list:
-      reversed: false
-      startIndex: true
 image_upload:
   status: true
   scheme: public

@@ -1,0 +1,18 @@
+uuid: 98df81db-ed03-4a07-a69a-cda995483108
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+name: Page
+type: page
+description: 'A general content type for all standard pages.'
+help: ''
+new_revision: true
+preview_mode: 0
+display_submitted: false

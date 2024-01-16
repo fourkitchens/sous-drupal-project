@@ -30,15 +30,17 @@ settings:
       - '|'
       - sourceEditing
   plugins:
+    ckeditor5_list:
+      properties:
+        reversed: true
+        startIndex: true
+      multiBlock: true
     ckeditor5_sourceEditing:
       allowed_tags: {  }
-    ckeditor5_list:
-      reversed: true
-      startIndex: true
-    media_media:
-      allow_view_mode_override: false
     linkit_extension:
       linkit_enabled: false
+    media_media:
+      allow_view_mode_override: false
 image_upload:
   status: true
   scheme: public
