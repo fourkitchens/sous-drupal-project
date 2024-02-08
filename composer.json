@@ -19,6 +19,14 @@
         {
             "type": "path",
             "url": "assets/scaffold/recipes/sous_admin"
+        },
+        {
+            "type": "path",
+            "url": "assets/scaffold/recipes/sous_media"
+        },
+        {
+            "type": "path",
+            "url": "assets/scaffold/recipes/sous_paragraphs"
         }
     ],
     "require": {
@@ -32,6 +40,8 @@
         "drush/drush": "^12.1",
         "ewcomposer/unpack": "dev-master",
         "fourkitchens/sous_admin": "*",
+        "fourkitchens/sous_media": "*",
+        "fourkitchens/sous_paragraphs": "*",
         "oomphinc/composer-installers-extender": "^2.0",
         "webflo/drupal-finder": "^1.2",
         "zaporylie/composer-drupal-optimizations": "^1.0"

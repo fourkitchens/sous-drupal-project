@@ -1,6 +1,6 @@
 name: 'Sous Admin'
 description: 'A recipe that contains modules, themes, and configuration for the Sous administration experience.'
-type: 'Sous'
+type: 'Site'
 
 install:
   # Install core dependencies.

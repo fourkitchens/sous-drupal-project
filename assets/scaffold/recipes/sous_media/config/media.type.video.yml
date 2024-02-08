@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies: {  }
+id: video
+label: Video
+description: ''
+source: 'oembed:video'
+queue_thumbnail_downloads: false
+new_revision: true
+source_configuration:
+  source_field: field_media_oembed_video
+  thumbnails_directory: 'public://oembed_thumbnails'
+  providers:
+    - YouTube
+    - Vimeo
+field_map:
+  type: field_media_oembed_video
+  title: name
+  url: field_media_oembed_video
