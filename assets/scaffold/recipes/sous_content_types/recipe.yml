@@ -1,0 +1,11 @@
+name: 'Sous Content Types'
+description: 'A recipe that contains modules and configuration for Sous default content types.'
+type: 'Sous'
+
+install:
+  # Install core dependencies.
+  - node
+  - publication_date
+  - text
+  - user
+
