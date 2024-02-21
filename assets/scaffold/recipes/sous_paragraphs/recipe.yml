@@ -2,10 +2,7 @@ name: 'Sous Paragraphs'
 description: 'A recipe that contains modules and configuration for Sous content with paragraphs.'
 type: 'Site'
 recipes:
-  - sous_admin
-  - sous_base
   - sous_content_types
-  - sous_media
   - sous_paragraph_types
 
 config:
