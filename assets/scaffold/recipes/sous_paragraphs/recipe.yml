@@ -1,29 +1,81 @@
-name: 'Sous Paragraph Types'
-description: 'A recipe that contains modules and configuration for the default Sous paragraphs types.'
+name: 'Sous Paragraphs'
+description: 'A recipe that contains modules and configuration for Sous content with paragraphs.'
 type: 'Site'
 recipes:
+  - sous_admin
+  - sous_base
+  - sous_content_types
   - sous_media
-install:
-  # Core modules
-  - file
-  - image
-  - media
-  - media_library
-  - options
-  - paragraphs
-  - paragraphs_collapsible
-  - paragraphs_ee
-  - paragraphs_features
-  - taxonomy
-  - views
-  # Contrib modules
-  - focal_point
-  - media_library_edit
+  - sous_paragraph_types
+
 config:
-  import:
-    # Core.
-    image: '*'
-    media: '*'
-    media_library: '*'
-    # Contrib.
-    focal_point: '*'
+  actions:
+    # Update page form display settings
+    core.entity_form_display.node.page.default:
+      dependencies:
+        config:
+          - field.field.node.page.field_content
+          - field.field.node.page.field_metadata
+          - field.field.node.page.field_seo_title
+          - field.field.node.page.field_teaser_text
+          - field.field.node.page.field_text
+          - node.type.page
+        module:
+          - field_group
+          - field_states_ui
+          - metatag
+          - paragraphs
+          - paragraphs_ee
+          - paragraphs_features
+          - publication_date
+          - text
+      third_party_settings:
+        field_group:
+          group_content:
+            children:
+              - field_text
+              - field_content
+    # Update page view display settings
+    core.entity_view_display.node.page.default:
+      dependencies:
+        config:
+          - field.field.node.page.field_content
+          - field.field.node.page.field_metadata
+          - field.field.node.page.field_seo_title
+          - field.field.node.page.field_teaser_text
+          - field.field.node.page.field_text
+          - node.type.page
+        module:
+          - entity_reference_revisions
+          - text
+          - user
+      content:
+        body:
+          type: text_default
+          label: hidden
+          settings: { }
+          third_party_settings: { }
+          weight: 101
+          region: content
+        field_content:
+          type: entity_reference_revisions_entity_view
+          label: hidden
+          settings:
+            view_mode: default
+            link: ''
+          third_party_settings: { }
+          weight: 2
+          region: content
+        field_text:
+          type: text_default
+          label: hidden
+          settings: { }
+          third_party_settings: { }
+          weight: 1
+          region: content
+        links:
+          settings: { }
+          third_party_settings: { }
+          weight: 0
+          region: content
+
