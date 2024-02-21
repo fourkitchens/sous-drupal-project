@@ -1,5 +1,5 @@
-name: 'Sous Paragraphs'
-description: 'A recipe that contains modules and configuration for the Sous paragraphs experience.'
+name: 'Sous Paragraph Types'
+description: 'A recipe that contains modules and configuration for the default Sous paragraphs types.'
 type: 'Site'
 recipes:
   - sous_media

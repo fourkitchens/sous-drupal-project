@@ -4,6 +4,7 @@ type: 'Sous'
 
 install:
   # Install core dependencies.
+  - metatag
   - node
   - publication_date
   - text

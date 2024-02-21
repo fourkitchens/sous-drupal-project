@@ -2,6 +2,8 @@ uuid: c862a9a8-4b38-409e-b337-219931da46ea
 langcode: en
 status: true
 dependencies: {  }
+_core:
+  default_config_hash: P1k6BLL_4uv7duUc22PxGh5aWhu0Jmy2rNSxBqGF1To
 name: Page
 type: page
 description: 'A basic page content type.'
