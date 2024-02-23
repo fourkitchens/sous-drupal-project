@@ -1,0 +1,25 @@
+name: 'Sous Base'
+description: 'A recipe to install a base Sous Drupal project.'
+type: 'Site'
+
+install:
+  - block
+  - block_content
+  - config
+  - components
+  - emulsify_twig
+  - field_ui
+  - filter
+  - link
+  - node
+  - sous-theme
+  - system
+  - text
+  - user
+  - views
+  - views_ui
+config:
+  actions:
+    system.theme:
+      simple_config_update:
+        default: sous-theme

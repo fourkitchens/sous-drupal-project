@@ -152,20 +152,34 @@ composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJE
 
 ## Contribute without create-project
 
+## Recipe update
+
+There is a base recipe included and scaffolded called sous_base that includes a basic set of modules for administration and security.
+
+To run setup + install the sous-base recipe:
 1. clone repo `gh repo clone fourkitchens/sous-drupal-project [directory]`
 2. `cd` to your project directory
 3. change the name of your project in .lando.yml
 4. `lando start`
 5. `lando composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
-7. `lando drush config-set system.theme default theme-name -y` (_theme-name_ is the name of your project)
+   
+In the case where we are using an external recipe, the following unpacks the composer dependencies to the main composer file so that we can remove the recipe 
+6. `lando composer unpack fourkitchens/[recipe]`
 
-After running the above steps you should have a fully functioning Drupal site with a custom Emulsify theme named after your project.
+### Composer update
+1. Removed the normal Sous Drupal dependencies
+2. Upgraded to Drupal 10
+3. Added patch that allows recipes to be applied
+4. Added post update script to scaffold recipes from assets to web/recipes (scripts/recipe-scaffold.sh)
 
-### Create a custom theme. (Change theme-name to your theme name.)
+### Assets
+1. Added sous_base recipe
 
-If you would like to generate another custom theme follow the steps below.
+### Scripts
+1. Added script that installs a recipe using lando (scripts/install-recipe.sh)
+2. Modified setup.sh script to install the Minimal profile without existing config (we will use recipes to install config) and install sous_base recipe
+3. Modified sous/Starter.php script to rewrite the theme name in the recipe to match the installed theme
 
-1. `npm ci`
-2. `npx emulsify init theme-name`
-3. `lando drush config-set system.theme default theme-name -y`
+### Lando
+1. Added command that installs a recipe using a script (see above)

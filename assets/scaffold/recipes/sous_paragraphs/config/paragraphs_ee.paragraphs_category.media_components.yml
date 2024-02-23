@@ -1,0 +1,8 @@
+uuid: 7629901a-d75f-4c22-a2c3-a45e8b1e8d75
+langcode: en
+status: true
+dependencies: {  }
+id: media_components
+label: 'Media Components'
+description: ''
+weight: -10

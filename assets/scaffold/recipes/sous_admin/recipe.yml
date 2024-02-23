@@ -1,0 +1,133 @@
+name: 'Sous Admin'
+description: 'A recipe that contains modules, themes, and configuration for the Sous administration experience.'
+type: 'Site'
+
+install:
+  # Install core dependencies.
+  - config
+  - help
+  - field
+  - filter
+  - node
+  - path_alias
+  - system
+  - text
+  - user
+  - views
+  # Install Claro as it is a dependency of Gin, but don't import config.
+  - claro
+  # Install Toolbar as it is a dependency of Gin Toolbar.
+  - toolbar
+  - admin_toolbar
+  - admin_toolbar_search
+  - admin_toolbar_tools
+  # Install Gin theme and base modules that extend it.
+  - gin
+  - gin_toolbar
+  # Install Emulsify base theme.
+  - emulsify
+  # Install Entity Usuage
+  - entity_usage
+  # Install Field Group and dependencies
+  - field_group
+  # Install Field States UI
+  - field_states_ui
+  # Install Login Destination
+  - login_destination
+  # Install Login History
+  - login_history
+  # Install Media Library Edit
+  - media_library_edit
+  # Install Publication Date
+  - publication_date
+  # Install Save and Edit
+  - save_edit
+  # Install Views AJAX History
+  - views_ajax_history
+  # Install Views Bulk Operations
+  - views_bulk_operations
+
+config:
+  import:
+    admin_toolbar: '*'
+    admin_toolbar_search: '*'
+    admin_toolbar_tools: '*'
+    entity_usage:
+      - entity_usage.settings
+    gin:
+      - gin.settings
+      - block.block.gin_breadcrumbs
+      - block.block.gin_content
+      - block.block.gin_help
+      - block.block.gin_local_actions
+      - block.block.gin_messages
+      - block.block.gin_page_title
+      - block.block.gin_primary_local_tasks
+    login_destination:
+      - login_destination.destination.admins_and_editors_login_destination
+      - login_destination.settings
+    save_edit:
+      - save_edit.settings
+  actions:
+    # Update admin_toolbar settings
+    admin_toolbar.settings:
+      simple_config_update:
+        menu_depth: 3
+    # Update admin_toolbar_tools settings
+    admin_toolbar_tools.settings:
+      simple_config_update:
+        max_bundle_number: 3
+        hoverintent_functionality: false
+    # Set and unset Gin blocks.
+    block.block.gin_admin:
+      simple_config_update:
+        status: false
+    block.block.gin_branding:
+      simple_config_update:
+        status: false
+    block.block.gin_local_actions:
+      simple_config_update:
+        region: content
+        weight: -10
+    block.block.gin_local_tasks:
+      simple_config_update:
+        status: false
+    block.block.gin_page_title:
+      simple_config_update:
+        region: header
+        weight: -10
+    block.block.gin_primary_local_tasks:
+      simple_config_update:
+        region: header
+        weight: -5
+    block.block.gin_tools:
+      simple_config_update:
+        status: false
+    # Update entity_usage
+    entity_usage.settings:
+      simple_config_update:
+        track_enabled_base_fields: true
+        local_task_enabled_entity_types:
+          - media
+    # Update gin settings      -
+    gin.settings:
+      simple_config_update:
+        preset_accent_color: 'green'
+        classic_toolbar: 'horizontal'
+    # Update login_destination settings
+    login_destination.settings:
+      simple_config_update:
+        preserve_destination: TRUE
+    # Update the node settings to use the admin theme.
+    node.settings:
+      simple_config_update:
+        use_admin_theme: true
+    # Update save_edit settings
+    save_edit.settings:
+      simple_config_update:
+        button_value: ''
+        button_weight: '-10'
+    # Update the admin theme to Gin in Theme settings.
+    system.theme:
+      simple_config_update:
+        admin: gin
