@@ -6,74 +6,126 @@ recipes:
   - sous_paragraph_types
 
 config:
+  import:
+    field_states_ui: '*'
+    paragraphs_ee: '*'
+    paragraphs_features: '*'
   actions:
     # Update page form display settings
     core.entity_form_display.node.page.default:
+      setComponent:
+        name: field_content
+        options:
+          type: paragraphs
+          weight: 123
+          region: content
+          settings:
+            title: Component
+            title_plural: Components
+            edit_mode: open
+            closed_mode: summary
+            autocollapse: none
+            closed_mode_threshold: 0
+            add_mode: dropdown
+            form_display_mode: default
+            default_paragraph_type: _none
+            features:
+              add_above: add_above
+              collapse_edit_all: collapse_edit_all
+              convert: '0'
+              duplicate: '0'
+          third_party_settings:
+            paragraphs_features:
+              add_in_between: false
+              add_in_between_link_count: 3
+              delete_confirmation: true
+              show_drag_and_drop: true
+              show_collapse_all: true
+            field_states_ui:
+              form:
+                type: ''
+                list: ''
+                add: Add
+            paragraphs_ee:
+              paragraphs_ee:
+                dialog_off_canvas: false
+                dialog_style: tiles
       simple_config_update:
-        dependencies:
-          config:
-            - field.field.node.page.field_content
-            - field.field.node.page.field_metadata
-            - field.field.node.page.field_seo_title
-            - field.field.node.page.field_teaser_text
-            - field.field.node.page.field_text
-            - node.type.page
-          module:
-            - field_group
-            - field_states_ui
-            - metatag
-            - paragraphs
-            - paragraphs_ee
-            - paragraphs_features
-            - publication_date
-            - text
         third_party_settings:
           field_group:
+            group_main:
+              children:
+                - group_info
+                - group_content
+                - group_teaser
+              label: Main
+              region: content
+              parent_name: ''
+              weight: 0
+              format_type: tabs
+              format_settings:
+                classes: ''
+                show_empty_fields: false
+                id: ''
+                direction: horizontal
+                width_breakpoint: 640
+            group_info:
+              children:
+                - title
+                - field_seo_title
+              label: Info
+              region: content
+              parent_name: group_main
+              weight: 20
+              format_type: tab
+              format_settings:
+                classes: ''
+                show_empty_fields: false
+                id: ''
+                formatter: open
+                description: ''
+                required_fields: true
             group_content:
               children:
-                - field_text
                 - field_content
+                - field_text
+              label: Content
+              region: content
+              parent_name: group_main
+              weight: 21
+              format_type: tab
+              format_settings:
+                classes: ''
+                show_empty_fields: false
+                id: ''
+                formatter: closed
+                description: ''
+                required_fields: true
+            group_teaser:
+              children:
+                - field_teaser_text
+              label: Teaser
+              region: content
+              parent_name: group_main
+              weight: 22
+              format_type: tab
+              format_settings:
+                classes: ''
+                show_empty_fields: false
+                id: ''
+                formatter: closed
+                description: ''
+                required_fields: true
     # Update page view display settings
     core.entity_view_display.node.page.default:
-      simple_config_update:
-        dependencies:
-          config:
-            - field.field.node.page.field_content
-            - field.field.node.page.field_metadata
-            - field.field.node.page.field_seo_title
-            - field.field.node.page.field_teaser_text
-            - field.field.node.page.field_text
-            - node.type.page
-          module:
-            - entity_reference_revisions
-            - text
-            - user
-        content:
-          body:
-            type: text_default
-            label: hidden
-            settings: { }
-            third_party_settings: { }
-            weight: 101
-            region: content
-          field_content:
-            type: entity_reference_revisions_entity_view
-            label: hidden
-            settings:
-              view_mode: default
-              link: ''
-            third_party_settings: { }
-            weight: 2
-            region: content
-          field_text:
-            type: text_default
-            label: hidden
-            settings: { }
-            third_party_settings: { }
-            weight: 1
-            region: content
-          links:
-            settings: { }
-            third_party_settings: { }
-            weight: 0
-            region: content
+      setComponent:
+        name: field_content
+        options:
+          type: entity_reference_revisions_entity_view
+          label: hidden
+          settings:
+            view_mode: default
+            link: ''
+          third_party_settings: {  }
+          weight: 10
+          region: content
