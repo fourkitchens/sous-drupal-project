@@ -7,7 +7,7 @@ install:
   - block_content
   - config
   - components
-  - emulsify_twig
+  - emulsify_tools
   - field_ui
   - filter
   - link
