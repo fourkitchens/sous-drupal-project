@@ -10,3 +10,14 @@ install:
   - text
   - user
 
+config:
+  import:
+    metatag: '*'
+  actions:
+    # Update metatag default node settings
+    metatag.metatag_defaults.node:
+      simple_config_update:
+        tags:
+          canonical_url: '[node:url]'
+          description: '[node:field_teaser_text]'
+          title: '[node:field_seo_title]'
