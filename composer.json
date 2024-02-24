@@ -22,15 +22,23 @@
         },
         {
             "type": "path",
+            "url": "assets/scaffold/recipes/sous_content_types"
+        },
+        {
+            "type": "path",
             "url": "assets/scaffold/recipes/sous_media"
         },
         {
             "type": "path",
+<<<<<<< HEAD
             "url": "assets/scaffold/recipes/sous_paragraphs"
         },
         {
             "type": "path",
             "url": "assets/scaffold/recipes/sous_formats"
+=======
+            "url": "assets/scaffold/recipes/sous_paragraph_types"
+>>>>>>> 4d87f45 (update recipes in composer)
         }
     ],
     "require": {
@@ -44,9 +52,11 @@
         "drush/drush": "^12.1",
         "ewcomposer/unpack": "dev-master",
         "fourkitchens/sous_admin": "*",
+        "fourkitchens/sous_content_types": "*",
+        "fourkitchens/sous_formats": "*",
         "fourkitchens/sous_media": "*",
         "fourkitchens/sous_paragraphs": "*",
-        "fourkitchens/sous_formats": "*",
+        "fourkitchens/sous_paragraph_types": "*",
         "oomphinc/composer-installers-extender": "^2.0",
         "webflo/drupal-finder": "^1.2",
         "zaporylie/composer-drupal-optimizations": "^1.0"
@@ -138,7 +148,8 @@
         },
         "patches": {
             "drupal/core": {
-                "Allow application of recipes": "https://git.drupalcode.org/project/distributions_recipes/-/raw/patch/recipe-10.2.x.patch"
+                "Allow application of recipes": "https://git.drupalcode.org/project/distributions_recipes/-/raw/patch/recipe-10.2.x.patch",
+                "Simple config add action": "https://git.drupalcode.org/project/distributions_recipes/-/merge_requests/79/diffs.patch"
             },
             "drupal/field_group": {
                 "2969051 - HTML5 Validation Prevents Submission in Tabs": "https://www.drupal.org/files/issues/2023-04-24/2969051-99.patch",
