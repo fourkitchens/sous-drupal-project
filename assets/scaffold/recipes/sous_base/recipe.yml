@@ -7,12 +7,12 @@ install:
   - block_content
   - config
   - components
+  - emulsify
   - emulsify_tools
   - field_ui
   - filter
   - link
   - node
-  - sous-theme
   - system
   - text
   - user
@@ -22,4 +22,4 @@ config:
   actions:
     system.theme:
       simple_config_update:
-        default: sous-theme
+        default: emulsify
