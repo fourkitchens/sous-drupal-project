@@ -16,6 +16,8 @@ echo "Creating an Emulsify based theme..."
 lando drush emulsify sous-project
 echo "Installing theme dependencies..."
 lando npm --prefix ./web/themes/custom/sous-project install --silent
+echo "Set sous-project as the default theme..."
+lando drush config-set system.theme default sous-project -y
 lando drush user:block superuser_1
 lando drush user:create sous_chef --mail="sous_chef@fourkitchens.com"
 lando drush user:role:add 'superuser' superuser_1
