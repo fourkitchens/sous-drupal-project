@@ -14,7 +14,7 @@
         },
         {
             "type": "vcs",
-            "url": "https://gitlab.ewdev.ca/yonas.legesse/drupal-recipe-unpack.git"
+            "url": "https://github.com/woredeyonas/Drupal-Recipe-Unpack.git"
         },
         {
             "type": "path",
