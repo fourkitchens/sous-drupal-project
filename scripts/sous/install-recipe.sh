@@ -8,7 +8,8 @@
 #
 
 recipe_full_package_name="$1"
-recipe_directory_name=$(echo "$recipe_directory_name" | cut -d'/' -f2)
+IFS='/' read -ra recipe_split <<< "$recipe_full_package_name"
+recipe_directory_name="${recipe_split[1]}"
 
 if [ $# -eq 0 ]; then
  echo "Usage: specify the directory name inside of /app/recipes/ that you want to install:"
