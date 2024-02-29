@@ -1,9 +1,12 @@
 name: 'Sous Content Types'
 description: 'A recipe that contains modules and configuration for Sous default content types.'
 type: 'Sous'
+recipes:
+  - sous_media
 
 install:
   # Install core dependencies.
+  - media
   - metatag
   - node
   - publication_date

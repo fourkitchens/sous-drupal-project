@@ -4,6 +4,7 @@ dependencies:
   config:
     - field.field.node.page.field_metadata
     - field.field.node.page.field_seo_title
+    - field.field.node.page.field_teaser_media
     - field.field.node.page.field_teaser_text
     - field.field.node.page.field_text
     - node.type.page
@@ -40,5 +41,6 @@ content:
 hidden:
   field_metadata: true
   field_seo_title: true
+  field_teaser_media: true
   field_teaser_text: true
   published_at: true

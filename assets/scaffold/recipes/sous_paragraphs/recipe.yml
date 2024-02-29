@@ -103,6 +103,7 @@ config:
                 required_fields: true
             group_teaser:
               children:
+                - field_teaser_media
                 - field_teaser_text
               label: Teaser
               region: content

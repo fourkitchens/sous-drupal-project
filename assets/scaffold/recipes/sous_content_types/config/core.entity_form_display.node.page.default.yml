@@ -4,11 +4,13 @@ dependencies:
   config:
     - field.field.node.page.field_metadata
     - field.field.node.page.field_seo_title
+    - field.field.node.page.field_teaser_media
     - field.field.node.page.field_teaser_text
     - field.field.node.page.field_text
     - node.type.page
   module:
     - field_group
+    - media_library
     - metatag
     - publication_date
     - text
@@ -63,6 +65,7 @@ third_party_settings:
         required_fields: true
     group_teaser:
       children:
+        - field_teaser_media
         - field_teaser_text
       label: Teaser
       region: content
@@ -115,6 +118,13 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_teaser_media:
+    type: media_library_widget
+    weight: 8
+    region: content
+    settings:
+      media_types: { }
+    third_party_settings: { }
   field_teaser_text:
     type: string_textarea
     weight: 9
