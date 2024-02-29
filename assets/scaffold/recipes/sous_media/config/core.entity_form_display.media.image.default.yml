@@ -32,7 +32,6 @@ third_party_settings:
         formatter: closed
         description: ''
         required_fields: true
-        open: false
     group_tabs:
       children:
         - group_image_content
