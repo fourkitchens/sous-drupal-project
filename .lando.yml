@@ -31,11 +31,6 @@ services:
       - chown -R www-data /usr/bin
       - npm install --silent -g npm@latest
       - npm install --silent -g @emulsify/cli
-  database:
-    creds:
-      user: drupal10
-      password: drupal10
-      database: drupal10
 tooling:
   drush:
     service: appserver
