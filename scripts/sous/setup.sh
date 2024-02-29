@@ -13,9 +13,9 @@ echo "Installing theme dependencies..."
 lando npm --prefix ./web/themes/custom/sous-project install --silent
 bash ./scripts/sous/recipe-scaffold.sh
 lando drush site:install minimal --account-name=sous-project --account-name=superuser_1 -y
-lando install-recipe sous_base
-lando install-recipe sous_admin
-lando install-recipe sous_paragraphs
+lando install-recipe fourkichens/sous_base
+lando install-recipe fourkichens/sous_admin
+lando install-recipe fourkichens/sous_paragraphs
 lando drush user:block superuser_1
 lando drush user:create sous_chef --mail="sous_chef@fourkitchens.com"
 lando drush user:role:add 'superuser' superuser_1
