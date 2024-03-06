@@ -1,0 +1,11 @@
+name: 'Sous Formats'
+description: 'A recipe that contains modules and configuration for Sous default date and text formats.'
+type: 'Sous'
+
+install:
+  - editor
+  - entity_embed
+  - media
+config:
+  import:
+    metatag: '*'
