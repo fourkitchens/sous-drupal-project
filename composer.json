@@ -26,19 +26,19 @@
         },
         {
             "type": "path",
+            "url": "assets/scaffold/recipes/sous_formats"
+        },
+        {
+            "type": "path",
             "url": "assets/scaffold/recipes/sous_media"
         },
         {
             "type": "path",
-<<<<<<< HEAD
-            "url": "assets/scaffold/recipes/sous_paragraphs"
+            "url": "assets/scaffold/recipes/sous_paragraph_types"
         },
         {
             "type": "path",
-            "url": "assets/scaffold/recipes/sous_formats"
-=======
-            "url": "assets/scaffold/recipes/sous_paragraph_types"
->>>>>>> 4d87f45 (update recipes in composer)
+            "url": "assets/scaffold/recipes/sous_paragraphs"
         }
     ],
     "require": {
@@ -55,8 +55,8 @@
         "fourkitchens/sous_content_types": "*",
         "fourkitchens/sous_formats": "*",
         "fourkitchens/sous_media": "*",
-        "fourkitchens/sous_paragraphs": "*",
         "fourkitchens/sous_paragraph_types": "*",
+        "fourkitchens/sous_paragraphs": "*",
         "oomphinc/composer-installers-extender": "^2.0",
         "webflo/drupal-finder": "^1.2",
         "zaporylie/composer-drupal-optimizations": "^1.0"

@@ -4,8 +4,10 @@ type: 'Site'
 
 install:
   # Core modules
+  - field_group
   - file
   - image
+  - link
   - media
   - media_library
   - taxonomy
