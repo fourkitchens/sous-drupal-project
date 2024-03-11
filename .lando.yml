@@ -9,9 +9,6 @@ config:
   index: false
   edge: false
   cache: false
-# proxy:
-#   appserver:
-#     - sous-project.lndo.site:6006
 services:
   appserver:
     build:
@@ -31,6 +28,9 @@ services:
       - chown -R www-data /usr/bin
       - npm install --silent -g npm@latest
       - npm install --silent -g @emulsify/cli
+proxy:
+  node:
+    - storybook.sous-project.lndo.site:6006
 tooling:
   drush:
     service: appserver
