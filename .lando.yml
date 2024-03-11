@@ -28,10 +28,9 @@ services:
       - chown -R www-data /usr/bin
       - npm install --silent -g npm@latest
       - npm install --silent -g @emulsify/cli
-proxy:
-  appserver:
-    - sous-project.lndo.site
-    - storybook.sous-project.lndo.site:6006
+    overrides:
+      ports:
+        - 6006:6006
 tooling:
   drush:
     service: appserver
