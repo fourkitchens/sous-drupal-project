@@ -30,7 +30,7 @@ services:
       - npm install --silent -g @emulsify/cli
 proxy:
   node:
-    - storybook.sous-project.lndo.site:6006
+    - sous-project.lndo.site:6006
 tooling:
   drush:
     service: appserver
