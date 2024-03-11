@@ -1,11 +1,15 @@
 name: 'Sous Formats'
 description: 'A recipe that contains modules and configuration for Sous default date and text formats.'
-type: 'Sous'
+type: 'Site'
 
 install:
   - editor
   - entity_embed
+  - filter
   - media
 config:
   import:
-    metatag: '*'
+    filter:
+      - filter.format.plain_text.yml
+    media:
+      - core.entity_view_mode.media.full

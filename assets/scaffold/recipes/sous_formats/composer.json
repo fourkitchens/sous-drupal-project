@@ -1,0 +1,17 @@
+{
+    "name": "fourkitchens/sous_formats",
+    "description": "A recipe that contains default text and date formats.",
+    "keywords": ["recipe", "Drupal recipes", "drupal recipe"],
+    "type": "drupal-recipe",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Hector Lopez",
+            "role": "Maintainer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "drupal/entity_embed":  "^1.4"
+    }
+}
