@@ -40,7 +40,7 @@
         "drupal/components": "^3.0@beta",
         "drupal/core-composer-scaffold": "^10",
         "drupal/core-recommended": "^10",
-        "drupal/emulsify_tools": "1.0.x-dev@dev",
+        "drupal/emulsify_tools": "^1.0.x-dev@dev",
         "drush/drush": "^12.1",
         "emulsify-ds/emulsify-drupal": "dev-release-base-theme",
         "ewcomposer/unpack": "dev-master",
