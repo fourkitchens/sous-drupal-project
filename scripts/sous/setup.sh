@@ -14,7 +14,7 @@ lando install-recipe sous_admin
 lando install-recipe sous_paragraphs
 echo "Creating an Emulsify based theme..."
 lando drush emulsify sous-project
-echo "Installing theme dependencies..."
+echo "Installing theme dependencies... This may take a minute..."
 lando npm --prefix ./web/themes/custom/sous-project install --silent
 echo "Enable sous-project set as the default theme..."
 lando drush theme:install sous-project
