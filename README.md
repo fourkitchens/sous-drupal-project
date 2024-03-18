@@ -161,7 +161,7 @@ To run setup + install:
 2. `cd` to your project directory
 3. change the name of your project in .lando.yml
 4. `lando start`
-5. `lando composer install`
+5. `composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
 
 For the paragraphs version of Sous, run:
