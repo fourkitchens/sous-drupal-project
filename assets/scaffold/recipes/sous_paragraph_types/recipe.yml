@@ -2,6 +2,7 @@ name: 'Sous Paragraph Types'
 description: 'A recipe that contains modules and configuration for the default Sous paragraphs types.'
 type: 'Site'
 recipes:
+  - sous_formats
   - sous_media
 install:
   # Core modules
@@ -13,17 +14,8 @@ install:
   - paragraphs
   - paragraphs_collapsible
   - paragraphs_ee
-  - paragraphs_features
   - taxonomy
   - views
   # Contrib modules
   - focal_point
   - media_library_edit
-config:
-  import:
-    # Core.
-    image: '*'
-    media: '*'
-    media_library: '*'
-    # Contrib.
-    focal_point: '*'

@@ -2,9 +2,12 @@ name: 'Sous Paragraphs'
 description: 'A recipe that contains modules and configuration for Sous content with paragraphs.'
 type: 'Site'
 recipes:
+  - sous_base
+  - sous_admin
   - sous_content_types
   - sous_paragraph_types
-
+install:
+  - paragraphs_features
 config:
   import:
     field_states_ui: '*'

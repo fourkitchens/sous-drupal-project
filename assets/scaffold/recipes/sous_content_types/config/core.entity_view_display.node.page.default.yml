@@ -12,17 +12,16 @@ dependencies:
     - metatag
     - text
     - user
-_core:
-  default_config_hash: Qs3aZhDg2Qx09DPK37VtTAqv2raYXlFl1fm-J3Js-M4
 id: node.page.default
 targetEntityType: node
 bundle: page
 mode: default
 content:
   body:
-    type: text_default
+    type: text_summary_or_trimmed
     label: hidden
-    settings: {  }
+    settings:
+      trim_length: 600
     third_party_settings: {  }
     weight: 101
     region: content
@@ -36,7 +35,7 @@ content:
   links:
     settings: {  }
     third_party_settings: {  }
-    weight: 0
+    weight: 100
     region: content
 hidden:
   field_metadata: true

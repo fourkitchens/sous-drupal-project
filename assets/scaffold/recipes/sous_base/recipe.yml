@@ -1,25 +1,12 @@
 name: 'Sous Base'
-description: 'A recipe to install a base Sous Drupal project.'
+description: 'A recipe to install a base Sous Drupal project with Emulsify dependencies.'
 type: 'Site'
-
 install:
-  - block
-  - block_content
-  - config
   - components
   - emulsify_twig
-  - field_ui
-  - filter
-  - link
-  - node
-  - sous-theme
-  - system
-  - text
-  - user
-  - views
-  - views_ui
+  - sousdrupalrecipe
 config:
   actions:
     system.theme:
       simple_config_update:
-        default: sous-theme
+        default: sousdrupalrecipe

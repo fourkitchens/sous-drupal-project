@@ -1,12 +1,12 @@
 name: 'Sous Admin'
 description: 'A recipe that contains modules, themes, and configuration for the Sous administration experience.'
 type: 'Site'
-
 install:
   # Install core dependencies.
   - config
   - help
   - field
+  - field_ui
   - filter
   - node
   - path_alias
@@ -14,6 +14,7 @@ install:
   - text
   - user
   - views
+  - views_ui
   # Install Claro as it is a dependency of Gin, but don't import config.
   - claro
   # Install Toolbar as it is a dependency of Gin Toolbar.
@@ -44,7 +45,6 @@ install:
   - views_ajax_history
   # Install Views Bulk Operations
   - views_bulk_operations
-
 config:
   import:
     admin_toolbar: '*'
@@ -61,6 +61,7 @@ config:
       - block.block.gin_messages
       - block.block.gin_page_title
       - block.block.gin_primary_local_tasks
+      - block.block.gin_secondary_local_tasks
     login_destination:
       - login_destination.destination.admins_and_editors_login_destination
       - login_destination.settings

@@ -1,20 +1,5 @@
 langcode: en
 status: true
-dependencies:
-  module:
-    - block
-    - block_content
-    - config
-    - components
-    - field_ui
-    - filter
-    - link
-    - node
-    - system
-    - text
-    - user
-    - views
-    - views_ui
 id: superuser
 label: Superuser
 weight: 2

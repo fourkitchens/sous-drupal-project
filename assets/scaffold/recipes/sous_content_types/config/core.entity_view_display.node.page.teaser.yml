@@ -11,8 +11,6 @@ dependencies:
     - node.type.page
   module:
     - user
-_core:
-  default_config_hash: RN9Pki3wmS8_dOB19eXx2lnKibkNvDC3oBLiNiZBaFg
 id: node.page.teaser
 targetEntityType: node
 bundle: page

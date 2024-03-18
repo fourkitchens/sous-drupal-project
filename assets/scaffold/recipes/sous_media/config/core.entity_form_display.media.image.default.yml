@@ -11,7 +11,7 @@ dependencies:
     - media.type.image
   module:
     - field_group
-    - image
+    - focal_point
     - text
 third_party_settings:
   field_group:
@@ -90,12 +90,14 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_media_image:
-    type: image_image
+    type: image_focal_point
     weight: 3
     region: content
     settings:
       progress_indicator: throbber
       preview_image_style: thumbnail
+      preview_link: true
+      offsets: '50,50'
     third_party_settings: {  }
   field_tags:
     type: entity_reference_autocomplete

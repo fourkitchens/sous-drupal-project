@@ -13,6 +13,21 @@
             "url": "https://asset-packagist.org"
         },
         {
+            "type": "package",
+            "package": {
+                "name": "dropzone/dropzone",
+                "version": "5.9.3",
+                "type": "drupal-library",
+                "extra": {
+                    "installer-name": "dropzone/dist"
+                },
+                "dist": {
+                    "url": "https://github.com/dropzone/dropzone/releases/download/v5.9.3/dist.zip",
+                    "type": "zip"
+                }
+            }
+        },
+        {
             "type": "vcs",
             "url": "https://github.com/woredeyonas/Drupal-Recipe-Unpack.git"
         },
@@ -47,7 +62,7 @@
         "cweagans/composer-patches": "^1.7",
         "drupal/components": "^3.0@beta",
         "drupal/core-composer-scaffold": "^10",
-        "drupal/core-recommended": "^10",
+        "drupal/core-recommended": "10.2.4",
         "drupal/emulsify_twig": "^4.0",
         "drush/drush": "^12.1",
         "ewcomposer/unpack": "dev-master",

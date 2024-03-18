@@ -10,9 +10,28 @@
             "role": "Maintainer"
         }
     ],
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "dropzone/dropzone",
+                "version": "5.9.3",
+                "type": "drupal-library",
+                "extra": {
+                    "installer-name": "dropzone/dist"
+                },
+                "dist": {
+                    "url": "https://github.com/dropzone/dropzone/releases/download/v5.9.3/dist.zip",
+                    "type": "zip"
+                }
+            }
+        }
+    ],
     "minimum-stability": "dev",
     "require": {
+        "dropzone/dropzone": "^5.9",
         "drupal/media_library_edit": "^3.0",
-        "drupal/focal_point": "^2.0"
+        "drupal/focal_point": "^2.0",
+        "drupal/dropzonejs": "^2.5"
     }
 }

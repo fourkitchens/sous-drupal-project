@@ -1,7 +1,6 @@
 name: 'Sous Media'
 description: 'A recipe that contains modules and configuration for the Sous media experience.'
 type: 'Site'
-
 install:
   # Core modules
   - field_group
@@ -13,6 +12,7 @@ install:
   - taxonomy
   - views
   # Contrib modules
+  - dropzonejs
   - focal_point
   - media_library_edit
 config:
