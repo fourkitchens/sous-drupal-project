@@ -32,6 +32,14 @@
             "url": "https://github.com/woredeyonas/Drupal-Recipe-Unpack.git"
         },
         {
+            "type": "vcs",
+            "url": "git@github.com:emulsify-ds/emulsify-drupal.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:emulsify-ds/emulsify_tools.git"
+        },
+        {
             "type": "path",
             "url": "assets/scaffold/recipes/sous_admin"
         },
@@ -63,8 +71,9 @@
         "drupal/components": "^3.0@beta",
         "drupal/core-composer-scaffold": "^10",
         "drupal/core-recommended": "10.2.4",
-        "drupal/emulsify_twig": "^4.0",
         "drush/drush": "^12.1",
+        "emulsify-ds/emulsify-drupal": "dev-release-base-theme",
+        "emulsify-ds/emulsify_tools": "dev-main",
         "ewcomposer/unpack": "dev-master",
         "fourkitchens/sous_admin": "*",
         "fourkitchens/sous_content_types": "*",

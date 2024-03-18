@@ -156,16 +156,17 @@ composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJE
 
 There is a base recipe included and scaffolded called sous_base that includes a basic set of modules for administration and security.
 
-To run setup + install the sous-base recipe:
+To run setup + install:
 1. clone repo `gh repo clone fourkitchens/sous-drupal-project [directory]`
 2. `cd` to your project directory
 3. change the name of your project in .lando.yml
 4. `lando start`
 5. `lando composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
-   
-In the case where we are using an external recipe, the following unpacks the composer dependencies to the main composer file so that we can remove the recipe 
-6. `lando composer unpack fourkitchens/[recipe]`
+
+For the paragraphs version of Sous, run:
+
+`lando install-recipe fourkitchens/sous_paragraphs`
 
 ### Composer update
 1. Removed the normal Sous Drupal dependencies

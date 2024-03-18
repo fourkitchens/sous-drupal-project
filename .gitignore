@@ -124,6 +124,6 @@ composer.lock
 # Remove me after development
 web/themes/
 .lando.yml
-composer.json
+/composer.json
 scripts/
 assets/scaffold/recipes/sous_base/recipe.yml

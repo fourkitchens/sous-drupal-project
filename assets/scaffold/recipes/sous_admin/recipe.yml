@@ -25,6 +25,8 @@ install:
   # Install Gin theme and base modules that extend it.
   - gin
   - gin_toolbar
+  # Install Emulsify base theme.
+  - emulsify
   # Install Entity Usuage
   - entity_usage
   # Install Field Group and dependencies

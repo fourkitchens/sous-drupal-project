@@ -3,10 +3,10 @@ description: 'A recipe to install a base Sous Drupal project with Emulsify depen
 type: 'Site'
 install:
   - components
-  - emulsify_twig
-  - sousdrupalrecipe
+  - emulsify
+  - emulsify_tools
 config:
   actions:
     system.theme:
       simple_config_update:
-        default: sousdrupalrecipe
+        default: emulsify

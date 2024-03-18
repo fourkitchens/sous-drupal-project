@@ -1,0 +1,17 @@
+{
+    "name": "fourkitchens/sous_paragraphs",
+    "description": "A recipe that contains modules and configuration for the Sous paragraphs experience.",
+    "keywords": ["recipe", "Drupal recipes", "drupal recipe"],
+    "type": "drupal-recipe",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Laura Johnson",
+            "role": "Maintainer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "drupal/paragraphs_features": "^2.0@beta"
+    }
+}

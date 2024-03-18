@@ -7,13 +7,15 @@ echo "Starting lando"
 lando start
 echo "Installing tooling dependencies..."
 lando npm --prefix ./ install --silent
-echo "Initializing your custom project theme based on Emulsify... (this may take a minute)"
-lando emulsify init sous-project --platform drupal
-echo "Installing theme dependencies..."
-lando npm --prefix ./web/themes/custom/sous-project install --silent
 bash ./scripts/sous/recipe-scaffold.sh
 lando drush site:install minimal --account-name=sous-project --account-name=superuser_1 -y
-lando install-recipe fourkitchens/sous_paragraphs
+echo "Creating an Emulsify based theme..."
+lando drush emulsify sous-project
+echo "Installing theme dependencies... This may take a minute..."
+lando npm --prefix ./web/themes/custom/sous-project install --silent
+echo "Enable sous-project set as the default theme..."
+lando drush theme:install sous-project
+lando drush config-set system.theme default sous-project -y
 lando drush user:block superuser_1
 lando drush user:create sous_chef --mail="sous_chef@fourkitchens.com"
 lando drush user:role:add 'superuser' superuser_1
