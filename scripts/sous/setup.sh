@@ -9,6 +9,8 @@ echo "Installing tooling dependencies..."
 lando npm --prefix ./ install --silent
 bash ./scripts/sous/recipe-scaffold.sh
 lando drush site:install minimal --account-name=sous-project --account-name=superuser_1 -y
+echo "Installing sous_admin recipe..."
+lando install-recipe fourkitchens/sous_admin
 echo "Creating an Emulsify based theme..."
 lando drush emulsify sous-project
 echo "Installing theme dependencies... This may take a minute..."
