@@ -79,6 +79,8 @@
         "emulsify-ds/emulsify-drupal": "dev-release-base-theme",
         "emulsify-ds/emulsify_tools": "dev-main",
         "ewcomposer/unpack": "dev-master",
+        "fourkitchens/sous_admin": "*",
+        "fourkitchens/sous_base": "*",
         "fourkitchens/sous_content_types": "*",
         "fourkitchens/sous_formats": "*",
         "fourkitchens/sous_media": "*",
