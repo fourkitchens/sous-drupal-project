@@ -1,7 +1,6 @@
 langcode: en
 status: true
-dependencies:
-  module: {  }
+dependencies: {  }
 name: 'Restricted HTML'
 format: restricted_html
 weight: 1
@@ -18,7 +17,7 @@ filters:
     status: true
     weight: -10
     settings:
-      allowed_html: '<br> <p> <a hreflang alt data-entity-substitution data-entity-type data-entity-uuid title href> <strong> <em>'
+      allowed_html: '<br> <p> <h2> <h3> <h4> <h5> <h6> <a hreflang alt data-entity-substitution data-entity-type data-entity-uuid title href> <strong> <em>'
       filter_html_help: true
       filter_html_nofollow: false
   filter_htmlcorrector:

@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: text_components
+label: 'Text Components'
+description: ''
+weight: -10

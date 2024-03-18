@@ -1,8 +1,8 @@
 name: 'Sous Formats'
 description: 'A recipe that contains modules and configuration for Sous default date and text formats.'
 type: 'Site'
-
 install:
+  - ckeditor5
   - editor
   - entity_embed
   - filter

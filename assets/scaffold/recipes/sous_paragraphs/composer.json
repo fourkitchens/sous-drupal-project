@@ -12,9 +12,6 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "drupal/paragraphs": "^1.12",
-        "drupal/paragraphs_collapsible": "^1.2",
-        "drupal/paragraphs_ee": "^2.1",
         "drupal/paragraphs_features": "^2.0@beta"
     }
 }

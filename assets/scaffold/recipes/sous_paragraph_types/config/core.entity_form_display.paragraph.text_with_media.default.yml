@@ -1,0 +1,40 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.text_with_media.field_media
+    - field.field.paragraph.text_with_media.field_media_alignment
+    - field.field.paragraph.text_with_media.field_text
+    - paragraphs.paragraphs_type.text_with_media
+  module:
+    - media_library
+    - text
+id: paragraph.text_with_media.default
+targetEntityType: paragraph
+bundle: text_with_media
+mode: default
+content:
+  field_media:
+    type: media_library_widget
+    weight: 1
+    region: content
+    settings:
+      media_types: {  }
+    third_party_settings: {  }
+  field_media_alignment:
+    type: options_select
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_text:
+    type: text_textarea
+    weight: 0
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

@@ -9,9 +9,6 @@ config:
   index: false
   edge: false
   cache: false
-# proxy:
-#   appserver:
-#     - sous-project.lndo.site:6006
 services:
   appserver:
     build:
@@ -31,6 +28,9 @@ services:
       - chown -R www-data /usr/bin
       - npm install --silent -g npm@latest
       - npm install --silent -g @emulsify/cli
+    overrides:
+      ports:
+        - 6006:6006
 tooling:
   drush:
     service: appserver
@@ -65,14 +65,14 @@ tooling:
     service: appserver
     description: "Rebuild your project using a fresh database"
     cmd: npm run rebuild
-  # theme-build:
-  #   service: appserver
-  #   description: "Compile your theme files"
-  #   cmd: npm run theme-build
-  # theme-watch:
-  #   service: appserver
-  #   description: "Watch for any theme changes and recompile"
-  #   cmd: npm run theme-watch
+  theme-build:
+    service: appserver
+    description: "Compile your theme files"
+    cmd: npm run theme-build
+  theme-watch:
+    service: appserver
+    description: "Watch for any theme changes and recompile"
+    cmd: npm run theme-watch
   compound-install:
     service: appserver
     description: "Install Compound component library"

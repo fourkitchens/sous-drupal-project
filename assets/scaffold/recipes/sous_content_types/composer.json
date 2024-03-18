@@ -1,0 +1,17 @@
+{
+    "name": "fourkitchens/sous_content_types",
+    "description": "A recipe that contains modules, themes, and configuration for Sous content.",
+    "keywords": ["recipe", "Drupal recipes", "drupal recipe"],
+    "type": "drupal-recipe",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Laura Johnson",
+            "role": "Maintainer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "drupal/metatag": "*"
+    }
+}

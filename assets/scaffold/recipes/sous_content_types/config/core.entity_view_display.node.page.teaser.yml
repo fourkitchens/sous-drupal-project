@@ -1,12 +1,15 @@
-uuid: 396e02e3-e90c-4e74-863a-504fec94d209
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
+    - field.field.node.page.field_metadata
+    - field.field.node.page.field_seo_title
+    - field.field.node.page.field_teaser_media
+    - field.field.node.page.field_teaser_text
+    - field.field.node.page.field_text
     - node.type.page
   module:
-    - text
     - user
 id: node.page.teaser
 targetEntityType: node
@@ -27,4 +30,9 @@ content:
     weight: 100
     region: content
 hidden:
+  field_metadata: true
+  field_seo_title: true
+  field_teaser_media: true
+  field_teaser_text: true
+  field_text: true
   published_at: true

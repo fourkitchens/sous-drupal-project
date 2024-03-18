@@ -1,0 +1,19 @@
+{
+    "name": "fourkitchens/sous_paragraph_types",
+    "description": "A recipe that contains modules and configuration Sous paragraph types.",
+    "keywords": ["recipe", "Drupal recipes", "drupal recipe"],
+    "type": "drupal-recipe",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Laura Johnson",
+            "role": "Maintainer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "drupal/paragraphs": "^1.12",
+        "drupal/paragraphs_collapsible": "^1.2",
+        "drupal/paragraphs_ee": "^2.1"
+    }
+}
