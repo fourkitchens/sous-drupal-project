@@ -9,7 +9,7 @@ echo "Installing tooling dependencies..."
 lando npm --prefix ./ install --silent
 bash ./scripts/sous/recipe-scaffold.sh
 lando drush site:install minimal --account-name=sous-project --account-name=superuser_1 -y
-echo "Installing sous_admin recipe..."
+lando install-recipe fourkitchens/sous_base
 lando install-recipe fourkitchens/sous_admin
 echo "Creating an Emulsify based theme..."
 lando drush emulsify sous-project
@@ -26,6 +26,7 @@ lando drush user:role:add 'superuser' sous_chef
 echo ""
 echo "//////////////"
 echo " ORDERS UP!"
+echo " To use sous with paragraphs, run 'lando install-recipe fourkitchens/sous_paragraphs'"
 echo " Use the following link to log into your new site"
 echo "//////////////"
 echo ""
