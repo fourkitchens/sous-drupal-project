@@ -28,9 +28,6 @@ services:
       - chown -R www-data /usr/bin
       - npm install --silent -g npm@latest
       - npm install --silent -g @emulsify/cli
-    overrides:
-      ports:
-        - 6006:6006
 tooling:
   drush:
     service: appserver
