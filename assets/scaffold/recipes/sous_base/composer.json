@@ -12,6 +12,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
+        "drupal/components": "^3.0@beta",
         "emulsify-ds/emulsify-drupal": "dev-release-base-theme",
         "emulsify-ds/emulsify_tools": "dev-main"
     }
