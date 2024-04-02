@@ -10,7 +10,7 @@ lando npm --prefix ./ install --silent
 bash ./scripts/sous/recipe-scaffold.sh
 lando drush site:install minimal --account-name=sous-project --account-name=superuser_1 -y
 lando install-recipe fourkitchens/sous-emulsify
-lando install-recipe fourkitchens/sous_admin
+lando install-recipe fourkitchens/sous-admin
 echo "Creating an Emulsify based theme..."
 lando drush emulsify sous-project
 echo "Installing theme dependencies... This may take a minute..."
