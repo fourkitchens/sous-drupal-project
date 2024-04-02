@@ -27,18 +27,17 @@ Use this command below and replace `PROJECT_NAME` with your chosen project name.
 ```
 composer create-project fourkitchens/sous-drupal-project [PROJECT-NAME] --no-interaction
 ```
+For the paragraphs version of Sous, run:
+
+```
+lando install-recipe fourkitchens/sous_paragraphs
+```
 
 ## Tweak project
 
 - Modify .gitignore
   - Remove the commented block at the EOF
   - Review ignored items you may need for your build and remove them
-
-## Optional Demo content and theme
-
-Sous can optionally install some demo content and a fully styled and wired theme. Note: This should only be ran immediately after installation. It contains basic content type and media architecture changes and may affect custom configuration unexpectedly.
-
-`lando sous-demo-install`
 
 # Working with Emulsify
 
@@ -47,7 +46,6 @@ The [Emulsify](https://emulsify.info/) theme is installed as part of this projec
 # Additional Tooling
 
 This package provides some additional tooling to support the build.
-
 
 ## Helper scripts
 
@@ -152,10 +150,6 @@ composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJE
 
 ## Contribute without create-project
 
-## Recipe update
-
-There is a base recipe included and scaffolded called sous_base that includes a basic set of modules for administration and security.
-
 To run setup + install:
 1. clone repo `gh repo clone fourkitchens/sous-drupal-project [directory]`
 2. `cd` to your project directory
@@ -166,21 +160,6 @@ To run setup + install:
 
 For the paragraphs version of Sous, run:
 
-`lando install-recipe fourkitchens/sous_paragraphs`
-
-### Composer update
-1. Removed the normal Sous Drupal dependencies
-2. Upgraded to Drupal 10
-3. Added patch that allows recipes to be applied
-4. Added post update script to scaffold recipes from assets to web/recipes (scripts/recipe-scaffold.sh)
-
-### Assets
-1. Added sous_base recipe
-
-### Scripts
-1. Added script that installs a recipe using lando (scripts/install-recipe.sh)
-2. Modified setup.sh script to install the Minimal profile without existing config (we will use recipes to install config) and install sous_base recipe
-3. Modified sous/Starter.php script to rewrite the theme name in the recipe to match the installed theme
-
-### Lando
-1. Added command that installs a recipe using a script (see above)
+```
+lando install-recipe fourkitchens/sous_paragraphs
+```
