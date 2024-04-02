@@ -26,7 +26,7 @@ lando drush user:role:add 'superuser' sous_chef
 echo ""
 echo "//////////////"
 echo " ORDERS UP!"
-echo " To use sous with paragraphs, run 'lando install-recipe fourkitchens/sous_paragraphs'"
+echo " To use sous with paragraphs, run 'lando install-recipe fourkitchens/sous-paragraphs'"
 echo " Use the following link to log into your new site"
 echo "//////////////"
 echo ""
