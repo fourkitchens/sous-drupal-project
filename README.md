@@ -30,7 +30,7 @@ composer create-project fourkitchens/sous-drupal-project [PROJECT-NAME] --no-int
 For the paragraphs version of Sous, run:
 
 ```
-lando install-recipe fourkitchens/sous_paragraphs
+lando install-recipe fourkitchens/sous-paragraphs
 ```
 
 ## Tweak project
@@ -161,5 +161,5 @@ To run setup + install:
 For the paragraphs version of Sous, run:
 
 ```
-lando install-recipe fourkitchens/sous_paragraphs
+lando install-recipe fourkitchens/sous-paragraphs
 ```

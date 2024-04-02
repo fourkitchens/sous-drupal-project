@@ -1,6 +1,0 @@
-langcode: en
-status: true
-id: superuser
-label: Superuser
-weight: 2
-is_admin: true
