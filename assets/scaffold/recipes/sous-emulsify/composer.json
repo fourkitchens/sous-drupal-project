@@ -1,6 +1,6 @@
 {
-    "name": "fourkitchens/sous_base",
-    "description": "A recipe to install a base Sous Drupal project with Emulsify dependencies.",
+    "name": "fourkitchens/sous-emulsify",
+    "description": "A recipe that installs Emulsify dependencies and sets Emulsify as the default theme.",
     "keywords": ["recipe", "Drupal recipes", "drupal recipe"],
     "type": "drupal-recipe",
     "license": "GPL-2.0-or-later",

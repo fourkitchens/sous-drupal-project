@@ -45,10 +45,6 @@
         },
         {
             "type": "path",
-            "url": "assets/scaffold/recipes/sous_base"
-        },
-        {
-            "type": "path",
             "url": "assets/scaffold/recipes/sous_content_types"
         },
         {
@@ -76,8 +72,8 @@
         "drupal/core-recommended": "10.2.4",
         "drush/drush": "^12.1",
         "ewcomposer/unpack": "dev-master",
+        "fourkitchens/sous-emulsify": "dev-main",
         "fourkitchens/sous_admin": "*",
-        "fourkitchens/sous_base": "*",
         "fourkitchens/sous_content_types": "*",
         "fourkitchens/sous_formats": "*",
         "fourkitchens/sous_media": "*",
