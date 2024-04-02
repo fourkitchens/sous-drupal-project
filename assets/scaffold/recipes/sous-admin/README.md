@@ -7,15 +7,15 @@ See https://www.drupal.org/files/issues/2023-10-01/Configuring%20Drupal%20to%20A
 
 ## Installing this Recipe
 
-`composer require sous-starter/sous_admin`
+`composer require sous-starter/sous-admin`
 
 ## Applying this Recipe
 
 If you used the Sous Project as your starterkit:
-- `lando install-recipe sous_admin` 
+- `lando install-recipe sous-admin` 
 
 Manually applying the recipe to your own project:
 From your webroot run: 
-- `php core/scripts/drupal recipe recipes/sous_admin`
+- `php core/scripts/drupal recipe recipes/sous-admin`
 - `drush cr`
-- `composer unpack fourkitchens/cookbook:sous_admin`
+- `composer unpack fourkitchens/sous-admin`

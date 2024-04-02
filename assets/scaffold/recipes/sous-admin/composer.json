@@ -1,5 +1,5 @@
 {
-    "name": "fourkitchens/sous_admin",
+    "name": "fourkitchens/sous-admin",
     "description": "A recipe that contains modules, themes, and configuration for the Sous administration experience.",
     "keywords": ["recipe", "Drupal recipes", "drupal recipe"],
     "type": "drupal-recipe",
