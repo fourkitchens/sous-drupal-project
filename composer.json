@@ -42,7 +42,7 @@
         "drupal/core-recommended": "^10",
         "drupal/emulsify_tools": "^1.0.x-dev@dev",
         "drush/drush": "^12.1",
-        "emulsify-ds/emulsify-drupal": "dev-release-base-theme",
+        "emulsify-ds/emulsify-drupal": "dev-main",
         "ewcomposer/unpack": "dev-master",
         "fourkitchens/sous_admin": "*",
         "fourkitchens/sous_media": "*",
