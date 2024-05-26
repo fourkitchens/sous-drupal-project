@@ -21,5 +21,5 @@ fi
 cd web
 php core/scripts/drupal recipe recipes/"$recipe_directory_name"
 /app/vendor/bin/drush cr
-cd ..
-php /usr/local/bin/composer unpack "$recipe_full_package_name"
+#cd ..
+#php /usr/local/bin/composer unpack "$recipe_full_package_name"

@@ -15,24 +15,15 @@ services:
       - composer install
       - cp web/sites/default/default.settings.php web/sites/default/settings.php
     build_as_root:
-      - apt-get update -qq -y && apt-get install -qq -y apt-transport-https build-essential unzip
-      - apt-get install -qq chromium
-      - apt-get update
-      - apt-get install -y ca-certificates curl gnupg
-      - mkdir -p /etc/apt/keyrings
-      - curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-      - echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
-      - apt-get update
-      - apt-get install nodejs -y
-      - chown -R www-data /usr/lib/node_modules
-      - chown -R www-data /usr/bin
+      - curl -sL https://deb.nodesource.com/setup_20.x | bash -
+      - apt-get install -y nodejs
       - npm install --silent -g npm@latest
       - npm install --silent -g @emulsify/cli
 tooling:
   drush:
     service: appserver
     env:
-      DRUSH_OPTIONS_URI: "https://sous-project.lndo.site"
+      DRUSH_OPTIONS_URI: "https://sous-drupal-recipe.lndo.site"
   node:
     service: appserver
   npm:
