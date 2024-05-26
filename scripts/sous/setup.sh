@@ -40,7 +40,6 @@ esac
 echo ""
 echo "//////////////"
 echo " ORDERS UP!"
-echo " To use sous with paragraphs, run 'lando install-recipe fourkitchens/sous-paragraphs'"
 echo " Use the following link to log into your new site"
 echo "//////////////"
 echo ""
