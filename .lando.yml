@@ -23,7 +23,7 @@ tooling:
   drush:
     service: appserver
     env:
-      DRUSH_OPTIONS_URI: "https://sous-drupal-recipe.lndo.site"
+      DRUSH_OPTIONS_URI: "https://sous-project.lndo.site"
   node:
     service: appserver
   npm:
