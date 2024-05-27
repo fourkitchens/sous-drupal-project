@@ -21,16 +21,20 @@ lando drush user:role:add 'superuser' superuser_1
 lando drush user:role:add 'superuser' sous_chef
 
 echo "Which version of Sous would you like to install?"
-echo "[1] Default Sous (media and content types only)"
+echo "[0] Default Sous (media and content types only)"
+echo "[1] Sous with Layout Builder"
 echo "[2] Sous with Paragraphs"
 echo "[3] Just the admin"
 read -p "Enter your selection " RESP
 case $RESP in
+  0)
+    lando composer require fourkitchens/sous-content-types && lando install-recipe fourkitchens/sous-content-types
+    ;;
   1)
-    lando install-recipe fourkitchens/sous-content-types
+    lando composer require fourkitchens/sous-layout-builder && lando install-recipe fourkitchens/sous-layout-builder
     ;;
   2)
-    lando install-recipe fourkitchens/sous-paragraphs
+    lando composer require fourkitchens/sous-paragraphs && lando install-recipe fourkitchens/sous-paragraphs
     ;;
   *)
     echo "No additional recipe required."
