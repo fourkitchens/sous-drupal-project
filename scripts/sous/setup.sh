@@ -28,13 +28,13 @@ echo "[3] Just the admin"
 read -p "Enter your selection " RESP
 case $RESP in
   0)
-    lando composer require fourkitchens/sous-content-types && lando install-recipe fourkitchens/sous-content-types
+    composer require fourkitchens/sous-content-types && lando install-recipe fourkitchens/sous-content-types
     ;;
   1)
-    lando composer require fourkitchens/sous-layout-builder && lando install-recipe fourkitchens/sous-layout-builder
+    composer require fourkitchens/sous-layout-builder && lando install-recipe fourkitchens/sous-layout-builder
     ;;
   2)
-    lando composer require fourkitchens/sous-paragraphs && lando install-recipe fourkitchens/sous-paragraphs
+    composer require fourkitchens/sous-paragraphs && lando install-recipe fourkitchens/sous-paragraphs
     ;;
   *)
     echo "No additional recipe required."
