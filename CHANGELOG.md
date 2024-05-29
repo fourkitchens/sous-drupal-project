@@ -1,3 +1,32 @@
+# [5.4.0](https://github.com/fourkitchens/sous-drupal-project/compare/5.3.0...5.4.0) (2024-05-29)
+
+
+### Bug Fixes
+
+* change theme back to sous-theme in sous_base ([3fe7731](https://github.com/fourkitchens/sous-drupal-project/commit/3fe77316a5244dacc206d8a17299288f4960a85d))
+* remove file permissions from superuser ([b8ac941](https://github.com/fourkitchens/sous-drupal-project/commit/b8ac941c69e4d665322b908331449bc9d7d35320))
+
+
+### Features
+
+* add correct unpack package with latest fixes ([5b38e33](https://github.com/fourkitchens/sous-drupal-project/commit/5b38e3337dec57ef6363b1b5c170f867b7a8fd94))
+* add sous_admin recipe to repo ([cfd7ceb](https://github.com/fourkitchens/sous-drupal-project/commit/cfd7cebc701c45f5c90a8b1c68baef576a62d3c7))
+* add sous_admin recipe to repo ([c30b8b3](https://github.com/fourkitchens/sous-drupal-project/commit/c30b8b3727575085573c5a835023e7cff080d1aa))
+* add sous_admin to setup script ([8b9d52b](https://github.com/fourkitchens/sous-drupal-project/commit/8b9d52bae7e81eb27b1ca04c830c703ab809fee9))
+* add sous_formats recipe ([f5528a7](https://github.com/fourkitchens/sous-drupal-project/commit/f5528a72d25bb503e550ec1a4ff1fb627bdb4abf))
+* add unpack packages into the set up script ([56fbde5](https://github.com/fourkitchens/sous-drupal-project/commit/56fbde564d5956a21752e7cfa44ed037b4e47ce0))
+* include fourkitchens cookbook repo ([e06b689](https://github.com/fourkitchens/sous-drupal-project/commit/e06b6890cbd5acc8ee44a381a7166750b2f435d5))
+* move sous_admin to scaffolding folder ([d6d0ec5](https://github.com/fourkitchens/sous-drupal-project/commit/d6d0ec5871b28d3fd28d5462bb47d82ba7d96ec5))
+* remove all contrib modules except those required for emulsify ([1fddc4d](https://github.com/fourkitchens/sous-drupal-project/commit/1fddc4db4bccf36f851b1fe45d05293a76dffecb))
+* remove gin_login reference ([eb6d447](https://github.com/fourkitchens/sous-drupal-project/commit/eb6d447d237cd644d8e2345fce2d69df6be69dac))
+* remove gitkeeps ([4029c3c](https://github.com/fourkitchens/sous-drupal-project/commit/4029c3ce900980743b3da13e19a0b4a7a3a5dfb6))
+* remove uuid from config ([fa010c6](https://github.com/fourkitchens/sous-drupal-project/commit/fa010c6505d1a51fd55b110cea852a1c26f84a89))
+* sous-25 create default content types recipe ([86c5fbb](https://github.com/fourkitchens/sous-drupal-project/commit/86c5fbb2ea2e623dc087e8b13892317d2811377e))
+* split package name correctly ([7d2e5eb](https://github.com/fourkitchens/sous-drupal-project/commit/7d2e5ebe3c8190e82b787b52ea0e271aebab1535))
+* update descriptions to not use single quote ([cd80aa3](https://github.com/fourkitchens/sous-drupal-project/commit/cd80aa338ff500ba777468b15e1ae77ffa9b9383))
+* update install instructions ([cde5ba8](https://github.com/fourkitchens/sous-drupal-project/commit/cde5ba8ca08cbd7b28aba578bf620f9a644bf4e5))
+* use https for repo ([3952c72](https://github.com/fourkitchens/sous-drupal-project/commit/3952c72dd6f2156b5cabca7fc4b77d6235635e9f))
+
 # [5.2.0](https://github.com/fourkitchens/sous-drupal-project/compare/5.1.0...5.2.0) (2023-12-19)
 
 
