@@ -27,17 +27,13 @@ Use this command below and replace `PROJECT_NAME` with your chosen project name.
 ```
 composer create-project fourkitchens/sous-drupal-project [PROJECT-NAME] --no-interaction
 ```
-For the paragraphs version of Sous, run:
 
-```
-lando install-recipe fourkitchens/sous-paragraphs
-```
+You will be prompted to select the version of Sous you want to install. The main versions are:
 
-## Tweak project
+1. Sous with Layout Builder
+2. Sous with Paragraphs
 
-- Modify .gitignore
-  - Remove the commented block at the EOF
-  - Review ignored items you may need for your build and remove them
+Both of these versions include Emulsify as the default theme in addition to a Gin admin and our recommended security, performance and admin modules.
 
 # Working with Emulsify
 
@@ -158,7 +154,7 @@ To run setup + install:
 5. `composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
 
-For the paragraphs version of Sous, run:
+To install recipes, use the `lando install-recipe` command. Eg. For the paragraphs version of Sous, run:
 
 ```
 lando install-recipe fourkitchens/sous-paragraphs
