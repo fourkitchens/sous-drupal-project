@@ -25,7 +25,7 @@ Without these you will have difficulty installing this project.
 Use this command below and replace `PROJECT_NAME` with your chosen project name.
 
 ```
-composer create-project fourkitchens/sous-drupal-project [PROJECT-NAME] --no-interaction
+composer create-project fourkitchens/sous-drupal-project [PROJECT-NAME]
 ```
 
 You will be prompted to select the version of Sous you want to install. The main versions are:
@@ -141,7 +141,7 @@ x.x.x
 The composer command can be adjusted to account for a new branch you're working on.
 
 ```
-composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJECT_NAME --no-interaction
+composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJECT_NAME
 ```
 
 ## Contribute without create-project
