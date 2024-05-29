@@ -27,18 +27,17 @@ Use this command below and replace `PROJECT_NAME` with your chosen project name.
 ```
 composer create-project fourkitchens/sous-drupal-project [PROJECT-NAME] --no-interaction
 ```
+For the paragraphs version of Sous, run:
+
+```
+lando install-recipe fourkitchens/sous-paragraphs
+```
 
 ## Tweak project
 
 - Modify .gitignore
   - Remove the commented block at the EOF
   - Review ignored items you may need for your build and remove them
-
-## Optional Demo content and theme
-
-Sous can optionally install some demo content and a fully styled and wired theme. Note: This should only be ran immediately after installation. It contains basic content type and media architecture changes and may affect custom configuration unexpectedly.
-
-`lando sous-demo-install`
 
 # Working with Emulsify
 
@@ -47,7 +46,6 @@ The [Emulsify](https://emulsify.info/) theme is installed as part of this projec
 # Additional Tooling
 
 This package provides some additional tooling to support the build.
-
 
 ## Helper scripts
 
@@ -152,20 +150,16 @@ composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJE
 
 ## Contribute without create-project
 
+To run setup + install:
 1. clone repo `gh repo clone fourkitchens/sous-drupal-project [directory]`
 2. `cd` to your project directory
 3. change the name of your project in .lando.yml
 4. `lando start`
-5. `lando composer install`
+5. `composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
-7. `lando drush config-set system.theme default theme-name -y` (_theme-name_ is the name of your project)
 
-After running the above steps you should have a fully functioning Drupal site with a custom Emulsify theme named after your project.
+For the paragraphs version of Sous, run:
 
-### Create a custom theme. (Change theme-name to your theme name.)
-
-If you would like to generate another custom theme follow the steps below.
-
-1. `npm ci`
-2. `npx emulsify init theme-name`
-3. `lando drush config-set system.theme default theme-name -y`
+```
+lando install-recipe fourkitchens/sous-paragraphs
+```

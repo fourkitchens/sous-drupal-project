@@ -68,7 +68,9 @@ web/libraries
 web/modules/contrib
 web/modules/features
 web/profiles/contrib
+web/recipes
 web/themes/contrib
+web/.gitignore
 
 # Ignore Composer-managed dependencies.
 vendor/
@@ -118,3 +120,10 @@ default.services.yml
 default.settings.php
 settings.php
 composer.lock
+
+# Remove me after development
+web/themes/
+.lando.yml
+/composer.json
+scripts/
+assets/scaffold/recipes/sous_base/recipe.yml

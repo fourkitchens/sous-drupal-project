@@ -1,5 +1,5 @@
 name: sous-project
-recipe: drupal9
+recipe: drupal10
 config:
   webroot: web
   php: "8.1"
@@ -9,26 +9,14 @@ config:
   index: false
   edge: false
   cache: false
-# proxy:
-#   appserver:
-#     - sous-project.lndo.site:6006
 services:
   appserver:
     build:
       - composer install
       - cp web/sites/default/default.settings.php web/sites/default/settings.php
     build_as_root:
-      - apt-get update -qq -y && apt-get install -qq -y apt-transport-https build-essential unzip
-      - apt-get install -qq chromium
-      - apt-get update
-      - apt-get install -y ca-certificates curl gnupg
-      - mkdir -p /etc/apt/keyrings
-      - curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-      - echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
-      - apt-get update
-      - apt-get install nodejs -y
-      - chown -R www-data /usr/lib/node_modules
-      - chown -R www-data /usr/bin
+      - curl -sL https://deb.nodesource.com/setup_20.x | bash -
+      - apt-get install -y nodejs
       - npm install --silent -g npm@latest
       - npm install --silent -g @emulsify/cli
 tooling:
@@ -65,19 +53,18 @@ tooling:
     service: appserver
     description: "Rebuild your project using a fresh database"
     cmd: npm run rebuild
-  # theme-build:
-  #   service: appserver
-  #   description: "Compile your theme files"
-  #   cmd: npm run theme-build
-  # theme-watch:
-  #   service: appserver
-  #   description: "Watch for any theme changes and recompile"
-  #   cmd: npm run theme-watch
+  theme-build:
+    service: appserver
+    description: "Compile your theme files"
+    cmd: npm run theme-build
+  theme-watch:
+    service: appserver
+    description: "Watch for any theme changes and recompile"
+    cmd: npm run theme-watch
   compound-install:
     service: appserver
     description: "Install Compound component library"
     cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
-  sous-demo-install:
+  install-recipe:
     service: appserver
-    description: "Install Sous Builder module and demo theme"
-    cmd: composer config repositories.2 git https://github.com/fourkitchens/sous-builder.git && composer config repositories.3 git https://github.com/fourkitchens/sousdemo.git && composer require fourkitchens/sous-builder && composer require fourkitchens/sousdemo && drush pm:enable sous_builder -y && drush theme:enable sousdemo -y && drush config-set system.theme default sousdemo -y
+    cmd: bash ./scripts/sous/install-recipe.sh
