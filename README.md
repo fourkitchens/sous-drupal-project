@@ -35,6 +35,18 @@ You will be prompted to select the version of Sous you want to install. The main
 
 Both of these versions include Emulsify as the default theme in addition to a Gin admin and our recommended security, performance and admin modules.
 
+# Important last step: Unpacking
+
+Recipe dependencies need to be unpacked to the root composer.json file. This feature is currently under development in Drupal core. In the meantime, you will need to run this command for every recipe in web/recipes:
+
+```
+php /usr/local/bin/composer unpack "$recipe_full_package_name
+```
+
+Eg: php /usr/local/bin/composer unpack fourkitchens/sous-layout-builder
+
+This will move all of the dependencies into the root and remove that recipe from web/recipes.
+
 # Working with Emulsify
 
 The [Emulsify](https://emulsify.info/) theme is installed as part of this project.
