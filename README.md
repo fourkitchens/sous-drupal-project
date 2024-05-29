@@ -43,7 +43,7 @@ Recipe dependencies need to be unpacked to the root composer.json file. This fea
 php /usr/local/bin/composer unpack "$recipe_full_package_name
 ```
 
-Eg: php /usr/local/bin/composer unpack fourkitchens/sous-layout-builder
+Eg: `php /usr/local/bin/composer unpack fourkitchens/sous-layout-builder`
 
 This will move all of the dependencies into the root and remove that recipe from web/recipes.
 
