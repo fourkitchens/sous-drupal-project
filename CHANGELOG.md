@@ -1,3 +1,10 @@
+## [6.0.1](https://github.com/fourkitchens/sous-drupal-project/compare/6.0.0...6.0.1) (2024-05-30)
+
+
+### Bug Fixes
+
+* update setup theme label ([#113](https://github.com/fourkitchens/sous-drupal-project/issues/113)) ([a3f59aa](https://github.com/fourkitchens/sous-drupal-project/commit/a3f59aa0daa3cf562c1c75d9a893bd01e7dab851))
+
 # [5.4.0](https://github.com/fourkitchens/sous-drupal-project/compare/5.3.0...5.4.0) (2024-05-29)
 
 
