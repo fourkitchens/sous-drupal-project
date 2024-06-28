@@ -1,3 +1,10 @@
+## [6.0.2](https://github.com/fourkitchens/sous-drupal-project/compare/6.0.1...6.0.2) (2024-06-28)
+
+
+### Bug Fixes
+
+* Remove dev repos for the new version of Emulsify ([#114](https://github.com/fourkitchens/sous-drupal-project/issues/114)) ([3a96852](https://github.com/fourkitchens/sous-drupal-project/commit/3a9685274c4f5810d3d09228627f574172528787))
+
 ## [6.0.1](https://github.com/fourkitchens/sous-drupal-project/compare/6.0.0...6.0.1) (2024-05-30)
 
 
