@@ -30,14 +30,6 @@
         {
             "type": "vcs",
             "url": "https://github.com/woredeyonas/Drupal-Recipe-Unpack.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@github.com:emulsify-ds/emulsify-drupal.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@github.com:emulsify-ds/emulsify_tools.git"
         }
     ],
     "require": {
