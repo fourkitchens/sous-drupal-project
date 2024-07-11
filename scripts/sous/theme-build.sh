@@ -2,4 +2,4 @@
 
 cd web/themes/custom/sous-project
 npm ci
-npm run storybook:build
+npm run storybook-build
