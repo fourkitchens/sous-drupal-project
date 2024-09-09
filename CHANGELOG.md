@@ -1,3 +1,10 @@
+# [6.1.0](https://github.com/fourkitchens/sous-drupal-project/compare/6.0.2...6.1.0) (2024-09-09)
+
+
+### Features
+
+* update field_group patches as consolidate patches into their own file ([4fb7676](https://github.com/fourkitchens/sous-drupal-project/commit/4fb7676b372da1322f18fb86969fd4b9be3fbe1a))
+
 ## [6.0.2](https://github.com/fourkitchens/sous-drupal-project/compare/6.0.1...6.0.2) (2024-06-28)
 
 
