@@ -1,3 +1,10 @@
+# [6.2.0](https://github.com/fourkitchens/sous-drupal-project/compare/6.1.0...6.2.0) (2024-09-16)
+
+
+### Features
+
+* check if src or components directory exists before compiling theme assets ([#115](https://github.com/fourkitchens/sous-drupal-project/issues/115)) ([41f4cc7](https://github.com/fourkitchens/sous-drupal-project/commit/41f4cc7fe3a5c26aec0d819c78c9309262fbe924))
+
 # [6.1.0](https://github.com/fourkitchens/sous-drupal-project/compare/6.0.2...6.1.0) (2024-09-09)
 
 
