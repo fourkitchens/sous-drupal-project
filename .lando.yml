@@ -67,4 +67,4 @@ tooling:
     cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
   install-recipe:
     service: appserver
-    cmd: bash ./scripts/sous/install-recipe.sh
+    cmd: bash ./devops/scripts/install-recipe.sh
