@@ -3,6 +3,8 @@
  */
 $settings['hash_salt'] = 'local';
 
+// DDEV configuration.
+if (getenv('IS_DDEV_PROJECT') == 'false') {
 /*
  * Local database configuration.
  */
@@ -17,3 +19,5 @@ $databases['default']['default'] = array (
   'driver' => 'mysql',
   'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
 );
+}
+
