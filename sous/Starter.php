@@ -30,7 +30,7 @@ public static function sousPrep() {
   shell_exec ("sed -i.bak 's/sous-theme/$emulsify_project_name/g' .lando.yml && rm -f .lando.yml.bak");
   shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .lando.yml && rm -f .lando.yml.bak");
   // .ddev
-  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .ddev/config.yml && rm -f .ddev/config.yml.bak");
+  shell_exec ("sed -i.bak 's/sous-project/$dashed_project_name/g' .ddev/config.yaml && rm -f .ddev/config.yaml.bak");
   // Theme scripts.
   shell_exec ("sed -i.bak 's/sous-project/$emulsify_project_name/g' scripts/sous/theme-build.sh && rm -f scripts/sous/theme-build.sh.bak");
   shell_exec ("sed -i.bak 's/sous-project/$emulsify_project_name/g' scripts/sous/theme-watch.sh && rm -f scripts/sous/theme-watch.sh.bak");
