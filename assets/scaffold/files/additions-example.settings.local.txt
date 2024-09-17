@@ -3,21 +3,51 @@
  */
 $settings['hash_salt'] = 'local';
 
-// DDEV configuration.
-if (getenv('IS_DDEV_PROJECT') == 'false') {
-/*
- * Local database configuration.
- */
-$databases['default']['default'] = array (
-  'database' => 'drupal10',
-  'username' => 'drupal10',
-  'password' => 'drupal10',
-  'prefix' => '',
-  'host' => 'database',
-  'port' => '3306',
-  'namespace' => 'Drupal\\mysql\\Driver\\Database\\mysql',
-  'driver' => 'mysql',
-  'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
-);
+
+include __DIR__ . "/settings.pantheon.php";
+
+// Specific environment settings.
+if (isset($_ENV['PANTHEON_ENVIRONMENT'])) {
+  switch ($_ENV['PANTHEON_ENVIRONMENT']) {
+
+    case 'lando':
+      $config['config_split.config_split.local']['status'] = TRUE;
+
+      /*
+       * Local database configuration.
+       */
+      $databases['default']['default'] = array (
+        'database' => 'drupal10',
+        'username' => 'drupal10',
+        'password' => 'drupal10',
+        'prefix' => '',
+        'host' => 'database',
+        'port' => '3306',
+        'namespace' => 'Drupal\\mysql\\Driver\\Database\\mysql',
+        'driver' => 'mysql',
+        'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
+      );
+      break;
+
+    default:
+      // Multidevs environments.
+      break;
+  }
 }
+
+/**
+ * Set config sync directory.
+ */
+$settings['config_sync_directory'] = '../config/default';
+
+/**
+ * Load DDEV settings.
+ */
+if (file_exists($app_root . '/' . $site_path . '/settings.ddev.php')) {
+  if (isset($_ENV['IS_DDEV_PROJECT']) && getenv('IS_DDEV_PROJECT') == 'true') {
+    include $app_root . '/' . $site_path . '/settings.ddev.php';
+    $config['config_split.config_split.local']['status'] = TRUE;
+  }
+}
+
 
