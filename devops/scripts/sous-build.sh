@@ -12,8 +12,8 @@ $local_dev composer install
 echo "Starting $local_dev"
 $local_dev start
 $local_dev drush site:install minimal --account-name=sous-project --account-name=superuser_1 -y
-$local_dev npm install-recipe fourkitchens/sous-emulsify
-$local_dev npm install-recipe fourkitchens/sous-admin
+bash ./devops/scripts/install-recipe.sh fourkitchens/sous-emulsify
+bash ./devops/scripts/install-recipe.sh fourkitchens/sous-admin
 echo "Creating an Emulsify based theme..."
 $local_dev drush emulsify sous-project
 echo "Installing theme dependencies... This may take a minute..."
