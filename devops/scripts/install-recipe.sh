@@ -7,6 +7,8 @@
 # lando install-recipe <directory name of recipe inside /recipes>
 #
 
+source ./devops/environment/local.env
+
 recipe_full_package_name="$1"
 IFS='/' read -ra recipe_split <<< "$recipe_full_package_name"
 recipe_directory_name="${recipe_split[1]}"
@@ -20,6 +22,6 @@ fi
 
 cd web
 php core/scripts/drupal recipe recipes/"$recipe_directory_name"
-/app/vendor/bin/drush cr
+$local_dev drush cr
 #cd ..
 #php /usr/local/bin/composer unpack "$recipe_full_package_name"
