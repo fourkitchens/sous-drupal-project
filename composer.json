@@ -141,7 +141,7 @@
     "scripts": {
         "post-create-project-cmd": [
             "Sous\\Starter::sousPrep",
-            "/devops/scripts/setup.sh"
+            "./devops/scripts/setup.sh"
         ],
         "build-assets": [
             "composer install --optimize-autoloader --no-dev",
