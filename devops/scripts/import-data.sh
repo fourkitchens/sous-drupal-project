@@ -9,7 +9,7 @@ if [ -f ./reference/site-db.sql.gz ];
 echo \"Importing database from reference...\"
 
 if [ "$local_dev" == "ddev" ];
-  then $local_dev import-db poets-and-writers-groups --file=reference/site-db.sql.gz; fi
+  then $local_dev import-db --file=reference/site-db.sql.gz; fi
 
 if [ "$local_dev" == "lando" ];
   then $local_dev db-import reference/site-db.sql.gz; fi
