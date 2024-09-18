@@ -1,7 +1,0 @@
-#!/bin/bash
-
-## Description: Install a Drupal recipe
-## Usage: install-recipe
-## Example: ddev install-recipe
-
-bash ./devops/scripts/install-recipe.sh

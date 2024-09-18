@@ -16,8 +16,8 @@ corepack_enable: false
 nodejs_version: "20"
 hooks:
     post-start:
-        - exec: bash -c "sudo npm install --silent -g npm@latest"
-        - exec: bash -c "sudo npm install --silent -g @emulsify/cli"
+        - exec: sudo npm install --silent -g npm@latest
+        - exec: sudo npm install --silent -g @emulsify/cli
 
 # Key features of DDEV's config.yaml:
 
