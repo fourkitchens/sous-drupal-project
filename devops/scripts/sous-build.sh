@@ -8,6 +8,7 @@ git init
 
 echo "Verify project dependencies are installed..."
 $local_dev composer install
+$local_dev npm install
 
 echo "Starting $local_dev"
 $local_dev start
