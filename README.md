@@ -14,13 +14,12 @@ Sous not only generates a custom theme based on Emulsify, it also builds upon Dr
 
 # Installation
 
-## Requirements
+## Dependencies and Requirements
 
-Without these you will have difficulty installing this project.
-
-1. [PHP ^8.1](http://www.php.net/)
-2. [Composer 2.x](https://getcomposer.org/)
-3. [Lando ^3.6](https://docs.lando.dev/basics/installation.html)
+* [PHP ^8.1](http://www.php.net/)
+* [Lando ^3.6](https://docs.devwithlando.io/)
+* [Node 20.X (we recommend nvm)](https://github.com/nvm-sh/nvm)
+* [Composer 2.x](https://getcomposer.org/)
 
 Use this command below and replace `PROJECT_NAME` with your chosen project name.
 
