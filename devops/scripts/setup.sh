@@ -29,7 +29,7 @@ else
       npm run sous-build
       ;;
     *)
-      echo "good luck! Review the manual setup section of https://github.com/Poets-Writers/groups/blob/develop/docs/SETUP.md for help."
+      echo "Good luck! Review the manual setup section of https://github.com/fourkitchens/sous-drupal-project/blob/main/README.md for help."
       ;;
   esac
 fi

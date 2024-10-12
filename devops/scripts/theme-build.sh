@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd web/themes/custom/groups
+cd web/themes/custom/sous-project
 # echo "clear npm cache"
 npm cache clear --force
 # echo "install packages"

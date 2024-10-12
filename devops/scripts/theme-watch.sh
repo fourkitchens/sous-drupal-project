@@ -1,5 +1,5 @@
 #!/bin/sh
 
-cd web/themes/custom/groups
+cd web/themes/custom/sous-project
 npm ci
 npm run develop
