@@ -3,37 +3,22 @@
  */
 $settings['hash_salt'] = 'local';
 
+$config['config_split.config_split.local']['status'] = TRUE;
 
-include __DIR__ . "/settings.pantheon.php";
-
-// Specific environment settings.
-if (isset($_ENV['PANTHEON_ENVIRONMENT'])) {
-  switch ($_ENV['PANTHEON_ENVIRONMENT']) {
-
-    case 'lando':
-      $config['config_split.config_split.local']['status'] = TRUE;
-
-      /*
-       * Local database configuration.
-       */
-      $databases['default']['default'] = array (
-        'database' => 'drupal10',
-        'username' => 'drupal10',
-        'password' => 'drupal10',
-        'prefix' => '',
-        'host' => 'database',
-        'port' => '3306',
-        'namespace' => 'Drupal\\mysql\\Driver\\Database\\mysql',
-        'driver' => 'mysql',
-        'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
-      );
-      break;
-
-    default:
-      // Multidevs environments.
-      break;
-  }
-}
+/*
+ * Local database configuration.
+ */
+$databases['default']['default'] = array (
+  'database' => 'drupal10',
+  'username' => 'drupal10',
+  'password' => 'drupal10',
+  'prefix' => '',
+  'host' => 'database',
+  'port' => '3306',
+  'namespace' => 'Drupal\\mysql\\Driver\\Database\\mysql',
+  'driver' => 'mysql',
+  'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
+);
 
 /**
  * Set config sync directory.
