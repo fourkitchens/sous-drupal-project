@@ -25,7 +25,6 @@ else
       ;;
     2)
       echo "local_dev=\"lando\"" >> ./devops/environment/local.env
-      cp web/sites/example.settings.local.php web/sites/default/settings.local.php
       npm run sous-build
       ;;
     *)

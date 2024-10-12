@@ -121,6 +121,12 @@
                 "sites/default/example.settings.my.php"
             ],
             "file-mapping": {
+                "[web-root]/sites/example.settings.local.php": {
+                    "append": "assets/scaffold/files/additions-example.settings.local.txt"
+                },
+                "[web-root]/sites/default/default.settings.php": {
+                    "append": "assets/scaffold/files/additions-default.settings.txt"
+                },
                 "[web-root]/sites/development.services.yml": {
                     "mode": "replace",
                     "path": "assets/scaffold/files/development.services.yml",
