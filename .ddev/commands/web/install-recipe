@@ -1,11 +1,8 @@
 #!/bin/bash
 
-#
-# Helper script to install a recipe inside lando.
-#
-# Usage:
-# lando install-recipe <directory name of recipe inside /recipes>
-#
+## Description: Install a Drupal recipe
+## Usage: install-recipe [full package name]
+## Example: ddev install-recipe fourkitchens/sous-admin
 
 recipe_full_package_name="$1"
 IFS='/' read -ra recipe_split <<< "$recipe_full_package_name"
@@ -20,6 +17,4 @@ fi
 
 cd web
 php core/scripts/drupal recipe recipes/"$recipe_directory_name"
-/app/vendor/bin/drush cr
-#cd ..
-#php /usr/local/bin/composer unpack "$recipe_full_package_name"
+../vendor/bin/drush cr

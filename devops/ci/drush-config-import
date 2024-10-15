@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -eo pipefail
+
+P_SITE="$1"
+P_ENV="$2"
+
+if [[ -z "$P_SITE" ]]; then
+  P_SITE="$TERMINUS_SITE"
+fi
+if [[ -z "$P_ENV" ]]; then
+  P_ENV="$TERMINUS_ENV"
+fi
+
+if [[ -z "$P_SITE" ]] || [[ -z "$P_ENV" ]]; then
+  echo "Provide a site and enviornment."
+  exit 1
+fi
+
+# Check for a system.site.yml file somewhere in the config directory.
+if find ./config -name "system.site.yml" | grep "./config" -q ; then
+  echo "Importing Configuration"
+  terminus -n drush "$P_SITE.$P_ENV" -- config-import --source="../config/_splits" --partial --yes
+  terminus -n drush "$P_SITE.$P_ENV" -- cr
+  terminus -n drush "$P_SITE.$P_ENV" -- config-import --yes
+else
+  echo "We didn't import any configuration."
+fi
+
+# Clear Drupal cache
+echo "Clearing Drupal cache again."
+terminus -n drush "$P_SITE.$P_ENV" -- cr
