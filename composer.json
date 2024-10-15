@@ -41,7 +41,7 @@
         "drupal/core-recommended": "^10.3",
         "drush/drush": "^12.1",
         "ewcomposer/unpack": "dev-master",
-        "fourkitchens/sous-admin": "dev-SOUS-32",
+        "fourkitchens/sous-admin": "dev-main",
         "fourkitchens/sous-emulsify": "dev-main",
         "oomphinc/composer-installers-extender": "^2.0",
         "webflo/drupal-finder": "^1.2",
