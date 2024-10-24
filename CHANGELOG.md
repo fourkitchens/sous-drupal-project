@@ -1,3 +1,10 @@
+## [6.2.1](https://github.com/fourkitchens/sous-drupal-project/compare/6.2.0...6.2.1) (2024-10-24)
+
+
+### Bug Fixes
+
+* remove field_group patch because it has been merged ([eff8438](https://github.com/fourkitchens/sous-drupal-project/commit/eff8438e49fd077ab1b2ce9d400748b8251f5eca))
+
 # [6.2.0](https://github.com/fourkitchens/sous-drupal-project/compare/6.1.0...6.2.0) (2024-09-16)
 
 
