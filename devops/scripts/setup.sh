@@ -9,27 +9,13 @@ fi
 source ./devops/environment/local.env
 
 # Skip setup process if local environment is already set.
+# We are using ddev by default. If you prefer lando, add 'lando' to
+# ./devops/environment/local.env and then 'npm run setup'.
 if [ -s ./devops/environment/local.env ]; then
   $local_dev start
   npm run rebuild
 else
-  echo "What would you like to use for local development?"
-  echo "[1] ddev - See https://ddev.com/"
-  echo "[2] lando - See https://lando.dev/"
-  echo "[3] I'll configure my own"
-  read -p "Enter your selection " RESP
-  case $RESP in
-    1)
-      echo "local_dev=\"ddev\"" >> ./devops/environment/local.env
-      npm run sous-build
-      ;;
-    2)
-      echo "local_dev=\"lando\"" >> ./devops/environment/local.env
-      npm run sous-build
-      ;;
-    *)
-      echo "Good luck! Review the manual setup section of https://github.com/fourkitchens/sous-drupal-project/blob/main/README.md for help."
-      ;;
-  esac
+  echo "local_dev=\"ddev\"" >> ./devops/environment/local.env
+  npm run sous-build
 fi
 
