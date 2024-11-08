@@ -162,7 +162,7 @@ composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJE
 To run setup + install:
 1. clone repo `gh repo clone fourkitchens/sous-drupal-project [directory]`
 2. `cd` to your project directory
-3. copy /.devops/environment/example.local.env to local.env
+3. copy `/.devops/environment/example.local.env` to `/.devops/environment/local.env`
 4. choose environment: add `local_dev="ddev"` or `local_dev="lando"` to /.devops/environment/local.env
 5. `composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
