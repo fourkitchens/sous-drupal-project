@@ -3,8 +3,11 @@
   "version": "0.0.1",
   "description": "A starter kit for a Drupal project",
   "scripts": {
-    "confim": "./scripts/sous/confim.sh",
-    "confex": "./scripts/sous/confex.sh",
+    "setup": "./devops/scripts/setup.sh",
+    "confim": "./devops/scripts/confim.sh",
+    "confex": "./devops/scripts/confex.sh",
+    "get-db": "./devops/scripts/get-db.sh",
+    "install-recipe": "./devops/scripts/install-recipe.sh",
     "husky:commit-msg": "commitlint --edit $1",
     "husky:pre-commit": "npm run lint",
     "import-data": "./scripts/sous/import-data.sh",
@@ -12,14 +15,15 @@
     "lint:php": "find web/modules/custom web/themes/custom -name '*.php' -exec php -l {} \\;",
     "lint:styles": "stylelint --color {web/modules/custom,web/themes/custom}/**/*.scss",
     "prettier": "prettier '{docs,web/modules/custom,web/themes/custom}/**/*.{json,md,js,html,scss,html}' --ignore-unknown --list-different",
-    "local-data-bak": "./scripts/sous/local-data-bak.sh",
+    "local-data-bak": "./devops/scripts/local-data-bak.sh",
     "prepare": "husky install",
     "publish": "semantic-release --tag-format '${version}'",
     "publish-test": "semantic-release --tag-format '${version}' --dry-run --debug",
     "postinstall": "patch-package",
-    "rebuild": "./scripts/sous/rebuild.sh",
-    "theme-build": "./scripts/sous/theme-build.sh",
-    "theme-watch": "./scripts/sous/theme-watch.sh"
+    "rebuild": "./devops/scripts/rebuild.sh",
+    "theme-build": "./devops/scripts/theme-build.sh",
+    "theme-watch": "./devops/scripts/theme-watch.sh",
+    "sous-build": "./devops/scripts/sous-build.sh"
   },
   "repository": {
     "type": "git",
@@ -33,7 +37,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.4.0",
     "@commitlint/config-conventional": "^17.4.0",
-    "@emulsify/cli": "^1.6.0",
+    "@emulsify/cli": "^1.9.0",
     "@semantic-release/changelog": "^6.0.2",
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/git": "^10.0.1",
@@ -41,6 +45,6 @@
     "@semantic-release/release-notes-generator": "^10.0.3",
     "husky": "^8.0.3",
     "patch-package": "^6.2.2",
-    "semantic-release": "^19.0.5"
+    "semantic-release": "^24.0.0"
   }
 }

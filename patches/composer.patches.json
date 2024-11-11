@@ -1,7 +1,7 @@
 {
   "patches": {
     "drupal/field_group": {
-      "2969051 - HTML5 Validation Prevents Submission in Tabs": "https://www.drupal.org/files/issues/2024-08-09/2969051-148.patch"
+      "https://www.drupal.org/project/field_group/issues/2969051": "https://git.drupalcode.org/project/field_group/-/merge_requests/57.diff"
     }
   }
 }

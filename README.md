@@ -20,13 +20,14 @@ Without these you will have difficulty installing this project.
 
 1. [PHP ^8.1](http://www.php.net/)
 2. [Composer 2.x](https://getcomposer.org/)
-3. [Lando ^3.6](https://docs.lando.dev/basics/installation.html)
+3. [DDEV](https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/) or [Lando](https://docs.lando.dev/basics/installation.html)
 
 Use this command below and replace `PROJECT_NAME` with your chosen project name.
 
 ```
 composer create-project fourkitchens/sous-drupal-project [PROJECT-NAME]
 ```
+Note that by default, the project will use DDEV. If you would like to use Lando, use the "Contribute without create project" steps below.
 
 You will be prompted to select the version of Sous you want to install. The main versions are:
 
@@ -161,8 +162,8 @@ composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJE
 To run setup + install:
 1. clone repo `gh repo clone fourkitchens/sous-drupal-project [directory]`
 2. `cd` to your project directory
-3. change the name of your project in .lando.yml
-4. `lando start`
+3. copy `/.devops/environment/example.local.env` to `/.devops/environment/local.env`
+4. choose environment: add `local_dev="ddev"` or `local_dev="lando"` to /.devops/environment/local.env
 5. `composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
 
