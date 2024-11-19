@@ -1,0 +1,114 @@
+#!/bin/bash
+
+if [[ -z "$DOCROOT" ]]; then
+  DOCROOT=web
+fi
+
+if [[ -z "$PHP_SCRIPTS" ]]; then
+  PHP_SCRIPTS="$DOCROOT/modules/custom $DOCROOT/themes/custom $DOCROOT/sites"
+fi
+
+if [[ -z "$SKIP_ESLINT" ]]; then
+  SKIP_ESLINT=NO
+fi
+if [[ -z "$SKIP_CODE_SNIFF" ]]; then
+  SKIP_CODE_SNIFF=NO
+fi
+if [[ -z "$SKIP_PHPSTAN" ]]; then
+  SKIP_PHPSTAN=NO
+fi
+if [[ "$SKIP_PHPSTAN" != "YES" ]]; then
+  if [[ -z "$PHPSTAN_CONFIG_FILE" ]]; then
+    if [[ -f phpstan.neon ]]; then
+      PHPSTAN_CONFIG_FILE="phpstan.neon"
+    elif [[ -f phpstan.neon.dist ]]; then
+      PHPSTAN_CONFIG_FILE="phpstan.neon.dist"
+    elif [[ -f phpstan.dist.neon ]]; then
+      PHPSTAN_CONFIG_FILE="phpstan.neon.dist"
+    else
+       echo "PHPStan is not configured. In the future, this will result in a default configuration being used."
+       SKIP_PHPSTAN=YES
+    fi
+  fi
+fi
+RESULTS_DIR=./test-results
+
+FAIL=NO
+
+mkdir -p "$RESULTS_DIR"
+
+echo "Checking for left over conflict markers."
+echo "<?xml version=\"1.0\" encoding=\"utf-8\"?> <testsuites>" >> $RESULTS_DIR/git-merge-marker.xml
+while IFS= read -r result
+do
+  FAIL=YES
+  echo "<testsuite package=\"git\" time=\"0\" tests=\"1\" errors=\"1\" name=\"$result\"><testcase time=\"0\" name=\"$result\"><error message=\"Merge conflict marker detected\"><![CDATA[line "$( echo "$result" | grep -o [0-9]*$)", Error Merge conflict marker detected]]  </error></testcase></testsuite>" >> $RESULTS_DIR/git-merge-marker.xml
+done < <( git diff --check | grep -oP ".*(?=: leftover conflict marker)" )
+echo "</testsuites>" >> $RESULTS_DIR/git-merge-marker.xml
+
+
+# Lint php code for syntax errors
+if composer run --list | grep -q "  lint"; then
+  echo "Custom composer lint script detected. Running composer lint."
+  set -eo pipefail
+  composer -n lint
+  set +eo pipefail
+else
+  # Default PHP Linting
+
+  # PHP Lint
+  echo "Running PHP Lint"
+
+  set -eo pipefail
+  find $PHP_SCRIPTS \( -iname  '*.php' -o -iname '*.inc' -o -iname '*.module' -o -iname '*.install'-o -iname '*.theme' \) '!' -path '*/node_modules/*' -print0 | xargs -0 -n1 -P8 php -l
+  set +eo pipefail
+
+  # Default ESLinting if availible
+  if [[ -f ./node_modules/.bin/eslint ]] && [[ $SKIP_ESLINT != "YES" ]]; then
+    echo "Running ESlint."
+    ./node_modules/.bin/eslint --format junit --output-file .test-results/eslint.xml .
+    if [ $? -ne 0 ]; then
+      FAIL=YES
+    fi
+    # TODO Add a default eslint config to check JS and YAML files to Drupal
+    # core's base standard.
+  fi
+fi
+
+# Checking for stinky code.
+if composer run --list | grep -q "  code-sniff"; then
+  echo "Custom composer code-sniff script detected. Running composer code-sniff."
+  composer -n code-sniff
+  if [ $? -ne 0 ]; then
+    FAIL=YES
+  fi
+else
+  # Check coding standards
+  if composer exec --list | grep -q 'phpcs' && [[ "$SKIP_CODE_SNIFF" != "YES" ]]; then
+    if [[ -f phpcs.xml  || -f phpcs.xml.dist ]]; then
+      echo "Running PHPCS"
+       composer exec -- phpcs -p --report-summary --report-junit=$RESULTS_DIR/phpcs.xml
+      if [ $? -ne 0 ]; then
+        FAIL=YES
+      fi
+      # TODO Add a default phpcs config to check coding standards of PHP files
+      # to Drupal core's base standard.
+    fi
+  fi
+fi
+
+# Check for deprecations.
+if composer exec --list | grep -q 'phpstan' && [[ "$SKIP_PHPSTAN" != "YES" ]]; then
+  echo "Running PHPStan"
+  composer exec -- phpstan analyze -c $PHPSTAN_CONFIG_FILE --error-format=junit > $RESULTS_DIR/phpstan.xml
+  if [ $? -ne 0 ]; then
+    FAIL=YES
+  fi
+  # TODO Add a default phpstan config to check coding deprecations of PHP files
+  # to Drupal core's base standard.
+fi
+if [ $FAIL == "YES" ]; then
+  echo "Tests Failed"
+  exit 1
+fi
+echo "Done"

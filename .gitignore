@@ -125,5 +125,3 @@ composer.lock
 web/themes/
 .lando.yml
 /composer.json
-scripts/
-assets/scaffold/recipes/sous_base/recipe.yml

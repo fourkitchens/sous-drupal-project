@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -eo pipefail
+
+#
+# This script performs all tasks related to the site theme.
+#
+
+# Use docroot as the drupal web root.
+DOCROOT=${DOCROOT:-docroot}
+
+echo "Compiling theme..."
+
+# Compile theme files and pattern lab.
+npm run theme-build

@@ -3,6 +3,8 @@
  */
 $settings['hash_salt'] = 'local';
 
+$config['config_split.config_split.local']['status'] = TRUE;
+
 /*
  * Local database configuration.
  */
@@ -17,3 +19,20 @@ $databases['default']['default'] = array (
   'driver' => 'mysql',
   'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
 );
+
+/**
+ * Set config sync directory.
+ */
+$settings['config_sync_directory'] = '../config/default';
+
+/**
+ * Load DDEV settings.
+ */
+if (file_exists($app_root . '/' . $site_path . '/settings.ddev.php')) {
+  if (isset($_ENV['IS_DDEV_PROJECT']) && getenv('IS_DDEV_PROJECT') == 'true') {
+    include $app_root . '/' . $site_path . '/settings.ddev.php';
+    $config['config_split.config_split.local']['status'] = TRUE;
+  }
+}
+
+
