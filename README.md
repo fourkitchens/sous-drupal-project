@@ -169,6 +169,20 @@ To run setup + install:
 5. `composer install`
 6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
 
+## Contribute to recipes
+
+1. Follow the steps above, and choose `[0] Default Sous (media and content types only)` option when presented with the recipe dialogue in the setup script
+2. Composer require the recipe using --prefer-source. Optionally specify a branch.
+3. The recipe will be added to the /recipes directory. Make changes there and push to your branch.
+4. Make desired changes to sous and export config. Compare the config in the /config/default directory to the config in the recipe. You may be able to replace the config in the recipe, or you may need to apply config actions.
+5. Test your recipe by running "ddev install-recipe [recipe-name]" or "lando install-recipe [recipe-name]"
+
+[TODO] Add more information on updating recipe config and config actions.
+
+## Current recipes in Sous
+
+[TODO] Add recipes here.
+
 To install recipes, use the `lando install-recipe` command. Eg. For the paragraphs version of Sous, run:
 
 ```
