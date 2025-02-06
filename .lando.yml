@@ -1,4 +1,4 @@
-name: sous-drupal-project
+name: sous-project
 recipe: drupal10
 config:
   webroot: web
@@ -23,7 +23,7 @@ tooling:
   drush:
     service: appserver
     env:
-      DRUSH_OPTIONS_URI: "https://sous-drupal-project.lndo.site"
+      DRUSH_OPTIONS_URI: "https://sous-project.lndo.site"
   node:
     service: appserver
   npm:
@@ -64,7 +64,7 @@ tooling:
   compound-install:
     service: appserver
     description: "Install Compound component library"
-    cmd: cd $LANDO_MOUNT && cd web/themes/custom/sousdrupalproject && emulsify system install compound
+    cmd: cd $LANDO_MOUNT && cd web/themes/custom/sous-theme && emulsify system install compound
   install-recipe:
     service: appserver
     cmd: bash ./devops/scripts/install-recipe.sh
