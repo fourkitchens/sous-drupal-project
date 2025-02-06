@@ -14,10 +14,10 @@ IFS='/' read -ra recipe_split <<< "$recipe_full_package_name"
 recipe_directory_name="${recipe_split[1]}"
 
 if [ $# -eq 0 ]; then
- echo "Usage: specify the directory name inside of /app/recipes/ that you want to install:"
- cd /app/recipes/
- ls -d -- */
- exit 1
+  echo "Usage: specify the directory name inside of /app/recipes/ that you want to install:"
+  cd /app/recipes/
+  ls -d -- */
+  exit 1
 fi
 
 cd web

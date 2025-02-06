@@ -13,9 +13,8 @@ source ./devops/environment/local.env
 # ./devops/environment/local.env and then 'npm run setup'.
 if [ -s ./devops/environment/local.env ]; then
   $local_dev start
-  npm run rebuild
+  ./devops/scripts/rebuild.sh
 else
   echo "local_dev=\"ddev\"" >> ./devops/environment/local.env
-  npm run sous-build
+  ./devops/scripts/sous-build.sh
 fi
-
