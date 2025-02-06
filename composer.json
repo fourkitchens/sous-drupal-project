@@ -39,7 +39,7 @@
         "drupal/core-project-message": "^11.1",
         "drupal/core-composer-scaffold": "^11.1",
         "drupal/core-recommended": "^11.1",
-        "drush/drush": "^12.1",
+        "drush/drush": "^13.3",
         "ewcomposer/unpack": "dev-master",
         "fourkitchens/sous-admin": "dev-main",
         "fourkitchens/sous-emulsify": "dev-main",
