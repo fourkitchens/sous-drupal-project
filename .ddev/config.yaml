@@ -1,4 +1,4 @@
-name: sous-project
+name: sous-drupal-project
 type: drupal
 docroot: web
 php_version: "8.3"

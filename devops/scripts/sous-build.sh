@@ -12,16 +12,16 @@ $local_dev npm install
 
 echo "Starting $local_dev"
 $local_dev start
-$local_dev drush site:install minimal --account-name=sous-project --account-name=superuser_1 -y
+$local_dev drush site:install minimal --account-name=sousdrupalproject --account-name=superuser_1 -y
 $local_dev install-recipe fourkitchens/sous-emulsify
 $local_dev install-recipe fourkitchens/sous-admin
 echo "Creating an Emulsify based theme..."
-$local_dev drush emulsify sous-project
+$local_dev drush emulsify sousdrupalproject
 echo "Installing theme dependencies... This may take a minute..."
-$local_dev npm --prefix ./web/themes/custom/sous-project install --silent
-echo "Enable sous-project and set as the default theme..."
-$local_dev drush theme:install sous-project
-$local_dev drush config-set system.theme default sous-project -y
+$local_dev npm --prefix ./web/themes/custom/sousdrupalproject install --silent
+echo "Enable sousdrupalproject and set as the default theme..."
+$local_dev drush theme:install sousdrupalproject
+$local_dev drush config-set system.theme default sousdrupalproject -y
 $local_dev drush user:block superuser_1
 $local_dev drush user:create sous_chef --mail="sous_chef@fourkitchens.com"
 $local_dev drush user:role:add 'superuser' superuser_1

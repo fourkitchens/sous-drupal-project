@@ -1,5 +1,5 @@
 #!/bin/sh
 
-cd web/themes/custom/sous-project
+cd web/themes/custom/sousdrupalproject
 npm ci
 npm run develop

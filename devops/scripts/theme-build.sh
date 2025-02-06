@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd web/themes/custom/sous-project
+cd web/themes/custom/sousdrupalproject
 # echo "clear npm cache"
 npm cache clear --force
 # echo "install packages"
