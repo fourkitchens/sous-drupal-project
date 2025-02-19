@@ -16,6 +16,9 @@ corepack_enable: false
 nodejs_version: "20"
 hooks:
     post-start:
+        - exec: sudo dpkg --add-architecture amd64
+        - exec: sudo apt-get update
+        - exec: sudo apt-get install -y libc6:amd64 libstdc++6:amd64 zlib1g:amd64
         - exec: sudo npm install --silent -g npm@latest
         - exec: sudo npm install --silent -g @emulsify/cli
 
