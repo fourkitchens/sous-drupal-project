@@ -1,3 +1,10 @@
+## [6.3.1](https://github.com/fourkitchens/sous-drupal-project/compare/6.3.0...6.3.1) (2025-02-21)
+
+
+### Bug Fixes
+
+* add required emulsify packages ([#122](https://github.com/fourkitchens/sous-drupal-project/issues/122)) ([91f7901](https://github.com/fourkitchens/sous-drupal-project/commit/91f79010420046a1c0f14096c68898c02b7ca289))
+
 ## [6.2.1](https://github.com/fourkitchens/sous-drupal-project/compare/6.2.0...6.2.1) (2024-10-24)
 
 
