@@ -1,0 +1,14 @@
+#!/bin/bash
+
+## Description: Run Emulsify CLI inside the web container
+## Usage: emulsify [flags] [args]
+## Example: "ddev emulsify system list" or "ddev emulsify system install emulsify-ui-kit"
+## HostWorkingDir: true
+## ExecRaw: true
+
+
+if ! command -v emulsify >/dev/null; then
+  echo "emulsify is not available. You may need to 'ddev npm install -g @emulsify/cli'"
+  exit 1
+fi
+emulsify "$@"
