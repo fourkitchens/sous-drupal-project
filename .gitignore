@@ -88,7 +88,7 @@ node_modules/
 # PHPStorm generated files/folders
 .idea
 
-# Lando app
+# App scaffold files
 app
 mods_disabled.local
 .editorconfig
@@ -123,5 +123,4 @@ composer.lock
 
 # Remove me after development
 web/themes/
-.lando.yml
 /composer.json

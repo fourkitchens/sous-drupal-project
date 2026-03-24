@@ -1,13 +1,11 @@
 #!/bin/bash
 
 #
-# Helper script to install a recipe inside lando.
+# Helper script to install a recipe in DDEV.
 #
 # Usage:
-# lando install-recipe <directory name of recipe inside /recipes>
+# ddev install-recipe <directory name of recipe inside /recipes>
 #
-
-source ./devops/environment/local.env
 
 recipe_full_package_name="$1"
 IFS='/' read -ra recipe_split <<< "$recipe_full_package_name"
@@ -22,6 +20,6 @@ fi
 
 cd web
 php core/scripts/drupal recipe recipes/"$recipe_directory_name"
-$local_dev drush cr
+ddev drush cr
 #cd ..
 #php /usr/local/bin/composer unpack "$recipe_full_package_name"
