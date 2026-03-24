@@ -1,5 +1,3 @@
 #!/bin/sh
 
-source ./devops/environment/local.env
-
-$local_dev drush config-export -y
+ddev drush config-export -y
