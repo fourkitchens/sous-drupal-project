@@ -17,7 +17,7 @@ Sous not only generates a custom theme based on Emulsify, it also builds upon Dr
 ## Dependencies and Requirements
 
 
-* [PHP ^8.3](http://www.php.net/)
+* [PHP ^8.4](http://www.php.net/)
 * [DDEV](https://ddev.readthedocs.io/)
 * [Node 20.x (we recommend nvm)](https://github.com/nvm-sh/nvm)
 * [Composer 2.x](https://getcomposer.org/)

@@ -33,7 +33,7 @@
         }
     ],
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.4",
         "composer/installers": "^1.9",
         "cweagans/composer-patches": "^1.7",
         "drupal/core-project-message": "^11.1.2",
@@ -66,12 +66,10 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "phpstan/extension-installer": true
         },
+        "platform": {
+            "php": "8.4.0"
+        },
         "process-timeout": 0
-    },
-    "autoload": {
-        "psr-4": {
-            "Sous\\": "sous"
-        }
     },
     "extra": {
         "installer-name": "sous",
@@ -140,7 +138,7 @@
     },
     "scripts": {
         "post-create-project-cmd": [
-            "Sous\\Starter::sousPrep",
+            "./devops/scripts/sous-setup.sh",
             "./devops/scripts/setup.sh"
         ],
         "build-assets": [
