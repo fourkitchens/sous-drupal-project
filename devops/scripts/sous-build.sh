@@ -1,5 +1,24 @@
 #!/bin/sh
 
+# Use a dedicated Drush wrapper to suppress terminal control-sequence noise.
+# - TERM=dumb prevents TTY capability probes in some host/container terminal chains.
+# - --no-ansi disables ANSI formatting and related escape output.
+# - -y auto-confirms prompts for setup-safe mutating commands.
+run_drush() {
+  TERM=dumb ddev drush --no-ansi "$@"
+}
+
+run_drush_yes() {
+  TERM=dumb ddev drush --no-ansi -y "$@"
+}
+
+# Use a dedicated Composer wrapper for cleaner setup logs.
+# - TERM=dumb minimizes terminal capability probing noise in nested shells.
+# - --no-ansi keeps output plain so escape/control sequences are not printed.
+run_composer() {
+  TERM=dumb ddev composer --no-ansi "$@"
+}
+
 # Initialize the new project as a git repository.
 echo "Initializing your project as a git repository and set the default branch to main"
 git config --global init.defaultBranch main
@@ -7,28 +26,28 @@ git init
 
 # Install PHP/JS dependencies in the project environment.
 echo "Verify project dependencies are installed..."
-ddev composer install
+run_composer install
 ddev npm install
 
 # Boot DDEV and install base Drupal with core Sous recipes.
 echo "Starting ddev"
 ddev start
-ddev drush site:install minimal --account-name=sous-project --account-name=superuser_1 -y
+run_drush_yes site:install minimal --account-name=sous-project --account-name=superuser_1
 ddev install-recipe fourkitchens/sous-emulsify
 ddev install-recipe fourkitchens/sous-admin
 
 # Generate and enable the project theme, then set up initial admin users.
 echo "Creating an Emulsify based theme..."
-ddev drush emulsify sous-project
+run_drush_yes emulsify sous-project
 echo "Installing theme dependencies... This may take a minute..."
 ddev npm --prefix ./web/themes/custom/sous-project install --silent
 echo "Enable sous-project and set as the default theme..."
-ddev drush theme:install sous-project
-ddev drush config-set system.theme default sous-project -y
-ddev drush user:block superuser_1
-ddev drush user:create sous_chef --mail="sous_chef@fourkitchens.com"
-ddev drush user:role:add 'superuser' superuser_1
-ddev drush user:role:add 'superuser' sous_chef
+run_drush_yes theme:install sous-project
+run_drush_yes config-set system.theme default sous-project
+run_drush_yes user:block superuser_1
+run_drush_yes user:create sous_chef --mail="sous_chef@fourkitchens.com"
+run_drush_yes user:role:add 'superuser' superuser_1
+run_drush_yes user:role:add 'superuser' sous_chef
 
 # Prompt for optional feature recipe and install based on selection.
 echo "Which version of Sous would you like to install?"
@@ -39,13 +58,13 @@ echo "[3] Just the admin"
 read -p "Enter your selection " RESP
 case $RESP in
   0)
-    ddev composer require fourkitchens/sous-content-types && ddev drush cr && ddev install-recipe fourkitchens/sous-content-types
+    run_composer require fourkitchens/sous-content-types && run_drush_yes cr && ddev install-recipe fourkitchens/sous-content-types
     ;;
   1)
-    ddev composer require fourkitchens/sous-layout-builder && ddev drush cr && ddev install-recipe fourkitchens/sous-layout-builder
+    run_composer require fourkitchens/sous-layout-builder && run_drush_yes cr && ddev install-recipe fourkitchens/sous-layout-builder
     ;;
   2)
-    ddev composer require fourkitchens/sous-paragraphs && ddev drush cr && ddev install-recipe fourkitchens/sous-paragraphs
+    run_composer require fourkitchens/sous-paragraphs && run_drush_yes cr && ddev install-recipe fourkitchens/sous-paragraphs
     ;;
   *)
     echo "No additional recipe required."
@@ -73,12 +92,9 @@ echo " ORDERS UP!"
 echo " Your Drupal site is ready."
 echo "//////////////"
 echo ""
-ddev drush uli --name=sous_chef
+run_drush uli --name=sous_chef
 
 # Remove bootstrap setup artifacts so this install workflow only runs once.
-echo "Running post-setup cleanup..."
-
-# Remove nested JSON key (sous references) from a file while preserving formatted JSON output.
 remove_json_key() {
   file="$1"
   top_level_key="$2"

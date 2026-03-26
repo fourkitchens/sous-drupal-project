@@ -26,21 +26,18 @@
                     "type": "zip"
                 }
             }
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/woredeyonas/Drupal-Recipe-Unpack.git"
         }
     ],
     "require": {
         "php": ">=8.4",
-        "composer/installers": "^1.9",
+        "composer/installers": "^2.3",
         "cweagans/composer-patches": "^1.7",
+        "drupal/core-recipe-unpack": "^11.3",
         "drupal/core-project-message": "^11.1.2",
         "drupal/core-composer-scaffold": "^11.1.2",
         "drupal/core-recommended": "^11.1.2",
+        "drupal/core-vendor-hardening": "^11.3",
         "drush/drush": "^13.3",
-        "ewcomposer/unpack": "dev-master",
         "fourkitchens/sous-admin": "dev-main",
         "fourkitchens/sous-emulsify": "dev-main",
         "oomphinc/composer-installers-extender": "^2.0",
@@ -58,10 +55,11 @@
             "composer/installers": true,
             "cweagans/composer-patches": true,
             "drupal/core-composer-scaffold": true,
+            "drupal/core-recipe-unpack": true,
             "zaporylie/composer-drupal-optimizations": true,
             "oomphinc/composer-installers-extender": true,
             "drupal/core-project-message": true,
-            "ewcomposer/unpack": true,
+            "drupal/core-vendor-hardening": true,
             "php-http/discovery": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "phpstan/extension-installer": true
@@ -133,10 +131,16 @@
             },
             "omit-defaults": false
         },
+        "drupal-core-vendor-hardening": {
+            "composer/composer": false
+        },
         "enable-patching": true,
         "patches-file": "patches/composer.patches.json"
     },
     "scripts": {
+        "post-update-cmd": [
+            "@php -r \"@unlink('vendor/bin/composer');\""
+        ],
         "post-create-project-cmd": [
             "./devops/scripts/sous-setup.sh",
             "./devops/scripts/setup.sh"
