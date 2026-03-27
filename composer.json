@@ -38,7 +38,7 @@
         "drupal/core-recommended": "^11.1.2",
         "drupal/core-vendor-hardening": "^11.3",
         "drush/drush": "^13.3",
-        "fourkitchens/sous-admin": "dev-main",
+        "fourkitchens/sous-admin": "dev-sous-80",
         "fourkitchens/sous-emulsify": "dev-main",
         "oomphinc/composer-installers-extender": "^2.0",
         "webflo/drupal-finder": "^1.2",
