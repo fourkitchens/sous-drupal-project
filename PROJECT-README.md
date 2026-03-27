@@ -13,7 +13,7 @@ Content management system for sous-project Built on Drupal
 | Drupal | 11.3 |
 | PHP | 8.4 |
 | Core Distribution | Drupal (11) |
-| Hosting | [Pantheon](https://dashboard.pantheon.io/sites/b2cee0b3-7ce1-49d8-9d14-9f08d729fbc3) |
+| Hosting | [Pantheon](https://dashboard.pantheon.io/) |
 | Circle CI | [sous-project](https://app.circleci.com/pipelines/github/Fourkitchens/sous-project) |
 
 ## Dependencies and Requirements
