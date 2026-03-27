@@ -1,5 +1,8 @@
 {
   "patches": {
+    "drupal/embed": {
+      "https://www.drupal.org/project/embed/issues/3517882": "https://www.drupal.org/files/issues/2025-06-30/embed--2025-06-30--3517882--mr-26.patch"
+    },
     "drupal/field_group": {
       "https://www.drupal.org/project/field_group/issues/2969051": "https://git.drupalcode.org/project/field_group/-/merge_requests/57.diff"
     }
