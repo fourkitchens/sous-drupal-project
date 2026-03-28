@@ -36,6 +36,10 @@ run_drush_yes site:install minimal --account-name=sous-project --account-name=su
 ddev install-recipe fourkitchens/sous-emulsify
 ddev install-recipe fourkitchens/sous-admin
 
+# Ensure custom module path exists and is tracked in git for new projects.
+mkdir -p web/modules/custom
+touch web/modules/custom/.gitkeep
+
 # Generate and enable the project theme, then set up initial admin users.
 echo "Creating an Emulsify based theme..."
 run_drush_yes emulsify sous-project
