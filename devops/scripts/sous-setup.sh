@@ -44,6 +44,8 @@ replace_token "sous-project" "$emulsify_project_name" "docs/DEPLOYMENT.md"
 replace_token "sous-project" "$emulsify_project_name" "docs/SETUP.md"
 replace_token "sous-project" "$emulsify_project_name" "composer.json"
 replace_token "fourkitchens/sous-drupal-project" "project/$dashed_project_name" "composer.json"
+replace_token "\"name\": \"sous-project\"" "\"name\": \"$dashed_project_name\"" "package.json"
+replace_token "web/themes/custom/sous-project" "web/themes/custom/$emulsify_project_name" "package.json"
 
 # Enable linting in the generated project by uncommenting line 3 in Husky hook.
 if [ -f ".husky/pre-commit" ]; then
