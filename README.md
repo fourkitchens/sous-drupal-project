@@ -17,8 +17,8 @@ Sous not only generates a custom theme based on Emulsify, it also builds upon Dr
 ## Dependencies and Requirements
 
 
-* [PHP ^8.3](http://www.php.net/)
-* [Lando ^3.6](https://docs.devwithlando.io/)
+* [PHP ^8.4](http://www.php.net/)
+* [DDEV](https://ddev.readthedocs.io/)
 * [Node 20.x (we recommend nvm)](https://github.com/nvm-sh/nvm)
 * [Composer 2.x](https://getcomposer.org/)
 
@@ -29,7 +29,7 @@ Use this command below and replace `PROJECT_NAME` with your chosen project name.
 ```
 composer create-project fourkitchens/sous-drupal-project [PROJECT-NAME]
 ```
-Note that by default, the project will use DDEV. If you would like to use Lando, use the "Contribute without create project" steps below.
+This starter kit supports DDEV for local development.
 
 You will be prompted to select the version of Sous you want to install. The main versions are:
 
@@ -38,17 +38,9 @@ You will be prompted to select the version of Sous you want to install. The main
 
 Both of these versions include Emulsify as the default theme in addition to a Gin admin and our recommended security, performance and admin modules.
 
-# Important last step: Unpacking
+# Recipe Dependency Management
 
-Recipe dependencies need to be unpacked to the root composer.json file. This feature is currently under development in Drupal core. In the meantime, you will need to run this command for every recipe in web/recipes:
-
-```
-php /usr/local/bin/composer unpack "$recipe_full_package_name
-```
-
-Eg: `php /usr/local/bin/composer unpack fourkitchens/sous-layout-builder`
-
-This will move all of the dependencies into the root and remove that recipe from web/recipes.
+Recipe dependency unpacking is handled by Drupal core tooling (`drupal/core-recipe-unpack`), so no manual `composer unpack` step is required.
 
 # Working with Emulsify
 
@@ -60,7 +52,7 @@ This package provides some additional tooling to support the build.
 
 ## Helper scripts
 
-To use the helper script provided you will need to have `npm` installed. Then just run `npm run <command>`. For example: `npm run import-data`. These commands are bash scripts located in the `./scripts/sous` directory and defined in `package.json`.
+To use the helper script provided you will need to have `npm` installed. Then just run `npm run <command>`. For example: `npm run import-data`. These commands are bash scripts located in the `./devops/scripts` directory and defined in `package.json`.
 
 ## Configuration management scripts
 
@@ -164,10 +156,8 @@ composer create-project fourkitchens/sous-drupal-project:dev-[branch-name] PROJE
 To run setup + install:
 1. clone repo `gh repo clone fourkitchens/sous-drupal-project [directory]`
 2. `cd` to your project directory
-3. copy `/.devops/environment/example.local.env` to `/.devops/environment/local.env`
-4. choose environment: add `local_dev="ddev"` or `local_dev="lando"` to /.devops/environment/local.env
-5. `composer install`
-6. `composer run-script post-create-project-cmd` (Requires composer to be installed locally. i.e. outside lando)
+3. `composer install`
+4. `composer run-script post-create-project-cmd`
 
 ## Contribute to recipes
 
@@ -175,7 +165,7 @@ To run setup + install:
 2. Composer require the recipe using --prefer-source. Optionally specify a branch.
 3. The recipe will be added to the /recipes directory. Make changes there and push to your branch.
 4. Make desired changes to sous and export config. Compare the config in the /config/default directory to the config in the recipe. You may be able to replace the config in the recipe, or you may need to apply config actions.
-5. Test your recipe by running "ddev install-recipe [recipe-name]" or "lando install-recipe [recipe-name]"
+5. Test your recipe by running `ddev install-recipe [recipe-name]`
 
 [TODO] Add more information on updating recipe config and config actions.
 
@@ -183,8 +173,8 @@ To run setup + install:
 
 [TODO] Add recipes here.
 
-To install recipes, use the `lando install-recipe` command. Eg. For the paragraphs version of Sous, run:
+To install recipes, use the `ddev install-recipe` command. Eg. For the paragraphs version of Sous, run:
 
 ```
-lando install-recipe fourkitchens/sous-paragraphs
+ddev install-recipe fourkitchens/sous-paragraphs
 ```
