@@ -1,9 +1,7 @@
 #!/bin/sh
 
-source ./devops/environment/local.env
-
-$local_dev drush updatedb -y
-$local_dev drush cache-rebuild
-$local_dev drush config-import --source="../config/_splits" --partial --yes
-$local_dev drush cache-rebuild
-$local_dev drush config-import --yes
+ddev drush updatedb -y
+ddev drush cache-rebuild
+ddev drush config-import --source="../config/_splits" --partial --yes
+ddev drush cache-rebuild
+ddev drush config-import --yes
