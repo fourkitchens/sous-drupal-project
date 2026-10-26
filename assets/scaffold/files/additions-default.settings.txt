@@ -4,8 +4,14 @@
 $settings['config_sync_directory'] = '../config/default';
 
 /**
- * Load local development override configuration.
+ * Load DDEV's connection settings before the project environment policy.
+ * The direct include also prevents DDEV appending another include after it.
  */
-if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
-  include $app_root . '/' . $site_path . '/settings.local.php';
+if (getenv('IS_DDEV_PROJECT') === 'true' && is_readable($app_root . '/' . $site_path . '/settings.ddev.php')) {
+  require $app_root . '/' . $site_path . '/settings.ddev.php';
 }
+
+/**
+ * Project-owned environment policy; initialized once by Composer scaffolding.
+ */
+require $app_root . '/' . $site_path . '/settings.sous.php';

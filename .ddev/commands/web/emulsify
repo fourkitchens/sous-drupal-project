@@ -6,9 +6,10 @@
 ## HostWorkingDir: true
 ## ExecRaw: true
 
+set -euo pipefail
 
-if ! command -v emulsify >/dev/null; then
-  echo "emulsify is not available. You may need to 'ddev npm install -g @emulsify/cli'"
+if [[ ! -x /var/www/html/node_modules/.bin/emulsify ]]; then
+  echo "Emulsify CLI is not installed. Run 'ddev npm ci --include=dev' in the project root." >&2
   exit 1
 fi
-emulsify "$@"
+exec /var/www/html/node_modules/.bin/emulsify "$@"

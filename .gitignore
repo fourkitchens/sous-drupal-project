@@ -68,7 +68,9 @@ web/libraries
 web/modules/contrib
 web/modules/features
 web/profiles/contrib
-web/recipes
+/web/recipes/*
+!/web/recipes/sous-layout-builder/
+!/web/recipes/sous-config-split/
 web/themes/contrib
 web/.gitignore
 
@@ -77,6 +79,16 @@ vendor/
 
 # Node modules.
 node_modules/
+
+# Generated theme assets and Storybook output.
+/web/themes/custom/*/dist/
+/web/themes/custom/*/.out/
+/web/themes/custom/*/.coverage/
+/web/themes/custom/*/.publish/
+/web/storybook/
+# The selected Core 4 build mirrors this generated theme's src/components here.
+# Naming setup scopes this rule to that theme; other themes may own components.
+/web/themes/custom/sous-project/components/
 
 # Ignore generated linting files
 /web/.eslintignore
@@ -93,6 +105,7 @@ app
 mods_disabled.local
 .editorconfig
 .gitattributes
+!/.gitattributes
 .csslintrc
 .eslintignore
 .eslintrc.json
@@ -101,6 +114,7 @@ mods_disabled.local
 INSTALL.txt
 README.txt
 autoload.php
+autoload_runtime.php
 example.gitignore
 index.php
 robots.txt
@@ -113,14 +127,13 @@ web.config
 
 # Remove me after sous install
 README.txt
-development.services.yml
+/web/sites/development.services.yml
 example.settings.local.php
 example.sites.php
 default.services.yml
 default.settings.php
 settings.php
-composer.lock
 
-# Remove me after development
-web/themes/
-/composer.json
+# Disposable integration diagnostics are not application source.
+/.integration-results/
+__pycache__/

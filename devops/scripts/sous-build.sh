@@ -1,50 +1,71 @@
 #!/bin/sh
 
+# Bootstrap a newly named Sous project, then retire its one-time setup helpers.
+# Called by setup.sh fresh (also exposed as npm run sous-build); no arguments.
+# Requires local/nonproduction and may replace its database with Minimal Drupal.
+# The workflow prompts for content composition, builds the theme, and verifies
+# export/metadata/login before cleanup or success output. Failures stop dependent
+# phases and retain remaining bootstrap files for diagnosis and a reviewed retry.
+set -eu
+. "$(dirname "$0")/_runtime.sh"
+runtime_require_development
+
 # Use a dedicated Drush wrapper to suppress terminal control-sequence noise.
 # - TERM=dumb prevents TTY capability probes in some host/container terminal chains.
 # - --no-ansi disables ANSI formatting and related escape output.
 # - -y auto-confirms prompts for setup-safe mutating commands.
 run_drush() {
-  TERM=dumb ddev drush --no-ansi "$@"
+  TERM=dumb runtime_drush --no-ansi "$@"
 }
 
 run_drush_yes() {
-  TERM=dumb ddev drush --no-ansi -y "$@"
+  TERM=dumb runtime_drush --no-ansi -y "$@"
 }
 
 # Use a dedicated Composer wrapper for cleaner setup logs.
 # - TERM=dumb minimizes terminal capability probing noise in nested shells.
 # - --no-ansi keeps output plain so escape/control sequences are not printed.
 run_composer() {
-  TERM=dumb ddev composer --no-ansi "$@"
+  TERM=dumb runtime_composer --no-ansi "$@"
 }
 
-# Initialize the new project as a git repository.
-echo "Initializing your project as a git repository and set the default branch to main"
-git config --global init.defaultBranch main
-git init
+# Preserve contributor clones and their branch. Only a project without Git is
+# initialized on main; -b sets the branch here without changing global Git prefs.
+if [ ! -e .git ]; then
+  echo "Initializing your project as a git repository on main"
+  git init -b main
+fi
 
-# Install PHP/JS dependencies in the project environment.
-echo "Verify project dependencies are installed..."
-run_composer install
-ddev npm install
-
-# Boot DDEV and install base Drupal with core Sous recipes.
 echo "Starting ddev"
-ddev start
+runtime_start
+
+# Install PHP and root frontend tools before using Drush or the project CLI.
+echo "Verify project dependencies are installed..."
+# Project naming changes Composer's root metadata. Refresh its lock hash without
+# changing locked package versions, including when no optional recipe is added.
+if [ -f composer.lock ]; then
+  run_composer update --lock --no-install --no-interaction
+fi
+run_composer install
+runtime_npm ci --include=dev
+
+# Install a fresh Minimal database, then apply the two always-on Sous recipes.
+# The canonical recipe helper stops on application/cache failures in either one.
 run_drush_yes site:install minimal --account-name=sous-project --account-name=superuser_1
-ddev install-recipe fourkitchens/sous-emulsify
-ddev install-recipe fourkitchens/sous-admin
+./devops/scripts/install-recipe.sh fourkitchens/sous-emulsify
+./devops/scripts/install-recipe.sh fourkitchens/sous-admin
 
 # Ensure custom module path exists and is tracked in git for new projects.
 mkdir -p web/modules/custom
 touch web/modules/custom/.gitkeep
 
-# Generate and enable the project theme, then set up initial admin users.
+# The theme helper installs/builds the generated theme before Drupal enables it.
+# Keep the bootstrap UID 1 account blocked and assign the administrator role to
+# the separate authoring account after the administration recipe has supplied it.
 echo "Creating an Emulsify based theme..."
 run_drush_yes emulsify sous-project
 echo "Installing theme dependencies... This may take a minute..."
-ddev npm --prefix ./web/themes/custom/sous-project install --silent
+sh devops/scripts/theme-setup.sh web/themes/custom/sous-project
 echo "Enable sous-project and set as the default theme..."
 run_drush_yes theme:install sous-project
 run_drush_yes config-set system.theme default sous-project
@@ -53,52 +74,55 @@ run_drush_yes user:create sous_chef --mail="sous_chef@fourkitchens.com"
 run_drush_yes user:role:add 'superuser' superuser_1
 run_drush_yes user:role:add 'superuser' sous_chef
 
-# Prompt for optional feature recipe and install based on selection.
+# Install the selected content/composition layer over the same administration
+# base. The fallback case also covers admin-only or an unrecognized response.
 echo "Which version of Sous would you like to install?"
 echo "[0] Default Sous (media and content types only)"
 echo "[1] Sous with Layout Builder"
 echo "[2] Sous with Paragraphs"
 echo "[3] Just the admin"
-read -p "Enter your selection " RESP
+printf 'Enter your selection '
+# Composer can close script stdin even when the caller has a terminal.
+if ! read -r RESP; then
+  read -r RESP < /dev/tty
+fi
 case $RESP in
   0)
-    run_composer require fourkitchens/sous-content-types && run_drush_yes cr && ddev install-recipe fourkitchens/sous-content-types
+    # The default Page model pulls in its shared formats and media dependencies.
+    run_composer require fourkitchens/sous-content-types:dev-main fourkitchens/sous-formats:dev-main fourkitchens/sous-media:dev-main
+    run_drush_yes cr
+    ./devops/scripts/install-recipe.sh fourkitchens/sous-content-types
     ;;
   1)
-    run_composer require fourkitchens/sous-layout-builder && run_drush_yes cr && ddev install-recipe fourkitchens/sous-layout-builder
+    run_composer require fourkitchens/sous-content-types:dev-main fourkitchens/sous-formats:dev-main fourkitchens/sous-media:dev-main
+    run_drush_yes cr
+    # Rebuild field/block discovery between Page creation and layout enabling.
+    ./devops/scripts/install-recipe.sh fourkitchens/sous-content-types
+    ./devops/scripts/install-recipe.sh fourkitchens/sous-layout-builder
     ;;
   2)
-    run_composer require fourkitchens/sous-paragraphs && run_drush_yes cr && ddev install-recipe fourkitchens/sous-paragraphs
+    # The Paragraphs host recipe composes the checked dependency recipes; using
+    # the canonical application helper preserves a failed child recipe's status.
+    run_composer require fourkitchens/sous-paragraphs:dev-main fourkitchens/sous-paragraph-types:dev-main fourkitchens/sous-content-types:dev-main fourkitchens/sous-formats:dev-main fourkitchens/sous-media:dev-main
+    run_drush_yes cr
+    ./devops/scripts/install-recipe.sh fourkitchens/sous-paragraphs
     ;;
   *)
     echo "No additional recipe required."
     ;;
 esac
 
-# Display setup banner and output one-time login URL for sous_chef.
-echo ""
-cat <<'EOF'
-       .--,--.
-       `.  ,.'
-        |___|
-        :o o:   O 
-       _`~^~'_  | 
-     /'   ^   `\=)
-   .'  _______ '~|
-   `(<=|     |= /'
-       |     |
-       |_____|
-~~~~~~~ ===== ~~~~~~~~
-EOF
-echo ""
-echo "//////////////"
-echo " ORDERS UP!"
-echo " Your Drupal site is ready."
-echo "//////////////"
-echo ""
+# Export the final installed composition as the generated site's complete config.
+# Validate the native transformed source before exporting the complete sync set.
+runtime_environment_check export
+run_drush_yes config:export
+
+# Verify the generated manifest/lock pair and login before success or cleanup.
+run_composer validate --no-check-publish
 run_drush uli --name=sous_chef
 
-# Remove bootstrap setup artifacts so this install workflow only runs once.
+# Remove bootstrap commands only after all installation checks above succeeded.
+# Update JSON structurally so other project scripts/metadata survive cleanup.
 remove_json_key() {
   file="$1"
   top_level_key="$2"
@@ -108,7 +132,9 @@ remove_json_key() {
     return 0
   fi
 
-  php -r '
+  # PHP, rather than the shell, expands these variables.
+  # shellcheck disable=SC2016
+  runtime_exec php -r '
   $file = $argv[1];
   $topLevelKey = $argv[2];
   $nestedKey = $argv[3];
@@ -125,13 +151,39 @@ remove_json_key() {
   if (isset($data[$topLevelKey]) && is_array($data[$topLevelKey])) {
     unset($data[$topLevelKey][$nestedKey]);
   }
-  file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+  $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+  if (file_put_contents($file, $json . PHP_EOL) === false) {
+    fwrite(STDERR, "Unable to write {$file}\n");
+    exit(1);
+  }
   ' "$file" "$top_level_key" "$nested_key"
 }
 
 remove_json_key "composer.json" "scripts" "post-create-project-cmd"
 remove_json_key "package.json" "scripts" "sous-build"
 
-# Delete this setup script and companion setup helper after successful run.
-rm -f "devops/scripts/sous-setup.sh"
-rm -f "devops/scripts/sous-build.sh"
+# Retire only the one-time naming/install helpers; setup.sh remains available to
+# dispatch existing-site restoration and reject another fresh bootstrap.
+rm -f "devops/scripts/sous-setup.sh" "devops/scripts/sous-build.sh"
+
+# Announce success only after installation, login generation, and cleanup succeed.
+echo ""
+cat <<'EOF'
+       .--,--.
+       `.  ,.'
+        |___|
+        :o o:   O
+       _`~^~'_  |
+     /'   ^   `\=)
+   .'  _______ '~|
+   `(<=|     |= /'
+       |     |
+       |_____|
+~~~~~~~ ===== ~~~~~~~~
+EOF
+echo ""
+echo "//////////////"
+echo " ORDERS UP!"
+echo " Your Drupal site is ready."
+echo "//////////////"
+echo ""

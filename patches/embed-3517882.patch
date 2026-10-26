@@ -1,0 +1,13 @@
+diff --git a/src/Plugin/CKEditor5Plugin/EmbedCKEditor5PluginBase.php b/src/Plugin/CKEditor5Plugin/EmbedCKEditor5PluginBase.php
+index 7dec428b76b84b0cd1c300d11a1f2238d3a19e75..d277320f607bcb7630a76529cabe86921f0d3ebf 100644
+--- a/src/Plugin/CKEditor5Plugin/EmbedCKEditor5PluginBase.php
++++ b/src/Plugin/CKEditor5Plugin/EmbedCKEditor5PluginBase.php
+@@ -2,7 +2,7 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace Drupal\entity_embed\Plugin\CKEditor5Plugin;
++namespace Drupal\embed\Plugin\CKEditor5Plugin;
+ 
+ use Drupal\ckeditor5\Plugin\CKEditor5PluginDefault;
+ use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;

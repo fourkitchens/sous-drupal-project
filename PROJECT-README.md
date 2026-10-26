@@ -1,38 +1,65 @@
-# sous-project
+# Generated Drupal application
 
-Content management system for sous-project Built on Drupal
+A Drupal application generated from Sous. This repository owns its custom code,
+Emulsify theme, complete configuration export, package lockfiles, hosting, and
+deployment policy. Record project-specific URLs, owners, and access requirements
+here after generation.
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Fourkitchens/sous-project/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/Fourkitchens/sous-project/tree/main)
+`devops/tests/` starts empty for this application's own checks. Sous's product
+integration runner and maintainer test files are excluded during generation;
+run upstream product checks from a separate Sous source checkout.
 
-## At A Glance
+## At a glance
 
-| Item | Details |
+|   |   |
 | --- | --- |
-| Local Environment | [DDEV](https://ddev.readthedocs.io/en/stable/) or [Lando](https://docs.lando.dev/getting-started/) |
-| Deployment Method | [Four Kitchens Pots CI](https://github.com/fourkitchens/pots) |
-| Drupal | 11.3 |
-| PHP | 8.4 |
-| Core Distribution | Drupal (11) |
-| Hosting | [Pantheon](https://dashboard.pantheon.io/) |
-| Circle CI | [sous-project](https://app.circleci.com/pipelines/github/Fourkitchens/sous-project) |
+| Local environment | [DDEV](https://ddev.readthedocs.io/en/stable/) — see `.ddev/config.yaml` |
+| Supported runtime | [Platform and Emulsify versions](docs/PLATFORM.md) |
+| Build tools | [Project-local npm and Emulsify tooling](docs/BUILD_TOOLS.md) |
+| Configuration | Complete project-owned `config/default` export |
+| Environment policy | [Local/nonproduction/production and optional Config Split](docs/ENVIRONMENTS.md) |
+| Hosting and deployment | Project-owned; [deployment guide](docs/DEPLOYMENT.md) |
+| CI | Configure application checks; copied Sous product CI is scoped to Sous repositories |
 
-## Dependencies and Requirements
+## Develop and restore
 
-* [DDEV](https://ddev.readthedocs.io/en/stable/)
-* [NVM](https://github.com/nvm-sh/nvm)
-* [NodeJS v24+ LTS](https://nodejs.org/en/)
-* [Drush 13+](https://github.com/drush-ops/drush)
-* [Terminus](https://github.com/pantheon-systems/terminus)
-* [Fire launcher](https://github.com/fourkitchens/fire-launcher)
+Follow [local setup and recovery](docs/SETUP.md) for prerequisites and the
+existing-site restore workflow. Use DDEV's PHP/Composer/Node tools. The host
+needs the reviewed Node/npm version only for aliases that orchestrate DDEV;
+calling the documented shell helper directly avoids that host dependency.
+Inside DDEV those helpers use project tools directly. Prepared native CI must
+select its runtime explicitly; see the [environment contract](docs/ENVIRONMENTS.md).
+Terminus is needed only if this project chooses the optional Pantheon helper.
 
-## Documentation
+[Build tools](docs/BUILD_TOOLS.md) documents installing from locks, theme
+build/watch, Storybook, and linting. Use the [configuration maintenance guide](docs/MAINTENANCE.md)
+for package/database updates and project-specific overrides. Recipe defaults
+are not an update subscription: newer recipe files do not automatically change
+configuration already applied here.
 
-* [Local Setup](docs/SETUP.md)
-* [Contribution Guidlines](docs/CONTRIBUTING.md)
-* [Build Tools](docs/BUILD_TOOLS.md)
-* [Deployment](docs/DEPLOYMENT.md)
-* [Emulsify](https://www.emulsify.info/docs)
+Commit the Composer and root/theme npm manifests and lockfiles, custom theme
+source, and complete configuration export with site UUIDs. Review configuration
+changes before deploying them. Accounts, content, and role assignments live in
+the database; environment-specific values belong in this project's settings
+integration or ignored local settings. Local files load only in local mode;
+production is the default outside DDEV unless explicitly selected otherwise.
 
-## Known Issues
+## Project operations
 
-There are currently no known issues for this site.
+- [Production build and deployment](docs/DEPLOYMENT.md)
+- [Maintenance responsibilities and review cadence](docs/OPERATIONS.md)
+- [Contribution and code standards](docs/CONTRIBUTING.md)
+- [Sous features](docs/FEATURES.md)
+- [Upstream integration checks](docs/INTEGRATION.md)
+- [Upstream coordinated releases](docs/RELEASES.md)
+
+The inherited product CI skips renamed generated repositories. Configure and
+verify this application's checks before enabling releases. Review release
+branches and permissions; its private npm release tooling uses this project's
+Git origin, commit history, and tags. Application deployment is not implied by
+an upstream Sous release.
+
+## License
+
+The Sous scaffold is licensed under [GPL-2.0-or-later](LICENSE). Dependencies
+retain their own license notices.

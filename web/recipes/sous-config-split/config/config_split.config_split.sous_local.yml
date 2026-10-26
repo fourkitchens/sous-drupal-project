@@ -1,0 +1,15 @@
+langcode: en
+status: false
+dependencies: {  }
+id: sous_local
+label: 'Sous local'
+description: 'Project-owned module and configuration differences for local development.'
+weight: 0
+stackable: false
+no_patching: false
+storage: folder
+folder: ../config/splits/local
+module: {  }
+theme: {  }
+complete_list: {  }
+partial_list: {  }

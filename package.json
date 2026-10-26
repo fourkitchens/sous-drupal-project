@@ -11,24 +11,31 @@
     "husky:commit-msg": "commitlint --edit $1",
     "husky:pre-commit": "npm run lint",
     "import-data": "./devops/scripts/import-data.sh",
-    "lint": "npm run lint:php && npm run lint:js",
-    "lint:js": "eslint --config web/themes/custom/sous-project/config/emulsify-core/eslint.config.js --no-error-on-unmatched-pattern ./src {web/modules/custom,web/themes/custom/sous-project/src}/**/*.js",
-    "lint:php": "find web/modules/custom web/themes/custom -name '*.php' -exec php -l {} \\;",
-    "lint:styles": "stylelint --color {web/modules/custom,web/themes/custom}/**/*.scss",
-    "prettier": "prettier '{docs,web/modules/custom,web/themes/custom}/**/*.{json,md,js,html,scss,html}' --ignore-unknown --list-different",
+    "lint": "npm run lint:starter",
+    "lint:js": "eslint .",
+    "lint:php": "node devops/scripts/lint-php.mjs",
+    "lint:styles": "npm --prefix web/themes/custom/sous-project run lint-styles",
+    "prettier": "npm --prefix web/themes/custom/sous-project run prettier -- --check",
     "local-data-bak": "./devops/scripts/local-data-bak.sh",
     "prepare": "husky",
     "publish": "semantic-release",
     "publish-test": "semantic-release --dry-run --debug",
-    "postinstall": "patch-package",
     "rebuild": "./devops/scripts/rebuild.sh",
     "theme-build": "./devops/scripts/theme-build.sh",
     "theme-watch": "./devops/scripts/theme-watch.sh",
-    "sous-build": "./devops/scripts/sous-build.sh"
+    "sous-build": "./devops/scripts/sous-build.sh",
+    "lint:starter": "npm run lint:php && npm run lint:js",
+    "lint:theme": "npm --prefix web/themes/custom/sous-project run lint-js && npm --prefix web/themes/custom/sous-project run lint-styles",
+    "lint:project": "npm run lint:starter && npm run lint:theme",
+    "theme-ci": "npm --prefix web/themes/custom/sous-project ci --include=dev",
+    "theme-storybook": "./devops/scripts/theme-storybook.sh",
+    "release": "semantic-release",
+    "release:dry-run": "semantic-release --dry-run",
+    "release:test": "node devops/tests/release.mjs"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:fourkitchens/sous-drupal-project.git"
+    "url": "https://github.com/fourkitchens/sous-drupal-project.git"
   },
   "keywords": [
     "sous"
@@ -36,16 +43,31 @@
   "author": "Four Kitchens",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
-    "@commitlint/cli": "^20.3.1",
-    "@commitlint/config-conventional": "^20.3.1",
-    "@emulsify/cli": "^1.12.2",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@emulsify/cli": "^2.4.1",
+    "@eslint/js": "^10.0.1",
     "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/github": "^12.0.2",
-    "@semantic-release/release-notes-generator": "^14.1.0",
-    "eslint": "^10.1.0",
+    "@semantic-release/github": "^12.0.10",
+    "@semantic-release/release-notes-generator": "^14.1.1",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "patch-package": "^8.0.1",
-    "semantic-release": "^25.0.2"
-  }
+    "lint-staged": "^17.6.0",
+    "semantic-release": "^25.0.9",
+    "conventional-changelog-conventionalcommits": "^10.4.1"
+  },
+  "overrides": {
+    "@semantic-release/release-notes-generator": {
+      "conventional-changelog-writer": "^9.3.0"
+    },
+    "@emulsify/cli": {
+      "simple-git": "^4.0.2"
+    }
+  },
+  "engines": {
+    "node": "^24.22.1"
+  },
+  "packageManager": "npm@11.21.1",
+  "private": true
 }

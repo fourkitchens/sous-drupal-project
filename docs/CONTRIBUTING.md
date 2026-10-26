@@ -1,119 +1,140 @@
-# How to contribute
+# Contributing to Sous
 
-## Commit messages
+The starter and its six owned recipes are one product. Work on dedicated
+branches, preserve unrelated changes, and verify current remote state before
+choosing a base. Installed copies under `web/recipes` are application inputs;
+edit the sibling source repositories when maintaining Sous itself.
 
-Commit code often and use the imperative mood when describing the nature of the change. This project uses [Conventional Commits](https://www.conventionalcommits.org/) using the [Angular standards](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines) as part of the release management strategy.
+Use the [supported platform](PLATFORM.md). The [maintenance ownership and cadence](OPERATIONS.md)
+guide assigns security, dependency, support-window, patch, and release reviews.
+Generated applications choose their own contribution, deployment, and review
+policy; this guide describes the reusable Sous sources.
 
-<details>
-  <summary>View all commit types</summary>
+## Change and release flow
 
-| Type            | SemVer | Purpose                                                  |
-| --------------- | ------ | -------------------------------------------------------- |
-| fix             | patch  | Resolving a bug or issue in existing code                |
-| feat            | minor  | Introduces a new feature into the codebase               |
-| style           | patch  | Formatting, whitespace, and other non-functional changes |
-| chore           | patch  | Changes that do not affect production                    |
-| docs            | none   | Adding or editing documentation                          |
-| refactor        | patch  | Neither fixes a bug nor adds a feature                   |
-| test            | none   | Adds or updates test files                               |
-| ci              | patch  | Changes to continuous integration                        |
-| build           | patch  | Changes to build files                                   |
-| BREAKING CHANGE | major  | Introduces a breaking API change                         |
+Use [Conventional Commits](https://www.conventionalcommits.org/) so the final
+squash commit communicates release intent. `fix:` and `perf:` produce patches,
+`feat:` produces a minor release, and `!` or a `BREAKING CHANGE:` footer produces
+a major release. Ordinary `docs:`, `chore:`, `test:`, `ci:`, and `build:` commits
+do not release by themselves. Include ticket references when the project uses
+them; a particular ticket tracker is not required.
 
-</details>
+`main` is the source default and the configured stable publication branch. An
+unmerged branch or untagged change is not a published stable release. The
+starter's other configured channels, first recipe releases, coordinated order,
+and native dry-run limitations are documented in [Release maintenance](RELEASES.md).
+Do not publish tags or release incompatible companions independently.
 
-```bash
-type(scope): commit message
-^--^ ^---^   ^------------^
-|    |       |
-|    |       +-> Summary in present tense, lower case
-|    |
-|    +----> ClickUp ticket number
-|
-+-----> Type: fix, feat, style, docs, etc...
+Use a pull request and the existing [PR template](../.github/PULL_REQUEST_TEMPLATE.md).
+Describe the problem, final behavior, actual checks, downstream migrations, and
+remaining limitations. Preserve breaking-change details in the squash commit.
+Use draft PRs while work is in progress. A designated maintainer reviews and
+merges after the applicable integration checks; labels are optional and do not
+replace checks or repository policy. Repository owners configure actual
+required reviews/checks after the shared workflow has run; source configuration
+alone does not enforce branch protection.
+
+Keep changes focused enough to review. Urgent security fixes follow the
+[security ownership and escalation policy](OPERATIONS.md); do not delay them
+behind unrelated feature work. Carry compatible fixes forward to other
+supported branches and publish downstream upgrade instructions with the release.
+
+## Sibling recipe development
+
+Use clean checkouts for the starter and the six recipes listed in
+[configuration ownership](MAINTENANCE.md#ownership). The shared
+[integration runner](INTEGRATION.md) snapshots their checked-out changes,
+introduces temporary Composer path repositories, and tests them together in a
+new disposable installation. `--subject` selects a primary recipe;
+`--sources` selects the parent containing companion checkouts. See that guide
+for exact commands, remote companion refs, source provenance, and diagnostics.
+Those temporary repositories do not belong in production `composer.json`.
+
+Do not copy a full site export over a recipe. Select the defaults owned by that
+recipe, remove only exported top-level site UUIDs/settings hashes, and preserve
+legitimate nested plugin and icon identifiers. Existing sites retain their
+complete exports, including UUIDs, and adopt later changes explicitly. Test
+both fresh application and documented existing-configuration behavior. See
+[Site maintenance](MAINTENANCE.md) for migrations and project-owned overrides.
+
+## Code standards and linting
+
+Use Drupal's [coding standards](https://project.pages.drupalcode.org/coding_standards/)
+for custom code, including its [Twig](https://project.pages.drupalcode.org/coding_standards/twig/coding/),
+[JavaScript](https://project.pages.drupalcode.org/coding_standards/javascript/coding/), and
+[CSS](https://project.pages.drupalcode.org/coding_standards/css/architecture/)
+guidance. Automated syntax, lint, and format checks have the following scopes:
+
+| Command | Check |
+| --- | --- |
+| `ddev npm run lint:starter` | Starter/custom-module JavaScript and custom PHP syntax; no generated theme required |
+| `ddev npm run lint:js` | ESLint with the appropriate Node/Drupal globals |
+| `ddev npm run lint:php` | Native `php -l`, including Drupal PHP file extensions and paths with spaces |
+| `ddev npm run lint:project` | Starter checks followed by the generated theme's checks |
+| `ddev npm run lint:theme` | Theme-owned JavaScript and SCSS checks |
+| `ddev npm run lint:styles` | Theme Stylelint check |
+| `ddev npm run prettier` | Theme formatting check |
+
+Install tools as described in [Build tools](BUILD_TOOLS.md). Naming setup changes
+a generated application's `lint` alias from `lint:starter` to `lint:project`.
+Theme checks require that theme and its locked dependencies. Downloaded code,
+minified output, and generated component mirrors are excluded. PHP syntax
+checking does not imply Drupal coding-standard compliance.
+
+For supported fixes:
+
+```sh
+ddev npm run lint:js -- --fix
+ddev npm --prefix web/themes/custom/sous-project run lint-fix
+ddev npm --prefix web/themes/custom/sous-project run prettier-fix
 ```
 
-View [example conventional commit](https://www.conventionalcommits.org/en/v1.0.0/#examples) messages.
+The theme path shown is the source placeholder; naming setup rewrites it in a
+generated project. Review autofix changes before committing them.
 
-## Git workflow
+## Maintainer and application checks
 
-This project follows a standard Git flow for managing and deploying changes. The following describes a typical flow for contributing work through standard feature branches or through hotfixes.
+The ungenerated starter's focused regressions use Bash, jq, Git, PHP, Composer,
+and the reviewed Node/npm tools; they are distinct from generated-site checks.
+Run the relevant scripts in `devops/tests` before changing their shared
+installation, configuration, lint, or release implementations. The
+[integration runner](INTEGRATION.md) executes these in the selected runtime and
+also covers the generated theme, all four installation options, configuration
+export/deploy, and Page authoring. It creates and removes its own database.
+These checks stay in the source checkout. Generated sites receive an empty
+`devops/tests/` and supply their own application checks.
 
-### Protected branches
+From an ungenerated starter with those tools prepared, run the isolated
+database-refresh and command regressions without a developer database:
 
-Two branches are protected in GitHub to ensure all changes are tested and that work moves through the approval workflow.
+```sh
+bash devops/tests/config-workflows.sh
+```
 
-- `main` contains code ready for release in production environments. Work on this branch may appear in the Test and Live Pantheon environments.
-- `develop` is the default branch and contains code ready for integration testing. It only contains code that has gone through peer review and is ready to be released. Work on this branch may appear in the Dev Pantheon environment.
+These use temporary files and mocked tools for corrupt/missing backups,
+downloads, hook failures, paths with spaces and failure-status propagation.
+The [refresh guide](SETUP.md#restore-an-existing-generated-site) owns the actual
+site workflow and project hook contract.
 
-### Feature branches
+Documentation can be checked without installed application dependencies:
 
-All planned development work should take place on dedicated feature branches outside of the master/main and develop branches. Keep branches as lightweight as possible, restricting pull requests to only the requirements necessary for the assigned ticket.
+```sh
+bash devops/tests/documentation.sh --sources /path/to/checked-out-sous-projects
+```
 
-- Feature branches are created from the `develop` branch to ensure the latest approved changes are included in the work.
-- Use the naming convention `sfasu-###` where ### represents a ClickUp ticket number and the short description expresses the purpose of the feature in a few hyphenated keywords.
-- When the feature is complete, a pull request should be created to merge the feature branch into the develop branch.
+With locked tools installed, these focused native probes are also available:
 
-### Hotfixes
+```sh
+ddev exec node devops/tests/verify-cli-cache.mjs
+```
 
-Hotfixes are a mechanism to quickly patch production releases without interrupting the rest of the Git workflow. Hotfixes can be created to fix urgent issues, but are generally discouraged unless of vital importance.
+The CLI probe uses local Git fixtures and removes its own cache bucket. Theme
+checks use native npm tasks; there is no starter-owned SCSS migration. Site
+checks that mutate content/configuration require `SOUS_DISPOSABLE_TEST=1` and a
+disposable installation; do not run them on a developer's canonical database.
 
-- Hotfix branches are created from the `main` branch to ensure the changes do not interfere with other work pending approval or release.
-- Use the naming convention `hotfix/short-description` where the short description expresses the purpose of the patch in a few hyphenated keywords.
-- When the work is ready, a pull request should be created to merge the hotfix branch into the master branch.
-
-## Pull requests
-
-All changes are merged into this project using GitHub Pull Requests. The process of moving work through a PR ensures changes are reviewed in a public and collaborative way.
-
-### Review and approval workflow
-
-- Follow the naming convention `sfasu-###: Short description` where ### is the ClickUp ticket number and a short description expresses the purpose of the work. This should be consistent with the branch naming convention.
-- Use the [SFA PR template](https://github.com/fourkitchens/sfasu/blob/project-documentation/.github/PULL_REQUEST_TEMPLATE.md) as it outlines the minimum information required to describe the change. This includes ClickUp ticket numbers, a description of the changes, and step-by-step instructions for validating the work.
-- The contributor responsible for the work should mark themselves as the `assignee`. PRs can be made ahead of a review by applying the `work in progress` label.
-- When ready for review, add 1 or more `reviewers` to the PR and change the label to `ready for review`. Members of the SFA project team should also post a link to the PR in the corresponding ClickUp ticket and any relevant Teams channel and tagging the reviewers.
-- Reviewers will test code quality, functionality, design, and other disciplines as needed. Add additional reviewers if the work is beyond your skillset. The work is then approved or changes are requested. Please provide meaningful feedback using the GitHub review system.
-- Once approved, the `assignee` will merge the changes, close the PR, delete the branch, and move the ClickUp ticket to 'Done'.
-
-### GitHub labels
-
-Labels are added and removed to PRs moving through the approval workflow. Typically the changes can be merged when the PR has the ‘pass code review’, ‘pass functional review’, and ‘ready to merge’ labels.
-
-| Label                  | Purpose                                                  |
-| ---------------------- | -------------------------------------------------------- |
-| work in progress       | The assignee is still making changes to this branch      |
-| needs review           | The work is ready for testing and reviewers are assigned |
-| review in progress     | Indicates the review process is underway                 |
-| pass code review       | All changes follow coding standards and best practices   |
-| pass functional review | The work functions as described in the ClickUp ticket    |
-| ready to merge         | The changes are approved and ready to be merged          |
-| needs work             | The PR did not pass review and feedback was provided     |
-| needs help             | Use if help is needed; leaving details in the comments   |
-| don't merge            | Do not merge the work; explanation in the comments       |
-
-### Best practices
-
-- Generally, pull requests should resolve a single ClickUp ticket. Try to avoid combining multiple tickets into a single pull request. There may be instances where it makes sense to do otherwise but please use discretion.
-- Avoid long-standing PRs as the work can become a bottleneck or create future merge conflicts. Regularly ping reviewers in Teams and ClickUp to ensure the review process can move swiftly.
-- Try to keep pull requests reasonably small and discrete. If you are beginning to work on a story and it feels like it will result in a giant pull request with lots of custom code, changes across many features, and lots of testing scenarios, think about how you might break down the story into smaller subtasks that could be incrementally developed and tested. Create subtasks or potentially even new stories within ClickUp. If you are unsure about how or are unable to do this, please reach out to the project Product Owner.
-
-## Code standards
-
-Development standards will be rigorously enforced on this project. Drupal maintains coding standards that apply to the core and contributed code. This is the basis for code linting and should be considered a reference when there are uncertainties. While linting is required, the following resources are more aspirational:
-
-- [Drupal Coding standards](https://www.drupal.org/docs/develop/standards)
-- [Twig coding standards](https://www.drupal.org/docs/develop/coding-standards/twig-coding-standards)
-- [JavaScript coding stand](https://www.drupal.org/docs/develop/standards/javascript)
-- [CSS Architecture](https://www.drupal.org/docs/develop/standards/css/css-architecture-for-drupal-8)
-
-### Linting
-
-Available npm commands for testing. All commands below can be run with `npm run [command]`. For example, `npm run lint:js`.
-Adding 'fix' onto each command will automatically fix the found issues where possible. For example, `npm run lint fix`.
-
-- prettier - runs prettier code beautifier tool on docs, .github, custom modules, and custom themes directories.
-- lint:js - uses eslint to validate the JS in custom modules and themes.
-- lint:style - uses eslint to validate the CSS in custom modules and themes.
-- lint:php - runs PHPCS with Drupal standards.
-- lint - runs lint:styles, lint:js, and lint:php.
-- test - runs lint:styles, lint:js, lint:php and prettier.
+Generated sites run their own project lint, build, configuration and content
+checks. Starter bootstrap tests require files removed after successful
+installation and are not application tests. Full command details and output
+paths are in [Build tools](BUILD_TOOLS.md); supported production steps are in
+[Deployment](DEPLOYMENT.md).

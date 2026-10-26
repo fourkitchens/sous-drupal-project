@@ -1,0 +1,60 @@
+name: Validate Sous integration
+description: Run the shared Sous product checks against an explicit caller checkout
+inputs:
+  subject:
+    description: Absolute path to the checked-out repository revision under test
+    required: true
+  subject_repository:
+    description: Canonical caller repository used for identity provenance
+    required: true
+  recipe_refs:
+    description: Optional JSON object mapping companion recipe names to reviewed Git refs
+    required: false
+    default: '{}'
+outputs:
+  result-path:
+    description: Directory containing result.json and diagnostic logs
+    value: ${{ steps.run.outputs.result-path }}
+runs:
+  using: composite
+  steps:
+    - name: Check out the complete tooling source at this action's revision
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Action downloads honor export-ignore, so their archive lacks the
+      # integration runner. A real Git checkout retains maintainer-only files.
+      # Capture the parent action context before checkout becomes the child
+      # action; direct github.action_ref in its inputs would refer to checkout.
+      env:
+        SOUS_TOOLING_REPOSITORY: ${{ github.action_repository }}
+        SOUS_TOOLING_REF: ${{ github.action_ref }}
+      with:
+        repository: ${{ env.SOUS_TOOLING_REPOSITORY }}
+        ref: ${{ env.SOUS_TOOLING_REF }}
+        path: .sous-tooling
+        fetch-depth: 1
+        persist-credentials: false
+    - name: Run the shared integration runner
+      id: run
+      shell: bash
+      env:
+        SUBJECT: ${{ inputs.subject }}
+        SUBJECT_REPOSITORY: ${{ inputs.subject_repository }}
+        RECIPE_REFS: ${{ inputs.recipe_refs }}
+        SOUS_TOOLING_REF: ${{ github.action_ref }}
+      run: |
+        artifacts="$RUNNER_TEMP/sous-integration-results"
+        printf 'result-path=%s\n' "$artifacts" >> "$GITHUB_OUTPUT"
+        mkdir -p "$artifacts"
+        tooling="$GITHUB_WORKSPACE/.sous-tooling"
+        # $/ resolves this action to the workflow's exact SHA. Do not fall back
+        # to a branch if its context or complete source checkout is unavailable.
+        if [[ ! "$SOUS_TOOLING_REF" =~ ^[0-9a-fA-F]{40}$ ]] || \
+          [[ "$(git -C "$tooling" rev-parse HEAD)" != "$SOUS_TOOLING_REF" ]]; then
+          echo 'The tooling checkout does not match the resolved action SHA.' >&2
+          exit 1
+        fi
+        bash "$tooling/devops/integration/run.sh" \
+          --subject "$SUBJECT" \
+          --subject-repository "$SUBJECT_REPOSITORY" \
+          --refs-json "$RECIPE_REFS" \
+          --artifacts "$artifacts"

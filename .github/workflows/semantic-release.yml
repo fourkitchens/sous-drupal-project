@@ -1,38 +1,36 @@
-name: Semantic Release on Merge
+name: Sous CI
+
 on:
   push:
-    branches: [main]
+    branches: [main, next, next-major, alpha, beta, '*.x']
+  pull_request:
+    branches: [main, next, next-major, alpha, beta, '*.x']
   workflow_dispatch:
+    inputs:
+      recipe_refs:
+        description: Optional JSON object mapping companion recipe names to reviewed Git refs
+        required: false
+        type: string
+        default: '{}'
 
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
+  contents: read
 
 concurrency:
-  group: semantic-release-main
-  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  integration:
+    # Same-name Sous forks run product CI; renamed generated sites configure app CI.
+    if: endsWith(github.repository, '/sous-drupal-project')
+    uses: ./.github/workflows/integration.yml
+    with:
+      recipe_refs: ${{ inputs.recipe_refs || '{}' }}
   release:
-    name: Attempt Semantic Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24.x"
-          cache: npm
-      - name: Install
-        run: npm ci
-        env:
-          HUSKY: 0
-      - name: Semantic Release
-        run: npm run publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HUSKY: 0
+    needs: integration
+    # Paired companion refs validate only; publication uses merged dependencies.
+    if: github.repository == 'fourkitchens/sous-drupal-project' && github.event_name != 'pull_request' && (!inputs.recipe_refs || inputs.recipe_refs == '{}')
+    permissions:
+      contents: write
+    uses: ./.github/workflows/release.yml

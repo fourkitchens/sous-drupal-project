@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# Name a new project from its directory before Drupal/theme installation.
+# Composer's post-create hook calls this from the project root with no arguments.
+# It edits template files in place, needs PHP for JSON metadata, and must run in
+# a generated/disposable copy rather than the maintained starter checkout.
+
 # Exit on first error (-e) and fail on undefined variables (-u).
 set -eu
 
@@ -17,8 +22,8 @@ escape_replacement() {
   printf '%s' "$1" | sed 's/[&|\\]/\\&/g'
 }
 
-# Safely replace a token in a file if that file exists.
-# Uses a backup suffix for cross-platform sed compatibility, then removes backup.
+# Replace a known placeholder only when the optional file exists. The backup
+# suffix works with BSD/GNU sed; remove that temporary backup after replacement.
 replace_token() {
   token="$1"
   replacement="$2"
@@ -33,10 +38,14 @@ replace_token() {
   rm -f "$file.bak"
 }
 
-# Normalize project names in runtime/config/docs files.
+# Keep runtime paths, package metadata and documented commands aligned. The
+# Emulsify directory name intentionally differs from DDEV's dashed identifier.
 replace_token "sous-project" "$dashed_project_name" ".ddev/config.yaml"
+replace_token "sous-project" "$emulsify_project_name" ".gitignore"
 replace_token "sous-project" "$emulsify_project_name" "devops/scripts/theme-build.sh"
 replace_token "sous-project" "$emulsify_project_name" "devops/scripts/theme-watch.sh"
+replace_token "sous-project" "$emulsify_project_name" "devops/scripts/theme-storybook.sh"
+replace_token "sous-project" "$emulsify_project_name" "devops/scripts/theme-setup.sh"
 replace_token "sous-project" "$emulsify_project_name" "devops/scripts/sous-build.sh"
 replace_token "sous-project" "$emulsify_project_name" "docs/BUILD_TOOLS.md"
 replace_token "sous-project" "$emulsify_project_name" "docs/CONTRIBUTING.md"
@@ -45,16 +54,38 @@ replace_token "sous-project" "$emulsify_project_name" "docs/SETUP.md"
 replace_token "sous-project" "$emulsify_project_name" "composer.json"
 replace_token "fourkitchens/sous-drupal-project" "project/$dashed_project_name" "composer.json"
 replace_token "\"name\": \"sous-project\"" "\"name\": \"$dashed_project_name\"" "package.json"
+replace_token "\"name\": \"sous-project\"" "\"name\": \"$dashed_project_name\"" "package-lock.json"
 replace_token "web/themes/custom/sous-project" "web/themes/custom/$emulsify_project_name" "package.json"
+replace_token '"lint": "npm run lint:starter"' '"lint": "npm run lint:project"' "package.json"
 
-# Enable linting in the generated project by uncommenting line 3 in Husky hook.
+# Remove the starter's npm repository field so release tooling discovers the
+# generated site's own Git origin instead of targeting the Sous repository.
+php -r '
+$file = "package.json";
+$package = json_decode(file_get_contents($file), true, 512, JSON_THROW_ON_ERROR);
+unset($package["repository"]);
+unset($package["scripts"]["release:test"]);
+$json = json_encode($package, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+if (file_put_contents($file, $json . PHP_EOL) === false) {
+  throw new RuntimeException("Unable to update {$file}");
+}
+'
+
+# The source starter keeps its Husky lint command commented. Enable that known
+# template line only after naming has selected generated-project lint paths.
 if [ -f ".husky/pre-commit" ]; then
   sed -i.bak '3s/^[[:space:]]*#[[:space:]]*//' .husky/pre-commit
   rm -f .husky/pre-commit.bak
 fi
 
-# Replace template README with project-specific README content.
-rm -f "README.md"
+# Consume the generated-site README once. A retry preserves README.md when the
+# companion has already been moved, rather than restoring starter instructions.
 if [ -f "PROJECT-README.md" ]; then
   mv "PROJECT-README.md" "README.md"
 fi
+
+# GitHub/Composer distributions exclude maintainer checks. A source-based
+# create-project or contributor clone needs the same boundary after naming.
+# Retain an empty location for the generated site's own future tests.
+rm -rf devops/integration devops/tests
+mkdir -p devops/tests

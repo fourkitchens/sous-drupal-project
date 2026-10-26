@@ -1,0 +1,6 @@
+# Install the reviewed runtime once in the image, matching .nvmrc/config.yaml.
+ENV N_PREFIX=/usr/local
+RUN n install --cleanup 24.22.1 && npm install --global npm@11.21.1
+
+# DDEV 1.25 otherwise re-extracts Node's bundled older npm on every startup.
+ENV N_INSTALL_VERSION=""

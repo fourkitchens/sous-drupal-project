@@ -1,5 +1,5 @@
 {
-    "name": "project/sous-drupal-project",
+    "name": "fourkitchens/sous-drupal-project",
     "description": "Starter project for Sous a Drupal distribution featuring a theme based on Emulsify Design System.",
     "type": "project",
     "license": "GPL-2.0-or-later",
@@ -16,38 +16,41 @@
             "type": "package",
             "package": {
                 "name": "dropzone/dropzone",
-                "version": "5.9.3",
+                "version": "6.3.5",
                 "type": "drupal-library",
                 "extra": {
-                    "installer-name": "dropzone/dist"
+                    "installer-name": "dropzone"
                 },
                 "dist": {
-                    "url": "https://github.com/dropzone/dropzone/releases/download/v5.9.3/dist.zip",
+                    "url": "https://github.com/enyo/dropzone/releases/download/dropzone%406.3.5/dist.zip",
                     "type": "zip"
                 }
             }
         }
     ],
     "require": {
-        "php": ">=8.4",
-        "composer/installers": "^2.3",
-        "cweagans/composer-patches": "^1.7",
-        "drupal/core-recipe-unpack": "^11.3",
-        "drupal/core-project-message": "~11.3.5",
-        "drupal/core-composer-scaffold": "~11.3.5",
-        "drupal/core-recommended": "~11.3.5",
-        "drupal/core-vendor-hardening": "^11.3",
-        "drush/drush": "^13.3",
+        "composer/installers": "^2.3.0",
+        "cweagans/composer-patches": "^2.0.0",
+        "drupal/core-composer-scaffold": "^11.4.11",
+        "drupal/core-project-message": "^11.4.11",
+        "drupal/core-recipe-unpack": "^11.4.11",
+        "drupal/core-recommended": "^11.4.11",
+        "drupal/core-vendor-hardening": "^11.4.11",
+        "drupal/login_destination": "^2.0.0-beta10@beta",
+        "drush/drush": "^13.8.0",
         "fourkitchens/sous-admin": "dev-main",
         "fourkitchens/sous-emulsify": "dev-main",
-        "oomphinc/composer-installers-extender": "^2.0",
-        "webflo/drupal-finder": "^1.2",
-        "zaporylie/composer-drupal-optimizations": "^1.0"
+        "fourkitchens/sous-formats": "dev-main",
+        "fourkitchens/sous-media": "dev-main",
+        "oomphinc/composer-installers-extender": "^2.0.1",
+        "php": "^8.4",
+        "webflo/drupal-finder": "^1.3.1",
+        "zaporylie/composer-drupal-optimizations": "^1.2.0"
     },
     "conflict": {
         "drupal/drupal": "*"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
@@ -62,7 +65,8 @@
             "drupal/core-vendor-hardening": true,
             "php-http/discovery": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "phpstan/extension-installer": true
+            "phpstan/extension-installer": true,
+            "symfony/runtime": true
         },
         "platform": {
             "php": "8.4.0"
@@ -71,10 +75,6 @@
     },
     "extra": {
         "installer-name": "sous",
-        "composer-exit-on-patch-failure": true,
-        "patchLevel": {
-            "drupal/core": "-p2"
-        },
         "installer-types": [
             "npm-asset",
             "bower-asset",
@@ -127,6 +127,16 @@
                     "mode": "replace",
                     "path": "assets/scaffold/files/development.services.yml",
                     "overwrite": false
+                },
+                "[web-root]/sites/default/settings.sous.php": {
+                    "mode": "replace",
+                    "path": "assets/scaffold/files/settings.sous.php",
+                    "overwrite": false
+                },
+                "[web-root]/sites/sous.production.services.yml": {
+                    "mode": "replace",
+                    "path": "assets/scaffold/files/sous.production.services.yml",
+                    "overwrite": false
                 }
             },
             "omit-defaults": false
@@ -134,8 +144,12 @@
         "drupal-core-vendor-hardening": {
             "composer/composer": false
         },
-        "enable-patching": true,
-        "patches-file": "patches/composer.patches.json"
+        "composer-patches": {
+            "patches-file": "patches/patches.json",
+            "package-depths": {
+                "drupal/core": 2
+            }
+        }
     },
     "scripts": {
         "post-update-cmd": [
@@ -143,20 +157,19 @@
         ],
         "post-create-project-cmd": [
             "./devops/scripts/sous-setup.sh",
-            "./devops/scripts/setup.sh"
+            "./devops/scripts/setup.sh fresh"
         ],
         "build-assets": [
             "composer install --optimize-autoloader --no-dev",
-            "@build-theme",
-            "@build-storybook"
+            "npm ci --include=dev",
+            "npm run theme-ci",
+            "@build-theme"
         ],
         "build-theme": [
-            "npm ci --prefix web/themes/custom/sous-project",
-            "npm run build --prefix web/themes/custom/sous-project"
+            "npm run theme-build"
         ],
         "build-storybook": [
-            "npm run storybook-build --prefix web/themes/custom/sous-project",
-            "mv ./web/themes/custom/sous-project/.out ./web/storybook"
+            "npm run theme-storybook"
         ],
         "lint": "npm run lint",
         "code-sniff": [
@@ -164,7 +177,15 @@
             "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,info --ignore=node_modules,dist,bower_components,vendor ./web/themes/custom"
         ],
         "post-drupal-scaffold-cmd": [
-            "cp web/sites/example.settings.local.php web/sites/default/settings.local.php"
+            "@php -r \"if (!file_exists('web/sites/default/settings.local.php') && !is_link('web/sites/default/settings.local.php') && !copy('web/sites/example.settings.local.php', 'web/sites/default/settings.local.php')) { exit(1); }\"",
+            "@php -r \"if (!file_exists('web/sites/default/settings.php') && !is_link('web/sites/default/settings.php') && !copy('web/sites/default/default.settings.php', 'web/sites/default/settings.php')) { exit(1); }\""
+        ]
+    },
+    "archive": {
+        "exclude": [
+            "/devops/integration",
+            "/devops/tests/*",
+            "/devops/tests/.*"
         ]
     }
 }

@@ -1,0 +1,43 @@
+name: Shared Sous release
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    # Inspect the original dispatch payload independently of the thin caller.
+    if: github.event_name != 'pull_request' && contains(fromJSON('["fourkitchens/sous-drupal-project","fourkitchens/sous-admin","fourkitchens/sous-content-types","fourkitchens/sous-formats","fourkitchens/sous-emulsify","fourkitchens/sous-media","fourkitchens/sous-paragraph-types"]'), github.repository) && (!github.event.inputs.recipe_refs || github.event.inputs.recipe_refs == '{}')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    concurrency:
+      group: release-${{ github.repository }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - name: Check out complete caller release history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up the caller's reviewed Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install reviewed npm
+        run: npm install --global npm@11.21.1
+      - name: Install locked caller release tools
+        run: npm ci --include=dev
+        env:
+          HUSKY: 0
+      - name: Verify caller release behavior without publishing
+        run: npm run release:test
+      - name: Publish Git tag and GitHub release
+        run: npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUSKY: 0
