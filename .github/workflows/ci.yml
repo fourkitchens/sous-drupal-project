@@ -41,6 +41,7 @@ jobs:
           coverage: none
       - run: npm ci
       - run: npm run lint
+      - run: php devops/tests/starter-defaults.php
       - name: Check shell scripts
         run: find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
       - name: Check installation and environment helpers
@@ -52,7 +53,19 @@ jobs:
   integration:
     needs: checks
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - option: default
+            config_split: false
+          - option: layout-builder
+            config_split: false
+          - option: paragraphs
+            config_split: true
+          - option: admin-only
+            config_split: false
     steps:
       - name: Initialize diagnostic artifacts
         run: |
@@ -69,28 +82,29 @@ jobs:
           version: '1.25.4'
           autostart: false
           installScriptUrl: https://raw.githubusercontent.com/ddev/ddev/5da91aeb9ebab0b0e66171c450b72099308d332c/scripts/install_ddev.sh
-      - name: Validate the integrated product
+      - name: Smoke-test the installation
         env:
           PACKAGES_REF: ${{ inputs.packages_ref || '' }}
           SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
+          OPTION: ${{ matrix.option }}
+          CONFIG_SPLIT: ${{ matrix.config_split }}
         run: |
           if [[ -z "$PACKAGES_REF" ]] && jq -e --arg branch "$SOURCE_BRANCH" '.head_ref == $branch' devops/integration/pr-refs.json >/dev/null; then
             PACKAGES_REF=$(jq -er '.packages_ref' devops/integration/pr-refs.json)
           fi
-          args=()
+          args=(--option "$OPTION" --artifacts "$RUNNER_TEMP/sous-integration-results")
           if [[ -n "$PACKAGES_REF" ]]; then
             args+=(--packages-ref "$PACKAGES_REF")
           fi
-          bash devops/integration/run.sh \
-            --subject "$GITHUB_WORKSPACE" \
-            --subject-repository "$GITHUB_REPOSITORY" \
-            --artifacts "$RUNNER_TEMP/sous-integration-results" \
-            "${args[@]}"
+          if [[ "$CONFIG_SPLIT" == true ]]; then
+            args+=(--config-split)
+          fi
+          bash devops/integration/run.sh "${args[@]}"
       - name: Upload integration diagnostics
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: sous-integration-${{ github.run_id }}-${{ github.run_attempt }}
+          name: sous-smoke-${{ matrix.option }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/sous-integration-results
           if-no-files-found: error
           retention-days: 7

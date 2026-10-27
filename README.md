@@ -74,42 +74,27 @@ site. Use the [maintenance workflow](docs/MAINTENANCE.md).
 
 ## Work on Sous itself
 
-Pull requests, release-branch pushes and manual runs use
-`.github/workflows/ci.yml` for source checks and full integration. With the
-reviewed Node/npm and PHP tools installed, run the local source checks from
-this checkout:
+CI runs source checks and four parallel smoke installs through the same
+`devops/scripts/sous-setup.sh` and `setup.sh fresh` commands users run. With
+Docker and DDEV available, test one option from this checkout:
 
 ```sh
-bash devops/tests/check.sh
+bash devops/integration/run.sh --option default
+bash devops/integration/run.sh --option paragraphs --config-split \
+  --packages /path/to/sous-drupal-packages
 ```
 
-Full product integration runs after the source checks and must pass before
-publication from a push to canonical `main`. It tests the
-starter with the companion packages repository in its own disposable site. See
-[Integration checks](docs/INTEGRATION.md) for the published-index gate and the
-explicit candidate-commit mode. For local edits, the source parent contains
-`sous-drupal-project` and `sous-drupal-packages`:
-
-```sh
-bash devops/integration/run.sh --packages /path/to/sous-drupal-packages
-```
+Omit package overrides to use the published Composer index. `--packages PATH`
+tests a local packages checkout; `--packages-ref SHA` fetches a reviewed packages
+commit. Both use Composer path repositories only inside the disposable site.
+See [Integration checks](docs/INTEGRATION.md) for the full interface, smoke checks,
+logs and cleanup. The default option also checks backup/restore and dependency
+audits. Source checks and all smoke legs must pass before publication from a
+push to canonical `main`.
 
 Edit `sous-drupal-packages/packages/<basename>` for reusable recipe defaults.
-Installed copies under `web/recipes` can differ from those sources. Candidate
-repositories are validation inputs and do not belong in a production lockfile.
-
-Documentation paths and filename case can be checked without installing PHP or
-Node dependencies:
-
-```sh
-bash devops/tests/documentation.sh --sources /path/to/checked-out-sous-projects
-```
-
-[Contributing](docs/CONTRIBUTING.md) separates source maintainer regressions from
-generated-site checks. [Dependency](docs/DEPENDENCY_UPGRADE.md),
-[frontend](docs/FRONTEND_TOOLING.md), and [Paragraph Types](docs/PARAGRAPH_TYPES.md)
-reviews retain earlier validation and migration evidence; current operating
-instructions are the guides linked above.
+Installed copies under `web/recipes` can differ from those sources. Keep the
+maintained starter checkout separate from generated client sites.
 
 ## License
 

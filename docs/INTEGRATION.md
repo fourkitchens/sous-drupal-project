@@ -1,164 +1,73 @@
-# Sous integration and release checks
+# Installation smoke checks
 
-The checks job in `.github/workflows/ci.yml` runs lint, ShellCheck and the
-installation/configuration/environment helper suites. The full product gate in
-`devops/integration/run.sh` then runs on pull requests, release-branch pushes
-and manual dispatches. It creates
-an owned disposable DDEV application, exercises the generated theme, installs
-only selected package ZIPs, and checks configuration and environment behavior.
-The packages repository separately runs syntax, code-sniff and formatting checks.
-Neither gate modifies a developer database or publishes a package release.
-
-## Local source checks
-
-With the reviewed Node/npm and PHP tools prepared, run:
-
-```sh
-bash devops/tests/check.sh
-```
-
-The entry point checks PHP/JavaScript syntax and lint, starter defaults,
-installation/configuration/environment command helpers, documentation paths
-and CLI-cache behavior. It needs no DDEV, Composer dependency installation or Drupal
-database. It does not build a generated theme or exercise the runtime matrices.
-
-GitHub Actions runs checks and integration once per PR update and cancels
-superseded PR runs. Both jobs must pass before a push to canonical `main` can
-publish; manual runs validate without publishing.
-
-## Review branch and publication status
-
-The package sources are consolidated in
-[fourkitchens/sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages).
-The starter's production Composer root targets the scoped public index and
-stable `^2.0` requirements. The package collection starts at `2.0.0` and
-publishes semantic releases, package ZIPs and the static index automatically
-from `main`. A normal installation requires that published index; it must not
-silently substitute branches or local sources.
-
-The review branch `codex/release-starter-8.x` explicitly validates the
-reviewed packages commit in `devops/integration/pr-refs.json`. This override is
-limited to the disposable test application. Its temporary loopback index and
-candidate lockfiles are diagnostic artifacts, not publishable starter locks.
-Only a push to canonical `main` with no candidate override may enter the starter
-publication job. The guard lives in the single workflow.
-
-Earlier PR #130 full runs failed the generated-theme lint gate. Their separate
-configuration diagnostics did not establish full acceptance. The migration
-must pass the unchanged categories below, including actual source lint,
-formatting, production build and Storybook; excluding generated output from
-source lint must not hide authored source failures.
-
-## Run the full gate
-
-Install Git, Bash 3.2+, jq, curl, realpath, shasum, Docker and DDEV 1.25.2+ within
-1.x. PHP, Node, npm and Composer run in DDEV at the versions in
-[Platform](PLATFORM.md). A developer site's installed dependencies or database
-are not inputs. CI uses Ubuntu 24.04 and pinned DDEV 1.25.4 setup.
-
-After package publication, the ordinary gate uses the production index:
-
-```sh
-bash devops/integration/run.sh
-```
-
-Before publication, select an explicit reviewed full commit:
+`devops/integration/run.sh` creates a temporary DDEV project from the tracked
+files in this checkout, runs `sh devops/scripts/sous-setup.sh`, and pipes the
+chosen content and Config Split answers into `sh devops/scripts/setup.sh fresh`.
+It tests the shipped installer instead of rebuilding its steps in the harness.
+Docker, DDEV, Git, Bash and the runner's host command-line tools must be available.
+PHP, Node, npm and Composer run in the generated DDEV project.
 
 ```sh
 bash devops/integration/run.sh \
-  --packages-ref 53bd45f61b3003fb3f2d7f82ecde9cfa879785fd
+  [--option default|layout-builder|paragraphs|admin-only] \
+  [--config-split] [--packages PATH | --packages-ref SHA] \
+  [--artifacts DIR] [--keep]
 ```
 
-To test local edits, provide the monorepo checkout instead:
+The default option is `default`; Config Split is off unless requested. Examples:
 
 ```sh
-bash devops/integration/run.sh --packages /path/to/sous-drupal-packages
+bash devops/integration/run.sh --option default --artifacts /tmp/sous-default
+bash devops/integration/run.sh --option paragraphs --config-split \
+  --packages /path/to/sous-drupal-packages
+bash devops/integration/run.sh --option layout-builder --packages-ref FULL_COMMIT_SHA
 ```
 
-The compatibility `--sources /path/to/Projects` spelling selects
-`/path/to/Projects/sous-drupal-packages`. A package override is always explicit;
-`--packages-ref` accepts only a lowercase 40-character commit, never a floating
-branch. GitHub's manual validation input is `packages_ref` with the same meaning.
-No companion-repository ref map or path-distribution lock remains.
+Without a package override, Composer uses the published index in `composer.json`.
+`--packages PATH` selects a packages checkout, and `--packages-ref SHA` fetches
+that commit from `fourkitchens/sous-drupal-packages`. Overrides prepend a
+canonical Composer path repository for `packages/*`, limited to
+`fourkitchens/sous-*`, with symlinks disabled. These disposable path installs are
+not release locks. There is no candidate ZIP build or local package-index server.
 
-The runner snapshots tracked and non-ignored source files, excludes installed
-code/caches/reference artifacts and records each actual revision plus copied
-source digest. Symlinks leaving a source checkout are rejected. Candidate ZIPs
-are built by the package repository's deterministic builder and served through
-an owned loopback HTTP index supervised by DDEV inside the disposable container. Production runs
-obtain the reviewed package source revision from published dist metadata.
+Each smoke install checks Drupal bootstrap, HTTP 200 from the front page, a login
+URL, and the selected composition. Page must exist except for administration-only
+installs; Paragraphs is enabled only for its option; the Page display uses Layout
+Builder only for its option; Config Split matches its flag. Navigation enables
+the shared core Layout Builder module independently of the Page display.
 
-Use `--artifacts DIRECTORY` to retain logs and machine-readable `result.json`.
-`--keep` preserves only this run's disposable fixture for diagnosis. Otherwise
-the runner verifies the registered DDEV application's actual directory before
-deleting its own containers/database/workspace. It never deletes a project by
-name alone. `--option default|paragraphs|layout-builder|admin-only` narrows content
-checks while keeping both split states; `all` also runs the six environment
-cases. Pull requests, release-branch pushes and manual CI runs execute the full
-gate, without `--keep`.
+The runner also executes `npm run lint:project`, then `npm run confex` and
+`npm run confim`, requiring a clean `drush config:status`. For the default option
+only, it backs up with `npm run local-data-bak`, restores through `setup.sh restore`,
+checks bootstrap again, and runs `composer audit --abandoned=report` plus
+`npm audit --omit=dev --audit-level=high` in the generated site.
 
-## Generated application and optional packages
+`--artifacts DIR` retains `result.json` and one log per step. By default, exiting
+deletes the uniquely named DDEV project with `ddev delete -Oy` and removes its
+temporary workspace, including on failure. `--keep` preserves both for diagnosis;
+remove those disposable resources manually afterward. Existing developer sites
+are not smoke-test inputs.
 
-The baseline requires Admin and Emulsify, with Formats as Admin's shared Linkit
-prerequisite. It applies Admin once and generates the custom theme through the
-actual starter tools. Every selected Sous recipe remains in Composer's native
-require/lock records through the exact nine-name unpack exclusion. The ignore
-list does not install any package. No blanket unpack command removes those
-records, and no maintainer probe ships in a package ZIP.
+## GitHub Actions and local source checks
 
-| Content choice | Additional package | Native assertions |
-| --- | --- | --- |
-| Default | `fourkitchens/sous-content-types` | Page/Frontpage setup and HTTPS Page authoring |
-| Paragraphs | `fourkitchens/sous-paragraphs` | Selected host fields and absence of Layout Builder composition |
-| Layout Builder | `fourkitchens/sous-core-layout-builder` | Body field blocks, Basic inline blocks, enabled layouts and saved per-node overrides |
-| Admin only | None | Gin; no Page/Frontpage or Sous media bundles |
+`.github/workflows/ci.yml` runs lint, ShellCheck, starter-default checks, and the
+three retained shell suites before the smoke matrix. The four options run in
+parallel with a 30-minute limit per leg; the Paragraphs leg also enables Config
+Split. Every leg uploads its own diagnostic artifact, even after failure.
+The optional `packages_ref` workflow input takes precedence over the matching
+review-branch entry in `devops/integration/pr-refs.json`.
 
-Each choice runs with and without `fourkitchens/sous-config-split`, giving eight
-combinations. The runner restores the baseline database, exported configuration directory
-and Composer manifest/lock before each case, then resolves only the selected composition and its
-shared dependencies. It checks retained ZIP-only lock records and actual module
-and recipe directories. Layout Builder must never resolve/install Paragraphs.
-Paragraphs/default must omit the Core Layout Builder composition. Navigation
-itself enables the shared core Layout Builder module; tests enforce per-bundle
-layout/override configuration independently of that shared module state.
+The source checks can also run locally with the reviewed Node/npm, PHP and
+ShellCheck tools:
 
-Each case commits only the generated application's source and manifests into a
-disposable Git fixture, clones it with no Composer-managed code/recipes, then
-installs its exact lock from a new cache and reinstalls selected Sous packages
-with `--prefer-source`. Dist-only metadata must still use individual ZIPs.
-Recipe source includes and nested Linkit paths remain
-available without copying sibling packages. Project recipe directories stay
-ignored; a recipe update never implicitly reapplies configuration.
+```sh
+npm run lint
+php devops/tests/starter-defaults.php
+bash devops/tests/install-workflows.sh
+bash devops/tests/config-workflows.sh
+bash devops/tests/environment-settings.sh
+```
 
-Every runtime case exports complete configuration, deliberately mutates the
-site name, runs native Drush deployment/import, and compares all active
-configuration collections. Starter-owned checks cover its installation,
-environment and theme workflows; it does not load feature probes from the
-packages repository.
-
-## Environments, frontend and source checks
-
-The full run checks local/staging/production with split support absent, then
-with native Config Split enabled: six real environment round trips. The recipe
-supplies `_splits` definitions; the application owns `config/_splits`,
-`config/local`, `config/staging` and runtime activation policy. Contact supplies
-disposable environment-owned module/config values. Transitions to production
-must remove split-only modules without contaminating stored status defaults.
-Missing/public split paths and unsafe development settings must fail before
-configuration import or database replacement. See [Environments](ENVIRONMENTS.md).
-
-The generated-theme gate runs the selected Emulsify/UI Kit source checks,
-formatting, production asset build, Storybook, Drupal theme/asset assertions,
-generated-project lint and a native prepared build. Source checks validate the
-starter and all nine package manifests/YAML, documentation paths and licenses,
-installer/runtime regressions and PHP/JavaScript lint. Composer and npm audits include development tools;
-[audit policy](../devops/integration/audit-policy.json) applies only its existing
-narrow exceptions and does not hide newly introduced findings.
-
-Maintainer source validation remains excluded from generated sites through Git
-archive rules and one-time naming cleanup. Application CI
-continues to come from the optional [CircleCI or Actions templates](CI.md).
-A passing candidate full gate verifies the starter against reviewed package
-source. The public index and a cold-cache public consumer installation must be verified
-before the starter's final release. This review branch never publishes tags,
-releases or Pages deployments.
+Publication needs both source checks and every smoke leg. It runs only for pushes
+to canonical `main` with no `packages_ref` input. Pull requests and manual runs do
+not publish tags or releases.
