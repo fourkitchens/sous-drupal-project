@@ -42,6 +42,24 @@ for runtime in ddev native; do
   calls_assert 'any(.[];.tool=="hook-probe" and .argv==["two words"])'
 done
 pass 'runtime adapters use named DDEV commands or prepared native tools'
+
+run_theme_task() { (cd "$PROJECT"; PATH="$BIN:$PATH" sh -c "$(jq -r --arg task "$1" '.scripts[$task]' "$SOURCE/package.json")"); }
+reset_project
+mkdir -p "$PROJECT/web/themes/custom/sous-project" "$PROJECT/web/storybook"
+for task in theme-build theme-watch theme-storybook; do
+  reset_log; expect_status 0 run_theme_task "$task"
+  case "$task" in
+    theme-build) arguments='["--prefix","web/themes/custom/sous-project","run","build"]' ;;
+    theme-watch) arguments='["--prefix","web/themes/custom/sous-project","run","develop"]' ;;
+    theme-storybook) arguments='["--prefix","web/themes/custom/sous-project","run","storybook-build","--","--output-dir","../../../storybook"]' ;;
+  esac
+  calls_assert "length==1 and .[0].tool==\"npm\" and .[0].argv==$arguments"
+  export TEST_COMMAND_STATUSES='{"npm":42}'
+  expect_status 42 run_theme_task "$task"
+  export TEST_COMMAND_STATUSES='{}'
+done
+[ "$(cd "$PROJECT/web/themes/custom/sous-project/../../../storybook" && pwd -P)" = "$(cd "$PROJECT/web/storybook" && pwd -P)" ] || fail 'Storybook output escapes web/storybook'
+pass 'theme npm tasks use the configured prefix, correct Storybook output and child exit status'
 reset_project; export SOUS_RUNTIME=ddev IS_DDEV_PROJECT=true
 expect_status 0 helper confex.sh
 calls_assert 'all(.[];.tool!="ddev")'

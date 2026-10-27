@@ -1,12 +1,15 @@
 #!/bin/sh
 
-# Select the installation workflow explicitly; Git history does not select it.
-# Usage: npm run setup -- fresh|restore [backup.sql|backup.sql.gz]
+# Select fresh/restore; after bootstrap, an omitted mode restores the site.
+# Usage: npm run setup -- [fresh|restore] [backup.sql|backup.sql.gz]
 # Fresh installs replace the development database; restore forwards the optional
 # backup to rebuild.sh. Both reject production before destructive work. Shared
 # runtime helpers select host DDEV or prepared native tools and resolve the root.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
+
+# A completed bootstrap retires its installer, so ordinary setup means restore.
+if [ "$#" -eq 0 ] && [ ! -f ./devops/scripts/sous-build.sh ]; then set -- restore; fi
 
 # Reject ambiguous invocations before starting either workflow.
 if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
@@ -31,6 +34,8 @@ case "$1" in
     shift
     runtime_require_development
     runtime_start
+    runtime_npm run theme-ci
+    runtime_npm run theme-build
     # Replace the dispatcher so callers receive the child workflow's exit code.
     exec ./devops/scripts/rebuild.sh "$@"
     ;;

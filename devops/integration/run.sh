@@ -21,8 +21,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 case "$option" in
-  default) selection=0 ;; layout-builder) selection=1 ;;
-  paragraphs) selection=2 ;; admin-only) selection=3 ;;
+  default|layout-builder|paragraphs|admin-only) ;;
   *) usage >&2; exit 2 ;;
 esac
 [ -z "$packages" ] || [ -z "$packages_ref" ] || { usage >&2; exit 2; }
@@ -87,9 +86,9 @@ use_packages() {
   jq --argjson versions "$versions" '.repositories = [{type:"path",url:".smoke-packages/*",canonical:true,only:["fourkitchens/sous-*"],options:{symlink:false,versions:$versions}}] + .repositories' composer.json > composer.tmp && mv composer.tmp composer.json
 }
 fresh() {
-  local answer=n
-  [ "$split" -eq 0 ] || answer=y
-  printf '%s\n%s\n' "$selection" "$answer" | sh devops/scripts/setup.sh fresh
+  local answer=no
+  [ "$split" -eq 0 ] || answer=yes
+  SOUS_CONTENT="$option" SOUS_CONFIG_SPLIT="$answer" sh devops/scripts/setup.sh fresh
 }
 bootstrapped() { ddev drush status --field=bootstrap | grep -Fx Successful; }
 front_page() {

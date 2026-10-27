@@ -1,8 +1,8 @@
 # Installation smoke checks
 
 `devops/integration/run.sh` creates a temporary DDEV project from the tracked
-files in this checkout, runs `sh devops/scripts/sous-setup.sh`, and pipes the
-chosen content and Config Split answers into `sh devops/scripts/setup.sh fresh`.
+files in this checkout, runs `sh devops/scripts/sous-setup.sh`, and supplies
+`SOUS_CONTENT` and `SOUS_CONFIG_SPLIT` to `sh devops/scripts/setup.sh fresh`.
 It tests the shipped installer instead of rebuilding its steps in the harness.
 Docker, DDEV, Git, Bash and the runner's host command-line tools must be available.
 PHP, Node, npm and Composer run in the generated DDEV project.

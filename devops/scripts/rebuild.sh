@@ -10,11 +10,9 @@ set -eu
 runtime_require_development
 
 echo "Verify project dependencies are installed..."
-# Finish locked dependency installation and asset building before touching data.
+# Refresh root dependencies; setup restore separately installs/builds the theme.
 runtime_composer install
 runtime_npm ci --include=dev
-runtime_npm run theme-ci
-sh devops/scripts/theme-build.sh
 sh devops/scripts/import-data.sh "$@"
 sh devops/scripts/confim.sh
 runtime_drush uli --name=sous_chef

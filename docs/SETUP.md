@@ -67,10 +67,13 @@ Minimal, applies Admin and Emulsify, creates/builds/enables the project theme,
 and configures administrator access. Select one of the four choices in
 [Platform](PLATFORM.md#installation-choices-and-scope). A Git clone is a valid
 fresh-install target: `.git` is never used to choose database restoration, and
-its existing branch is retained. Config Split is an independent yes/no prompt
-after content selection, defaults to no, and initializes its project-owned
-directories when selected. A directory without Git is initialized on `main`
-without changing global Git preferences.
+its existing branch is retained. Both content and Config Split questions are
+asked before installation starts. Set `SOUS_CONTENT` to `default`,
+`layout-builder`, `paragraphs`, `admin-only` (or `0`–`3`) and
+`SOUS_CONFIG_SPLIT` to `yes` or `no` to skip the corresponding prompts. Config
+Split defaults to no and initializes its project-owned directories when selected.
+A directory without Git is initialized on `main` without changing global Git
+preferences.
 
 Git archive rules exclude `devops/integration/` and every maintainer test file,
 including hidden placeholders. Project naming also removes those files for
@@ -84,8 +87,9 @@ After naming, the equivalent explicit fresh command is:
 npm run setup -- fresh
 ```
 
-Choose the intended workflow explicitly. `npm run setup` without a mode prints
-usage and does no installation work. Successful bootstrap exports complete
+Before bootstrap finishes, choose `fresh` or `restore` explicitly. After its
+one-time installer has been removed, `npm run setup` without a mode defaults
+to restore. Successful bootstrap exports complete
 configuration to `config/default`, validates the generated Composer pair,
 produces a login link, and only then removes its one-time setup files. Commit
 Composer/npm manifests and lockfiles, the custom theme sources/patches, and the
@@ -134,13 +138,12 @@ npm run import-data -- "/absolute/path with spaces/reviewed.sql"
 npm run rebuild -- "reference/database copies/reviewed.sql.gz"
 ```
 
-`import-data` validates/imports and sanitizes after its post-import safeguards;
-it does not import configuration or print a login link. `rebuild` performs the
-complete dependency/build, import, configuration, sanitization and final-login
-sequence. It invokes `import-data --defer-sanitize` internally so sanitization
-waits for both post-import and post-config-import safeguards. A deferred copy
-remains unsanitized until the complete workflow succeeds. Sanitization sets
-local test passwords and email addresses only in this development copy.
+`import-data` validates/imports and sanitizes after its post-import hook; it
+does not import configuration or print a login link. `rebuild` installs root
+dependencies, imports/sanitizes the backup, deploys configuration and generates
+a final login link only after success. Use `npm run setup -- restore` when theme
+dependency installation and an asset build are needed too. Sanitization sets local test
+passwords and email addresses only in this development copy.
 
 ### Backup validation and download hooks
 

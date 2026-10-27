@@ -45,6 +45,14 @@ case "$tool:$command" in
   ddev:install-recipe)
     shift; unset IS_DDEV_PROJECT
     exec bash .ddev/commands/web/install-recipe "$@" ;;
+  npm:pkg)
+    if [ "${2:-}" = delete ] && [ "${3:-}" = scripts.sous-build ]; then
+      jq 'del(.scripts["sous-build"])' package.json > package.tmp && mv package.tmp package.json
+    fi ;;
+  composer:config)
+    if [ "${2:-}" = --unset ] && [ "${3:-}" = scripts.post-create-project-cmd ]; then
+      jq 'del(.scripts["post-create-project-cmd"])' composer.json > composer.tmp && mv composer.tmp composer.json
+    fi ;;
   composer:*) touch composer.lock ;;
   drush:emulsify)
     for theme do :; done

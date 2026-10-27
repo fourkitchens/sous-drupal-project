@@ -9,7 +9,7 @@ fixture() {
   for name in docs .husky .github assets config/default config/_splits config/local config/staging; do mkdir -p "$PROJECT/$(dirname "$name")"; cp -R "$SOURCE/$name" "$PROJECT/$name"; done
   mkdir -p "$PROJECT/web/recipes" "$PROJECT/web/sites/default" "$PROJECT/web/themes/custom/sous-project"
   # Stand in for Composer-managed packages, never copy optional payloads out of
-  # the starter. The real ZIP/Drupal acceptance gate checks their contents.
+  # the starter. The smoke test checks the selected installed composition.
   for recipe in sous-admin sous-emulsify sous-formats sous-media sous-content-types sous-core-layout-builder sous-paragraphs sous-paragraph-types sous-config-split; do
     mkdir -p "$PROJECT/web/recipes/$recipe"
     printf 'name: Test recipe\ntype: Site\n' > "$PROJECT/web/recipes/$recipe/recipe.yml"
@@ -20,15 +20,10 @@ fixture() {
   export GIT_CONFIG_GLOBAL="$TEST_ROOT/gitconfig" GIT_CONFIG_NOSYSTEM=1
   export COMPOSER_HOME="$TEST_ROOT/composer" COMPOSER_CACHE_DIR="$TEST_ROOT/composer-cache" COMPOSER_DISABLE_NETWORK=1
   printf '[init]\n\tdefaultBranch = developer-preference\n' > "$GIT_CONFIG_GLOBAL"
-  cat > "$BIN/php" <<'SH'
-#!/usr/bin/env bash
-set -euo pipefail
-if [ "${FAIL_MATCH:-}" = metadata-write ] && [ "${3:-}" = composer.json ]; then exit 42; fi
-exec "$REAL_PHP" "$@"
-SH
-  chmod +x "$BIN/php"
+
 }
 generate() { (cd "$PROJECT"; PATH="$BIN:$PATH" sh devops/scripts/sous-setup.sh && printf '%s\n%s\n' "$1" "${2:-n}" | PATH="$BIN:$PATH" sh devops/scripts/setup.sh fresh); }
+generate_env() { (cd "$PROJECT"; PATH="$BIN:$PATH" sh devops/scripts/sous-setup.sh && SOUS_CONTENT="$1" SOUS_CONFIG_SPLIT="$2" PATH="$BIN:$PATH" sh devops/scripts/setup.sh fresh < /dev/null); }
 scaffold() { (cd "$PROJECT"; PATH="$BIN:$PATH" "$REAL_COMPOSER" --no-plugins run-script post-drupal-scaffold-cmd); }
 naming() { (cd "$PROJECT"; PATH="$BIN:$PATH" sh devops/scripts/sous-setup.sh); }
 preserved() {
@@ -79,6 +74,55 @@ pass 'naming retries preserve a generated README'
 [ -f "$PROJECT/assets/ci/circleci/config.yml" ] && [ -f "$PROJECT/assets/ci/github-actions/build.yml" ] || fail 'generated CI choices missing'
 pass 'generation separates product workflows from opt-in site CI templates'
 
+fixture; expect_status 0 generate 3
+output=$(cat "$TEST_ROOT/output")
+[[ "$output" == *'Which version of Sous'*'Install optional Config Split'*'Starting ddev'* ]] || fail 'setup did not collect both answers before starting tools'
+pass 'both bootstrap questions precede dependency installation and theme work'
+for content in default layout-builder paragraphs admin-only 0 1 2 3; do
+  fixture; expect_status 0 generate_env "$content" no
+  excludes "$TEST_ROOT/output" 'Which version of Sous'
+  excludes "$TEST_ROOT/output" 'Install optional Config Split'
+  case "$content" in
+    default|0) recipe=sous-content-types ;; layout-builder|1) recipe=sous-core-layout-builder ;;
+    paragraphs|2) recipe=sous-paragraphs ;; admin-only|3) recipe='' ;;
+  esac
+  if [ -n "$recipe" ]; then
+    calls_assert "any(.[];.tool==\"composer\" and (.argv|index(\"fourkitchens/$recipe:^2.0\"))!=null)"
+  else calls_assert 'all(.[];(.argv|index("require"))==null)'; fi
+done
+fixture; expect_status 0 generate_env admin-only yes
+calls_assert 'any(.[];(.argv|index("fourkitchens/sous-config-split:^2.0"))!=null)'
+pass 'named and numeric environment selections run without prompts, including optional splits'
+fixture; export SOUS_CONTENT=paragraphs
+expect_status 0 generate y
+excludes "$TEST_ROOT/output" 'Which version of Sous'
+contains "$TEST_ROOT/output" 'Install optional Config Split'
+calls_assert 'any(.[];(.argv|index("fourkitchens/sous-config-split:^2.0"))!=null)'
+fixture; export SOUS_CONFIG_SPLIT=yes
+expect_status 0 generate 3
+contains "$TEST_ROOT/output" 'Which version of Sous'
+excludes "$TEST_ROOT/output" 'Install optional Config Split'
+pass 'each environment selection skips only its own prompt'
+for content in invalid 9 ''; do
+  fixture; expect_status 2 generate_env "$content" no
+  [ ! -s "$COMMAND_LOG" ] && [ ! -e "$PROJECT/.git" ] || fail 'invalid content selection started bootstrap'
+done
+for split in maybe ''; do
+  fixture; expect_status 2 generate_env default "$split"
+  [ ! -s "$COMMAND_LOG" ] && [ ! -e "$PROJECT/.git" ] || fail 'invalid split selection started bootstrap'
+done
+pass 'invalid explicit selections fail before Git initialization or tool calls'
+# No-answer behavior is meaningful only without a controlling terminal; interactive runs may use /dev/tty.
+if ! ( : < /dev/tty ) 2>/dev/null; then
+  fixture; expect_status 0 naming
+  expect_status 2 helper setup.sh fresh < /dev/null
+  [ ! -s "$COMMAND_LOG" ] || fail 'missing content answer started bootstrap'
+  fixture; expect_status 0 naming; export SOUS_CONTENT=admin-only
+  expect_status 0 helper setup.sh fresh < /dev/null
+  calls_assert 'all(.[];(.argv|index("fourkitchens/sous-config-split:^2.0"))==null)'
+  pass 'content input is required while an unavailable split answer defaults to no'
+fi
+
 # Each failure is injected at an actual child command; the real shell must stop.
 for row in \
   '0|recipe recipes/sous-admin' \
@@ -89,12 +133,11 @@ for row in \
   '3|npm ci' \
   '0|recipe recipes/sous-content-types' \
   '3|uli --name=sous_chef' \
-  '3|config:export' \
-  '3|metadata-write'; do
+  '3|config:export'; do
   selection="${row%%|*}"; failed="${row#*|}"
   fixture; export FAIL_MATCH="$failed"
   expect_status 42 generate "$selection"; preserved
-  if [ "$failed" != 'uli --name=sous_chef' ] && [ "$failed" != metadata-write ]; then
+  if [ "$failed" != 'uli --name=sous_chef' ]; then
     calls_assert 'all(.[];.command!="uli")'
   fi
   pass "failed $failed stops dependent work and keeps bootstrap"
@@ -148,6 +191,18 @@ fixture; expect_status 0 generate 3
 calls_assert '[.[]|select(.tool=="drush")|.command]|index("config:export")<index("uli")'
 [ -f "$PROJECT/config/default/core.extension.yml" ] && [ -f "$PROJECT/config/default/system.site.yml" ] || fail 'missing complete export'
 pass 'complete configuration export precedes login and success'
+
+for failed in 'pkg delete scripts.sous-build' 'config --unset scripts.post-create-project-cmd'; do
+  fixture; export FAIL_MATCH="$failed"
+  expect_status 42 generate 3
+  excludes "$TEST_ROOT/output" 'Your Drupal site is ready'
+  [ -f "$PROJECT/devops/scripts/sous-build.sh" ] && [ -f "$PROJECT/devops/scripts/sous-setup.sh" ] || fail 'cleanup failure retired bootstrap'
+  json_assert "$PROJECT/composer.json" '.scripts|has("post-create-project-cmd")'
+  if [ "$failed" = 'pkg delete scripts.sous-build' ]; then
+    json_assert "$PROJECT/package.json" '.scripts|has("sous-build")'
+  else json_assert "$PROJECT/package.json" '.scripts|has("sous-build")|not'; fi
+done
+pass 'native metadata cleanup failures keep bootstrap files for recovery'
 for entry in direct ddev; do
   for failed in php:eval recipe cr; do
     fixture; export TEST_COMMAND_STATUSES="{\"$failed\":42}"
@@ -171,12 +226,16 @@ printf '#!/bin/sh\nprintf "fresh\\n"\n' > "$PROJECT/devops/scripts/sous-build.sh
 printf '#!/bin/sh\nprintf "restore\\n"\n' > "$PROJECT/devops/scripts/rebuild.sh"
 expect_status 0 helper setup.sh fresh; contains "$TEST_ROOT/output" fresh
 expect_status 0 helper setup.sh restore; contains "$TEST_ROOT/output" restore
-pass 'setup requires an explicit fresh/restore workflow'
+rm "$PROJECT/devops/scripts/sous-build.sh"; reset_log
+expect_status 0 helper setup.sh; contains "$TEST_ROOT/output" restore
+calls_assert 'any(.[];.tool=="npm" and .argv==["run","theme-ci"]) and any(.[];.tool=="npm" and .argv==["run","theme-build"])'
+pass 'setup requires a choice before bootstrap and defaults to restore afterward'
+
 fixture
 expect_failure helper setup.sh restore
 calls_assert 'all(.[];.command!="import-db" and .command!="deploy" and .command!="uli")'
 pass 'missing restore backup stops before database/configuration/login'
-for failed in import-db deploy 'run build'; do
+for failed in import-db deploy 'run theme-ci' 'run theme-build'; do
   fixture; mkdir -p "$PROJECT/reference"; printf 'SELECT 1;\n' | gzip > "$PROJECT/reference/site-db.sql.gz"
   export FAIL_MATCH="$failed"; expect_status 42 helper setup.sh restore
   calls_assert 'all(.[];.command!="uli")'
@@ -188,6 +247,12 @@ expect_status 0 helper setup.sh restore
 calls_assert '[.[]|select(.tool=="drush" or .tool=="hook-probe")|.command]|index("post-import")<index("sql:sanitize") and index("sql:sanitize")<index("deploy") and index("post-config-import")<index("uli")'
 calls_assert 'all(.[];.command!="site:install")'
 pass 'restore sanitizes its import, deploys configuration and prints login last'
+
+calls_assert '[.[]|select(.tool=="npm")|.argv|join(" ")]|index("run theme-ci")<index("run theme-build")'
+fixture; mkdir -p "$PROJECT/reference"; printf 'SELECT 1;\n' | gzip > "$PROJECT/reference/site-db.sql.gz"
+expect_status 0 helper rebuild.sh
+calls_assert 'all(.[];(.argv|index("theme-ci"))==null and (.argv|index("theme-build"))==null) and any(.[];.command=="uli")'
+pass 'plain rebuild refreshes data without theme installation or build'
 fixture; export SOUS_ENVIRONMENT=production
 for script in setup.sh rebuild.sh import-data.sh local-data-bak.sh get-db.sh; do
   reset_log

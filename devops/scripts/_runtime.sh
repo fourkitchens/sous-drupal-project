@@ -33,10 +33,3 @@ runtime_emulsify() {
     "$SOUS_PROJECT_ROOT/node_modules/.bin/emulsify" "$@"
   fi
 }
-runtime_theme_directory() (
-  directory="$(CDPATH='' cd "$1" && pwd -P)" || exit $?
-  case "$directory" in
-    "$SOUS_PROJECT_ROOT"/*) printf '%s\n' "${directory#"$SOUS_PROJECT_ROOT/"}" ;;
-    *) echo 'The theme directory must be inside this project.' >&2; exit 2 ;;
-  esac
-)

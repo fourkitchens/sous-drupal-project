@@ -10,10 +10,13 @@ set -eu
 . "$(dirname "$0")/_runtime.sh"
 runtime_require_development
 
-# The runtime normalizes the path for both host DDEV and in-container/native
-# commands, and rejects directories outside this project.
+# Keep the theme path relative to this project in either runtime.
 theme_directory="${1:-web/themes/custom/sous-project}"
-theme_directory="$(runtime_theme_directory "$theme_directory")"
+theme_directory="$(CDPATH='' cd "$theme_directory" && pwd -P)"
+case "$theme_directory" in
+  "$SOUS_PROJECT_ROOT"/*) theme_directory="${theme_directory#"$SOUS_PROJECT_ROOT/"}" ;;
+  *) echo 'The theme directory must be inside this project.' >&2; exit 2 ;;
+esac
 # Reject initialized/project-owned themes before the CLI can copy any source.
 runtime_exec node devops/scripts/theme-initialize.mjs --check "$theme_directory"
 
@@ -42,5 +45,5 @@ runtime_exec sh -c 'cd "$1"; if [ -f package-lock.json ]; then npm ci --include=
 # Normalize the pinned starter's stock source and generated-output check scope.
 # This is first setup, not the routine locked theme-ci/theme-build workflow.
 runtime_exec node devops/scripts/theme-initialize.mjs "$theme_directory"
-runtime_exec sh devops/scripts/theme-build.sh "$theme_directory"
+runtime_npm --prefix "$theme_directory" run build
 runtime_exec touch "$theme_directory/.sous-initialized"

@@ -28,7 +28,7 @@ build tools. This policy does not add Node packages to the browser output.
 ## Theme tasks
 
 The generated theme lives at `web/themes/custom/sous-project`. Naming setup
-updates the helper paths for the generated project.
+updates the npm task paths for the generated project.
 
 | Command | Behavior |
 | --- | --- |
@@ -136,8 +136,8 @@ arguments, and safety checks are defined in the
 | Command | Behavior |
 | --- | --- |
 | `npm run setup -- fresh` | Install a new/disposable site; successful bootstrap removes its one-time setup files |
-| `npm run setup -- restore [BACKUP]` | Start DDEV and restore the selected backup through the complete rebuild workflow |
-| `npm run rebuild -- [BACKUP]` | Install locked dependencies/build assets, restore/import configuration, run both safeguards, then sanitize and generate final login |
+| `npm run setup -- restore [BACKUP]` | Start DDEV, install/build the theme, then restore the selected backup through rebuild |
+| `npm run rebuild -- [BACKUP]` | Install root dependencies, import/sanitize the backup, deploy configuration, then generate final login |
 | `npm run get-db -- [DESTINATION]` | Download through the explicitly configured project hook; validate and atomically complete a private backup |
 | `npm run import-data -- [BACKUP]` | Validate `.sql`/`.sql.gz`, restore, run safeguards, then sanitize; no configuration import or login |
 | `npm run local-data-bak` | Save a local database backup under `reference` |
@@ -147,8 +147,8 @@ arguments, and safety checks are defined in the
 Fresh installation and database restoration can replace the local database.
 Choose the intended workflow explicitly and use disposable installations for
 destructive validation. Setup/restoration reject production before destructive
-work. Build/watch commands install no packages; theme helpers accept an
-optional project-contained theme path followed by task arguments.
+work. Build/watch commands install no packages; theme paths are configured in
+`package.json` and renamed during project naming.
 Backup paths are root-relative or absolute and may contain spaces. The
 [restore guide](SETUP.md#restore-an-existing-generated-site) owns validation,
 atomic downloads, hook implementation and partial-failure recovery. There is
