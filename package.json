@@ -66,8 +66,7 @@
     }
   },
   "engines": {
-    "node": "^24.22.1"
+    "node": ">=24 <25"
   },
-  "packageManager": "npm@11.21.1",
   "private": true
 }

@@ -11,10 +11,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install the reviewed DDEV runtime
+          name: Install DDEV
           command: |
-            curl -fsSL https://raw.githubusercontent.com/ddev/ddev/5da91aeb9ebab0b0e66171c450b72099308d332c/scripts/install_ddev.sh -o /tmp/install-ddev.sh
-            bash /tmp/install-ddev.sh v1.25.4
+            curl -fsSL https://ddev.com/install.sh -o /tmp/install-ddev.sh
+            bash /tmp/install-ddev.sh
       - run:
           name: Validate and build the generated site
           command: |

@@ -11,12 +11,12 @@ changes. See [release coordination](RELEASES.md) before choosing a published tag
 | --- | --- | --- |
 | Drupal core | 11.4.11; starter constraint `^11.4.11` | `composer.json`; generated site's lockfile |
 | PHP | 8.4 in DDEV; Composer platform 8.4.0 and requirement `^8.4` | `.ddev/config.yaml`, `composer.json` |
-| Composer | 2.10.3 | `.ddev/config.yaml` |
+| Composer | 2.x | `.ddev/config.yaml` |
 | Drush | 13.8.0 / `^13.8.0` | `composer.json`; generated lockfile |
-| DDEV | `>=1.25.2 <2`; shared CI installs 1.25.4 | `.ddev/config.yaml`, `.github/workflows/ci.yml` |
+| DDEV | `>=1.25.2 <2`; maintainer CI installs 1.25.4 | `.ddev/config.yaml`, `.github/workflows/ci.yml` |
 | Database | MariaDB 10.11 | `.ddev/config.yaml` |
-| Node.js | 24.22.1 | Root and generated theme `.nvmrc`, DDEV config/image, npm engines |
-| npm | 11.21.1 | `packageManager`, DDEV image, release workflow |
+| Node.js | 24.x | `.nvmrc`; DDEV and npm engines mirror its major |
+| npm | Bundled with Node.js | Selected Node.js installation |
 | Drupal Emulsify theme | 7.2.1 / `^7.2.1` | Sous Emulsify Composer manifest |
 | Drupal Emulsify Tools | 2.2.2 / `^2.2.2` | Sous Emulsify Composer manifest |
 | Project Emulsify CLI | 2.4.1 / `^2.4.1`, locked, without a local CLI patch | Root npm manifest/lockfile and `ddev emulsify` |
@@ -28,13 +28,16 @@ The native integration baseline runs Drupal 11.4.11 on PHP 8.4.20. Wider upstrea
 package constraints do not establish additional tested Sous combinations. Host
 PHP satisfying `^8.4` and Composer are needed for the Composer bootstrap path;
 that path can use a different PHP patch/minor from the DDEV application runtime.
-Host npm aliases require the reviewed Node/npm selection too. Host PHP 8.5.12
+Host npm aliases use Node 24 and its bundled npm. Host PHP 8.5.12
 is used only for bootstrap/metadata validation in the documented disposable
 verification; Drupal executes in DDEV's PHP 8.4 environment.
 
-DDEV builds the selected Node/npm and native frontend libraries into its image.
-Normal starts reuse it; they do not globally install Emulsify or reinstall npm
-dependencies. `ddev emulsify` selects the root's locked CLI. The theme's Emulsify
+DDEV selects Node 24 with its bundled npm and installs native frontend libraries.
+Generated-site CI installs the current DDEV release; `ddev_version_constraint`
+in `.ddev/config.yaml` defines the supported range. Maintainer CI keeps exact
+DDEV and Composer pins. Dependabot proposes weekly Actions, npm and Composer
+dependency updates for this repository.
+`ddev emulsify` selects the root's locked CLI. The theme's Emulsify
 Core SDK also depends on that CLI package; it does not change the authoritative
 project command. Use `npm ci` wherever a lockfile exists. The first generated
 theme setup creates its lock once, then ordinary builds do not install packages.

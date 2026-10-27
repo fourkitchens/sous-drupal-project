@@ -18,12 +18,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install the reviewed DDEV runtime
+      - name: Install DDEV
         uses: ddev/github-action-setup-ddev@fdf2f5c97943bae638f31df6df86f1defa6210c0 # v1.12.1
         with:
-          version: '1.25.4'
           autostart: false
-          installScriptUrl: https://raw.githubusercontent.com/ddev/ddev/5da91aeb9ebab0b0e66171c450b72099308d332c/scripts/install_ddev.sh
       - name: Validate and build the generated site
         run: |
           ddev start
