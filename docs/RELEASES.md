@@ -1,5 +1,20 @@
 # Sous release maintenance
 
+## Sous 8 release contract
+
+The starter review branch `codex/release-starter-8.x` prepares `8.0.0` from the
+latest starter tag `7.0.1`. Its breaking changes are the Drupal `^11.4.11`
+baseline, shared Sous `^2.0` ZIP packages with independent composition choices,
+explicit `fresh|restore` setup, and project-owned exports/runtime environment
+settings. Existing sites retain their database and complete configuration export
+and adopt source/configuration changes through the [maintenance workflow](MAINTENANCE.md).
+
+Keep `feat!:` or a `BREAKING CHANGE:` footer in the final merge/squash commit.
+Native semantic-release checks cover the `7.0.1` → `8.0.0` decision. Only the
+canonical `main` publication job creates starter tags and releases.
+Pull requests run focused source checks, while release-branch pushes and manual
+runs retain full integration before publication.
+
 ## Current two-repository release sequence
 
 The active development repositories are this starter and

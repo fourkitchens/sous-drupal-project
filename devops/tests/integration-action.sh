@@ -44,7 +44,7 @@ for status in 0 42; do
   [ -z "$(find "$TEST_ROOT" -name injected-subject)" ] || fail 'untrusted input was executed'
   pass "exact source checkout, literal arguments and runner exit $status"
 done
-export TEST_EXIT_CODE=0 PACKAGES_REF='' SOURCE_BRANCH=codex/release-starter-packages-2.0
+export TEST_EXIT_CODE=0 PACKAGES_REF='' SOURCE_BRANCH="$(jq -er '.head_ref' "$SOURCE/devops/integration/pr-refs.json")"
 expect_status 0 bash -e -o pipefail "$TEST_ROOT/action.sh"
 expected_package_ref="$(jq -er '.packages_ref | select(test("^[0-9a-f]{40}$"))' "$SOURCE/devops/integration/pr-refs.json")"
 jq -e --arg ref "$expected_package_ref" '.packages_ref==$ref' "$expected/result.json" >/dev/null || fail 'release branch did not use its reviewed candidate SHA'

@@ -1,10 +1,30 @@
 # Sous integration and release checks
 
-The starter owns one full product gate in `devops/integration/run.sh`. It creates
+Pull requests run focused source checks in `devops/tests/check.sh`. The full
+product gate in `devops/integration/run.sh` runs on release-branch pushes and
+manual dispatches after those focused checks. It creates
 an owned disposable DDEV application, exercises the generated theme, installs
 only selected package ZIPs, and checks configuration and environment behavior.
 The packages repository separately runs syntax, code-sniff and formatting checks.
 Neither gate modifies a developer database or publishes a package release.
+
+## Focused pull-request checks
+
+With the reviewed Node/npm and PHP tools prepared, run:
+
+```sh
+bash devops/tests/check.sh
+```
+
+The entry point checks PHP/JavaScript syntax and lint, starter defaults,
+installation/configuration/environment command helpers, workflow/artifact
+handling, documentation paths, CLI-cache behavior and native semantic-release
+version decisions. It needs no DDEV, Composer dependency installation or Drupal
+database. It does not build a generated theme or exercise the runtime matrices.
+
+GitHub Actions runs these checks once per PR update, cancels superseded PR runs,
+and runs the full gate on release-branch pushes and manual runs. The canonical
+`main` publisher still depends on both the focused checks and full integration.
 
 ## Review branch and publication status
 
@@ -16,7 +36,7 @@ publishes semantic releases, package ZIPs and the static index automatically
 from `main`. A normal installation requires that published index; it must not
 silently substitute branches or local sources.
 
-The review branch `codex/release-starter-packages-2.0` explicitly validates the
+The review branch `codex/release-starter-8.x` explicitly validates the
 reviewed packages commit in `devops/integration/pr-refs.json`. This override is
 limited to the disposable test application. Its temporary loopback index and
 candidate lockfiles are diagnostic artifacts, not publishable starter locks.
@@ -74,7 +94,8 @@ the runner verifies the registered DDEV application's actual directory before
 deleting its own containers/database/workspace. It never deletes a project by
 name alone. `--option default|paragraphs|layout-builder|admin-only` narrows content
 checks while keeping both split states; `all` also runs the six environment
-cases. CI runs the full gate, without `--keep`.
+cases. Release-branch pushes and manual CI runs execute the full gate, without
+`--keep`; ordinary pull requests run the focused checks instead.
 
 ## Generated application and optional packages
 

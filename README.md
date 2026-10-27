@@ -32,9 +32,13 @@ integration/tests from a Sous source checkout, not a generated application.
 - [Coordinated releases](docs/RELEASES.md) — dependency order, Conventional Commits, and publication gates.
 - [Maintenance ownership and cadence](docs/OPERATIONS.md) — security, dependency/support reviews, patches, and downstream instructions.
 
-This release branch targets the shared `^2.0` package line through a scoped
-static Composer index. The package collection starts at `2.0.0`; merges to its
-`main` branch publish semantic releases, package ZIPs and the index. Until that
+This branch prepares the **Sous starter 8.0.0** release from `7.0.1`. Its
+breaking contract requires Drupal `^11.4.11`, the shared Sous `^2.0` package
+line, explicit fresh/restore setup, and project-owned configuration/environment
+settings. See the [Sous 8 release contract](docs/RELEASES.md#sous-8-release-contract).
+Packages are downloaded through a scoped static Composer index. The package
+collection starts at `2.0.0`; merges to its `main` branch publish semantic
+releases, package ZIPs and the index. Until that
 first publication completes, candidate integration uses an explicit reviewed
 package commit. An older published starter tag does not contain this
 implementation. Follow
@@ -70,10 +74,20 @@ site. Use the [maintenance workflow](docs/MAINTENANCE.md).
 
 ## Work on Sous itself
 
-The shared check tests the starter with the companion packages repository in
-its own disposable site. See [Integration checks](docs/INTEGRATION.md) for the
-published-index gate and the explicit candidate-commit mode. For local edits,
-the source parent contains `sous-drupal-project` and `sous-drupal-packages`:
+Pull requests run focused source checks without starting DDEV or installing a
+Drupal site. With the reviewed Node/npm and PHP tools installed, run the same
+checks from this source checkout:
+
+```sh
+bash devops/tests/check.sh
+```
+
+Full product integration runs after the focused checks on release-branch pushes
+and manual runs, and must pass before publication from `main`. It tests the
+starter with the companion packages repository in its own disposable site. See
+[Integration checks](docs/INTEGRATION.md) for the published-index gate and the
+explicit candidate-commit mode. For local edits, the source parent contains
+`sous-drupal-project` and `sous-drupal-packages`:
 
 ```sh
 bash devops/integration/run.sh --packages /path/to/sous-drupal-packages

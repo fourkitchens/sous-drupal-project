@@ -46,6 +46,7 @@ const cases = [
   { name: 'minor', tag: '1.0.3', message: 'feat: add recipe capabilities', version: '1.1.0' },
   { name: 'breaking header', tag: '1.0.3', message: 'feat!: require Drupal 11.4', version: '2.0.0' },
   { name: 'breaking footer', tag: '1.0.3', message: 'feat: require Drupal 11.4\n\nBREAKING CHANGE: Drupal 11.4 is the minimum supported baseline.', version: '2.0.0' },
+  { name: 'Sous 8 installer contract', tag: '7.0.1', message: 'feat!: require the Sous 8 installer contract', version: '8.0.0' },
 ];
 const results = [];
 for (const test of cases) {

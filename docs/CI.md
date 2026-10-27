@@ -7,11 +7,24 @@ policy. These are separate configurations even when both use GitHub Actions.
 ## Maintained source repository
 
 `.github/workflows/` and `.github/actions/` contain the Sous integration/release
-pipeline. It tests the checked-out starter with independent package ZIPs from
-the scoped static Composer index, installs disposable Drupal, and tests the
-supported content choices and optional Config Split. Explicit candidate mode
-builds ZIPs from one reviewed package commit for prepublication acceptance.
-These jobs do not deploy client sites. See [integration](INTEGRATION.md).
+pipeline. Checks are split by cost:
+
+- **Pull requests:** native PHP/JavaScript lint, installer/runtime helper
+  regressions, documentation paths, CLI-cache checks and semantic-release dry
+  runs. These use `bash devops/tests/check.sh` without DDEV or a Drupal database.
+- **Release-branch pushes and manual runs:** the focused checks followed by the
+  full disposable Drupal installation, optional-package, environment and
+  generated-theme matrix. Publication from canonical `main` requires both jobs
+  to pass.
+
+Review branches run through the pull-request event instead of duplicate branch
+push and pull-request events. A newer PR update cancels its superseded check
+run; publication runs stay serialized without interruption.
+
+The full gate installs independent package ZIPs from the scoped static Composer
+index. Explicit candidate mode builds ZIPs from one reviewed package commit for
+prepublication acceptance. These jobs do not deploy client sites. See
+[integration](INTEGRATION.md).
 
 The Git archive excludes product workflows; Composer archives also exclude the
 composite-action metadata. One-time project naming removes both directories
@@ -53,8 +66,9 @@ The package source is consolidated in
 The old repositories remain historical download sources; the starter no longer
 combines their floating branches. Package CI owns syntax/style checks and
 automatic semantic publication from `main`;
-starter CI retains the full theme, installation and environment acceptance gate.
-Neither a configuration-only pass nor the package fixture replaces that gate.
+starter CI retains the full theme, installation and environment acceptance gate
+for release-branch pushes and manual runs. Pull requests use the focused checks
+above; a passing PR source check alone does not establish product acceptance.
 
 At the October 27, 2026 cutover review, package source is merged but ZIPs/index
 are unpublished. The explicit reviewed-commit candidate input tests this branch
