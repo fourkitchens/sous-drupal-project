@@ -3,13 +3,15 @@
 PR #130 removed 129 YAML files from `config/default`. Most were copies of
 defaults already supplied by recipes or Drupal modules, but **Frontpage and the
 Page/Frontpage alias patterns had no replacement**. Those starter defaults are
-restored through bundled recipes rather than another partial site export.
+restored through independently distributed recipes rather than another partial
+site export. Their source now lives together in
+[Sous Drupal Packages](https://github.com/fourkitchens/sous-drupal-packages).
 
-The [starter content recipe](../web/recipes/sous-starter-content/recipe.yml)
+The [Content Types recipe](https://github.com/fourkitchens/sous-drupal-packages/blob/main/packages/sous-content-types/recipe.yml)
 supplies the common Page/Frontpage composition for installation options 0, 1,
-and 2. The [Paragraphs composition](../web/recipes/sous-starter-paragraphs/recipe.yml)
+and 2. The [Paragraphs composition](https://github.com/fourkitchens/sous-drupal-packages/blob/main/packages/sous-paragraphs/recipe.yml)
 adds the shared `field_content` to Frontpage, and the
-[Layout Builder composition](../web/recipes/sous-layout-builder/recipe.yml)
+[Core Layout Builder composition](https://github.com/fourkitchens/sous-drupal-packages/blob/main/packages/sous-core-layout-builder/recipe.yml)
 enables native layouts for both content types. The explicit admin-only option
 remains available without content types.
 
@@ -40,12 +42,12 @@ listed names, not a wildcard selection.
 | Page field names replaced by the current recipe model | 4 |
 | Shared Paragraph preview mode imported from its module | 1 |
 | Ancillary view modes without current starter consumers | 9 |
-| Missing Frontpage and alias defaults restored in the starter | 10 |
+| Missing Frontpage and alias defaults restored in Sous Content Types | 10 |
 | **Total** | **129** |
 
 ### Media: 41 files
 
-Provider: [`sous-media/config`](https://github.com/fourkitchens/sous-media/tree/main/config).
+Provider: [`sous-media/config`](https://github.com/fourkitchens/sous-drupal-packages/tree/main/packages/sous-media/config).
 These remain reusable media defaults rather than site-specific exports.
 
 | Original configuration names | Count |
@@ -62,7 +64,7 @@ These remain reusable media defaults rather than site-specific exports.
 
 ### Page: 13 files
 
-Provider: [`sous-content-types/config`](https://github.com/fourkitchens/sous-content-types/tree/main/config).
+Provider: [`sous-content-types/config`](https://github.com/fourkitchens/sous-drupal-packages/tree/main/packages/sous-content-types/config).
 Its repaired Page model also supplies `body` and `field_teaser_image`, covered
 by the replacement accounting below.
 
@@ -77,7 +79,7 @@ by the replacement accounting below.
 
 ### Paragraph components: 25 files
 
-Provider: [`sous-paragraph-types/config`](https://github.com/fourkitchens/sous-paragraph-types/tree/main/config).
+Provider: [`sous-paragraph-types/config`](https://github.com/fourkitchens/sous-drupal-packages/tree/main/packages/sous-paragraph-types/config).
 The component types remain optional and are applied by the Paragraphs
 installation choice.
 
@@ -96,11 +98,11 @@ installation choice.
 ### Authorization: 1 file
 
 `user.role.superuser` is supplied by
-[`sous-admin/config/user.role.superuser.yml`](https://github.com/fourkitchens/sous-admin/blob/main/config/user.role.superuser.yml).
+[`sous-admin/config/user.role.superuser.yml`](https://github.com/fourkitchens/sous-drupal-packages/blob/main/packages/sous-admin/config/user.role.superuser.yml).
 The role remains an administrator role with `is_admin: true`. It belongs to
 the administration layer; the Emulsify recipe does not own authorization.
 Fresh setup applies Admin before assigning the role to its authoring account.
-The Admin repository also supplies an explicit existing-site migration for a
+The Admin package also supplies an explicit existing-site migration for a
 missing role, preserving existing roles and assignments. Restoring a second
 role definition in the starter would duplicate this responsibility.
 
@@ -132,9 +134,11 @@ use those current providers rather than frozen copies from an older export.
 `views.view.login_history` is the separate **one-file** contrib category,
 provided by `web/modules/contrib/login_history/config/install`.
 
-The starter content recipe explicitly imports the Views it needs. Shared
-provider defaults use non-strict imports so customized preexisting Views are
-preserved. Imports require their provider modules and dependencies to be
+Sous Admin explicitly imports these native Views. They are outside its strict
+Gin/login whitelist, preserving preexisting customized Views while retaining
+strict validation for Admin-owned imports. Media also preserves these Views
+when applied afterward while keeping its own bundles/fields/displays strict.
+Imports require their provider modules and dependencies to be
 installed. Glossary remains disabled by its native default; the user-listing
 Views supply block displays without placing blocks in a theme.
 
@@ -160,7 +164,7 @@ The legacy copies did not contain a necessary Sous-specific Views feature:
 | `field.field.node.page.field_teaser_media` | Sous Content Types: `field.field.node.page.field_teaser_image` |
 
 The current Paragraphs source is
-[`sous-paragraphs/config`](https://github.com/fourkitchens/sous-paragraphs/tree/main/config).
+[`sous-paragraphs/config`](https://github.com/fourkitchens/sous-drupal-packages/tree/main/packages/sous-paragraphs/config).
 `field_content` is an entity-reference-revisions field for Paragraphs.
 `field_teaser_image` is still an image-media reference labelled “Teaser Media”.
 The default Page model uses its formatted Body; installing Paragraphs adds the
@@ -187,7 +191,7 @@ sites with custom displays using these ancillary modes keep their own exports.
 
 ### Restored starter defaults: 10 files
 
-Provider: [bundled starter content configuration](../web/recipes/sous-starter-content/config).
+Provider: [Sous Content Types configuration](https://github.com/fourkitchens/sous-drupal-packages/tree/main/packages/sous-content-types/config).
 The repaired Page recipe supplies the shared storages; Frontpage supplies its
 own attachments and displays.
 
@@ -206,7 +210,7 @@ own attachments and displays.
 
 The old Frontpage form depended on Paragraphs-specific widgets and fields.
 Restoring it unchanged would make Paragraphs mandatory for the default and
-Layout Builder choices. The bundled compositions now extend the common
+Layout Builder choices. The optional packages now extend the common
 Frontpage model only when their installation option is selected.
 
 This accounting comes from source comparisons. Runtime verification of the

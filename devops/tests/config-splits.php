@@ -23,7 +23,6 @@ use Drupal\Core\Site\Settings;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\Yaml\Yaml;
 
 $root = dirname(__DIR__, 2);
 $loader = require getenv('SOUS_INTEGRATION_AUTOLOAD') ?: $root . '/vendor/autoload.php';
@@ -54,14 +53,19 @@ try {
     }
   };
   $active = new MemoryStorage();
-  foreach (glob($root . '/web/recipes/sous-config-split/config/*.yml') as $filename) {
-    $definition = Yaml::parseFile($filename);
-    $folder = $definition['id'] === '_splits' ? '_splits' : substr($definition['id'], strlen('sous_'));
-    $check($definition['folder'] === '../config/' . $folder, 'A reusable split points outside the documented project directory.');
-    // Absolute temporary paths keep the guard independent of the installed
-    // Core bootstrap's DRUPAL_ROOT constant and never inspect site data.
-    $definition['folder'] = $work . '/config/' . $folder;
-    $active->write(basename($filename, '.yml'), $definition);
+  // Test the application's environment/bootstrap policy with native fixture
+  // definitions. Package YAML/schema is checked during real recipe acceptance;
+  // this source-only check must not require an optional recipe to be installed.
+  foreach (['_splits', 'local', 'staging'] as $folder) {
+    $bootstrap = $folder === '_splits';
+    $id = $bootstrap ? '_splits' : 'sous_' . $folder;
+    $active->write('config_split.config_split.' . $id, [
+      'id' => $id, 'status' => $bootstrap, 'weight' => $bootstrap ? 100 : 0,
+      'stackable' => FALSE, 'no_patching' => FALSE, 'storage' => 'folder',
+      'folder' => $work . '/config/' . $folder, 'module' => [], 'theme' => [],
+      'complete_list' => $bootstrap ? ['config_split.config_split.sous_local', 'config_split.config_split.sous_staging'] : [],
+      'partial_list' => [],
+    ]);
   }
   $active->write('core.extension', ['module' => ['config_split' => 0], 'theme' => []]);
   $active->write('system.site', ['name' => 'Native split fixture']);

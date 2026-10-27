@@ -1,5 +1,11 @@
 # Frontend tooling review
 
+This records earlier frontend review evidence. The 2.x package cutover uses
+the two-repository ownership in [Maintenance](MAINTENANCE.md); current commands
+and acceptance results are in [Build tools](BUILD_TOOLS.md) and
+[Integration](INTEGRATION.md). Historical passing runs below do not attest that
+a later generated theme passed unchanged.
+
 ## Current simplified implementation
 
 Use [Build tools](BUILD_TOOLS.md) for operating commands. The current source

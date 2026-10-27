@@ -2,16 +2,16 @@ name: Sous CI
 
 on:
   push:
-    branches: [main, next, next-major, alpha, beta, '*.x']
+    branches: [main, next, next-major, alpha, beta, '*.x', 'codex/**']
   pull_request:
     branches: [main, next, next-major, alpha, beta, '*.x']
   workflow_dispatch:
     inputs:
-      recipe_refs:
-        description: Optional JSON object mapping companion recipe names to reviewed Git refs
+      packages_ref:
+        description: Optional full reviewed packages commit (validation only)
         required: false
         type: string
-        default: '{}'
+        default: ''
 
 permissions:
   contents: read
@@ -26,11 +26,11 @@ jobs:
     if: endsWith(github.repository, '/sous-drupal-project')
     uses: ./.github/workflows/integration.yml
     with:
-      recipe_refs: ${{ inputs.recipe_refs || '{}' }}
+      packages_ref: ${{ inputs.packages_ref || '' }}
   release:
     needs: integration
     # Paired companion refs validate only; publication uses merged dependencies.
-    if: github.repository == 'fourkitchens/sous-drupal-project' && github.event_name != 'pull_request' && (!inputs.recipe_refs || inputs.recipe_refs == '{}')
+    if: github.repository == 'fourkitchens/sous-drupal-project' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !inputs.packages_ref
     permissions:
       contents: write
     uses: ./.github/workflows/release.yml

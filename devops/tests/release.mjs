@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -26,6 +26,17 @@ for (const plugin of config.plugins.slice(0, 2)) {
 const github = config.plugins[2][1];
 for (const option of ['successCommentCondition', 'failCommentCondition', 'labels', 'releasedLabels', 'addReleases']) {
   assert.equal(github[option], false);
+}
+
+// Both the caller and reusable publisher must independently exclude review
+// branches and validation-only package overrides from real publication.
+for (const filename of ['semantic-release.yml', 'release.yml']) {
+  const workflow = await readFile(join(root, '.github/workflows', filename), 'utf8');
+  const guard = workflow.split('\n').find((line) => line.trim().startsWith('if:') && line.includes('github.ref'));
+  assert.ok(guard?.includes("github.repository == 'fourkitchens/sous-drupal-project'"), 'Publisher is canonical-repository only.');
+  assert.ok(guard.includes("github.ref == 'refs/heads/main'"), 'Review branch pushes cannot publish.');
+  assert.ok(guard.includes("github.event_name != 'pull_request'"), 'Pull requests cannot publish.');
+  assert.ok(guard.includes('!inputs.packages_ref') || guard.includes('!github.event.inputs.packages_ref'), 'Candidate ZIP overrides cannot publish.');
 }
 
 const cases = [

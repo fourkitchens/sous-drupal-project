@@ -7,8 +7,10 @@ policy. These are separate configurations even when both use GitHub Actions.
 ## Maintained source repository
 
 `.github/workflows/` and `.github/actions/` contain the Sous integration/release
-pipeline. It snapshots the caller's checked-out changes with companion recipes,
-installs disposable Drupal, and tests the supported product combinations.
+pipeline. It tests the checked-out starter with independent package ZIPs from
+the scoped static Composer index, installs disposable Drupal, and tests the
+supported content choices and optional Config Split. Explicit candidate mode
+builds ZIPs from one reviewed package commit for prepublication acceptance.
 These jobs do not deploy client sites. See [integration](INTEGRATION.md).
 
 The Git archive excludes product workflows; Composer archives also exclude the
@@ -44,7 +46,25 @@ independently versioned shared jobs or reusable deployment logic. Splitting a
 few starter templates today would add repositories, release order and access
 management without removing duplicated runtime ownership.
 
-## PR #130 and the CI cutover
+## Package repository cutover
+
+The package source is consolidated in
+[sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages).
+The old repositories remain historical download sources; the starter no longer
+combines their floating branches. Package CI owns archive/index validation;
+starter CI retains the full theme, installation and environment acceptance gate.
+Neither a configuration-only pass nor the package fixture replaces that gate.
+
+At the October 27, 2026 cutover review, package source is merged but ZIPs/index
+are unpublished. The explicit reviewed-commit candidate input tests this branch
+without publication: a manual dispatch's `packages_ref` must be a full reviewed
+commit, such as `d3dcd219d251e322a3b206a6bf12889712b2b3f0`.
+Candidate runs cannot publish a starter release. After the
+package release and public index are verified, run the normal published-index
+gate before starter publication. See [Integration](INTEGRATION.md) for inputs
+and diagnostics and [Releases](RELEASES.md) for the ordering.
+
+## Historical PR #130 CI failures
 
 The original PR head `1e2914a` had two independent failures:
 
@@ -57,14 +77,10 @@ The original PR head `1e2914a` had two independent failures:
   Dropzone 6 while the unmerged `sous-media/main` still required Dropzone 5.
   It did not reach the runtime tests or the previously observed UI Kit checks.
 
-For this coordinated release only, `devops/integration/pr-refs.json` records
-reviewed companion commit SHAs. The composite action uses them only for pull
-requests from `codex/release-2026-10-26` when no explicit refs are supplied.
-The subject repository always uses its actual checkout. Other PRs, pushes and
-release gates use merged companion branches; an explicit validation dispatch
-can still supply reviewed refs. Remove/update the temporary manifest after
-the companion PRs merge. Passing paired-source checks is not evidence that
-publication against merged dependencies is ready.
+The earlier `pr-refs.json` scheme paired individual legacy repository commits.
+The monorepo cutover supersedes that map with one explicit reviewed package
+commit. This history explains the old failure; it is not the current package
+source-selection procedure.
 
 Remote CircleCI settings and branch-protection rules require repository/service
 administrator access. Source changes do not silently modify those settings.

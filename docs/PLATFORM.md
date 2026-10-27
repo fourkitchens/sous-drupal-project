@@ -1,7 +1,7 @@
 # Sous responsibilities and supported platform
 
-This is the shared platform reference for the starter and all six owned recipe
-repositories. Versions below describe the selected, tested implementation;
+This is the shared platform reference for the starter and its nine recipe
+packages in the companion monorepo. Versions below describe the selected implementation;
 they are not a promise that an old published recipe contains current source
 changes. See [release coordination](RELEASES.md) before choosing a published tag.
 
@@ -22,6 +22,7 @@ changes. See [release coordination](RELEASES.md) before choosing a published tag
 | Project Emulsify CLI | 2.4.1 / `^2.4.1`, locked, without a local CLI patch | Root npm manifest/lockfile and `ddev emulsify` |
 | Generated-theme Emulsify Core | 4.5.0 | Generated theme tooling/lockfile; see frontend review |
 | Emulsify UI Kit | Tag 1.9.0, Drupal variant | `devops/scripts/theme-setup.sh` |
+| Storybook | Coherent 10.6.4 package set, scoped beneath Emulsify Core | Generated theme overrides/lockfile; `devops/scripts/theme-setup.sh` |
 
 The native integration baseline runs Drupal 11.4.11 on PHP 8.4.20. Wider upstream
 package constraints do not establish additional tested Sous combinations. Host
@@ -40,29 +41,43 @@ theme setup creates its lock once, then ordinary builds do not install packages.
 Build outputs, lint tools, security overrides, and patch rationale are described
 in [Build tools](BUILD_TOOLS.md) and the [frontend implementation review](FRONTEND_TOOLING.md).
 
+First theme setup pins Storybook and its matching addons/adapters to `10.6.4`
+under Emulsify Core. This avoids an upstream addon release whose peer requires
+an unavailable Storybook version. The application keeps that explicit scoped
+override and resolved lock; review/remove the pin together when the upstream
+package set is published and passes native dependency/build checks. No forced
+install or ignored peer dependency is part of the supported setup.
+
 ## Repositories and dependencies
 
-| Repository | Responsibility and relationships |
+Development uses `sous-drupal-project` for the application starter and
+[sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages) for
+all reusable source. Each recipe is an independent `fourkitchens/<name>` ZIP
+with bounded `^2.0` sibling requirements; the common release number does not
+require every package. Legacy repositories retain historical downloads.
+
+| Starter or package | Responsibility and relationships |
 | --- | --- |
 | `sous-drupal-project` | Consumer template: dependency/scaffold/runtime setup, theme generation, four choices, complete initial site export, shared integration, and release coordination |
-| `sous-admin` | Gin/Navigation, administration defaults and Superuser role. Requires the Formats **package** and applies its shared Linkit subrecipe; does not apply the full editor recipe, Page model, or Sous Media |
+| `sous-admin` | Gin/Navigation, administration defaults, native management Views and Superuser role. Requires the Formats **package** and applies its shared Linkit subrecipe; does not apply the full editor recipe, Page model, or Sous Media |
 | `sous-formats` | Editor/filter formats and canonical shared Linkit defaults. Independent of other Sous packages; its subrecipe installs required core Node/Media and Linkit |
 | `sous-media` | Media bundles/fields/displays and native module imports; independent of Admin and the other Sous recipes |
-| `sous-content-types` | Usable Page fields/forms/rendering; applies Formats and Media. Supports the Paragraphs and native Layout Builder compositions |
+| `sous-content-types` | Page/Frontpage fields/forms/rendering and aliases; applies Formats and Media. Requires neither optional composition |
 | `sous-paragraph-types` | Four reusable Paragraph types and icons; applies Formats and Media. Does not require Page or Admin by itself |
 | `sous-emulsify` | Theme dependencies and frontend theme selection; independent of Admin and supplies no authorization role |
+| `sous-paragraphs` | Optional Page/Frontpage Paragraphs composition; applies Content Types and Paragraph Types |
+| `sous-core-layout-builder` | Optional native Page/Frontpage layouts, Basic inline blocks and overrides; applies Content Types without Paragraphs |
+| `sous-config-split` | Optional native `_splits`, local and staging definitions; requires Config Split |
 
 “Independent” means no prerequisite Sous recipe beyond those listed. A consuming
 Composer project still needs the required module/library repositories,
 installer paths, stability exceptions, and native unpacking support. The starter
 provides these; a bare Composer project does not inherit dependency-level
-repository declarations automatically. See [recipe application](SETUP.md#recipe-application-and-unpacking).
+repository declarations automatically. See [recipe application](SETUP.md#recipe-application-and-composer-ownership).
 
-The public `sous-paragraphs` companion adds the Page's `field_content` host and
-composes Content Types with Paragraph Types. It is fetched/tested as source but
-is outside these seven repositories' ownership. Native Layout Builder is owned
-by the starter's `web/recipes/sous-layout-builder`; the incompatible public Gin
-Layout Builder package is not selected. All includes use the documented
+The seven existing Composer names are preserved. The new Core Layout Builder
+name avoids repurposing the legacy public Gin-based `sous-layout-builder`.
+Neither optional composition is bundled in the starter. All includes use the documented
 `web/recipes` layout; slash-containing native recipe includes are Drupal-root
 relative.
 
@@ -72,13 +87,19 @@ relative.
 | --- | --- |
 | `0` Default | Gin + generated Emulsify theme; Page and Frontpage Body/SEO/metadata/teasers, title-based aliases, media and native management Views |
 | `1` Layout Builder | Both starter types plus native core Layout Builder, visible Body blocks, Basic inline blocks and per-node overrides |
-| `2` Paragraphs | Both starter types with Body and Image, Text, Text with Media and Video components through the bundled extension of the public host |
+| `2` Paragraphs | Both starter types with Body and Image, Text, Text with Media and Video components through the independent Paragraphs package |
 | `3` Admin only | Gin/Navigation/authorization and generated Emulsify theme, without optional Page or content-composition recipes |
 
-The starter's bundled recipes supply Frontpage; they do not seed homepage/error
+Content Types supplies Frontpage; it does not seed homepage/error
 content, enforce a single Frontpage node, or configure Entity Browser/Role
 Delegation. [Features](FEATURES.md) describes the supported compositions and
 [the configuration audit](CONFIGURATION_AUDIT.md) records ownership/restoration.
+
+After content selection, Config Split is an independent yes/no prompt with no
+as the default. Core Layout Builder never installs Paragraphs payloads;
+Paragraphs does not configure Layout Builder displays or override fields.
+Admin's core Navigation enables the shared `layout_builder` module in Drupal
+11.4 independently of that optional content composition.
 
 ## Local tooling and hosting
 
@@ -97,11 +118,12 @@ that provider; it is not the default deployment system. See [deployment](DEPLOYM
 
 ## License and ongoing reviews
 
-The maintainer confirmed **GPL-2.0-or-later** for all seven Sous repositories.
-Each now includes uppercase `LICENSE` with the full GPL v2 text and an explicit
-“or later” notice; Composer/npm/root-lock metadata uses the same SPDX expression.
-The five pre-existing Four Kitchens copyright notices are retained. Earlier
-tags/history and third-party dependency notices were not rewritten.
+The starter and all nine recipes are distributed under **GPL-2.0-or-later**,
+with uppercase `LICENSE` files and preserved original notices. The collection's
+[source provenance](https://github.com/fourkitchens/sous-drupal-packages/blob/main/provenance/source-imports.json)
+records imported commits and license reconciliation, including the original
+Paragraphs MIT notice retained in that package's `NOTICE`. Earlier tags/history
+and third-party dependency notices are not rewritten.
 
 Review responsibility and cadence are defined once in [Operations](OPERATIONS.md):
 security advisories, latest stable/major versions, Drupal support windows,

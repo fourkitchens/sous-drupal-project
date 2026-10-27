@@ -1,11 +1,4 @@
 {
-  "head_ref": "codex/release-2026-10-26",
-  "recipes": {
-    "sous-admin": "905ccf7e2002877bffc6bcd0bc5bd20e97c1d670",
-    "sous-content-types": "855729b491e1f0e29fc4d81115c3172066529029",
-    "sous-emulsify": "b054eaef4d0492696ef00372ba90ea2bf55e9662",
-    "sous-formats": "fb5b0420e5d1e3a8a7ef9f46fdcbab6d0f9683c1",
-    "sous-media": "2a7dac0ef14d792e1cb388c9e2bef2de14c4326b",
-    "sous-paragraph-types": "9dedd3fb0ab6095aead5c321b90b9836df45e808"
-  }
+  "head_ref": "codex/release-starter-packages-2.0",
+  "packages_ref": "d3dcd219d251e322a3b206a6bf12889712b2b3f0"
 }

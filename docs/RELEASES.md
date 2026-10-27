@@ -1,5 +1,49 @@
 # Sous release maintenance
 
+## Current two-repository release sequence
+
+The active development repositories are this starter and
+[Sous Drupal Packages](https://github.com/fourkitchens/sous-drupal-packages).
+The seven existing Composer names are preserved; Core Layout Builder and Config
+Split are independent additions. All nine target the coordinated stable
+`2.0.0` collection line with bounded `^2.0` sibling requirements. The compatible
+starter candidate is `8.0.0`; preserve breaking-change semantics when merging.
+
+As checked on October 27, 2026, collection source is merged at
+`d3dcd219d251e322a3b206a6bf12889712b2b3f0`, but no ZIP release or public Composer
+index exists. This starter branch prepares the scoped production index and
+uses explicit reviewed candidate source only for acceptance. It does not
+publish package assets, create tags, enable Pages or authorize starter release.
+
+1. Pass the full starter acceptance gate against the reviewed package commit,
+   including generated-theme lint/build, all content choices, optional Config
+   Split, environments and clean-clone recovery. Candidate validation alone
+   cannot publish a starter release.
+2. Review and manually publish the package collection using its protected,
+   opt-in [publisher](https://github.com/fourkitchens/sous-drupal-packages/blob/main/docs/RELEASING.md).
+   Verify immutable uploaded/public ZIP bytes before deploying the complete
+   static index. Preserve prior version metadata and every historical URL.
+3. Verify a cold-cache public install and rerun the starter's published-index
+   gate with no candidate/path overrides. Resolve real public ZIP distributions;
+   `composer update --lock` does not convert a path distribution to a ZIP.
+4. Review and publish the compatible starter release. Existing applications
+   retain their database/complete export and adopt 2.x explicitly. Historical
+   legacy repositories/tags/Packagist metadata remain available; do not move old
+   tags or repoint legacy `dev-main` as a shortcut.
+
+The static index is canonical only for the exact nine package names, preserving
+access to unrelated Four Kitchens packages. Selected recipes remain in root
+requirements and locks through exact native recipe-unpack exclusions. Neither
+the collection version nor the ignore list installs an unselected package.
+Application CI/deployment remains independent of both upstream publishers.
+
+## Historical pre-consolidation review
+
+The remaining review below records the earlier multi-repository release setup.
+Its per-repository version proposals, temporary ref maps and rollout state are
+historical evidence, superseded by the sequence above; do not follow that old
+publication order for the 2.x collection.
+
 Later simplification replaced maintainer Python entry points with shell, excluded product integration/tests from generated projects, and removed the custom theme helper/CLI patch. Historical file lists below retain the earlier review scope; source CI still gates publication on the current integration checks.
 
 The [shared integration pipeline](INTEGRATION.md) supersedes the original CI

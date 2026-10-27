@@ -9,7 +9,7 @@ permissions:
 jobs:
   release:
     # Inspect the original dispatch payload independently of the thin caller.
-    if: github.event_name != 'pull_request' && contains(fromJSON('["fourkitchens/sous-drupal-project","fourkitchens/sous-admin","fourkitchens/sous-content-types","fourkitchens/sous-formats","fourkitchens/sous-emulsify","fourkitchens/sous-media","fourkitchens/sous-paragraph-types"]'), github.repository) && (!github.event.inputs.recipe_refs || github.event.inputs.recipe_refs == '{}')
+    if: github.repository == 'fourkitchens/sous-drupal-project' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !github.event.inputs.packages_ref
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     concurrency:

@@ -82,32 +82,52 @@ echo "[1] Sous with Layout Builder"
 echo "[2] Sous with Paragraphs"
 echo "[3] Just the admin"
 printf 'Enter your selection '
-# Composer can close script stdin even when the caller has a terminal.
-if ! read -r RESP; then
-  read -r RESP < /dev/tty
+# Composer can close script stdin even when the caller has a terminal. Both
+# installation prompts use that terminal when available; CI supplies stdin.
+read_response() {
+  if read -r "$1"; then return 0; fi
+  if { read -r "$1" < /dev/tty; } 2>/dev/null; then return 0; fi
+  return 1
+}
+if ! read_response RESP; then
+  echo 'A content selection is required.' >&2
+  exit 2
 fi
 case $RESP in
   0)
     # The default Page model pulls in its shared formats and media dependencies.
-    run_composer require fourkitchens/sous-content-types:dev-main fourkitchens/sous-formats:dev-main fourkitchens/sous-media:dev-main
+    run_composer require 'fourkitchens/sous-content-types:^2.0'
     run_drush_yes cr
-    ./devops/scripts/install-recipe.sh fourkitchens/sous-starter-content
+    ./devops/scripts/install-recipe.sh fourkitchens/sous-content-types
     ;;
   1)
-    run_composer require fourkitchens/sous-content-types:dev-main fourkitchens/sous-formats:dev-main fourkitchens/sous-media:dev-main
+    run_composer require 'fourkitchens/sous-core-layout-builder:^2.0'
     run_drush_yes cr
-    # The bundled layout recipe creates both starter types before enabling layouts.
-    ./devops/scripts/install-recipe.sh fourkitchens/sous-layout-builder
+    ./devops/scripts/install-recipe.sh fourkitchens/sous-core-layout-builder
     ;;
   2)
     # The Paragraphs host recipe composes the checked dependency recipes; using
     # the canonical application helper preserves a failed child recipe's status.
-    run_composer require fourkitchens/sous-paragraphs:dev-main fourkitchens/sous-paragraph-types:dev-main fourkitchens/sous-content-types:dev-main fourkitchens/sous-formats:dev-main fourkitchens/sous-media:dev-main
+    run_composer require 'fourkitchens/sous-paragraphs:^2.0'
     run_drush_yes cr
-    ./devops/scripts/install-recipe.sh fourkitchens/sous-starter-paragraphs
+    ./devops/scripts/install-recipe.sh fourkitchens/sous-paragraphs
     ;;
   *)
     echo "No additional recipe required."
+    ;;
+esac
+
+# Environment policy remains in the application; definitions arrive only when
+# the project selects Config Split. A closed noninteractive input defaults off.
+printf 'Install optional Config Split definitions? [y/N] '
+if ! read_response SPLITS; then
+  SPLITS=n
+fi
+case "$SPLITS" in
+  [yY]|[yY][eE][sS])
+    mkdir -p config/_splits config/local config/staging
+    run_composer require 'fourkitchens/sous-config-split:^2.0'
+    ./devops/scripts/install-recipe.sh fourkitchens/sous-config-split
     ;;
 esac
 

@@ -1,8 +1,0 @@
-name: 'Sous optional configuration splits'
-description: 'Provides inactive local and staging splits for projects that need module or stored-configuration separation.'
-type: 'Site'
-install:
-  - config_split
-config:
-  # Existing site-owned split definitions are never replaced by these defaults.
-  strict: false

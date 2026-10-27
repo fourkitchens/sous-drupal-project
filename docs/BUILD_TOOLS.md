@@ -75,10 +75,19 @@ build independently from its committed files. See the
 for component and system commands. No global Emulsify installation is required,
 and routine DDEV startup does not install it.
 
-Theme setup uses native CLI/npm tasks. It does not rewrite SCSS, copy assets
-from the CLI cache, alter Drupal component metadata or attach assumed global
-styles. Those choices belong to the generated project. The removed
-`theme-integrate.php` helper is not replaced by another transformation script.
+First theme setup installs the pinned UI Kit and normalizes its stock source
+with the selected formatting/lint tools. It also corrects the upstream example
+Storybook icon references and excludes compiled output from source checks.
+Review and commit the generated source and manifest with the theme lockfile.
+After initialization, use the routine build/watch/lint tasks rather than rerun
+initial setup over a customized theme. Those tasks never rewrite project source.
+Drupal component metadata and library wiring remain project-owned.
+
+The generated manifest retains a scoped Storybook `10.6.4` package-set override
+under Emulsify Core. It keeps addon/adapter peers aligned while a newer addon
+requires a Storybook version missing from the registry. Keep the reviewed pin
+and lock together; remove it only after a coherent upstream set resolves and
+passes the native preview/build checks. Setup does not bypass peer validation.
 
 CLI 2.4.1 with the secure Git dependency supports cold-cache generation from
 pinned releases. Its moving-branch refresh lookup remains an upstream
@@ -86,11 +95,11 @@ compatibility limitation. Use the native `ddev emulsify cache clear` before
 deliberately fetching a changed moving reference. No local CLI patch or unsafe
 Git allowance is installed.
 
-The selected stock UI Kit currently fails Storybook because imported example
-assets are absent, and its lint/format checks report upstream source/output
-issues. These are visible failures, not successful checks. The production
-asset build and theme dependency audit pass. Projects own any design-system
-assets, style conventions and Drupal library wiring they choose to add.
+The acceptance gate checks JavaScript, SCSS, formatting, production assets and
+Storybook separately after initialization. Deliberate invalid authored files
+must still fail, while compiled JavaScript and generated component mirrors
+stay outside source lint. The initialization fixes do not replace those checks.
+Projects own later design-system assets, style conventions and library wiring.
 
 ## Lint and formatting
 

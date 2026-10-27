@@ -15,15 +15,22 @@ selects the environment; existing sites adopt the ordered include explicitly.
 
 ## Published releases versus current coordinated source
 
-The current fixes span seven source repositories and have not been published.
-The existing public starter 7.0.1 and Content Types 1.0.3 do not contain this
-implementation. Other owned recipes are currently untagged. Do not describe an
-unqualified stable `composer create-project` as installing these repairs.
+Sous now has two development repositories: this starter and
+[Sous Drupal Packages](https://github.com/fourkitchens/sous-drupal-packages),
+which keeps the seven existing Composer names and adds separate Core Layout
+Builder and Config Split packages. This starter branch targets the coordinated
+`^2.0` line through its scoped static Composer index.
 
-Until the coordinated releases exist, maintainers validate the checked-out
-sources using [sibling development](#local-development-with-sibling-recipes).
-Once a reviewed starter tag and its recipe dependencies exist, create a project
-with an explicit real tag, replacing `REVIEWED_TAG` before running:
+As checked on October 27, 2026, package source is merged at reviewed commit
+`d3dcd219d251e322a3b206a6bf12889712b2b3f0`, but no package ZIP release or index
+is published. Ordinary Composer resolution against that future index cannot
+succeed yet. Validate candidate source through the explicit mode in
+[Integration](INTEGRATION.md); it builds disposable package ZIPs without
+publishing or putting candidate sources in a production lockfile. The existing
+public starter 7.0.1 does not contain this cutover.
+
+After the immutable package release/index and a reviewed starter tag exist,
+create a project with that real tag, replacing `REVIEWED_TAG` before running:
 
 ```sh
 composer create-project fourkitchens/sous-drupal-project:REVIEWED_TAG my-site
@@ -31,8 +38,9 @@ composer create-project fourkitchens/sous-drupal-project:REVIEWED_TAG my-site
 
 This is the published-project command shape, not a claim that a future tag
 exists or that Packagist delivery was tested. [Release maintenance](RELEASES.md)
-defines the merge/tag order. Current necessary `dev-main` and existing beta
-exceptions are explicit in the manifests; they are not new stable releases.
+defines package publication, public cold-cache verification and starter release
+order. The existing explicit Login Destination beta exception remains root
+policy; sibling Sous dependencies use bounded stable `^2.0` constraints.
 
 ## Fresh installation and contributor clones
 
@@ -41,25 +49,28 @@ installs Minimal Drupal and can replace that local database. Do not run the
 bootstrap hooks in the canonical starter checkout you are maintaining: naming
 changes files and successful setup removes its bootstrap helpers.
 
-For a clone/copy of the reviewed starter source, run from its root:
+After the package index is published, a clone/copy of the reviewed starter
+source can run from its root:
 
 ```sh
 composer install
 composer run-script post-create-project-cmd
 ```
 
-For a real remote clone, first check out the reviewed source ref containing the
-coordinated changes. A clone of today's old public main does not acquire local
-uncommitted repairs. The command sequence above is validated using a disposable
-source fixture with checked-out companion recipes, not an invented public tag.
+For a remote clone, check out the reviewed starter ref first. Until package
+publication, use the disposable integration candidate mode instead of running
+these bootstrap commands against an unavailable public index. A source branch
+or local package directory is not a published stable dependency.
 
 The hook names the project, starts DDEV, installs locked dependencies, installs
 Minimal, applies Admin and Emulsify, creates/builds/enables the project theme,
 and configures administrator access. Select one of the four choices in
 [Platform](PLATFORM.md#installation-choices-and-scope). A Git clone is a valid
 fresh-install target: `.git` is never used to choose database restoration, and
-its existing branch is retained. A directory without Git is initialized on
-`main` without changing global Git preferences.
+its existing branch is retained. Config Split is an independent yes/no prompt
+after content selection, defaults to no, and initializes its project-owned
+directories when selected. A directory without Git is initialized on `main`
+without changing global Git preferences.
 
 Git and Composer archives exclude `devops/integration/` and every maintainer
 test file, including hidden placeholders. Project naming also removes those
@@ -247,27 +258,39 @@ client data, production deployment or new asset build was tested in this
 follow-up. Projects still configure and verify their own integration kill
 switches and optional download source.
 
-## Local development with sibling recipes
+## Local development with package source
 
 Use the shared product runner to test source changes together without touching
 a developer database or depending on ignored installations:
 
 ```sh
-bash devops/integration/run.sh --sources /path/to/Projects
+bash devops/integration/run.sh --packages /path/to/sous-drupal-packages
 ```
 
-The directory contains the seven Sous checkouts. The public Sous Paragraphs
-companion is fetched when absent; when supplied locally, review its ref too.
-The runner records actual source digests/revisions, uses temporary Composer
-path repositories, invokes native unpacking, and removes development overrides
-before proving a portable lockfile and clean installation. It does not commit
-path repositories into production config.
+The parent contains `sous-drupal-project` and `sous-drupal-packages`.
+Reusable edits belong in the latter's `packages/<basename>` directories. The
+runner records source revisions/digests and exercises individual package ZIPs;
+it does not require a checkout for each legacy recipe repository. See
+[Integration](INTEGRATION.md) for the explicit reviewed candidate-commit mode
+and the separate default gate against published assets. Candidate sources are
+validation-only and must not enter a production manifest/lock.
 
-To inspect a default Page site while editing a specific recipe source:
+To test the merged reviewed package candidate instead of local working files:
+
+```sh
+bash devops/integration/run.sh \
+  --packages-ref d3dcd219d251e322a3b206a6bf12889712b2b3f0
+```
+
+Omit both package-source options only when testing the actual published index;
+that gate fails while its public metadata/assets are unavailable. The matching
+manual Actions dispatch input is `packages_ref`.
+
+To inspect a default Page site with locally edited package source:
 
 ```sh
 bash /path/to/sous-drupal-project/devops/integration/run.sh \
-  --subject /path/to/sous-admin --sources /path/to/Projects \
+  --subject /path/to/sous-drupal-project --packages /path/to/sous-drupal-packages \
   --option default --keep
 ```
 
@@ -284,56 +307,55 @@ points to the owned fixture; from its directory run
 Without `--keep`, the runner performs ownership-checked cleanup automatically.
 [Integration](INTEGRATION.md) covers PR refs, all options, diagnostics, and gates.
 
-## Recipe application and unpacking
+## Recipe application and Composer ownership
 
-Recipes are applied once, not enabled as updatable extensions. In the starter's
-supported layout, unpacked recipe roots live at `web/recipes/PACKAGE_NAME`.
-The public host and the shared Linkit subrecipe use that layout too. A bare
-consumer must configure Drupal/asset repositories, library/recipe installer
-paths, native `drupal/core-recipe-unpack`, and root stability exceptions;
-Composer does not inherit dependency-level repository declarations. Reuse the
-starter's reviewed Composer setup rather than assuming one `require` configures
-an arbitrary Composer project.
+Recipes are applied operations, not extensions with an automatic update
+lifecycle. The starter installs selected package roots at
+`web/recipes/PACKAGE_NAME`, including the shared Linkit subrecipe's parent.
+The root owns the scoped static index, Drupal/asset repositories, Dropzone
+library metadata, installer paths, native `drupal/core-recipe-unpack` plugin and
+explicit Login Destination beta exception. Composer does not inherit
+repositories declared by dependencies.
 
-For example, from a configured Sous project using today's explicit development
-exceptions:
+The starter always requires Admin and Emulsify. It then requires only the
+chosen content package: Content Types, Core Layout Builder or Paragraphs;
+admin only adds none. Config Split is an independent choice. After the public
+2.x index and ZIPs are available, a prepared project can explicitly add/apply
+an optional composition, for example:
 
 ```sh
-ddev composer require fourkitchens/sous-admin:dev-main fourkitchens/sous-formats:dev-main drupal/login_destination:^2.0.0-beta10@beta
-ddev install-recipe fourkitchens/sous-admin
+ddev composer require fourkitchens/sous-core-layout-builder:^2.0
+ddev install-recipe fourkitchens/sous-core-layout-builder
 ```
 
-Admin applies only the shared Linkit subrecipe from the Formats package. The
-full editor recipe is a separate choice. Content Types/Paragraph Types require
-root `dev-main` allowances for Formats and Media; Media also needs the declared
-Dropzone/asset repository setup. Recipe README examples list their dependency
-relationships. Replace development constraints with bounded stable lines only
-when those coordinated releases actually exist.
+Changing a valued site's composition needs reviewed field/data/configuration
+adoption, not a blind rerun of this new-site example. Admin applies only the
+shared Linkit subrecipe from Formats; it does not apply the full editor recipe.
+Content Types supplies its own Formats/Media/Pathauto dependencies and never
+reapplies Admin's strict Gin setup.
 
-The shared DDEV wrapper applies the recipe from `web/recipes` and rebuilds caches
-only after successful application. An equivalent manual application from the
-project root is:
+The DDEV wrapper applies the recipe from `web/recipes` and rebuilds caches only
+after successful application. Its equivalent manual command is:
 
 ```sh
-ddev drush recipe /var/www/html/web/recipes/sous-admin
+ddev drush recipe /var/www/html/web/recipes/sous-core-layout-builder
 ddev drush cache:rebuild
 ```
 
-The absolute example is the DDEV container path. Outside DDEV, use the actual
-absolute recipe path with the project's Drush. Native Composer require/create
-project events unpack recipe dependencies. If resolving source fixtures with
-an explicit `composer update` instead, use the native command:
+The absolute path is inside DDEV; another runtime uses its actual recipe path
+and project Drush. Do not include the vendor prefix in the recipe directory
+(`web/recipes/fourkitchens/sous-admin` is wrong).
 
-```sh
-ddev composer drupal:recipe-unpack
-```
-
-Do not use the obsolete `composer unpack` command, and do not include the vendor
-prefix in the directory name (`web/recipes/fourkitchens/sous-admin` is wrong).
-An unpacked recipe can be removed from Composer requirements after its
-underlying dependencies transfer to the application. Updating its package/code
-does not update active site configuration. Use [existing-site maintenance](MAINTENANCE.md)
-and explicit migrations instead of blanket recipe reapplication.
+The root's native `extra.drupal-recipe-unpack.ignore` names exactly the nine
+Sous packages. It retains selected requirements and lock entries, so a clean
+Composer install restores their independently downloaded ZIPs. The exclusion
+list does not install any unselected package. Other recipes retain normal native
+unpack behavior. Keep Composer-managed recipe directories ignored, and do not
+remove the Sous requirements or run a blanket unpack command after setup.
+Existing unpacked/customized directories need review before Composer takes
+ownership; updating a package still does not change active site configuration.
+Use [existing-site maintenance](MAINTENANCE.md) and explicit migrations instead
+of routine recipe reapplication.
 
 ## Interrupted installation and recovery
 
@@ -365,7 +387,9 @@ creation, and user creation can reject repeated work after a partial install.
 
 For config import errors, confirm the configured sync directory contains the
 site's complete export and matching site UUID, not the retired template YAML or
-another fresh site's export. Do not restore the nonexistent `_splits` import.
+another fresh site's export. When Config Split is selected, retain its native
+`_splits` bootstrap and exported definitions; do not add unconditional partial
+imports.
 A preserved settings file may intentionally override the default sync path;
 review it instead of overwriting it. Known tooling advisories and transient
 Layout Builder warnings are recorded in the implementation reviews; rendering

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Check the selected Sous sources together in one owned disposable DDEV site.
+# Check the starter against independently installed recipe ZIPs in one owned DDEV site.
 # Host tools: Bash, Git, jq, curl, realpath and shasum; PHP/Node run in DDEV.
 # Usage: bash devops/integration/run.sh [--sources PARENT] [--subject CHECKOUT]
-#   [--subject-repository OWNER/REPO] [--refs-json JSON] [--artifacts DIRECTORY]
+#   [--subject-repository OWNER/REPO] [--packages CHECKOUT|--packages-ref SHA] [--artifacts DIRECTORY]
 #   [--option all|default|paragraphs|layout-builder|admin-only] [--keep]
 # --keep is for local diagnosis only. CI always removes its owned fixture.
 # jq expands its --arg variables inside the literal filter strings below.
@@ -14,17 +14,19 @@ harness="$(CDPATH='' cd "$(dirname "$0")/../.." && pwd -P)"
 subject=$harness
 subject_repository=
 sources=
-refs='{}'
+packages=
+packages_ref=
+candidate=0
 artifacts="$PWD/.integration-results"
 option=all
 keep=0
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --subject|--subject-repository|--sources|--refs-json|--artifacts|--option)
+    --subject|--subject-repository|--sources|--packages|--packages-ref|--artifacts|--option)
       [ "$#" -ge 2 ] || { echo "Missing value for $1" >&2; exit 2; }
       case "$1" in
         --subject) subject=$2 ;; --subject-repository) subject_repository=$2 ;;
-        --sources) sources=$2 ;; --refs-json) refs=$2 ;; --artifacts) artifacts=$2 ;;
+        --sources) sources=$2 ;; --packages) packages=$2 ;; --packages-ref) packages_ref=$2 ;; --artifacts) artifacts=$2 ;;
         --option) option=$2 ;;
       esac
       shift 2 ;;
@@ -38,7 +40,11 @@ for tool in git jq curl realpath shasum ddev; do
   command -v "$tool" > /dev/null || { echo "Required integration tool is unavailable: $tool" >&2; exit 127; }
 done
 subject=$(realpath "$subject")
-[ -z "$sources" ] || sources=$(realpath "$sources")
+[ -z "$sources" ] || packages="$(realpath "$sources")/sous-drupal-packages"
+[ -z "$packages" ] || packages=$(realpath "$packages")
+[ -z "$packages_ref" ] || [[ "$packages_ref" =~ ^[0-9a-f]{40}$ ]] || { echo "Use a full reviewed packages commit SHA." >&2; exit 2; }
+[ -z "$packages" ] || [ -z "$packages_ref" ] || { echo "Choose --packages or --packages-ref." >&2; exit 2; }
+if [ -n "$packages$packages_ref" ]; then candidate=1; fi
 mkdir -p "$artifacts"
 artifacts=$(CDPATH='' cd "$artifacts" && pwd -P)
 umask 077
@@ -49,7 +55,7 @@ result="$artifacts/result.json"
 count=0
 started=0
 start_attempted=0
-owned=(sous-admin sous-content-types sous-emulsify sous-formats sous-media sous-paragraph-types)
+owned=(sous-admin sous-config-split sous-content-types sous-core-layout-builder sous-emulsify sous-formats sous-media sous-paragraph-types sous-paragraphs)
 export HUSKY=0 SOUS_DISPOSABLE_TEST=1 SOUS_RUNTIME=ddev SOUS_ENVIRONMENT=local COMPOSER_NO_INTERACTION=1
 jq -n --arg workspace "$work" --arg project "$project" \
   '{status:"running",sources:{},commands:[],options:{},workspace:$workspace,ddev_project:$project}' > "$result"
@@ -103,6 +109,7 @@ trap 'exit 143' TERM
 # Record every child status separately from stdout/stderr. Expected negative
 # cases use record directly; must stops dependent work after an unexpected exit.
 record() {
+  local label prefix begin elapsed
   label=$1
   shift
   count=$((count + 1))
@@ -161,42 +168,36 @@ snapshot() {
 }
 
 acquire() {
-  catalog="$harness/devops/integration/sources.json"
-  jq -e --argjson refs "$refs" '
-    . as $catalog | ($refs | type)=="object" and
-    all($refs | to_entries[]; . as $entry | ($catalog | has($entry.key)) and ($entry.value | type)=="string" and ($entry.value | test("^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$")) and ($entry.value | contains("..") | not))
-  ' "$catalog" > /dev/null || fail 'recipe_refs must map known repositories to valid reviewed Git references.'
-  subject_name=$(jq -er '.name | sub("^fourkitchens/"; "")' "$subject/composer.json")
-  case "$subject_name" in sous-drupal-project|sous-admin|sous-content-types|sous-emulsify|sous-formats|sous-media|sous-paragraph-types) ;; *) fail 'Unknown Sous subject.' ;; esac
-  [ -z "$subject_repository" ] || [ "${subject_repository##*/}" = "$subject_name" ] || fail 'Subject checkout does not match caller repository.'
-  jq -en --argjson refs "$refs" --arg subject "$subject_name" '$refs | has($subject) | not' > /dev/null || fail 'A companion ref cannot replace the checked-out subject.'
-  while IFS= read -r name; do
-    repository=$(jq -r --arg name "$name" '.[$name]' "$catalog")
-    ref=$(jq -nr --argjson refs "$refs" --arg name "$name" '$refs[$name] // ""')
-    if [ "$name" = "$subject_name" ]; then source_directory=$subject
-    elif [ -n "$sources" ] && [ -d "$sources/$name" ] && [ -z "$ref" ]; then source_directory="$sources/$name"
-    elif [ "$name" = sous-drupal-project ] && [ -z "$ref" ]; then source_directory=$harness
-    else
-      source_directory="$work/downloads/$name"
-      mkdir -p "$source_directory"
-      must "init-$name" git init --quiet "$source_directory"
-      must "remote-$name" git -C "$source_directory" remote add origin "$repository"
-      must "fetch-$name" git -C "$source_directory" fetch --depth=1 origin "${ref:-main}"
-      must "checkout-$name" git -C "$source_directory" checkout --quiet --detach FETCH_HEAD
-    fi
-    snapshot "$source_directory" "$work/sources/$name"
-    update_result --arg name "$name" --arg repository "$repository" --arg revision "$revision" --arg digest "$digest" \
-      '.sources[$name]={repository:$repository,revision:$revision,source_digest_sha256:$digest}'
-  done < <(jq -r 'keys[]' "$catalog")
-  mkdir -p "$site/.integration/recipes"
+  packages_repository=$(jq -er '.["sous-drupal-packages"]' "$harness/devops/integration/sources.json")
+  subject_name=$(jq -er '.name' "$subject/composer.json")
+  [ "$subject_name" = fourkitchens/sous-drupal-project ] || fail 'The starter checkout must be the integration subject.'
+  [ -z "$subject_repository" ] || [ "$subject_repository" = fourkitchens/sous-drupal-project ] || [[ "$subject_repository" = */sous-drupal-project ]] || fail 'Unknown starter subject repository.'
+  snapshot "$subject" "$work/sources/sous-drupal-project"
+  update_result --arg revision "$revision" --arg digest "$digest" --argjson candidate "$candidate" \
+    '.sources["sous-drupal-project"]={revision:$revision,source_digest_sha256:$digest} | .candidate_packages=($candidate==1)'
+  if [ "$candidate" -eq 0 ]; then
+    index=$(jq -er '.repositories[] | select(.type=="composer" and ((.only//[]) | index("fourkitchens/sous-admin"))) | .url' "$subject/composer.json")
+    must published-index curl --fail --silent --show-error --location "${index%/}/packages.json" --output "$work/published-index.json"
+    packages_ref=$(jq -er '.packages["fourkitchens/sous-admin"] | to_entries | map(select(.key|test("^2\\.[0-9]+\\.[0-9]+$"))) | sort_by(.key|split(".")|map(tonumber)) | last.value.dist.reference | select(test("^[0-9a-f]{40}$"))' "$work/published-index.json")
+  fi
+  if [ -z "$packages" ]; then
+    packages="$work/downloads/sous-drupal-packages"
+    must packages-init git init --quiet "$packages"
+    must packages-fetch git -C "$packages" fetch --depth=1 "$packages_repository" "$packages_ref"
+    must packages-checkout git -C "$packages" checkout --quiet --detach FETCH_HEAD
+  fi
+  snapshot "$packages" "$work/sources/sous-drupal-packages"
+  packages_revision=$revision
+  [[ "$packages_revision" =~ ^[0-9a-f]{40}$ ]] || fail 'Packages must be an exact committed checkout.'
+  update_result --arg repository "$packages_repository" --arg revision "$revision" --arg digest "$digest" \
+    '.sources["sous-drupal-packages"]={repository:$repository,revision:$revision,source_digest_sha256:$digest}'
+  mkdir -p "$site"
   cp -pR "$work/sources/sous-drupal-project/." "$site/"
+  mkdir -p "$site/.integration"
   cp -pR "$work/sources/sous-drupal-project" "$site/.integration/original-starter"
-  # Canonical directory names let the documentation checker resolve links among
-  # all source repositories while its PHP parser runs inside DDEV, not the host.
-  cp -pR "$work/sources" "$site/.integration/sources"
-  while IFS= read -r name; do
-    [ "$name" = sous-drupal-project ] || cp -pR "$work/sources/$name" "$site/.integration/recipes/$name"
-  done < <(jq -r 'keys[]' "$catalog")
+  cp -pR "$work/sources/sous-drupal-packages" "$site/.integration/packages"
+  mkdir -p "$site/.integration/sources"
+  cp -pR "$work/sources/." "$site/.integration/sources/"
   mkdir -p "$site/devops/integration"
   cp -pR "$harness/devops/integration/." "$site/devops/integration/"
   jq '.sources' "$result" > "$artifacts/sources.json"
@@ -235,22 +236,17 @@ provision() {
   [ "$node_version" = "v$expected_node" ] && [ "$npm_version" = "$expected_npm" ] || fail 'Unexpected Node/npm runtime.'
   case "$composer_version" in "Composer version $expected_composer "*) ;; *) fail 'Unexpected Composer runtime.' ;; esac
   update_result --arg php "$php_version" --arg node "$node_version" --arg npm "$npm_version" --arg composer "$expected_composer" '.runtime={php:$php,node:$node,npm:$npm,composer:$composer}'
-  jq --argjson names '["sous-admin","sous-content-types","sous-emulsify","sous-formats","sous-media","sous-paragraph-types","sous-paragraphs"]' '
-    ($names | map({key:("fourkitchens/"+.),value:"dev-main"}) | from_entries) as $versions |
-    .repositories=([{type:"path",url:".integration/recipes/*",options:{symlink:false,versions:$versions}}]+.repositories) |
-    .require += $versions
-  ' composer.json > "$work/composer.json"
-  mv "$work/composer.json" composer.json
+  if [ "$candidate" -eq 1 ]; then
+    dd build-candidate-zips exec node .integration/packages/tools/build.mjs --version 2.0.0 --reference "$packages_revision" --output .integration/publication --dist-base-url http://127.0.0.1:18737/dist/
+    dd serve-candidate-zips exec bash -c 'nohup php -S 127.0.0.1:18737 -t .integration/publication >.integration/publication/http.log 2>&1 </dev/null &'
+    dd candidate-index-ready exec curl --retry 5 --retry-connrefused --retry-delay 1 --fail http://127.0.0.1:18737/site/packages.json
+    jq '.repositories=([{type:"composer",url:"http://127.0.0.1:18737/site",canonical:true,only:["fourkitchens/sous-admin","fourkitchens/sous-config-split","fourkitchens/sous-content-types","fourkitchens/sous-core-layout-builder","fourkitchens/sous-emulsify","fourkitchens/sous-formats","fourkitchens/sous-media","fourkitchens/sous-paragraph-types","fourkitchens/sous-paragraphs"]}]+[.repositories[] | select(((.only//[]) | index("fourkitchens/sous-admin")) | not)]) | .config["secure-http"]=false' composer.json > "$work/composer.json"
+    mv "$work/composer.json" composer.json
+  fi
   mkdir -p web/sites/default
   printf "<?php\n\$settings['sous_integration_sentinel'] = 'preserved';\n" > web/sites/default/settings.local.php
   cp web/sites/default/settings.local.php "$work/settings.local.php"
-  dd composer-resolve-sources composer update --no-interaction --prefer-dist
-  dd composer-unpack-recipes composer drupal:recipe-unpack
-  for name in "${owned[@]}" sous-paragraphs; do
-    cmp -s ".integration/recipes/$name/recipe.yml" "web/recipes/$name/recipe.yml" || fail "Installed recipe differs from source: $name"
-  done
-  jq '.repositories |= map(select(.type!="path"))' composer.json > "$work/composer.json"
-  mv "$work/composer.json" composer.json
+  dd composer-resolve-base exec env COMPOSER_HOME=/var/www/html/.integration/composer-home COMPOSER_CACHE_DIR=/var/www/html/.integration/cache-base composer update --no-interaction --prefer-dist
   mkdir -p "$work/bin"
   printf '#!/bin/sh\nexec ddev exec --dir=/var/www/html --raw php "$@"\n' > "$work/bin/php"
   chmod 755 "$work/bin/php"
@@ -263,11 +259,13 @@ provision() {
   jq -c '(.packages+(."packages-dev"//[])) | map([.name,.version,.source.reference,.dist.reference]) | sort' composer.lock > "$work/selected-packages.json"
   dd composer-portable-lock composer update --lock --no-install --no-interaction
   jq -c '(.packages+(."packages-dev"//[])) | map([.name,.version,.source.reference,.dist.reference]) | sort' composer.lock > "$work/portable-packages.json"
-  cmp -s "$work/selected-packages.json" "$work/portable-packages.json" || fail 'Portable lock refresh changed selected packages.'
-  jq -e 'all((.packages+(."packages-dev"//[]))[]; (.name | startswith("fourkitchens/sous-") | not) and .dist.type != "path")' composer.lock > /dev/null || fail 'A temporary recipe/path package remains in the portable lock.'
+  cmp -s "$work/selected-packages.json" "$work/portable-packages.json" || fail 'Lock metadata refresh changed selected packages.'
+  # The generated candidate keeps dist-only recipe records. Its temporary HTTP
+  # index is validation-only; production root manifests never contain it.
+  jq -e 'all((.packages+(."packages-dev"//[]))[]; .dist.type != "path" and (if (.name|startswith("fourkitchens/sous-")) then .dist.type=="zip" and (has("source")|not) else true end))' composer.lock > /dev/null || fail 'Non-ZIP recipe or path distribution in the generated lock.'
   lock_digest=$(sha256 composer.lock)
-  rm -rf vendor web/core web/modules/contrib web/themes/contrib web/libraries
-  dd composer-clean-install composer install --no-interaction --prefer-dist
+  rm -rf vendor web/core web/modules/contrib web/themes/contrib web/libraries web/recipes
+  dd composer-clean-install exec env COMPOSER_HOME=/var/www/html/.integration/clone-home COMPOSER_CACHE_DIR=/var/www/html/.integration/cache-clean composer install --no-interaction --prefer-dist
   cmp -s web/sites/default/settings.local.php "$work/settings.local.php" && [ "$(sha256 composer.lock)" = "$lock_digest" ] || fail 'Clean install changed local settings or lock bytes.'
   dd generated-composer-validate composer validate --no-check-publish
   dd generated-ddev-settings start
@@ -278,16 +276,14 @@ provision() {
   original=/var/www/html/.integration/original-starter
   ln -s ../../node_modules .integration/original-starter/node_modules
   directories=("$original")
-  for name in "${owned[@]}"; do directories+=("/var/www/html/.integration/recipes/$name"); done
-  directories+=("/var/www/html/.integration/recipes/sous-paragraphs")
+  for name in "${owned[@]}"; do directories+=("/var/www/html/.integration/packages/packages/$name"); done
   dd source-validation exec env SOUS_INTEGRATION_AUTOLOAD=/var/www/html/vendor/autoload.php php devops/integration/validate-recipes.php "${directories[@]}"
   dd starter-defaults exec -d "$original" env SOUS_INTEGRATION_AUTOLOAD=/var/www/html/vendor/autoload.php php devops/tests/starter-defaults.php
   dd documentation-validation exec bash devops/tests/documentation.sh --sources /var/www/html/.integration/sources
-  for name in sous-drupal-project "${owned[@]}"; do
-    if [ "$name" = sous-drupal-project ]; then local_source="$site/.integration/original-starter"; container=$original
-    else local_source="$site/.integration/recipes/$name"; container="/var/www/html/.integration/recipes/$name"; fi
-    dd "composer-validate-$name" exec -d "$container" composer validate --no-check-publish
-    audit "npm-audit-$name" npm "$local_source/package-lock.json" ddev exec -d "$container" npm audit --include=dev --package-lock-only --json
+  dd composer-validate-starter exec -d "$original" composer validate --no-check-publish
+  audit npm-audit-starter npm "$site/.integration/original-starter/package-lock.json" ddev exec -d "$original" npm audit --include=dev --package-lock-only --json
+  for name in "${owned[@]}"; do
+    dd "composer-validate-$name" exec -d "/var/www/html/.integration/packages/packages/$name" composer validate --strict --no-check-publish
   done
   dd php-lint exec npm run lint:php
   dd javascript-lint exec npm run lint:js
@@ -301,14 +297,17 @@ provision() {
   authorization
   for recipe in sous-emulsify sous-admin; do dd "base-$recipe" install-recipe "fourkitchens/$recipe"; done
   must theme-generation-build-lint-storybook sh devops/integration/theme.sh integration
+  dd theme-source-lint-regressions exec env SOUS_DISPOSABLE_TEST=1 node devops/tests/theme-initialize.mjs web/themes/custom/integration
   audit theme-audit npm "$site/web/themes/custom/integration/package-lock.json" ddev exec -d /var/www/html/web/themes/custom/integration npm audit --include=dev --json
   dd generated-project-lint exec npm run lint:project
   dd baseline-snapshot snapshot --name=integration-base
+  cp composer.json "$work/baseline-composer.json"
+  cp composer.lock "$work/baseline-composer.lock"
   for manifest in composer.json composer.lock package.json package-lock.json; do cp "$manifest" "$artifacts/generated-$manifest"; done
 }
 
-auth_verify() { dd "authorization-$1" exec env SOUS_DISPOSABLE_TEST=1 "SOUS_AUTHORIZATION_CASE=$1" vendor/bin/drush php:script web/recipes/sous-admin/tests/verify-authorization.php; }
-linkit_verify() { dd "linkit-ownership-$1" exec env SOUS_DISPOSABLE_TEST=1 "SOUS_LINKIT_CASE=$1" vendor/bin/drush php:script web/recipes/sous-formats/tests/verify-linkit-ownership.php; }
+auth_verify() { dd "authorization-$1" exec env SOUS_DISPOSABLE_TEST=1 "SOUS_AUTHORIZATION_CASE=$1" vendor/bin/drush php:script .integration/packages/tests/recipes/sous-admin/verify-authorization.php; }
+linkit_verify() { dd "linkit-ownership-$1" exec env SOUS_DISPOSABLE_TEST=1 "SOUS_LINKIT_CASE=$1" vendor/bin/drush php:script .integration/packages/tests/recipes/sous-formats/verify-linkit-ownership.php; }
 authorization() {
   dd authorization-minimal-snapshot snapshot --name=authorization-minimal
   dd authorization-theme-only install-recipe fourkitchens/sous-emulsify
@@ -327,7 +326,7 @@ authorization() {
   auth_verify verify-legacy
   for repeat in 1 2; do dd "authorization-explicit-migration-$repeat" drush recipe /var/www/html/web/recipes/sous-admin/migrations/2026-10-superuser-role; done
   auth_verify verify-legacy
-  dd authorization-legacy-export-deploy exec env SOUS_DISPOSABLE_TEST=1 SOUS_INTEGRATION_COMBINATION=admin-only vendor/bin/drush "--uri=https://$project.ddev.site" php:script devops/integration/verify-site.php
+  dd authorization-legacy-export-deploy exec env SOUS_DISPOSABLE_TEST=1 SOUS_INTEGRATION_COMBINATION=admin-only SOUS_INTEGRATION_PROBES_DIR=/var/www/html/.integration/packages/tests/recipes vendor/bin/drush "--uri=https://$project.ddev.site" php:script devops/integration/verify-site.php
   auth_verify verify-legacy
   dd authorization-missing-role-reset snapshot restore authorization-minimal
   auth_verify migration
@@ -335,19 +334,60 @@ authorization() {
   update_result '.authorization={theme_only_has_no_role:true,fresh_admin_access:true,legacy_role_and_memberships_preserved:true,explicit_migration_repeated_safely:true,legacy_export_deploy_preserved:true,shared_linkit_defaults_and_customization_preserved:true}'
 }
 
+verify_selected() {
+  selection=$1
+  split=$2
+  must "$selection-$split-package-boundaries" ddev exec env "SOUS_INTEGRATION_SELECTION=$selection" "SOUS_INTEGRATION_SPLIT=$split" php devops/integration/verify-packages.php
+}
+
+cold_clone() {
+  label=$1
+  # Commit only generated application source, never downloaded code or probes.
+  if [ ! -d .git ]; then
+    must clone-source-init git init --quiet
+    printf '/.integration/\n/devops/integration/\n/devops/tests/\n' >> .git/info/exclude
+  fi
+  must "$label-stage-source" git add --all
+  must "$label-stage-lock" git add --force composer.json composer.lock patches.lock.json
+  must "$label-source-commit" git -c user.name='Sous integration' -c user.email=sous-tests@example.invalid commit --quiet --allow-empty -m 'Disposable application source'
+  clone="$site/.integration/clean-clone"
+  rm -rf "$clone"
+  must "$label-clone" git clone --quiet --no-hardlinks "$site" "$clone"
+  [ ! -e "$clone/vendor" ] && [ ! -e "$clone/web/recipes" ] || fail 'Composer-managed files entered the source clone.'
+  dd "$label-clone-install" exec -d /var/www/html/.integration/clean-clone env COMPOSER_HOME=/var/www/html/.integration/clone-home COMPOSER_CACHE_DIR="/var/www/html/.integration/cache-$label" composer install --no-interaction --prefer-dist
+  cmp -s composer.lock "$clone/composer.lock" || fail 'Clone install changed lock bytes.'
+  clone_recipes=()
+  while IFS= read -r name; do clone_recipes+=("$name"); done < <(jq -r '.packages[] | select(.name | startswith("fourkitchens/sous-")) | .name' composer.lock)
+  dd "$label-clone-prefer-source" exec -d /var/www/html/.integration/clean-clone env COMPOSER_HOME=/var/www/html/.integration/clone-home COMPOSER_CACHE_DIR="/var/www/html/.integration/source-cache-$label" composer reinstall "${clone_recipes[@]}" --prefer-source --no-interaction
+  must "$label-clone-boundaries" ddev exec -d /var/www/html/.integration/clean-clone env "SOUS_INTEGRATION_SELECTION=$choice" "SOUS_INTEGRATION_SPLIT=$split" php /var/www/html/devops/integration/verify-packages.php
+}
+
 option_case() {
     choice=$1
-    dd "$choice-reset" snapshot restore integration-base || return 1
+    split=$2
+    label="$choice-$split"
+    dd "$label-reset" snapshot restore integration-base || return 1
+    cp "$work/baseline-composer.json" composer.json
+    cp "$work/baseline-composer.lock" composer.lock
+    dd "$label-base-packages" composer install --no-interaction --prefer-dist || return 1
     case "$choice" in
-      default) recipe=sous-starter-content; mode=default ;;
-      paragraphs) recipe=sous-starter-paragraphs; mode=paragraphs ;;
-      layout-builder)
-        recipe=sous-layout-builder; mode=core-layout-builder ;;
+      default) recipe=sous-content-types; mode=default ;;
+      paragraphs) recipe=sous-paragraphs; mode=paragraphs ;;
+      layout-builder) recipe=sous-core-layout-builder; mode=core-layout-builder ;;
       admin-only) recipe=; mode=admin-only ;;
     esac
-    if [ -n "$recipe" ]; then dd "$choice-apply" install-recipe "fourkitchens/$recipe" || return 1; fi
-    dd "$choice-runtime" exec env SOUS_DISPOSABLE_TEST=1 "SOUS_INTEGRATION_COMBINATION=$mode" SOUS_INTEGRATION_RECIPES_DIR=/var/www/html/web/recipes vendor/bin/drush "--uri=https://$project.ddev.site" php:script devops/integration/verify-site.php || return 1
-    if [ "$choice" = default ]; then
+    if [ -n "$recipe" ]; then
+      dd "$label-package" composer require "fourkitchens/$recipe:^2.0" --no-interaction || return 1
+      dd "$label-apply" install-recipe "fourkitchens/$recipe" || return 1
+    fi
+    if [ "$split" = split ]; then
+      mkdir -p config/_splits config/local config/staging
+      dd "$label-split-package" composer require 'fourkitchens/sous-config-split:^2.0' --no-interaction || return 1
+      dd "$label-split-apply" install-recipe fourkitchens/sous-config-split || return 1
+    fi
+    verify_selected "$choice" "$split" || return 1
+    dd "$label-runtime" exec env SOUS_DISPOSABLE_TEST=1 "SOUS_INTEGRATION_COMBINATION=$mode" SOUS_INTEGRATION_RECIPES_DIR=/var/www/html/web/recipes SOUS_INTEGRATION_PROBES_DIR=/var/www/html/.integration/packages/tests/recipes vendor/bin/drush "--uri=https://$project.ddev.site" php:script devops/integration/verify-site.php || return 1
+    if [ "$choice" = default ] && [ "$split" = plain ]; then
       certificate=()
       if command -v mkcert > /dev/null; then
         must development-ca mkcert -CAROOT || return 1
@@ -356,21 +396,22 @@ option_case() {
       fi
       must page-http-authoring bash "$harness/devops/integration/verify-authoring.sh" "https://$project.ddev.site" ${certificate[@]+"${certificate[@]}"} || return 1
     fi
+    cold_clone "$label" || return 1
 }
 
 options() {
   choices=("$option")
   [ "$option" != all ] || choices=(default paragraphs layout-builder admin-only)
   failed_options=
-  # Each case restores the same owned baseline. A failed case must not hide the
-  # other offered choices, but the aggregate gate still fails before release.
   for choice in "${choices[@]}"; do
-    if option_case "$choice"; then
-      update_result --arg option "$choice" '.options[$option]={status:"pass"}'
-    else
-      update_result --arg option "$choice" '.options[$option]={status:"fail",error:.error}'
-      failed_options="$failed_options $choice"
-    fi
+    for split in plain split; do
+      if option_case "$choice" "$split"; then
+        update_result --arg option "$choice-$split" '.options[$option]={status:"pass"}'
+      else
+        update_result --arg option "$choice-$split" '.options[$option]={status:"fail",error:.error}'
+        failed_options="$failed_options $choice-$split"
+      fi
+    done
   done
   [ -z "$failed_options" ] || fail "Installation option(s) failed:$failed_options"
 }
@@ -432,6 +473,10 @@ environment_negatives() {
 
 environments() {
   dd environment-page-reset snapshot restore integration-base
+  cp "$work/baseline-composer.json" composer.json
+  cp "$work/baseline-composer.lock" composer.lock
+  dd environment-base-packages composer install --no-interaction --prefer-dist
+  dd environment-content-package composer require 'fourkitchens/sous-content-types:^2.0' --no-interaction
   dd environment-page-apply install-recipe fourkitchens/sous-content-types
   probe seed local
   environment_exec environment-local-cache local vendor/bin/drush cache:rebuild
@@ -443,15 +488,19 @@ environments() {
   folders="$site/config"
   hidden="$work/optional-folders-not-installed"
   mkdir -p "$hidden"
-  for split_folder in _splits local staging; do mv "$folders/$split_folder" "$hidden/$split_folder"; done
+  for split_folder in _splits local staging; do
+    [ ! -d "$folders/$split_folder" ] || mv "$folders/$split_folder" "$hidden/$split_folder"
+  done
   update_result '.environments={}'
   for split in plain split; do
     if [ "$split" = split ]; then
-      for split_folder in _splits local staging; do mv "$hidden/$split_folder" "$folders/$split_folder"; done
-      dd environment-optional-package composer require 'drupal/config_split:^2.0.2' --no-interaction
+      for split_folder in _splits local staging; do
+        if [ -d "$hidden/$split_folder" ]; then mv "$hidden/$split_folder" "$folders/$split_folder"; else mkdir -p "$folders/$split_folder"; fi
+      done
+      dd environment-optional-package composer require 'fourkitchens/sous-config-split:^2.0' --no-interaction
       dd environment-native-split-transforms exec php devops/tests/config-splits.php
       dd environment-optional-recipe install-recipe fourkitchens/sous-config-split
-      environment_exec environment-split-defaults local env SOUS_DISPOSABLE_TEST=1 vendor/bin/drush php:script web/recipes/sous-config-split/tests/verify-defaults.php
+      environment_exec environment-split-defaults local env SOUS_DISPOSABLE_TEST=1 vendor/bin/drush php:script .integration/packages/tests/recipes/sous-config-split/verify-defaults.php
       probe split-prepare local
       helper confex local
       dd environment-split-base-snapshot snapshot --name=environment-split-base

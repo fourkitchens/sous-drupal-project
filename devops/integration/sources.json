@@ -1,10 +1,4 @@
 {
-  "sous-admin": "https://github.com/fourkitchens/sous-admin.git",
-  "sous-content-types": "https://github.com/fourkitchens/sous-content-types.git",
-  "sous-emulsify": "https://github.com/fourkitchens/sous-emulsify.git",
-  "sous-formats": "https://github.com/fourkitchens/sous-formats.git",
-  "sous-media": "https://github.com/fourkitchens/sous-media.git",
-  "sous-paragraph-types": "https://github.com/fourkitchens/sous-paragraph-types.git",
-  "sous-paragraphs": "https://github.com/fourkitchens/sous-paragraphs.git",
-  "sous-drupal-project": "https://github.com/fourkitchens/sous-drupal-project.git"
+  "sous-drupal-project": "https://github.com/fourkitchens/sous-drupal-project.git",
+  "sous-drupal-packages": "https://github.com/fourkitchens/sous-drupal-packages.git"
 }

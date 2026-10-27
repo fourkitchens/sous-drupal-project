@@ -2,8 +2,8 @@
 
 # Apply one already installed recipe through the shared DDEV/native entry point.
 # Usage: npm run install-recipe -- vendor/package
-# The package basename identifies web/recipes/<name>, including owned bundled
-# recipes; this command does not download or unpack Composer packages. A failed
+# The package basename identifies the Composer-managed web/recipes/<name>.
+# This command does not download or unpack Composer packages. A failed
 # application stops before cache rebuild so a later success cannot hide it.
 set -euo pipefail
 # shellcheck source=_runtime.sh

@@ -1,9 +1,9 @@
 # Contributing to Sous
 
-The starter and its six owned recipes are one product. Work on dedicated
+The starter and companion packages repository are one product. Work on dedicated
 branches, preserve unrelated changes, and verify current remote state before
 choosing a base. Installed copies under `web/recipes` are application inputs;
-edit the sibling source repositories when maintaining Sous itself.
+edit `sous-drupal-packages/packages/<basename>` for reusable recipe changes.
 
 Use the [supported platform](PLATFORM.md). The [maintenance ownership and cadence](OPERATIONS.md)
 guide assigns security, dependency, support-window, patch, and release reviews.
@@ -21,9 +21,10 @@ them; a particular ticket tracker is not required.
 
 `main` is the source default and the configured stable publication branch. An
 unmerged branch or untagged change is not a published stable release. The
-starter's other configured channels, first recipe releases, coordinated order,
+starter's other configured channels, package release line, coordinated order,
 and native dry-run limitations are documented in [Release maintenance](RELEASES.md).
-Do not publish tags or release incompatible companions independently.
+Publish the immutable package collection/index before a compatible starter;
+candidate-commit integration never authorizes a production release.
 
 Use a pull request and the existing [PR template](../.github/PULL_REQUEST_TEMPLATE.md).
 Describe the problem, final behavior, actual checks, downstream migrations, and
@@ -39,16 +40,18 @@ Keep changes focused enough to review. Urgent security fixes follow the
 behind unrelated feature work. Carry compatible fixes forward to other
 supported branches and publish downstream upgrade instructions with the release.
 
-## Sibling recipe development
+## Package repository development
 
-Use clean checkouts for the starter and the six recipes listed in
-[configuration ownership](MAINTENANCE.md#ownership). The shared
-[integration runner](INTEGRATION.md) snapshots their checked-out changes,
-introduces temporary Composer path repositories, and tests them together in a
-new disposable installation. `--subject` selects a primary recipe;
-`--sources` selects the parent containing companion checkouts. See that guide
-for exact commands, remote companion refs, source provenance, and diagnostics.
-Those temporary repositories do not belong in production `composer.json`.
+Use clean checkouts for `sous-drupal-project` and
+[sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages).
+The latter contains all nine packages in `packages/` with one catalog and shared
+contributor tests. The [integration runner](INTEGRATION.md) tests the starter
+with released ZIPs by default or explicit candidate source for review. Local
+`--packages /path/to/sous-drupal-packages` selects that working checkout;
+`--packages-ref COMMIT` selects an exact reviewed commit. See that guide for
+source provenance and diagnostics. No
+path override, floating branch or candidate distribution belongs in a published
+application lockfile. Legacy repositories remain historical download sources.
 
 Do not copy a full site export over a recipe. Select the defaults owned by that
 recipe, remove only exported top-level site UUIDs/settings hashes, and preserve

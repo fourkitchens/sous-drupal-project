@@ -8,7 +8,8 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --sources)
       [ "$#" -ge 2 ] || exit 2; parent="$2"; roots=()
-      for name in sous-drupal-project sous-admin sous-content-types sous-formats sous-media sous-emulsify sous-paragraph-types; do roots+=("$parent/$name"); done
+      roots=("$parent/sous-drupal-project" "$parent/sous-drupal-packages")
+      for directory in "$parent"/sous-drupal-packages/packages/*; do roots+=("$directory"); done
       shift 2 ;;
     --json-output) [ "$#" -ge 2 ] || exit 2; output="$2"; shift 2 ;;
     --self-test) self_test=1; shift ;;
@@ -19,7 +20,7 @@ work="$(mktemp -d "${TMPDIR:-/tmp}/sous-doc-check.XXXXXX")"
 trap 'rm -rf -- "$work"' EXIT
 inventory="$work/inventory.jsonl"; : > "$inventory"
 for root in "${roots[@]}"; do
-  [ -f "$root/composer.json" ] || { echo "Missing Sous source: $root" >&2; exit 2; }
+  [ -f "$root/composer.json" ] || [ -f "$root/package.json" ] || { echo "Missing Sous source: $root" >&2; exit 2; }
   root="$(CDPATH='' cd "$root" && pwd -P)"
   if [ "$(git -C "$root" rev-parse --show-toplevel 2>/dev/null || :)" = "$root" ]; then
     git -C "$root" ls-files -z --cached --others --exclude-standard > "$work/files"
@@ -88,15 +89,19 @@ $roots=array_slice($argv,3);
 $repositories=[];
 $errors=[];
 foreach($roots as $root) {
-  $manifest=json_decode(file_get_contents($root.'/composer.json'),TRUE,512,JSON_THROW_ON_ERROR);
+  $manifest_file=is_file($root.'/composer.json')?'composer.json':'package.json';
+  $manifest=json_decode(file_get_contents($root.'/'.$manifest_file),TRUE,512,JSON_THROW_ON_ERROR);
   $repositories[basename($manifest['name'])]=realpath($root);
   foreach(['composer.json','package.json'] as $file) {
+    if(!is_file($root.'/'.$file)||($manifest_file==='package.json'&&$file==='package.json'))continue;
     $data=json_decode(file_get_contents($root.'/'.$file),TRUE,512,JSON_THROW_ON_ERROR);
     if(($data['license']??NULL)!=='GPL-2.0-or-later')$errors[]="$root/$file: license differs from GPL-2.0-or-later";
   }
   if(!exactPath($root.'/LICENSE')||!str_starts_with(file_get_contents($root.'/LICENSE'),'SPDX-License-Identifier: GPL-2.0-or-later'))$errors[]="$root/LICENSE: missing/case-mismatched license or SPDX grant";
-  $lock=json_decode(file_get_contents($root.'/package-lock.json'),TRUE,512,JSON_THROW_ON_ERROR);
-  if(($lock['packages']['']['license']??NULL)!=='GPL-2.0-or-later')$errors[]="$root/package-lock.json: inconsistent root license";
+  if(is_file($root.'/package-lock.json')) {
+    $lock=json_decode(file_get_contents($root.'/package-lock.json'),TRUE,512,JSON_THROW_ON_ERROR);
+    if(($lock['packages']['']['license']??NULL)!=='GPL-2.0-or-later')$errors[]="$root/package-lock.json: inconsistent root license";
+  }
 }
 $files=0;
 $targets=0;

@@ -8,7 +8,12 @@ fixture() {
   for name in composer.json package.json package-lock.json .gitignore README.md PROJECT-README.md; do cp "$SOURCE/$name" "$PROJECT/$name"; done
   for name in docs .husky .github assets config/default config/_splits config/local config/staging; do mkdir -p "$PROJECT/$(dirname "$name")"; cp -R "$SOURCE/$name" "$PROJECT/$name"; done
   mkdir -p "$PROJECT/web/recipes" "$PROJECT/web/sites/default" "$PROJECT/web/themes/custom/sous-project"
-  for recipe in sous-starter-content sous-starter-paragraphs sous-layout-builder sous-config-split; do cp -R "$SOURCE/web/recipes/$recipe" "$PROJECT/web/recipes/$recipe"; done
+  # Stand in for Composer-managed packages, never copy optional payloads out of
+  # the starter. The real ZIP/Drupal acceptance gate checks their contents.
+  for recipe in sous-admin sous-emulsify sous-formats sous-media sous-content-types sous-core-layout-builder sous-paragraphs sous-paragraph-types sous-config-split; do
+    mkdir -p "$PROJECT/web/recipes/$recipe"
+    printf 'name: Test recipe\ntype: Site\n' > "$PROJECT/web/recipes/$recipe/recipe.yml"
+  done
   cp "$SOURCE/.ddev/config.yaml" "$PROJECT/.ddev/config.yaml"
   printf '<?php\n// local defaults\n' > "$PROJECT/web/sites/example.settings.local.php"
   printf '<?php\n// core defaults and Sous additions\n' > "$PROJECT/web/sites/default/default.settings.php"
@@ -23,7 +28,7 @@ exec "$REAL_PHP" "$@"
 SH
   chmod +x "$BIN/php"
 }
-generate() { (cd "$PROJECT"; PATH="$BIN:$PATH" sh devops/scripts/sous-setup.sh && printf '%s\n' "$1" | PATH="$BIN:$PATH" sh devops/scripts/setup.sh fresh); }
+generate() { (cd "$PROJECT"; PATH="$BIN:$PATH" sh devops/scripts/sous-setup.sh && printf '%s\n%s\n' "$1" "${2:-n}" | PATH="$BIN:$PATH" sh devops/scripts/setup.sh fresh); }
 scaffold() { (cd "$PROJECT"; PATH="$BIN:$PATH" "$REAL_COMPOSER" --no-plugins run-script post-drupal-scaffold-cmd); }
 naming() { (cd "$PROJECT"; PATH="$BIN:$PATH" sh devops/scripts/sous-setup.sh); }
 preserved() {
@@ -51,7 +56,8 @@ cp "$SOURCE/assets/scaffold/files/settings.sous.php" "$PROJECT/web/sites/default
 cp "$SOURCE/assets/scaffold/files/sous.production.services.yml" "$PROJECT/web/sites/sous.production.services.yml"
 git -C "$PROJECT" add .
 git -C "$PROJECT" ls-files > "$TEST_ROOT/tracked"
-for name in composer.json composer.lock config/default/core.extension.yml config/default/system.site.yml web/sites/default/settings.sous.php web/sites/sous.production.services.yml devops/hooks/post-import.sh devops/hooks/post-config-import.sh web/recipes/sous-starter-content/recipe.yml web/recipes/sous-starter-paragraphs/recipe.yml web/recipes/sous-layout-builder/recipe.yml web/recipes/sous-config-split/recipe.yml web/themes/custom/projectwithspaces/src/index.js; do contains "$TEST_ROOT/tracked" "$name"; done
+for name in composer.json composer.lock config/default/core.extension.yml config/default/system.site.yml web/sites/default/settings.sous.php web/sites/sous.production.services.yml devops/hooks/post-import.sh devops/hooks/post-config-import.sh web/themes/custom/projectwithspaces/src/index.js; do contains "$TEST_ROOT/tracked" "$name"; done
+excludes "$TEST_ROOT/tracked" 'web/recipes/'
 for pattern in web/core/ web/modules/contrib/ web/themes/contrib/ web/storybook/ /node_modules/ /dist/; do excludes "$TEST_ROOT/tracked" "$pattern"; done
 excludes "$TEST_ROOT/tracked" 'web/themes/custom/projectwithspaces/components/'
 contains "$TEST_ROOT/tracked" 'web/themes/custom/projectwithspaces/src/components/source.yml'
@@ -77,11 +83,11 @@ pass 'generation separates product workflows from opt-in site CI templates'
 for row in \
   '0|recipe recipes/sous-admin' \
   '0|require fourkitchens/sous-content-types' \
-  '2|fourkitchens/sous-paragraph-types:dev-main' \
-  '1|recipe recipes/sous-layout-builder' \
+  '2|require fourkitchens/sous-paragraphs:^2.0' \
+  '1|recipe recipes/sous-core-layout-builder' \
   '0|composer --no-ansi install' \
   '3|npm ci' \
-  '0|recipe recipes/sous-starter-content' \
+  '0|recipe recipes/sous-content-types' \
   '3|uli --name=sous_chef' \
   '3|config:export' \
   '3|metadata-write'; do
@@ -94,11 +100,28 @@ for row in \
   pass "failed $failed stops dependent work and keeps bootstrap"
 done
 fixture; expect_status 0 generate 2
-calls_assert 'any(.[];(.argv|join(" ")|contains("fourkitchens/sous-paragraph-types:dev-main"))) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-starter-paragraphs"))!=null)'
-pass 'Paragraphs installs the starter composition for both content types'
+calls_assert 'any(.[];(.argv|index("fourkitchens/sous-paragraphs:^2.0"))!=null) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-paragraphs"))!=null) and all(.[];(.argv|join(" ")|contains("sous-core-layout-builder")|not))'
+pass 'Paragraphs selects only its published composition and shared dependencies'
 fixture; expect_status 0 generate 1
-calls_assert 'any(.[];.command=="recipe" and (.argv|index("recipes/sous-layout-builder"))!=null) and all(.[];(.argv|join(" ")|contains("require fourkitchens/sous-layout-builder")|not))'
-pass 'Layout Builder applies bundled core source without Gin Layout Builder'
+calls_assert 'any(.[];(.argv|index("fourkitchens/sous-core-layout-builder:^2.0"))!=null) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-core-layout-builder"))!=null) and all(.[];(.argv|join(" ")|contains("sous-paragraph")|not))'
+pass 'Layout Builder selects its package without requesting Paragraphs'
+fixture; expect_status 0 generate 3
+calls_assert 'all(.[];(.argv|index("require"))==null)'
+pass 'Admin only requests no optional content or split package'
+for selection in 0 1 2 3; do
+  fixture
+  rm -rf "$PROJECT/config/_splits" "$PROJECT/config/local" "$PROJECT/config/staging"
+  expect_status 0 generate "$selection" y
+  calls_assert 'any(.[];(.argv|index("fourkitchens/sous-config-split:^2.0"))!=null) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-config-split"))!=null)'
+  for directory in _splits local staging; do [ -d "$PROJECT/config/$directory" ] || fail 'optional split directory not initialized'; done
+done
+pass 'Config Split can be selected independently with all four compositions'
+for failed in 'require fourkitchens/sous-config-split:^2.0' 'recipe recipes/sous-config-split'; do
+  fixture; export FAIL_MATCH="$failed"
+  expect_status 42 generate 3 y; preserved
+  calls_assert 'all(.[];.command!="uli" and .command!="config:export")'
+done
+pass 'optional split dependency/application failures stop before export or cleanup'
 fixture; touch "$PROJECT/composer.lock"
 expect_status 0 generate 3
 calls_assert '[.[]|select(.tool=="composer")|.argv|join(" ")]|(map(contains("update --lock"))|index(true))<(map(test("(^| )install( |$)"))|index(true))'
@@ -112,10 +135,13 @@ for failed in 'composer --no-ansi update --lock' 'composer --no-ansi validate'; 
 done
 pass 'lock refresh/validation failures never retire bootstrap'
 # Keep this list limited to native setup work; removed theme rewrites are not prerequisites.
-for failed in 'system install' 'pkg set' 'if [ -f package-lock.json ]' 'run build'; do
+for failed in 'theme-initialize.mjs --check' 'system install' 'pkg set' 'if [ -f package-lock.json ]' 'run build'; do
   fixture; export FAIL_MATCH="$failed"
   expect_status 42 generate 0; preserved
   calls_assert 'all(.[];.command!="theme:install" and .command!="user:create")'
+  if [ "$failed" = 'theme-initialize.mjs --check' ]; then
+    calls_assert 'all(.[];(.argv|index("system"))==null)'
+  fi
 done
 pass 'theme setup failures stop before theme enabling and account creation'
 fixture; expect_status 0 generate 3

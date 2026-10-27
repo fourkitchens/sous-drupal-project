@@ -17,6 +17,7 @@ run upstream product checks from a separate Sous source checkout.
 | Supported runtime | [Platform and Emulsify versions](docs/PLATFORM.md) |
 | Build tools | [Project-local npm and Emulsify tooling](docs/BUILD_TOOLS.md) |
 | Configuration | Complete project-owned `config/default` export |
+| Sous packages | Selected independent `^2.0` recipes from the scoped Composer index; see [maintenance](docs/MAINTENANCE.md) |
 | Environment policy | [Local/staging/production and optional Config Split](docs/ENVIRONMENTS.md) |
 | Hosting and deployment | Project-owned; [deployment guide](docs/DEPLOYMENT.md) |
 | CI | Opt-in [CircleCI or GitHub Actions application templates](docs/CI.md) |
@@ -43,6 +44,12 @@ changes before deploying them. Accounts, content, and role assignments live in
 the database; environment-specific values belong in this project's settings
 integration or ignored local settings. Local files load only in local mode;
 production is the default outside DDEV unless explicitly selected otherwise.
+
+Keep the selected Sous requirements and lock entries. Native recipe-unpack
+exclusions retain their Composer ownership, so a clean `composer install`
+restores `web/recipes` from individual ZIPs. Recipe directories stay ignored;
+package updates do not replay configuration. Layout Builder, Paragraphs and
+Config Split remain explicit installation choices.
 
 ## Project operations
 

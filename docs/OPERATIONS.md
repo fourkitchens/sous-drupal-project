@@ -1,6 +1,8 @@
 # Maintenance ownership and review cadence
 
-This policy covers the seven Sous source repositories as one product. It defines
+This policy covers the two Sous development repositories as one product:
+`sous-drupal-project` and `sous-drupal-packages`. Legacy repositories retain
+historical tags/download URLs and are not ongoing split mirrors. This defines
 work ownership, not an automatically scheduled service. No monitoring job,
 notification, production deployment, or release is created by this document.
 
@@ -28,8 +30,8 @@ with the downstream site's operations team.
 | Latest stable dependencies, including majors | Recipe maintainers + release maintainer | Monthly, and before each coordinated starter release | Inspect every direct requirement with Composer/npm metadata and official release notes, investigate newer majors/conflicts, update bounded constraints and compatible transitives, record any exact exception; do not treat an in-range update as a complete latest-stable review |
 | Drupal support windows | Release maintainer | Monthly and at every core minor/major RC or release announcement | Check the official schedule, supported/security-covered branches and required PHP/extensions; plan upgrades before support ends and update PLATFORM/CI/DDEV/Composer together |
 | Patches and overrides | Owner of the affected package + release maintainer | Every affected package/tool upgrade and each monthly dependency review | Compare the patch to upgraded source/upstream fix, retain rationale/version/issue evidence, test unpatched and patched behavior when removing it, regenerate native lock/checksum data as required |
-| Integration | Author + reviewer; maintainer on duty resolves cross-repo failures | Every PR, every coordinated source pairing, and before publishing | Test exact subject source plus companion refs, supported four options, configuration/authorization/Linkit regressions and clean locks; retain diagnostics and do not publish from a validation-only paired-ref run |
-| Coordinated releases | Release maintainer + recipe maintainers | When reviewed changes are ready; urgent security work takes priority | Release dependencies before consumers, verify indexed tags, replace only real development exceptions, rerun the integrated starter, publish with correct Conventional Commit semantics and adoption notes |
+| Integration | Author + reviewer; maintainer on duty resolves cross-repo failures | Every PR, every reviewed package candidate, and before publishing | Test exact starter source plus reviewed package ZIPs, all four choices with optional Config Split, full theme/environment/configuration/authorization/Linkit regressions and clean clone recovery; retain diagnostics and never publish from candidate-only validation |
+| Coordinated releases | Release maintainer + recipe maintainers | When reviewed changes are ready; urgent security work takes priority | Publish immutable collection ZIPs, verify their static index and cold-cache public installation, then rerun/release the compatible starter with correct Conventional Commit semantics and adoption notes |
 | Downstream instructions | Recipe maintainer drafts; release maintainer verifies; downstream owner executes | Every behavior/dependency/configuration migration and every release affecting existing sites | State new-install defaults separately from existing-site steps, role/content/config risks, required backups/platform, explicit migration commands, validation and recovery; updating a recipe is not configuration deployment |
 
 “Same working day” is a triage target, not a claim of 24/7 staffed coverage or a

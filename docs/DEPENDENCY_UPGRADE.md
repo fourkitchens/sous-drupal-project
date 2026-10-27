@@ -1,5 +1,12 @@
 # Composer dependency upgrade review
 
+The 2.x cutover consolidates reusable source in
+[sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages).
+Its independent ZIP packages and scoped static Composer index replace the old
+per-repository development requirements described below. Current package
+publication and starter adoption follow [Releases](RELEASES.md); version and
+validation tables here remain historical evidence.
+
 The dependency/version review below retains its original evidence. Current Composer patches live in patches/ with a native regenerated patches.lock.json; the CLI patch and custom theme integration helper were subsequently removed. Current operating commands use the shell tooling linked from README.md.
 
 This is historical implementation evidence. Current responsibilities, runtime

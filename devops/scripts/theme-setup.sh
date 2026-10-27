@@ -14,19 +14,31 @@ runtime_require_development
 # commands, and rejects directories outside this project.
 theme_directory="${1:-web/themes/custom/sous-project}"
 theme_directory="$(runtime_theme_directory "$theme_directory")"
+# Reject initialized/project-owned themes before the CLI can copy any source.
+runtime_exec node devops/scripts/theme-initialize.mjs --check "$theme_directory"
 
 # Keep the library checkout reproducible; project-owned components can evolve later.
 (cd "$theme_directory" && runtime_emulsify system install \
   --repository https://github.com/emulsify-ds/emulsify-ui-kit.git \
   --checkout 1.9.0 --variant drupal --all --yes)
-# Upstream Core/CLI ranges still select vulnerable build tools. Keep the two
-# reviewed security overrides visible in the site's manifest using native npm;
-# do not patch dependency source or rewrite theme assets/component metadata.
+# Keep the security overrides and one coherent Storybook peer cohort visible.
+# Addons at 10.6.5 currently require a Storybook host that is not published.
 runtime_npm --prefix "$theme_directory" pkg set \
   'overrides.@emulsify/cli.simple-git=^4.0.2' \
-  'overrides.@emulsify/core.pa11y=^10.0.0'
+  'overrides.@emulsify/core.pa11y=^10.0.0' \
+  'overrides.@emulsify/core.storybook=10.6.4' \
+  'overrides.@emulsify/core.@storybook/addon-a11y=10.6.4' \
+  'overrides.@emulsify/core.@storybook/addon-links=10.6.4' \
+  'overrides.@emulsify/core.@storybook/addon-themes=10.6.4' \
+  'overrides.@emulsify/core.@storybook/react=10.6.4' \
+  'overrides.@emulsify/core.@storybook/react-vite=10.6.4' \
+  'overrides.@emulsify/core.@storybook/builder-vite=10.6.4' \
+  'overrides.@emulsify/core.@storybook/react-dom-shim=10.6.4' \
+  'overrides.@emulsify/core.eslint-plugin-storybook=10.6.4'
 # A newly generated theme has no lockfile. Subsequent installs reproduce it.
 runtime_exec sh -c 'cd "$1"; if [ -f package-lock.json ]; then npm ci --include=dev; else npm install --include=dev; fi' sh "$theme_directory"
-# Leave source, package scripts, libraries and component metadata owned by the
-# selected upstream starter/system. Project-specific changes belong to the site.
+# Normalize the pinned starter's stock source and generated-output check scope.
+# This is first setup, not the routine locked theme-ci/theme-build workflow.
+runtime_exec node devops/scripts/theme-initialize.mjs "$theme_directory"
 runtime_exec sh devops/scripts/theme-build.sh "$theme_directory"
+runtime_exec touch "$theme_directory/.sous-initialized"

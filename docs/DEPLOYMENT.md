@@ -37,6 +37,9 @@ A deployable artifact needs:
 
 - Composer manifest/lock and installed production PHP dependencies under
   `vendor`, Drupal core, contributed modules/themes/libraries, and custom code.
+- Selected Composer-managed `web/recipes` packages from the committed lock,
+  including their nested recipes/migrations; they are restored from independent
+  ZIPs and stay ignored in application Git.
 - Generated theme metadata, templates/source assets, native built `components/`
   SDC mirrors, and compiled `dist/` assets. Current Emulsify global CSS is under
   `dist/global/`; the SVG sprite is under `dist/assets/`.
@@ -127,8 +130,10 @@ production policy and guard on the target in their own pipeline.
 
 ## Product releases versus application deployment
 
-The shared Sous release workflow publishes recipe/starter tags after product
-integration; it does not deploy downstream applications. Generated sites need
+The packages repository publishes immutable recipe ZIPs and its static Composer
+index after its reviewed gates. The starter publishes a compatible tag only
+after full acceptance against the public index; a candidate package commit is
+validation only. Neither operation deploys downstream applications. Generated sites need
 their own application CI, artifact distribution, deployment permissions, and
 release/rollback policy. See [coordinated releases](RELEASES.md) and
 [maintenance ownership/cadence](OPERATIONS.md). Source recipe references used for

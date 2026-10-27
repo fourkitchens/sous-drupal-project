@@ -74,16 +74,19 @@ logging, aggregation, debug or mail differences.
 When stored module/configuration differences are needed, explicitly opt in:
 
 ```sh
-ddev composer require drupal/config_split:^2.0.2
+ddev composer require fourkitchens/sous-config-split:^2.0
+mkdir -p config/_splits config/local config/staging
 ddev install-recipe fourkitchens/sous-config-split
 ```
 
-Config Split **2.0.2** is the latest stable verified from official Composer
-metadata and [release notes](https://www.drupal.org/project/config_split/releases/2.0.2).
-Its application lockfile is reproducible. It remains a production dependency
-when selected, because imports need the module; it is not a new Sous package or
-a default dependency. The bundled native recipe supplies inactive `sous_local`
-and `sous_staging` definitions plus the native `_splits` definition split:
+Run these commands after the Sous 2.x package index and ZIPs are published;
+candidate-source testing uses the explicit integration mode instead. Fresh
+bootstrap offers this independent choice and creates the directories when
+selected; its default is no. The Sous recipe requires the bounded stable
+`drupal/config_split:^2.0.2` module line. Keep both packages in the application
+lockfile, because imports need Config Split at runtime. The recipe supplies
+inactive `sous_local` and `sous_staging` definitions plus the native `_splits`
+definition split:
 
 | Directory | Ownership |
 | --- | --- |
@@ -93,12 +96,12 @@ and `sous_staging` definitions plus the native `_splits` definition split:
 | `config/staging` | Staging modules/configuration values |
 
 This restores the useful SFASU layout without copying its hosting assumptions.
-The reusable YAML has one source in the bundled recipe; generated sites own
+The reusable YAML has one source in the Config Split package; generated sites own
 their exported definitions. Runtime settings keep `_splits` active and select
 only the applicable environment split. A native priority imports definitions
 before their values and exports them afterward, including on fresh imports.
 Production keeps both environment splits inactive. Module/theme/complete/partial
-lists remain stored, reviewed project configuration. The [bundle README](../web/recipes/sous-config-split/README.md)
+lists remain stored, reviewed project configuration. The [package guide](https://github.com/fourkitchens/sous-drupal-packages/tree/main/packages/sous-config-split)
 explains adoption, adding dev/test/multidev definitions and preserving overrides.
 
 For separate deployment-specific splits, add the definitions to
@@ -225,16 +228,18 @@ The current `devops/tests/config-splits.php` separately exercises native
 definition export, fresh local/staging/production imports, and unsafe nested
 folder rejection using memory storage and private files without a site/database.
 
-The shared full integration adds one Page baseline with local/staging/
-production export/import cases, with and without the optional split, rather
-than multiplying all four content choices. Explicit single-option debug runs
-retain their selected site and skip this additional matrix. Focused tests cover
+The shared full integration checks local/staging/production export/import and
+both Config Split states, alongside the four content choices. See the
+[current matrix](INTEGRATION.md) for the exact candidate and published-index
+gates. Focused tests cover
 environment precedence/local-file isolation, copied core UI debug state,
 project tools/context/arguments/exits, unsafe staged defaults, missing active
 split folders and absent optional configuration.
 
-The recorded environment-contract baseline, before the database-refresh
-follow-up, completed **217 native commands**, exited zero,
+The following historical environment-contract baseline predates the package
+consolidation and database-refresh follow-up. It does not attest that this
+release branch passed the current gate. That recorded baseline completed
+**217 native commands**, exited zero,
 and removed its owned containers, database and workspace. It used Drupal
 11.4.11/PHP 8.4.20 and the tools listed in [Platform](PLATFORM.md), with optional
 Config Split 2.0.2. Actual results:
@@ -288,7 +293,7 @@ seven repositories, including staged entries, were preserved on dedicated
 | Files | Purpose |
 | --- | --- |
 | `composer.json`, `.gitignore`, `assets/scaffold/files/` | Once-only environment settings/services, ordered DDEV include, local isolation and trackable source |
-| `config/{_splits,local,staging}/`, `web/recipes/sous-config-split/` | Native definition split, inactive environment definitions, values directories and adoption guide |
+| `config/{_splits,local,staging}/`, selected `fourkitchens/sous-config-split` package | Project-owned definitions/values directories plus independently distributed native recipe defaults |
 | `devops/scripts/`, `.ddev/commands/web/install-recipe` | Shared project runtime, guarded export/deploy, explicit safe development workflows and consistent entry points |
 | `devops/integration/{run.sh,validate-recipes.php}`, `devops/tests/` | Six-case native environment coverage, unsafe-default/path regressions, settings/services and command/Git checks |
 | `README.md`, `PROJECT-README.md`, setup/platform/build/maintenance/deployment/integration guides and this guide | One environment contract with linked operating instructions and explicit existing-site adoption |

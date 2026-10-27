@@ -27,14 +27,15 @@ if (!in_array($combination, ['default', 'paragraphs', 'core-layout-builder', 'ad
   throw new InvalidArgumentException('Unknown integration combination: ' . $combination);
 }
 $recipes_directory = getenv('SOUS_INTEGRATION_RECIPES_DIR') ?: DRUPAL_ROOT . '/recipes';
+$probes_directory = getenv('SOUS_INTEGRATION_PROBES_DIR') ?: DRUPAL_ROOT . '/../.integration/packages/tests/recipes';
 $recipes = $combination === 'admin-only'
   ? ['sous-admin']
-  : ['sous-admin', 'sous-emulsify', 'sous-content-types', 'sous-formats', 'sous-media', 'sous-starter-content'];
+  : ['sous-admin', 'sous-emulsify', 'sous-content-types', 'sous-formats', 'sous-media'];
 if ($combination === 'paragraphs') {
-  $recipes = array_merge($recipes, ['sous-paragraph-types', 'sous-paragraphs', 'sous-starter-paragraphs']);
+  $recipes = array_merge($recipes, ['sous-paragraph-types', 'sous-paragraphs']);
 }
 if ($combination === 'core-layout-builder') {
-  $recipes[] = 'sous-layout-builder';
+  $recipes[] = 'sous-core-layout-builder';
 }
 $checked_recipes = [];
 $verify_recipe = static function (string $name) use (&$verify_recipe, &$checked_recipes, $recipes_directory): void {
@@ -89,9 +90,45 @@ if ($combination === 'core-layout-builder') {
   }
 }
 
+// Navigation enables the shared core Layout Builder module. The selected
+// composition controls each content display and per-node override field.
+if ($combination === 'admin-only') {
+  foreach (['page', 'frontpage'] as $bundle) {
+    if (\Drupal::entityTypeManager()->getStorage('node_type')->load($bundle)) {
+      throw new RuntimeException('Admin-only created a starter content type: ' . $bundle);
+    }
+  }
+  foreach (['file', 'image', 'video'] as $bundle) {
+    if (\Drupal::entityTypeManager()->getStorage('media_type')->load($bundle)) {
+      throw new RuntimeException('Admin-only created a Sous Media bundle: ' . $bundle);
+    }
+  }
+}
+else {
+  foreach (['page', 'frontpage'] as $bundle) {
+    $display = \Drupal::service('entity_display.repository')->getViewDisplay('node', $bundle);
+    $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', $bundle);
+    $layout = $combination === 'core-layout-builder';
+    if ((bool) $display->getThirdPartySetting('layout_builder', 'enabled', FALSE) !== $layout || isset($fields['layout_builder__layout']) !== $layout) {
+      throw new RuntimeException('Unexpected Layout Builder content composition: ' . $bundle);
+    }
+  }
+}
+if ($combination !== 'paragraphs') {
+  $storage = \Drupal::service('config.storage');
+  foreach (['paragraphs.', 'paragraphs_ee.', 'field.storage.paragraph.', 'field.field.paragraph.'] as $prefix) {
+    if ($storage->listAll($prefix)) {
+      throw new RuntimeException('Unselected Paragraphs configuration exists: ' . $prefix);
+    }
+  }
+  if ($storage->exists('field.storage.node.field_content')) {
+    throw new RuntimeException('Unselected Paragraphs host field exists.');
+  }
+}
+
 $checks = [];
-$run = static function (string $relative) use ($recipes_directory, &$checks): void {
-  $path = $recipes_directory . '/' . $relative;
+$run = static function (string $relative) use ($probes_directory, &$checks): void {
+  $path = $probes_directory . '/' . $relative;
   if (!is_file($path)) {
     throw new RuntimeException('Missing versioned regression check: ' . $relative);
   }
@@ -105,21 +142,21 @@ $run = static function (string $relative) use ($recipes_directory, &$checks): vo
   }
   $checks[] = ['script' => $relative, 'output' => $output];
 };
-$run('sous-admin/tests/verify-navigation.php');
-$run('sous-starter-content/tests/verify-defaults.php');
+$run('sous-admin/verify-navigation.php');
+$run('sous-content-types/verify-starter-defaults.php');
 if ($combination !== 'admin-only') {
-  $run('sous-formats/tests/verify-formats.php');
+  $run('sous-formats/verify-formats.php');
 }
 // The standalone Page check intentionally precedes composition: the public
 // Paragraphs host can require field_content, which that check does not supply.
 if ($combination === 'default') {
-  $run('sous-content-types/tests/verify-page.php');
+  $run('sous-content-types/verify-page.php');
 }
 if ($combination === 'paragraphs') {
-  $run('sous-content-types/tests/verify-composition.php');
+  $run('sous-content-types/verify-composition.php');
 }
 if ($combination === 'paragraphs') {
-  $run('sous-paragraph-types/tests/verify-paragraph-types.php');
+  $run('sous-paragraph-types/verify-paragraph-types.php');
 }
 if ($combination === 'core-layout-builder') {
   $assert = static function (bool $condition, string $message): void {
@@ -216,7 +253,7 @@ if (Settings::get('sous_integration_sentinel') !== 'preserved') {
   throw new RuntimeException('The preserved settings.local.php file must also be loaded.');
 }
 // Composer also installs a shell proxy named "drush"; PHP must use this proxy.
-$drush = $project_root . '/vendor/bin/drush.php';
+$drush = $project_root . '/vendor/drush/drush/drush.php';
 $uri = \Drupal::request()->getSchemeAndHttpHost() . \Drupal::request()->getBasePath();
 foreach ([['config:export'], ['deploy']] as $arguments) {
   $process = new Process(array_merge([PHP_BINARY, $drush, '--root=' . DRUPAL_ROOT, '--uri=' . $uri], $arguments, ['--yes']), $project_root);

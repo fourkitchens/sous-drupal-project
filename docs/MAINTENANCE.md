@@ -14,24 +14,30 @@ not installed extensions with an update lifecycle. See the official
 
 | Layer | Reusable responsibility |
 | --- | --- |
-| Starter | Scaffold/setup and bundled Frontpage, alias, native View and content-composition defaults; initially empty site sync directory |
-| Sous Admin | Gin, Navigation, administration defaults, the `superuser` role, and the offered editorial/operations conveniences |
+| Starter | Scaffold/setup, runtime environment policy, installer choices and initially empty site sync directory |
+| Sous Admin | Gin, Navigation, administration defaults, native management Views, the `superuser` role, and the offered editorial/operations conveniences |
 | Sous Emulsify | Theme dependencies and the default frontend theme; no roles or user assignments |
 | Sous Formats | Text formats/editor defaults and the shared Linkit profile subrecipe |
-| Sous Content Types | Page fields, forms, displays, metadata, and tags |
+| Sous Content Types | Page and Frontpage fields, forms, displays, metadata, teasers and title-based URL aliases; Page tags |
 | Sous Media | Media bundles/fields/displays and imports of native module defaults |
 | Sous Paragraph Types | Reusable Paragraph types, fields, displays, and portable icon assets |
+| Sous Paragraphs | Optional Paragraphs composition and host fields/displays on Page and Frontpage |
+| Sous Core Layout Builder | Optional native layouts and per-node overrides on both content types |
+| Sous Config Split | Optional native `_splits`, local and staging definition defaults |
 | Generated site | Complete exported configuration, site-specific overrides, content, accounts/assignments, and explicit adoption of future changes |
 
-The public Sous Paragraphs host recipe remains an external companion that
-composes the owned Page and Paragraph Types recipes. Its Page display/form
-actions are an intentional composition layer, not another complete site export.
-The bundled core Layout Builder option is a separate supported composition.
+All nine recipe packages live in
+[Sous Drupal Packages](https://github.com/fourkitchens/sous-drupal-packages).
+The seven existing Composer names remain unchanged; Core Layout Builder and
+Config Split are new independent packages. Each downloads as its own ZIP.
+Common packages require neither optional content composition. The Paragraphs
+host composes Content Types and Paragraph Types; Core Layout Builder composes
+Content Types without any Paragraphs dependency.
 
 Admin and Formats share `sous-formats/recipes/linkit`, rather than independently
 writing the default profile. Both include it using Drupal's native
 `recipes/sous-formats/recipes/linkit` root-relative path. The supported layout
-places unpacked recipes in **`web/recipes`**, as configured by the starter and
+places Composer-managed recipes in **`web/recipes`**, as configured by the starter and
 shown in the recipe READMEs. Other installation layouts must adapt those
 includes in a project-owned copy before applying them; they are not a
 tested baseline. Admin requires the Formats package for this subrecipe, but
@@ -55,8 +61,8 @@ the modes.
 The configured path remains **`config/default`** for compatibility. The starter's
 129 legacy YAML files were a partial historic export without `core.extension.yml`
 or `system.site.yml`. Removing that partial export must retain the starter's
-useful defaults: bundled recipes now restore Frontpage, Page/Frontpage aliases
-and current native Views. Existing recipe/module providers retain Page, media,
+useful defaults: Content Types supplies Frontpage and Page/Frontpage aliases;
+Admin imports current native Views. Recipe/module providers retain Page, media,
 Paragraph types and Superuser. See the complete [configuration audit](CONFIGURATION_AUDIT.md).
 The source sync directory contains only a marker and ownership README.
 
@@ -112,11 +118,12 @@ remote site's own configured directory. It does not search the caller's files
 to decide whether the remote site should import. No remote deployment was
 performed while changing these helpers.
 
-Config Split is optional. The bundled `sous-config-split` recipe supplies
+Config Split is optional. The `fourkitchens/sous-config-split` package supplies
 inactive local/staging definitions only when explicitly selected; sites
 own its package, lists and exported split files. Ordinary configuration commands
-also work without it or its directories. There is no `config/_splits` import,
-meta-split ordering or broad Config Ignore policy. Follow the
+also work without it or its directories. The active `_splits` bootstrap routes
+definitions into `config/_splits` through native Config Split transforms;
+there is no unconditional partial import or broad Config Ignore policy. Follow the
 [environment guide](ENVIRONMENTS.md#optional-moduleconfiguration-differences)
 for adoption. Existing `settings.local.php` files remain untouched by Composer.
 
@@ -139,10 +146,12 @@ for adoption. Existing `settings.local.php` files remain untouched by Composer.
 
    Replace the example package name. Commit the resulting manifest/lockfile.
    This repository's [dependency review](DEPENDENCY_UPGRADE.md) records current
-   constraints, patch migrations, necessary development exceptions, and
-   remaining advisories. An unpacked recipe can disappear from Composer's
-   requirements after transferring its dependencies to the application; the
-   generated manifest is the authority for subsequent package updates.
+   historical constraints, patch migrations and advisories. For the 2.x line,
+   keep selected Sous requirements/locks and the root's exact nine-name native
+   recipe-unpack exclusions. A clean locked install restores their files from
+   independent ZIPs; downloaded recipe directories stay ignored. Other recipes
+   retain normal native unpack behavior. The generated manifest is the authority
+   for subsequent package updates.
 3. On that development copy, run database updates and rebuild caches:
 
    ```sh
@@ -223,7 +232,7 @@ The supported starter/runtime baseline is defined in [Platform](PLATFORM.md).
 The compact product suite covers Minimal plus default Page, Paragraphs, native
 Layout Builder, and admin-only installations. Independent recipe baselines and
 ordering requirements are listed in each recipe README; installed recipe
-copies may differ from sibling source repositories.
+copies may differ from `sous-drupal-packages/packages/*` source.
 
 Published tags are immutable. A recipe release describes reusable defaults and
 package requirements for new applications; release notes must separately state
@@ -233,14 +242,27 @@ requires a breaking-change note and appropriate SemVer treatment. The theme's
 authorization removal and Admin's new shared Formats dependency are such
 compatibility changes, even though an existing active role is retained.
 
-Use reviewed stable tags when available. Current necessary `dev-main`
-exceptions remain explicit until the [coordinated releases](RELEASES.md) exist;
-do not invent tags or publish them as part of this maintenance work. Main is
-unreleased development. Projects review defaults before adopting them and own
-their overrides thereafter. Shared integration gates publication, while
-project-owned CI verifies each site's exported configuration and customizations.
+The starter targets `^2.0` through the scoped static Composer index. At this
+cutover's October 27, 2026 review, merged source exists but the package ZIPs/index
+are unpublished. Candidate integration against an explicit reviewed commit is
+validation only; publish and verify immutable packages before the starter
+release. Retain historical repositories/tags/download URLs for older locks.
+Moving source does not upgrade existing `^1` or `dev-main` clients; those sites
+adopt 2.x deliberately, reviewing customized recipe folders before Composer
+takes ownership. Review the [release sequence](RELEASES.md).
+
+Keep the scoped index restricted to the nine IDs. Its canonical priority does
+not fall through to legacy metadata when an incompatible version is requested.
+Remove contributor path overrides and re-resolve from published ZIPs before
+releasing an application. `composer update --lock` alone does not replace
+locked path distributions. Package updates still do not replay configuration.
 
 ## Verification and changed files
+
+The following is historical ownership-review evidence, before the monorepo
+cutover. Current release-branch acceptance and publication readiness are
+reported in [Integration](INTEGRATION.md); these receipts do not prove a new
+revision passed.
 
 The final clean-source entry point completed **93 native commands**, exited
 **0**, and passed all four options on Drupal **11.4.11**, PHP **8.4.20**, Node
