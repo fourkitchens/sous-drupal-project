@@ -69,4 +69,5 @@ core/.phpstan-baseline.php text eol=lf whitespace=blank-at-eol,-blank-at-eof,-sp
 # Keep the tracked tests placeholder out too: archives retain the empty folder.
 /devops/integration export-ignore
 /devops/tests/* export-ignore
+/docs/maintainers export-ignore
 /.github/workflows export-ignore

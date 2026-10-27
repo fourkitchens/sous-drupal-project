@@ -81,10 +81,10 @@ if [ -f "PROJECT-README.md" ]; then
   mv "PROJECT-README.md" "README.md"
 fi
 
-# Git distributions exclude maintainer checks. A source-based
+# Git distributions exclude maintainer checks and guides. A source-based
 # create-project or contributor clone needs the same boundary after naming.
 # Retain an empty location for the generated site's own future tests.
-rm -rf devops/integration devops/tests
+rm -rf devops/integration devops/tests docs/maintainers
 mkdir -p devops/tests
 
 # The product's workflows test coordinated Sous sources and publish its releases.

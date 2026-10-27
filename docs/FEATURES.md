@@ -1,64 +1,61 @@
-# Features and configuration ownership
+# Choose your site's features
 
-Reusable defaults live in the Sous recipes. A generated site owns the complete
-export produced after installation, and any later customization. See
-[ownership and maintenance](MAINTENANCE.md) for the supported update workflow.
+Choose a content setup during [fresh installation](SETUP.md). Every option
+includes Gin administration, Navigation and a generated Emulsify theme.
 
-## Installation choices
-
-Every starter choice includes Gin administration and a generated Emulsify theme.
-
-| Choice | Content authoring defaults |
+| Option | Content setup |
 | --- | --- |
-| Default | Page and Frontpage with visible Body, metadata, SEO and teasers; Page also has tags; both have title-based URL aliases |
-| Paragraphs | Both content types plus Image, Text, Text with Media, and Video components through `fourkitchens/sous-paragraphs` |
-| Native Layout Builder | Both content types with their visible field formatters retained as blocks, native Basic inline blocks, and per-node layout overrides |
-| Admin only | Administration and theme setup without the optional Page/content recipe |
+| `0` Default | Page and Frontpage with Body, metadata, SEO, teasers and title-based aliases; Page also has tags |
+| `1` Layout Builder | Page and Frontpage with field blocks, Basic inline blocks and per-node layout overrides |
+| `2` Paragraphs | Page and Frontpage with Body and Image, Text, Text with Media and Video components |
+| `3` Admin only | Administration and theme without the Page or Frontpage recipes |
 
-`fourkitchens/sous-content-types` supplies Frontpage and both alias patterns
-without requiring either layout composition. The installer requires only the
-selected Content Types, Core Layout Builder or Paragraphs package and its shared
-dependencies. Admin only adds no content composition. The original
-type neither created a homepage node nor enforced a singleton; those remain
-project decisions, as do homepage/error-page content, Entity Browser and Role
-Delegation. The [configuration audit](CONFIGURATION_AUDIT.md) accounts for every
-removed file. The complete generated-site export remains in `config/default`.
+Layout Builder and Paragraphs are separate packages. Installation downloads only
+the selected composition and its dependencies. Layout Builder does not add
+Paragraphs; Paragraphs does not configure Layout Builder on the content types.
+Navigation enables Drupal's `layout_builder` module in every option, so check
+the Page display settings when identifying the chosen composition.
 
-Sous Admin imports the ten historic Views from current core/module defaults,
-preserving existing customized Views in every installation choice. Management screens
-are restored without copying obsolete routes/permissions from old exports.
-Glossary remains disabled, and user-listing blocks remain unplaced by default.
+Config Split is a separate yes/no choice and defaults to no. When selected, it
+adds `_splits`, local and staging definitions. Follow
+[Environments](ENVIRONMENTS.md) to control their activation.
 
-Config Split is an independent yes/no choice after content selection and defaults
-to no. When selected, `fourkitchens/sous-config-split` supplies native `_splits`,
-local and staging definitions; project settings choose their runtime activation.
-See [environment differences](ENVIRONMENTS.md#optional-moduleconfiguration-differences).
+## Add reusable configuration
 
-Core Layout Builder installs no Paragraphs package, module or recipe/config
-payload. Paragraphs installs no Core Layout Builder composition or per-bundle
-layout/override configuration. Drupal 11.4 Navigation in Admin enables the
-shared core `layout_builder` module independently, so that module's enabled
-state does not identify the chosen content composition.
+The [Sous packages repository](https://github.com/fourkitchens/sous-drupal-packages)
+contains independent Composer packages. Each package has its own README,
+requirements and recipe. Their shared version does not require installing all
+of them.
 
-## Media and editing
+| Composer name (`fourkitchens/` prefix) | Configuration supplied |
+| --- | --- |
+| `sous-admin` | Gin, Navigation, administration Views, conveniences and the `superuser` role; uses the shared Linkit defaults from Formats |
+| `sous-emulsify` | Frontend theme dependencies and selection |
+| `sous-formats` | Basic, Full, Limited and Restricted HTML formats, editors and shared Linkit defaults |
+| `sous-media` | File, Image and remote Video media types with Media Library forms and displays |
+| `sous-content-types` | Page and Frontpage; includes Formats and Media |
+| `sous-paragraph-types` | Four component types and their icons; includes Formats and Media |
+| `sous-paragraphs` | Paragraphs fields and displays on Page and Frontpage; includes Content Types and Paragraph Types |
+| `sous-core-layout-builder` | Layout Builder on Page and Frontpage; includes Content Types |
+| `sous-config-split` | Config Split definitions for local and staging |
 
-Sous Media supplies File, Image, and Video bundles with their fields, forms,
-displays, and native Media Library integration. Video uses Drupal's remote
-video source. Sous Formats supplies Basic, Full, Limited, and Restricted HTML
-editor/filter configurations, plus native Plain Text. The shared Linkit
-subrecipe supplies node, media, and external matchers when its default profile
-is missing. Existing profile customization is retained.
+Composer installs recipes under `web/recipes`. Use the starter's
+[recipe command](SETUP.md) when applying a recipe. Review the package README
+before adding it to an existing site; later downloads do not apply configuration
+changes automatically. See [Maintenance](MAINTENANCE.md).
 
-## Administration and authorization
+## Finish site configuration
 
-Sous Admin owns Gin, core Navigation, the administration defaults, and the
-`superuser` administrator role. Emulsify owns only frontend theme configuration.
-Fresh starter bootstrap creates `sous_chef`, assigns that role, and blocks the
-initial `superuser_1` account. Accounts and role assignments are site database
-data; the role's configuration is included in the site's export. Projects own
-their account and credential policies.
+Create homepage and error-page content, then choose their paths in Drupal.
+Frontpage is a content type; it does not create content or limit the site to one
+Frontpage node. Configure Entity Browser and Role Delegation if the site needs
+them.
 
-All offered administration conveniences remain enabled. They are not all
-authorization requirements. The [Sous Admin package guide](https://github.com/fourkitchens/sous-drupal-packages/tree/main/packages/sous-admin)
-documents its dependencies and ownership. Existing sites must validate dependencies
-and uninstall modules through Drupal before removing their Composer packages.
+Administration Views come from Drupal and module defaults. Existing customized
+Views and Linkit profiles are preserved. Glossary starts disabled; user-listing
+blocks are not placed automatically.
+
+Fresh setup creates `sous_chef`, assigns the administrator role `superuser`, and
+blocks `superuser_1`. Set your site's account and credential policy. Accounts
+and role assignments are database data; role definitions are configuration.
+Commit the complete export in `config/default` and customize it for your site.

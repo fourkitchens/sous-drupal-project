@@ -14,6 +14,6 @@ and `config/staging`; runtime settings choose which environment split is active.
 
 Add project-specific definitions to `_splits.complete_list` when dev, test or
 multidev need distinct behavior. Keep all active directories present and outside
-the web root. Native Config Split handles ordering and ordinary export/import;
+the web root. Config Split handles ordering and ordinary export/import;
 do not add unconditional partial imports. See the
 [package guide](https://github.com/fourkitchens/sous-drupal-packages/tree/main/packages/sous-config-split).

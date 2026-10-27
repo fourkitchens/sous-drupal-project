@@ -1,16 +1,13 @@
-# Production build and deployment
+# Build and deploy a site
 
-A generated site owns its hosting, deployment pipeline, credentials, writable
-files, backups, and rollback process. Sous supplies tested local build commands
-and native Drupal/Drush maintenance, not a hosting account or automatic release
-to production. Use the runtime versions in [Platform](PLATFORM.md) and the
-project's committed lockfiles and complete configuration export.
-The [environment contract](ENVIRONMENTS.md) defines production-safe settings,
-optional Config Split, and explicit adoption for existing sites.
+Build from the site's committed lockfiles and complete configuration export.
+Configure its hosting, secrets, database, uploaded files, backups, and rollback
+procedure separately. Sous supplies build commands and CI examples; publishing
+a Sous package does not deploy a site.
 
-## Build a reviewed artifact
+## Build the site
 
-From the generated project's root in a disposable/local DDEV build environment:
+From the project root:
 
 ```sh
 ddev start
@@ -20,121 +17,109 @@ ddev composer check-platform-reqs
 ddev npm run lint:project
 ```
 
-`build-assets` installs PHP packages from the lockfile with `--no-dev`, runs
-root/theme locked npm installs with build dependencies included, then builds
-production assets. Storybook is built separately only when the project wants
-that preview and its design-system assets/checks are ready;
-there is no second package installation hidden in ordinary build/watch tasks.
-[Build tools](BUILD_TOOLS.md) owns the detailed command reference.
+`build-assets` installs production PHP dependencies, installs the root and theme
+npm dependencies needed for building, and compiles the theme. Build Storybook
+separately with `ddev npm run theme-storybook` if the site publishes that preview.
+[Build tools](BUILD_TOOLS.md) lists the individual tasks.
 
-Run native `composer audit` and root/theme `npm audit` as separate gates in the
-review environment. Known tooling findings must remain visible and reviewed;
-an asset build is not proof of a clean audit. Shared Sous integration applies
-its narrow policy and tests theme findings separately. Each application must
-choose and enforce its own documented security policy before deployment.
+Run dependency audits as part of the project's release checks:
 
-A deployable artifact needs:
+```sh
+ddev composer audit --abandoned=report
+ddev npm audit
+ddev npm --prefix web/themes/custom/sous-project audit
+```
 
-- Composer manifest/lock and installed production PHP dependencies under
-  `vendor`, Drupal core, contributed modules/themes/libraries, and custom code.
-- Selected Composer-managed `web/recipes` packages from the committed lock,
-  including their nested recipes/migrations; they are restored from independent
-  ZIPs and stay ignored in application Git.
-- Generated theme metadata, templates/source assets, native built `components/`
-  SDC mirrors, and compiled `dist/` assets. Current Emulsify global CSS is under
-  `dist/global/`; the SVG sprite is under `dist/assets/`.
-- The site's complete exported configuration and its reviewed environment
-  settings/bootstrap integration, including any project-owned update/deploy hooks.
+Resolve findings or document how the project handles them before deployment.
 
-Do not omit `dist/` merely because source Git ignores it. Build and package it
-in CI. Root/theme `node_modules`, development caches, database backups,
-`.integration` fixtures, ignored reference files, and local settings are not
-runtime artifact inputs. Publish `web/storybook` only when the project intends
-to expose that separate static preview; otherwise exclude it from the deployed
-artifact. Uploaded/private files and production secrets are environment-managed.
-The public document root is `web`; private config/vendor paths must not be
-served as public content.
+Package these files for the server:
 
-On a prepared CI host without DDEV, select `SOUS_RUNTIME=native` and run the
-same Composer/npm tasks with the reviewed PHP/extensions, Node/npm, paths and
-lockfiles. Inside actual DDEV the helpers already select native project tools;
-they do not invoke DDEV recursively. DDEV is not required on production.
+- Production PHP dependencies in `vendor/`, Drupal core, contributed extensions,
+  libraries, and the Composer-managed recipes in `web/recipes/`.
+- Custom modules and theme source, the theme's generated `components/` mirror,
+  and its compiled `dist/` directory.
+- The complete configuration export, environment settings and services files,
+  and project update/deployment scripts.
 
-## Apply code and the site's own configuration
+Include generated theme output even though source Git ignores it. Exclude
+`node_modules`, local settings, caches, database backups, and local reference
+files. Include `web/storybook` only when publishing it is intended. Keep secrets
+and uploaded/private files in the hosting environment. Set the public document
+root to `web/`; configuration and `vendor/` belong outside it.
 
-1. Review the artifact/configuration diff and migration notes, test on a database
-   copy, and back up production database/files before the authorized deployment.
-   Confirm an administrator account and a rollback point are available.
-2. Deliver the built artifact using the site's approved host/atomic-release
-   process. Supply its database/environment settings and writable file paths,
-   explicitly set `SOUS_ENVIRONMENT=production`, and disable server debug
-   extensions. Confirm the runtime satisfies platform requirements.
-3. In the selected site's project root, use the checked helper and project Drush:
+## Deploy code and configuration
+
+1. Test the build and configuration changes against a database copy. Back up the
+   destination database and files before deploying.
+2. Deliver the build through the site's deployment pipeline. Supply its database
+   settings, writable paths, and `SOUS_ENVIRONMENT=production`. Use the versions
+   in [Platform](PLATFORM.md) and disable server debugging extensions.
+3. From the destination's project root, deploy its configuration and database
+   updates using the project's Drush:
 
    ```sh
    SOUS_RUNTIME=native SOUS_ENVIRONMENT=production \
      sh devops/scripts/confim.sh --uri=https://YOUR_SITE
    ```
 
-   Replace the URI with the real selected target. The local-copy equivalent,
-   used by the disposable environment matrix, is:
+   Replace the URI with the destination URL. This runs `drush deploy --yes`,
+   including database updates, configuration import, cache work, and deployment
+   hooks. Production skips the optional post-config-import shell hook.
+4. Run the explicit environment checks on the bootstrapped destination:
 
    ```sh
-   SOUS_ENVIRONMENT=production npm run confim
+   SOUS_RUNTIME=native SOUS_ENVIRONMENT=production \
+     sh devops/scripts/check-environment.sh config
+   SOUS_RUNTIME=native SOUS_ENVIRONMENT=production \
+     sh devops/scripts/check-environment.sh runtime
    ```
 
-   The helper checks the complete source, invokes native Drush deployment, then
-   checks active production configuration. Native deployment runs database
-   updates, imports the configured complete export, performs cache work and
-   project deployment hooks. It does not
-   download new packages, restore a database, or reapply recipes. See
-   [maintenance](MAINTENANCE.md) for explicit configuration adoption/migrations.
-   If an old database cannot bootstrap the safety check, apply its reviewed
-   native database updates/cache rebuild on the test copy first. Keep the same
-   artifact's helper/safety script available on the target. Execute the helper
-   there through the project's authorized remote execution mechanism; guarded
-   helpers reject `@alias` selectors rather than assuming Drush SSH forwards
-   their environment and project scripts.
-4. Check the site's important routes/content, administrator/editor access,
-   rendered assets, logs, pending update status, and any project-specific
-   integration/queue/cron behavior. Record the artifact and configuration revision.
-5. If a step fails, stop dependent deployment work and retain diagnostics. Restore
-   the prior compatible code **and database** when rollback requires reversing
-   schema/data/configuration changes; switching code alone may be insufficient.
-   Follow the site's tested rollback procedure rather than guessing an inverse
-   recipe or deleting live configuration.
+5. Check important pages, administrator access, rendered assets, logs, cron,
+   queues, and project integrations.
 
-No remote production deployment or rollback is claimed by local disposable
-verification. Existing-site package/database/configuration changes are reviewed
-separately; updating a recipe's files does not update already applied defaults.
-`npm run setup -- restore` and `npm run rebuild` replace a local database and
-sanitize it; neither is a production deployment command.
+The server needs PHP, Composer, Node/npm when building there, and the installed
+project dependencies; it does not need DDEV. [Environments](ENVIRONMENTS.md)
+explains runtime selection and what the checks cover. `confim` does not run
+those checks automatically or apply recipe changes.
 
-## Optional Pantheon adapter
+If deployment fails, stop dependent steps and follow the site's rollback
+procedure. A schema or data change can require restoring the database together
+with compatible code. Local `setup restore`, `rebuild`, and `import-data` replace
+and sanitize a database; use them for development, not production deployment.
 
-The retained `devops/ci/drush-config-import SITE ENV` entry point runs:
+## Choose site CI
+
+Copy one of the generated-site examples into the site's repository.
+For GitHub Actions:
 
 ```sh
-terminus -n drush SITE.ENV -- deploy --yes
+mkdir -p .github/workflows
+cp assets/ci/github-actions/build.yml .github/workflows/build.yml
 ```
 
-Use it only for an intentionally configured Pantheon project with Terminus,
-credentials, and explicit target authorization. It delegates to the remote
-site's configured sync directory, not a local template export. No Pantheon site
-name or FIRE/Lando pipeline is assumed. A non-Pantheon project uses its own
-remote execution mechanism for the same native Drush step. The adapter's
-arguments/error propagation are tested; remote Terminus execution is not.
-This legacy adapter invokes native deployment directly and does not run the
-local safety script remotely. Projects retaining it must arrange the reviewed
-production policy and guard on the target in their own pipeline.
+For CircleCI:
 
-## Product releases versus application deployment
+```sh
+mkdir -p .circleci
+cp assets/ci/circleci/config.yml .circleci/config.yml
+```
 
-The packages repository publishes immutable recipe ZIPs and its static Composer
-index after its reviewed gates. The starter publishes a compatible tag only
-after full acceptance against the public index; a candidate package commit is
-validation only. Neither operation deploys downstream applications. Generated sites need
-their own application CI, artifact distribution, deployment permissions, and
-release/rollback policy. See [coordinated releases](RELEASES.md) and
-[maintenance ownership/cadence](OPERATIONS.md). Source recipe references used for
-paired integration validation cannot publish a release.
+Both examples start DDEV, validate Composer metadata, install locked PHP and npm
+dependencies, run lint, and build production theme assets. They do not deploy
+or publish a release. Add the project's checks, artifact storage, deployment
+credentials, and release conditions. Replace theme tasks if the site has no
+Emulsify theme. The starter's own GitHub workflows are removed during project
+naming; these examples are the site's starting point.
+
+## Deploy with Pantheon
+
+For a project using Pantheon and an authenticated Terminus installation, the
+optional adapter accepts a site and environment:
+
+```sh
+bash devops/ci/drush-config-import SITE ENV
+```
+
+It runs `terminus -n drush SITE.ENV -- deploy --yes`. The same values can be set
+with `TERMINUS_SITE` and `TERMINUS_ENV`. Configure environment settings and run
+the explicit checks on the destination as part of that project's pipeline.

@@ -1,162 +1,102 @@
-# Build tools
+# Build and check a theme
 
-The project uses DDEV, Composer, and the tasks in `package.json`. The reviewed
-runtime and Emulsify versions are listed in [Supported platform](PLATFORM.md).
-See [Local setup](SETUP.md) for generation, contributor clones, restoration,
-and recovery. [Frontend tooling](FRONTEND_TOOLING.md) records the dependency
-review and earlier validation; this guide is the current command reference.
+Run these commands from the project root. DDEV supplies the versions listed in
+[Platform](PLATFORM.md). See [Setup](SETUP.md) for first installation or restoration.
 
-## Install locked tools
+## Install dependencies
 
-From the project root, after starting DDEV:
+Start DDEV and install the root and theme packages from their lockfiles:
 
-```bash
+```sh
+ddev start
 ddev npm ci --include=dev
 ddev npm run theme-ci
 ```
 
-The second command requires an existing generated theme and reproduces its
-lockfile. For an ungenerated starter, stop after root `npm ci` and use only
-starter checks until theme generation. Fresh bootstrap handles the theme's
-first `npm install --include=dev` while creating that lockfile. Commit both root
-and theme manifests/lockfiles and theme source.
-Routine build, watch, lint, and Storybook tasks use those installed dependencies.
-Build/tool installations explicitly include development dependencies, even
-under `NODE_ENV=production`, because the CLI, compiler, and linters are
-build tools. This policy does not add Node packages to the browser output.
+Fresh setup creates the theme's first lockfile. Later installs use `npm ci`.
+Commit the root and theme manifests and lockfiles with the theme source.
+Builds require npm development dependencies, including when `NODE_ENV=production`.
+The compiled browser assets do not contain those build tools.
 
-## Theme tasks
+## Build assets or Storybook
 
-The generated theme lives at `web/themes/custom/sous-project`. Naming setup
-updates the npm task paths for the generated project.
+The theme lives at `web/themes/custom/sous-project`. Project naming updates this
+path in the npm tasks and documentation.
 
-| Command | Behavior |
+| Command | Purpose |
 | --- | --- |
-| `ddev npm run theme-build` | Run the theme's native production asset build |
-| `ddev npm run theme-watch` | Run its native development/watch task |
-| `ddev npm run theme-storybook` | Run the native Storybook build directly into `web/storybook`, also compiling production assets |
-| `ddev composer build-theme` | Call the asset build using the installed tools |
-| `ddev composer build-storybook` | Call the native Storybook build using the installed tools |
-| `ddev composer build-assets` | Install locked PHP dependencies, run root/theme `npm ci` once each, then build production assets |
+| `ddev npm run theme-build` | Build production theme assets |
+| `ddev npm run theme-watch` | Run the theme's development task |
+| `ddev npm run theme-storybook` | Build a static Storybook at `web/storybook` |
+| `ddev composer build-assets` | Install PHP and root/theme npm dependencies, then build production assets |
 
-`build-assets` is the complete dependency-and-build pipeline. It runs Composer
-installation with `--no-dev` and invokes the native production build. Storybook
-is a separate optional preview task. Individual build/watch commands do not
-install dependencies.
+The individual theme tasks use installed dependencies. `build-assets` also runs
+Composer installation with `--no-dev`; Storybook is a separate optional build.
 
-Production assets are generated under the theme's `dist/` directory. Emulsify
-Core's global CSS uses `dist/global/` and its SVG sprite uses `dist/assets/`.
-Storybook is separate static output under `web/storybook`, served locally at
-`/storybook/`. Include `dist/` in the production artifact even though it is
-ignored in source Git. Include Storybook only if the application intentionally
-publishes that preview. See [Production deployment](DEPLOYMENT.md) for artifact
-contents and the database/configuration update sequence.
+Emulsify writes compiled assets to the theme's `dist/` directory and generates
+a `components/` mirror from `src/components/`. Edit and commit the source under
+`src/`, not the generated mirror. Source Git ignores both outputs; include them
+in deployments. Local Storybook output is available at `/storybook/`. See
+[Deployment](DEPLOYMENT.md) for build contents and site CI examples.
 
-The selected Core build also mirrors component output into the generated
-theme's `components/`; its project-root Git ignore rule follows the generated
-theme name. Component source under `src/components/` stays tracked. The rule
-does not ignore another custom theme's own `components/` source directory.
+## Use the Emulsify CLI
 
-## Emulsify CLI
+The project installs its CLI locally. Run theme commands from the theme directory:
 
-`ddev emulsify` uses the root project's locked CLI. Run it from the theme
-directory when working with that theme's project configuration:
-
-```bash
+```sh
 cd web/themes/custom/sous-project
 ddev emulsify component list
 ```
 
-The selected Emulsify Core also uses a theme-local SDK dependency on the same CLI version.
-The reviewed Git security override is retained without a local CLI patch.
-The theme retains its own build/lint configuration and can install and
-build independently from its committed files. See the
-[Emulsify CLI documentation](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage)
-for component and system commands. No global Emulsify installation is required,
-and routine DDEV startup does not install it.
+For component and system commands, see the
+[Emulsify CLI documentation](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage).
+When deliberately fetching a changed branch of a design system, clear the CLI
+cache first with `ddev emulsify cache clear`.
 
-First theme setup installs the pinned UI Kit and normalizes its stock source
-with the selected formatting/lint tools. It also corrects the upstream example
-Storybook icon references and excludes compiled output from source checks.
-Review and commit the generated source and manifest with the theme lockfile.
-After initialization, use the routine build/watch/lint tasks rather than rerun
-initial setup over a customized theme. Those tasks never rewrite project source.
-Drupal component metadata and library wiring remain project-owned.
+First setup installs the selected UI Kit, fixes its starter source for the
+current lint tools, and creates the theme lockfile. It keeps the Storybook
+packages on one compatible version through scoped npm overrides. It also sets
+simple-git and Pa11y overrides. Keep these with the lockfile until updated
+dependencies pass install, lint and builds. Use the routine tasks above after setup;
+`theme-setup.sh` is for first initialization and rejects an initialized theme.
 
-The generated manifest retains a scoped Storybook `10.6.4` package-set override
-under Emulsify Core. It keeps addon/adapter peers aligned while a newer addon
-requires a Storybook version missing from the registry. Keep the reviewed pin
-and lock together; remove it only after a coherent upstream set resolves and
-passes the native preview/build checks. Setup does not bypass peer validation.
+## Check and format source
 
-CLI 2.4.1 with the secure Git dependency supports cold-cache generation from
-pinned releases. Its moving-branch refresh lookup remains an upstream
-compatibility limitation. Use the native `ddev emulsify cache clear` before
-deliberately fetching a changed moving reference. No local CLI patch or unsafe
-Git allowance is installed.
-
-The acceptance gate checks JavaScript, SCSS, formatting, production assets and
-Storybook separately after initialization. Deliberate invalid authored files
-must still fail, while compiled JavaScript and generated component mirrors
-stay outside source lint. The initialization fixes do not replace those checks.
-Projects own later design-system assets, style conventions and library wiring.
-
-## Lint and formatting
-
-The source starter defaults to `lint:starter`, which works without a generated
-theme or `web/` tree. Naming setup rewires generated applications' `lint` alias
-to `lint:project`, which requires their theme checks to succeed too.
-
-| Command | Scope |
+| Command | Checks |
 | --- | --- |
-| `ddev npm run lint` | The appropriate starter or generated-project checks |
-| `ddev npm run lint:starter` | Native PHP syntax and root/custom-module ESLint 10 checks |
-| `ddev npm run lint:js` | Starter/custom-module JavaScript with appropriate Node/Drupal globals |
-| `ddev npm run lint:php` | Custom PHP syntax, including Drupal file extensions and paths with spaces |
-| `ddev npm run lint:project` | Starter checks followed by theme checks |
-| `ddev npm run lint:theme` | The theme's own JavaScript and SCSS checks |
-| `ddev npm run lint:styles` | The theme's native Stylelint check |
-| `ddev npm run prettier` | The theme's formatting check |
+| `ddev npm run lint` | PHP/JavaScript checks and the generated theme's checks |
+| `ddev npm run lint:php` | PHP syntax in custom code and project scripts |
+| `ddev npm run lint:js` | Root and custom-module JavaScript |
+| `ddev npm run lint:theme` | Theme JavaScript and SCSS |
+| `ddev npm run prettier` | Theme formatting |
 
-Downloaded dependencies, minified output, and generated SDC mirrors are excluded.
-PHP lint uses `php -l`; it checks syntax rather than Drupal coding standards.
-For theme fixes, use the theme's `lint-fix` or `prettier-fix` task. See
-[Contributing](CONTRIBUTING.md#code-standards-and-linting)
-for focused regression commands.
+PHP lint uses `php -l`. Generated assets and downloaded dependencies are excluded
+from source checks. To fix theme lint or formatting, run its tasks directly:
 
-## Site and configuration helpers
+```sh
+ddev npm --prefix web/themes/custom/sous-project run lint-fix
+ddev npm --prefix web/themes/custom/sous-project run prettier-fix
+```
 
-These aliases default to DDEV from the host. They also work inside actual DDEV,
-where they use native project tools and never call DDEV recursively. Use the
-reviewed host Node/npm versions for host npm aliases, or invoke the shell
-scripts directly. Explicit prepared native CI, environment selection, target
-arguments, and safety checks are defined in the
-[environment contract](ENVIRONMENTS.md).
+Review the changed source before committing. [Contributing](CONTRIBUTING.md)
+covers project code standards and [Maintenance](MAINTENANCE.md) covers dependency
+and Composer patch updates.
 
-| Command | Behavior |
-| --- | --- |
-| `npm run setup -- fresh` | Install a new/disposable site; successful bootstrap removes its one-time setup files |
-| `npm run setup -- restore [BACKUP]` | Start DDEV, install/build the theme, then restore the selected backup through rebuild |
-| `npm run rebuild -- [BACKUP]` | Install root dependencies, import/sanitize the backup, deploy configuration, then generate final login |
-| `npm run get-db -- [DESTINATION]` | Download through the explicitly configured project hook; validate and atomically complete a private backup |
-| `npm run import-data -- [BACKUP]` | Validate `.sql`/`.sql.gz`, restore, run safeguards, then sanitize; no configuration import or login |
-| `npm run local-data-bak` | Save a local database backup under `reference` |
-| `npm run confex -- [DRUSH_ARGS]` | Check and export complete project-owned configuration, including optional native split transforms |
-| `npm run confim -- [DRUSH_ARGS]` | Check source, run native deployment, attempt post-config safeguards and check active state, preserving failures |
+## Upgrade an existing theme
 
-Fresh installation and database restoration can replace the local database.
-Choose the intended workflow explicitly and use disposable installations for
-destructive validation. Setup/restoration reject production before destructive
-work. Build/watch commands install no packages; theme paths are configured in
-`package.json` and renamed during project naming.
-Backup paths are root-relative or absolute and may contain spaces. The
-[restore guide](SETUP.md#restore-an-existing-generated-site) owns validation,
-atomic downloads, hook implementation and partial-failure recovery. There is
-no default production source; no-argument imports use `reference/site-db.sql.gz`.
+Updating Emulsify Drupal or Emulsify Tools does not rewrite an existing child
+theme. Compare its templates, libraries, component metadata, and npm configuration
+with the new upstream version, then make the needed changes in the child theme.
+Install its dependencies and run lint, the production build, and Storybook if the
+project uses it. Do not rerun first-time theme initialization over custom work.
 
-See [configuration ownership and maintenance](MAINTENANCE.md) before adopting
-new recipe defaults in an existing site. The template sync directory is not a
-reusable source of defaults; each generated site commits its complete export.
-Security findings, review cadence, and escalation belong to the
-[maintenance owners](OPERATIONS.md); an asset build completing does not mean
-the dependency audit is clean.
+For an older child theme with favicon configuration incompatible with Emulsify
+Tools 2, use its repair command after updating the packages:
+
+```sh
+ddev drush emulsify_tools:repair-favicon-config sous-project
+ddev npm run confex
+```
+
+Review and commit the exported configuration. Check the rendered theme and its
+asset URLs after deploying the update.

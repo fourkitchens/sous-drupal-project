@@ -1,400 +1,145 @@
-# Installation, restoration, and recipe development
+# Set up a site
 
-Read [Platform](PLATFORM.md) for the one supported runtime/tooling reference and
-repository relationships. DDEV, Docker, and Git are required locally. The
-Composer bootstrap path additionally needs the reviewed host PHP and Composer;
-host orchestration aliases require the same selected Node/npm versions.
-NVM is one optional way to select them. DDEV supplies the application/runtime
-and build tools. Terminus is needed only for an explicitly chosen Pantheon
-workflow, not normal setup.
+Use DDEV, Docker, and Git for local development. Creating a project with
+Composer also requires PHP and Composer on your computer. See
+[Platform](PLATFORM.md) for supported versions and [Features](FEATURES.md) for
+the installation choices.
 
-The [environment contract](ENVIRONMENTS.md) defines safe local/staging/
-production settings and command context. Unset environments default to local
-only inside actual DDEV, otherwise production. A local settings file never
-selects the environment; existing sites adopt the ordered include explicitly.
+## Create a new site
 
-## Published releases versus current coordinated source
-
-Sous now has two development repositories: this starter and
-[Sous Drupal Packages](https://github.com/fourkitchens/sous-drupal-packages),
-which keeps the seven existing Composer names and adds separate Core Layout
-Builder and Config Split packages. This starter branch targets the coordinated
-`^2.0` line through its scoped static Composer index.
-
-The package collection starts at `2.0.0` and publishes semantic releases, ZIPs
-and its index automatically from `main`. Until its first publication completes,
-ordinary Composer resolution against that index cannot succeed. Validate
-candidate source through the explicit mode in
-[Integration](INTEGRATION.md); it builds disposable package ZIPs without
-publishing or putting candidate sources in a production lockfile. The existing
-public starter 7.0.1 does not contain this cutover.
-
-After the immutable package release/index and a reviewed starter tag exist,
-create a project with that real tag, replacing `REVIEWED_TAG` before running:
+Create the project in a new directory:
 
 ```sh
-composer create-project fourkitchens/sous-drupal-project:REVIEWED_TAG my-site
+composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
+cd my-site
 ```
 
-This is the published-project command shape, not a claim that a future tag
-exists or that Packagist delivery was tested. [Release maintenance](RELEASES.md)
-defines package publication, public cold-cache verification and starter release
-order. The existing explicit Login Destination beta exception remains root
-policy; sibling Sous dependencies use bounded stable `^2.0` constraints.
+The Composer hook names the project from its directory and asks which content
+composition to install and whether to add Config Split. It starts DDEV after
+both questions. Choose the content option explicitly;
+Config Split defaults to no.
 
-## Fresh installation and contributor clones
-
-Work in a new generated-project directory or disposable copy. Fresh setup
-installs Minimal Drupal and can replace that local database. Do not run the
-bootstrap hooks in the canonical starter checkout you are maintaining: naming
-changes files and successful setup removes its bootstrap helpers.
-
-After the package index is published, a clone/copy of the reviewed starter
-source can run from its root:
+For an unattended install, set both answers before running Composer:
 
 ```sh
-composer install
-composer run-script post-create-project-cmd
+SOUS_CONTENT=layout-builder SOUS_CONFIG_SPLIT=yes \
+  composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
 ```
 
-For a remote clone, check out the reviewed starter ref first. Until package
-publication, use the disposable integration candidate mode instead of running
-these bootstrap commands against an unavailable public index. A source branch
-or local package directory is not a published stable dependency.
+`SOUS_CONTENT` accepts `default`, `layout-builder`, `paragraphs`, or `admin-only`
+(and the corresponding menu numbers `0`–`3`). `SOUS_CONFIG_SPLIT` accepts `yes`
+or `no`. Invalid values stop the bootstrap before Drupal or theme installation.
+When input is unavailable, an unset content choice stops setup; an unset Config
+Split choice uses no.
 
-The hook names the project, starts DDEV, installs locked dependencies, installs
-Minimal, applies Admin and Emulsify, creates/builds/enables the project theme,
-and configures administrator access. Select one of the four choices in
-[Platform](PLATFORM.md#installation-choices-and-scope). A Git clone is a valid
-fresh-install target: `.git` is never used to choose database restoration, and
-its existing branch is retained. Both content and Config Split questions are
-asked before installation starts. Set `SOUS_CONTENT` to `default`,
-`layout-builder`, `paragraphs`, `admin-only` (or `0`–`3`) and
-`SOUS_CONFIG_SPLIT` to `yes` or `no` to skip the corresponding prompts. Config
-Split defaults to no and initializes its project-owned directories when selected.
-A directory without Git is initialized on `main` without changing global Git
-preferences.
+Setup installs Drupal, applies the selected recipes, builds the custom theme,
+exports configuration to `config/default`, and prints a login link. It creates
+the `sous_chef` administrator account and blocks the initial `superuser_1`
+account. Successful setup removes its one-time installer files.
 
-Git archive rules exclude `devops/integration/` and every maintainer test file,
-including hidden placeholders. Project naming also removes those files for
-source-based installs and recreates an empty `devops/tests/` for the
-application's own checks. Keep the original starter checkout separate when
-maintaining Sous itself.
+Commit the resulting Composer and npm manifests and lockfiles, `patches.lock.json`,
+the custom theme source, and the complete configuration export. Dependencies,
+compiled assets, local settings, and database backups stay out of source Git.
+[Deployment](DEPLOYMENT.md) explains which generated files belong in a build.
 
-After naming, the equivalent explicit fresh command is:
+## Restore an existing site
+
+Clone the site's repository, including its lockfiles, custom theme, and complete
+configuration export. Get a database backup and any uploaded files the site
+needs. From the project root, run:
 
 ```sh
-npm run setup -- fresh
+sh devops/scripts/setup.sh restore "reference/site-db.sql.gz"
 ```
 
-Before bootstrap finishes, choose `fresh` or `restore` explicitly. After its
-one-time installer has been removed, `npm run setup` without a mode defaults
-to restore. Successful bootstrap exports complete
-configuration to `config/default`, validates the generated Composer pair,
-produces a login link, and only then removes its one-time setup files. Commit
-Composer/npm manifests and lockfiles, the custom theme sources/patches, and the
-complete configuration export. Downloaded dependencies/build output are ignored.
+This starts DDEV, installs and builds the theme, installs root dependencies,
+imports and sanitizes the database, and runs Drush deployment. It prints a
+`sous_chef` login link only after import and deployment succeed. Restoration
+replaces the local database and refuses the production environment.
 
-The first scaffold creates missing `settings.php` from the finished core
-defaults, so the project's sync path and local include take effect before DDEV
-uses its embedded fallback. Existing settings and local files/symlinks survive
-Composer install/update/scaffolding. Review an older site's actual path with
-`ddev drush status --field=config-sync`; path changes belong to that project.
-
-A newly generated theme creates its first npm lockfile during setup. Later
-installs use `npm ci`; routine builds/watch do not reinstall dependencies or
-clear caches. [Build tools](BUILD_TOOLS.md) owns those commands.
-
-## Restore an existing generated site
-
-Clone the **site's own repository**, including its final lockfiles, custom
-theme, and complete exported configuration. This is different from creating a
-new starter. Supply an explicitly selected `.sql` or `.sql.gz` backup (and the
-site's uploaded files if needed), then run from the project root on the host:
+After a completed bootstrap, omitting the mode also selects restore:
 
 ```sh
-npm run setup -- restore "reference/database copies/reviewed.sql.gz"
+sh devops/scripts/setup.sh
 ```
 
-DDEV starts; Composer/root/theme dependencies and theme assets build before
-any database import. The workflow validates and imports the selected backup,
-applies the post-import safeguards, then runs native Drush deployment and the
-post-config-import safeguards. It sanitizes local accounts and prints a login
-link only after both safeguard stages succeed. This replaces the local database.
-Fresh setup and restoration reject production before replacing a database. The same helpers
-use project tools directly when invoked inside DDEV. Prepared native CI must
-explicitly select its runtime and environment as described in the
-[environment guide](ENVIRONMENTS.md).
+Before bootstrap finishes, choose `fresh` or `restore` explicitly. A Git clone
+alone does not select restore. Do not run fresh installation in a site that
+contains data you need to keep.
 
-Backup paths may be absolute or relative to the project root, including spaces.
-An explicit missing path fails; it never selects a different backup or source.
-With no backup argument, restoration uses `reference/site-db.sql.gz` and invokes
-the configured download hook only if that default is absent. There is no
-automatic newest-backup or production-source selection. For an existing
-prepared site, the narrower commands are:
+## Refresh a local database
+
+For an already configured site, refresh dependencies and the database without
+rebuilding the theme:
 
 ```sh
-npm run import-data -- "/absolute/path with spaces/reviewed.sql"
-npm run rebuild -- "reference/database copies/reviewed.sql.gz"
+sh devops/scripts/rebuild.sh "reference/site-db.sql.gz"
 ```
 
-`import-data` validates/imports and sanitizes after its post-import hook; it
-does not import configuration or print a login link. `rebuild` installs root
-dependencies, imports/sanitizes the backup, deploys configuration and generates
-a final login link only after success. Use `npm run setup -- restore` when theme
-dependency installation and an asset build are needed too. Sanitization sets local test
-passwords and email addresses only in this development copy.
-
-### Backup validation and download hooks
-
-Before destructive import, both runtime paths require a readable, nonempty
-regular backup with a supported suffix. The `.sql`/`.sql.gz` suffix must match
-its compression signature. Gzip input must pass its full integrity check and
-produce nonempty SQL. Validation prepares private plain SQL before replacing
-the database, including when DDEV performs the import. DDEV's own import hooks
-are skipped so they cannot run Drupal commands or login before Sous safeguards.
-
-`get-db` accepts an optional completed destination:
+To import and sanitize only, without deploying configuration or printing a
+login link:
 
 ```sh
-npm run get-db -- "reference/database copies/reviewed.sql.gz"
+sh devops/scripts/import-data.sh "reference/site-db.sql.gz"
 ```
 
-Its default destination is `reference/site-db.sql.gz`. The project-owned
-[download hook](../devops/hooks/download-db.sh) is unconfigured by default and
-fails explicitly. Configure an approved source in that hook; provider tools are
-optional, and no remote site, production source, credentials or endpoint ships
-with Sous. The hook runs in the caller's environment from the project root,
-receives one absolute private payload path, and must write that exact file or
-return nonzero. It does not choose or rename the completed destination.
+Backup paths can be absolute or relative to the project root and may contain
+spaces. Both commands use `reference/site-db.sql.gz` when no path is supplied.
+If that default is missing, import first calls `get-db.sh`. An explicitly
+supplied missing path fails instead.
 
-For example, a project that already manages a local backup can use this body:
+Only non-empty `.sql` and `.sql.gz` files are accepted. Gzip files must pass
+`gzip -t` before any database command. After a successful import, the helper
+rebuilds caches, runs the optional post-import hook, and sanitizes user passwords
+to `admin` and email addresses to `user-%uid@example.com`.
+
+Configure `devops/hooks/download-db.sh` to write a backup to the path in `$1`.
+Then download a fresh default backup with:
 
 ```sh
-set -eu
-: "${SOUS_DB_BACKUP_SOURCE:?Set an explicit project-managed backup path}"
-cp -- "$SOUS_DB_BACKUP_SOURCE" "$1"
+sh devops/scripts/get-db.sh
 ```
 
-The variable is an example for that project-owned implementation, not a shipped
-source or credential. Keep provider authentication outside tracked files and
-command logs. A provider implementation must likewise report failed downloads
-and write only to the supplied path.
+An optional destination can follow the command. Downloads go to a `.part` file;
+the destination is replaced only after the hook succeeds and validation passes.
+Sous supplies no database source or credentials. Keep backups outside Git and
+follow the project's rules for handling production data.
 
-The wrapper creates private temporary storage in the destination's directory
-with a restrictive umask, validates the completed payload, sets mode `0600`,
-then atomically renames it into place. A failed download or validation preserves
-an existing completed backup and removes its partial payload. Imported/prepared
-SQL temporary files are private and removed on completion or failure.
+Optional `devops/hooks/post-import.sh` and `post-config-import.sh` run after
+import and deployment respectively. Use `runtime_drush` in these scripts for
+project commands. A failed import still attempts its hook; a failed deployment
+still attempts its hook. The original failure remains the command's exit status.
+Hooks do not run in production. See [Environments](ENVIRONMENTS.md) for routing
+and environment selection.
 
-### Post-import and post-config-import safeguards
-
-Keep these two small hooks in the generated project's source control:
-
-- [post-import.sh](../devops/hooks/post-import.sh) runs after attempted database replacement.
-- [post-config-import.sh](../devops/hooks/post-config-import.sh) runs after attempted native deployment/configuration import.
-
-For an existing site, review these hook files and the mail/cron runtime policy
-together when adopting the helpers. Composer preserves owned settings files;
-it does not add new overrides to an existing `settings.sous.php` automatically.
-
-They run only in local/staging through the selected project runtime, from
-the project root. Make their project-specific shutdown operations idempotent,
-verify the resulting state, and return nonzero if a required safeguard cannot
-be established. Use project Drush/runtime helpers and retain any supplied target
-selectors. The templates cannot infer which external synchronization or job
-systems a generated site owns; fill them with those integrations' real kill
-switches and checks. Do not copy client-specific module lists or disable
-unrelated production capabilities.
-
-The standard settings already capture native staging Drupal mail and
-disable Drupal's automated cron trigger through runtime overrides, so ordinary
-configuration import cannot reactivate those defaults. Custom transports,
-schedulers and synchronization clients need their own settings/state policy.
-Use runtime overrides for simple differences, as described in the
-[environment contract](ENVIRONMENTS.md), rather than exporting local mail or
-debug defaults. Native Drush deployment hooks run before the external
-post-config-import hook: integrations that could execute during deployment
-must remain quarantined by runtime settings throughout that sequence.
-
-After an attempted import or deployment, Sous attempts cache cleanup, its
-corresponding safety hook and the active environment check even when the
-operation reports a partial failure. It preserves the original failure status;
-cleanup failures are reported and cannot turn the command into success. If the
-operation succeeded but a required safeguard fails, that safeguard's failure
-stops dependent work. In the full workflow, sanitization is skipped after a
-failed import, deployment or either safeguard stage; standalone import waits
-for its post-import safeguards. Login generation is skipped after any required
-stage fails. Safety cleanup attempts to stop integrations; it does not roll back
-the database. Retain diagnostics
-and restore a reviewed backup or correct the failed safeguard before using
-the incomplete copy.
-
-If a customized project has no `sous_chef` account, adapt its login step to its
-own administrator before restoring. Recipes define roles, not a universal
-account-management policy. User assignments live in the database. Keep a real
-administrator account available and follow [maintenance](MAINTENANCE.md).
-
-### Refresh verification
-
-The refresh follow-up was checked on fresh, disposable Drupal 11.4.11/Drush
-13.8 installations using the selected PHP 8.4 DDEV runtime:
-
-| Check | Actual result |
-| --- | --- |
-| SQL/gzip imports | Host DDEV and in-container native imports passed with spaced paths; original read-only backups remained unchanged |
-| Safeguards and configuration | Hooks disabled fixture-only job/sync state; a module deliberately reenabled that state during configuration import and the post-config hook disabled it again |
-| Partial failures | Failed SQL import and native deployment retained their original exit codes while cache cleanup and failed safety hooks were still attempted |
-| Sanitization/login | Failed safeguards prevented dependent work; the deferred import → configuration safeguards → sanitization → login sequence passed |
-| Download completion | Private validated backup completed at mode `0600`; failed producer preserved the existing target and removed partial files |
-| Invalid selections | Corrupt gzip, empty selected paths and an empty ZIP disguised as SQL were rejected before database replacement; a valid default was never substituted for an explicit empty path |
-| Automated Cron absent | Fresh Minimal without the module or stored config passed the active guard with effective staging interval zero |
-| Focused regressions | 34 command/refresh tests passed on the host and inside DDEV with no skips; 34 installer and seven settings tests passed on the host |
-| Dependency checks | The minimal fixture's Composer manifest validation, platform checks and security audit all exited zero |
-
-The existing shared integration entry point already runs these focused tests;
-no extra provider or database matrix was added. Source hashes, native logs and
-cleanup receipts are retained under `reference/database-refresh`. All three
-owned fixture projects/databases were removed. No real provider download,
-client data, production deployment or new asset build was tested in this
-follow-up. Projects still configure and verify their own integration kill
-switches and optional download source.
-
-## Local development with package source
-
-Use the shared product runner to test source changes together without touching
-a developer database or depending on ignored installations:
+Save a local backup before changing data:
 
 ```sh
-bash devops/integration/run.sh --packages /path/to/sous-drupal-packages
+sh devops/scripts/local-data-bak.sh
 ```
 
-The parent contains `sous-drupal-project` and `sous-drupal-packages`.
-Reusable edits belong in the latter's `packages/<basename>` directories. The
-runner records source revisions/digests and exercises individual package ZIPs;
-it does not require a checkout for each legacy recipe repository. See
-[Integration](INTEGRATION.md) for the explicit reviewed candidate-commit mode
-and the separate default gate against published assets. Candidate sources are
-validation-only and must not enter a production manifest/lock.
+It writes a timestamped gzip dump under `reference/`.
 
-To test the merged reviewed package candidate instead of local working files:
+## Add a recipe
+
+Install the package, then apply it to the site. For example:
 
 ```sh
-bash devops/integration/run.sh \
-  --packages-ref 53bd45f61b3003fb3f2d7f82ecde9cfa879785fd
+ddev composer require fourkitchens/sous-content-types:^2.0
+ddev npm run install-recipe -- fourkitchens/sous-content-types
+ddev npm run confex
 ```
 
-Omit both package-source options only when testing the actual published index;
-that gate fails while its public metadata/assets are unavailable. The matching
-manual Actions dispatch input is `packages_ref`.
+The helper applies an already installed recipe under `web/recipes/`; it does
+not download packages. Review the complete export and commit the site's changed
+manifest, lockfile, and configuration. [Features](FEATURES.md) lists the packages;
+[Maintenance](MAINTENANCE.md) covers later package and configuration updates.
 
-To inspect a default Page site with locally edited package source:
+## Recover from an interrupted setup
 
-```sh
-bash /path/to/sous-drupal-project/devops/integration/run.sh \
-  --subject /path/to/sous-drupal-project --packages /path/to/sous-drupal-packages \
-  --option default --keep
-```
-
-`result.json` reports the unique disposable project and workspace. Enter its
-`integration` directory and use `ddev describe` or `ddev drush user:login`.
-Source snapshots are copies; edits to the original checkout are incorporated by
-another run, not silently synced into an active site. Select/export only the
-reusable changes back into the owning recipe. Never copy a complete site's
-export over a recipe's partial defaults or remove nested plugin identifiers.
-
-With `--keep`, clean up only that named project after confirming `ddev describe`
-points to the owned fixture; from its directory run
-`ddev delete --omit-snapshot --yes`, then remove that temporary workspace.
-Without `--keep`, the runner performs ownership-checked cleanup automatically.
-[Integration](INTEGRATION.md) covers PR refs, all options, diagnostics, and gates.
-
-## Recipe application and Composer ownership
-
-Recipes are applied operations, not extensions with an automatic update
-lifecycle. The starter installs selected package roots at
-`web/recipes/PACKAGE_NAME`, including the shared Linkit subrecipe's parent.
-The root owns the scoped static index, Drupal/asset repositories, Dropzone
-library metadata, installer paths, native `drupal/core-recipe-unpack` plugin and
-explicit Login Destination beta exception. Composer does not inherit
-repositories declared by dependencies.
-
-The starter always requires Admin and Emulsify. It then requires only the
-chosen content package: Content Types, Core Layout Builder or Paragraphs;
-admin only adds none. Config Split is an independent choice. After the public
-2.x index and ZIPs are available, a prepared project can explicitly add/apply
-an optional composition, for example:
-
-```sh
-ddev composer require fourkitchens/sous-core-layout-builder:^2.0
-ddev install-recipe fourkitchens/sous-core-layout-builder
-```
-
-Changing a valued site's composition needs reviewed field/data/configuration
-adoption, not a blind rerun of this new-site example. Admin applies only the
-shared Linkit subrecipe from Formats; it does not apply the full editor recipe.
-Content Types supplies its own Formats/Media/Pathauto dependencies and never
-reapplies Admin's strict Gin setup.
-
-The DDEV wrapper refreshes module/theme discovery after Composer adds code,
-applies the recipe from `web/recipes`, and rebuilds caches only after successful
-application. A manual sequence is:
-
-```sh
-ddev drush cache:rebuild
-ddev drush recipe /var/www/html/web/recipes/sous-core-layout-builder
-ddev drush cache:rebuild
-```
-
-The absolute path is inside DDEV; another runtime uses its actual recipe path
-and project Drush. Do not include the vendor prefix in the recipe directory
-(`web/recipes/fourkitchens/sous-admin` is wrong).
-
-The root's native `extra.drupal-recipe-unpack.ignore` names exactly the nine
-Sous packages. It retains selected requirements and lock entries, so a clean
-Composer install restores their independently downloaded ZIPs. The exclusion
-list does not install any unselected package. Other recipes retain normal native
-unpack behavior. Keep Composer-managed recipe directories ignored, and do not
-remove the Sous requirements or run a blanket unpack command after setup.
-Existing unpacked/customized directories need review before Composer takes
-ownership; updating a package still does not change active site configuration.
-Use [existing-site maintenance](MAINTENANCE.md) and explicit migrations instead
-of routine recipe reapplication.
-
-## Interrupted installation and recovery
-
-A failure propagates and stops dependent work; it does not print success or
-remove bootstrap helpers. Preserving files is not a promise that every already
-applied recipe/action can be replayed. Admin's strict Gin baseline, theme
-creation, and user creation can reject repeated work after a partial install.
-
-1. Keep the first failing command and its stderr. Check DDEV/Docker health,
-   available resources, Composer platform/constraints, and the exact source
-   revisions. Review `composer audit`/`npm audit` findings rather than forcing
-   dependency resolution or bypassing platform/security checks.
-2. For an interrupted **new disposable** installation, preserve any useful logs
-   or source edits, then return to a clean generated copy/database and rerun the
-   reviewed fresh sequence. Do not apply fresh setup to a valued existing site.
-3. Naming alone can be repeated without deleting an already generated README,
-   but a whole partial installation should not be blindly retried. Do not
-   manually delete bootstrap scripts to make a failed install appear complete.
-4. If failure occurs after cleanup during the final success output, use the
-   generated site's restore/maintenance workflow; the removed hooks are a
-   deliberate completion boundary. Do not reintroduce them into that site.
-5. A failed restore stops at the failing step. If import has begun, restore the
-   supplied backup again only in the intended local database after fixing the
-   cause. Keep an untouched backup and use the site's complete configuration.
-6. With no existing theme lockfile after interrupted initial generation, restart
-   from a clean theme/setup fixture. For a successfully locked project use
-   `ddev npm ci --include=dev` and `ddev npm run theme-ci`; never fix failures by
-   repeatedly clearing npm caches or globally installing another Emulsify CLI.
-
-For config import errors, confirm the configured sync directory contains the
-site's complete export and matching site UUID, not the retired template YAML or
-another fresh site's export. When Config Split is selected, retain its native
-`_splits` bootstrap and exported definitions; do not add unconditional partial
-imports.
-A preserved settings file may intentionally override the default sync path;
-review it instead of overwriting it. Known tooling advisories and transient
-Layout Builder warnings are recorded in the implementation reviews; rendering
-and configuration checks must still pass.
+Read the first failing command before retrying. Fix its dependency, database,
+or configuration error first. If the one-time installer still exists, rerun
+`sh devops/scripts/setup.sh fresh` only when replacing that database is intended.
+Keep the original starter checkout separate from generated sites: naming edits
+files, and successful installation removes the bootstrap helpers. Use a new
+project directory when you need to start over without preserving partial work.
