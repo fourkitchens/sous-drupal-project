@@ -68,3 +68,6 @@ core/.phpstan-baseline.php text eol=lf whitespace=blank-at-eol,-blank-at-eof,-sp
 # Keep the tracked tests placeholder out too: archives retain the empty folder.
 /devops/integration export-ignore
 /devops/tests/* export-ignore
+# GitHub downloads this repo as an action archive, so composite action metadata
+# must remain available. Project naming removes it from the generated site.
+/.github/workflows export-ignore

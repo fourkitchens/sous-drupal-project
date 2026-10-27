@@ -1,8 +1,8 @@
 name: 'Sous Layout Builder'
-description: 'Enable native Page layouts while preserving visible fields and allowing per-page customization.'
+description: 'Enable native Page and Frontpage layouts while retaining visible fields and per-page customization.'
 type: 'Site'
 recipes:
-  - sous-content-types
+  - sous-starter-content
   - core/recipes/basic_block_type
 install:
   - block
@@ -14,5 +14,8 @@ config:
   actions:
     core.entity_view_display.node.page.default:
       # Native entity saves convert existing formatters to field blocks.
+      enableLayoutBuilder: []
+      allowLayoutOverrides: true
+    core.entity_view_display.node.frontpage.default:
       enableLayoutBuilder: []
       allowLayoutOverrides: true

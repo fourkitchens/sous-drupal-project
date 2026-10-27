@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Watch and rebuild an existing generated theme in local/nonproduction mode.
+# Watch and rebuild an existing generated theme in local/staging mode.
 # Usage: npm run theme-watch -- [theme-directory] [watch arguments...]
 # Requires installed dependencies; the theme's develop task owns the long-running
 # watcher, and its exit status is returned through the shared runtime.

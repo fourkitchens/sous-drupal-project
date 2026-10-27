@@ -3,7 +3,8 @@
 # Sous Drupal starter
 
 Sous creates a Drupal application with Gin administration, an Emulsify theme,
-and a choice of Page, Paragraphs, native Layout Builder, or admin-only setup.
+and Page/Frontpage defaults with optional Paragraphs or native Layout Builder,
+plus an explicit admin-only setup.
 This repository owns the application scaffold, installation/build helpers, and
 shared product integration/release pipeline. The sibling recipes own reusable
 configuration defaults; generated sites own their complete configuration and
@@ -18,8 +19,10 @@ integration/tests from a Sous source checkout, not a generated application.
 - [Supported platform](docs/PLATFORM.md) — PHP, Drupal, Node/npm, Composer, DDEV, and Emulsify versions and requirements.
 - [Setup and recovery](docs/SETUP.md) — fresh generation, contributor clones, restoration, and interrupted installation.
 - [Features and installation choices](docs/FEATURES.md) — expected forms, fields, composition, and rendering.
+- [Configuration audit](docs/CONFIGURATION_AUDIT.md) — ownership and restoration of the 129 legacy export files.
+- [Product and application CI](docs/CI.md) — separate Sous Actions from opt-in CircleCI/Actions templates for generated sites.
 - [Build tools](docs/BUILD_TOOLS.md) — dependency installation, production assets, Storybook, lint, and local helpers.
-- [Environment contract](docs/ENVIRONMENTS.md) — local/nonproduction/production settings, optional Config Split, and guarded configuration commands.
+- [Environment contract](docs/ENVIRONMENTS.md) — local/staging/production settings, optional Config Split, and guarded configuration commands.
 - [Configuration and existing-site maintenance](docs/MAINTENANCE.md) — project-owned exports, explicit migrations, and overrides.
 - [Production deployment](docs/DEPLOYMENT.md) — building an artifact and updating an existing site.
 - [Contributing and sibling sources](docs/CONTRIBUTING.md) — changing the product without using a developer database.

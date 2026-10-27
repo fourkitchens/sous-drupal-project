@@ -37,6 +37,7 @@
         "drupal/core-recommended": "^11.4.11",
         "drupal/core-vendor-hardening": "^11.4.11",
         "drupal/login_destination": "^2.0.0-beta10@beta",
+        "drupal/pathauto": "^1.15",
         "drush/drush": "^13.8.0",
         "fourkitchens/sous-admin": "dev-main",
         "fourkitchens/sous-emulsify": "dev-main",
@@ -183,6 +184,8 @@
     },
     "archive": {
         "exclude": [
+            "/.github/workflows",
+            "/.github/actions",
             "/devops/integration",
             "/devops/tests/*",
             "/devops/tests/.*"

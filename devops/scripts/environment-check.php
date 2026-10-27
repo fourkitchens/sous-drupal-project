@@ -16,12 +16,13 @@ declare(strict_types=1);
 
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Site\Settings;
 
 $environment = Settings::get('sous_environment');
 // Require adopted project settings rather than inferring safety from a hostname
 // or a local file. The caller must also choose a mode explicitly.
-if (!in_array($environment, ['local', 'nonproduction', 'production'], TRUE)) {
+if (!in_array($environment, ['local', 'staging', 'production'], TRUE)) {
   throw new RuntimeException('Adopt the Sous environment include in this project before using its configuration helpers.');
 }
 $mode = getenv('SOUS_ENVIRONMENT_CHECK');
@@ -52,6 +53,13 @@ if ($environment === 'production' && array_intersect($excluded, $development_mod
 }
 
 $active = \Drupal::service('config.storage');
+$assert_stored_split_statuses = static function (StorageInterface $storage): void {
+  foreach (['sous_local', 'sous_staging'] as $id) {
+    if (!empty(($storage->read('config_split.config_split.' . $id) ?: [])['status'])) {
+      throw new RuntimeException('Store optional split statuses as inactive; select them through the environment override.');
+    }
+  }
+};
 if (\Drupal::moduleHandler()->moduleExists('config_split')) {
   // Use effective definitions, including runtime status overrides. Inspect
   // folders before asking native transforms to create or read their storage.
@@ -88,13 +96,29 @@ if (\Drupal::moduleHandler()->moduleExists('config_split')) {
         $assert_split($split);
       }
     }
+    // The bootstrap definition imports environment definitions from _splits.
+    // Check those incoming folders before native transforms can create them,
+    // including on a fresh install with no active environment definitions yet.
+    $definitions = $manager->getSplitConfig('_splits', $source);
+    if ($definitions !== NULL && $definitions->get('status') && $definitions->get('storage') === 'folder') {
+      $folder = (string) $definitions->get('folder');
+      $directory = str_starts_with($folder, '/') ? $folder : DRUPAL_ROOT . '/' . $folder;
+      $incoming = new FileStorage($directory);
+      foreach ($manager->listAll($incoming) as $name) {
+        $split = $manager->getSplitConfig($name, $incoming);
+        if ($split !== NULL) {
+          $assert_split($split);
+        }
+      }
+      $assert_stored_split_statuses($incoming);
+    }
   }
 }
 
 // A complete production-safe base is shared by all environments. Runtime
 // overrides and active splits may differ; those differences must not leak into
 // the base export. Accept a storage so each mode can inspect its native source.
-$assert_base = static function (StorageInterface $storage) use ($development_modules, $capture_backends): void {
+$assert_base = static function (StorageInterface $storage) use ($development_modules, $capture_backends, $assert_stored_split_statuses): void {
   $extensions = $storage->read('core.extension');
   if (!$extensions || !$storage->exists('system.site')) {
     throw new RuntimeException('Use a complete site export with core.extension and system.site.');
@@ -117,18 +141,14 @@ $assert_base = static function (StorageInterface $storage) use ($development_mod
     }
     foreach (($data->read('system.mail') ?: [])['interface'] ?? [] as $backend) {
       if (in_array($backend, $capture_backends, TRUE)) {
-        throw new RuntimeException('Mail capture belongs in nonproduction runtime overrides, not the production base.');
+        throw new RuntimeException('Mail capture belongs in local/staging runtime overrides, not the production base.');
       }
     }
     $proxy = $data->read('stage_file_proxy.settings') ?: [];
     if (!empty($proxy['origin']) || !empty($proxy['hotlink'])) {
       throw new RuntimeException('File proxying must not be configured in the production base.');
     }
-    foreach (['sous_local', 'sous_nonproduction'] as $id) {
-      if (!empty(($data->read('config_split.config_split.' . $id) ?: [])['status'])) {
-        throw new RuntimeException('Store optional split statuses as inactive; select them through the environment override.');
-      }
-    }
+    $assert_stored_split_statuses($data);
     foreach (($data->read('config_ignore.settings') ?: [])['ignored_config_entities'] ?? [] as $rule) {
       // Wildcards and whole-site ignores can hide drift from normal deployment.
       if (strpbrk((string) $rule, '*?') !== FALSE || in_array($rule, ['core.extension', 'system.site'], TRUE)) {
@@ -139,9 +159,13 @@ $assert_base = static function (StorageInterface $storage) use ($development_mod
 };
 
 // Select the storage matching the operation: transformed export, sync input,
-// or production's current active config. Nonproduction active state may contain
+// or production's current active config. Local/staging active state may contain
 // intentionally split-owned modules, so its base is checked during export/import.
 if ($mode === 'export') {
+  // _splits moves these definitions out of the transformed base. Inspect raw
+  // stored statuses first: effective runtime overrides can hide a true value,
+  // and a native export may already write that invalid value into _splits.
+  $assert_stored_split_statuses($active);
   // Native export transformations include Config Split when it is installed.
   $assert_base(\Drupal::service('config.storage.export'));
 }
@@ -170,7 +194,7 @@ if ($environment !== 'local') {
 }
 $interfaces = \Drupal::config('system.mail')->get('interface') ?: [];
 // Check every native mail mapping: a per-module transport can override the
-// default. Production retains real delivery; nonproduction must capture it.
+// default. Production retains real delivery; local/staging must capture it.
 if ($environment === 'production') {
   if (array_intersect($interfaces, $capture_backends)
     || \Drupal::config('stage_file_proxy.settings')->get('origin')) {
@@ -181,11 +205,11 @@ else {
   // Runtime overrides keep automatic cron disabled without exporting that local
   // choice into the shared production base, including when the module is absent.
   if (\Drupal::config('automated_cron.settings')->get('interval') !== 0) {
-    throw new RuntimeException('Nonproduction automated cron must remain disabled through runtime settings.');
+    throw new RuntimeException('Local/staging automated cron must remain disabled through runtime settings.');
   }
   foreach ($interfaces as $backend) {
     if ($backend !== 'test_mail_collector') {
-      throw new RuntimeException('Review specific mail transports: every nonproduction Drupal mail mapping must use the safe collector.');
+      throw new RuntimeException('Review specific mail transports: every local/staging Drupal mail mapping must use the safe collector.');
     }
   }
 }

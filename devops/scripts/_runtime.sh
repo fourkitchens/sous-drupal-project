@@ -29,8 +29,8 @@ export SOUS_RUNTIME
 # Distinguish an unset value from an explicitly empty or misspelled environment.
 if [ "${SOUS_ENVIRONMENT+x}" = x ]; then
   case "$SOUS_ENVIRONMENT" in
-    local|nonproduction|production) ;;
-    *) echo 'SOUS_ENVIRONMENT must be local, nonproduction, or production.' >&2; exit 2 ;;
+    local|staging|production) ;;
+    *) echo 'SOUS_ENVIRONMENT must be local, staging, or production.' >&2; exit 2 ;;
   esac
 fi
 
@@ -189,7 +189,7 @@ runtime_target_command() (
         fi
         case "$hook_environment" in
           production) exit 0 ;;
-          local|nonproduction) ;;
+          local|staging) ;;
           *) echo "Invalid environment for a local safety hook." >&2; exit 2 ;;
         esac
         if [ ! -f "$1" ] || [ ! -r "$1" ]; then
@@ -244,8 +244,8 @@ runtime_require_development() {
       fi
     fi
     case "$environment" in
-      local|nonproduction) ;;
-      *) echo "This development workflow requires local or nonproduction." >&2; exit 1 ;;
+      local|staging) ;;
+      *) echo "This development workflow requires local or staging." >&2; exit 1 ;;
     esac
   '
 }

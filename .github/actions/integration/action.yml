@@ -41,6 +41,8 @@ runs:
         SUBJECT_REPOSITORY: ${{ inputs.subject_repository }}
         RECIPE_REFS: ${{ inputs.recipe_refs }}
         SOUS_TOOLING_REF: ${{ github.action_ref }}
+        CI_EVENT: ${{ github.event_name }}
+        PR_HEAD_REF: ${{ github.head_ref }}
       run: |
         artifacts="$RUNNER_TEMP/sous-integration-results"
         printf 'result-path=%s\n' "$artifacts" >> "$GITHUB_OUTPUT"
@@ -52,6 +54,17 @@ runs:
           [[ "$(git -C "$tooling" rev-parse HEAD)" != "$SOUS_TOOLING_REF" ]]; then
           echo 'The tooling checkout does not match the resolved action SHA.' >&2
           exit 1
+        fi
+        # This coordinated release changes companion packages together. Only
+        # its PR branch uses the reviewed, temporary SHA map; publication and
+        # unrelated PRs continue to test merged main branches. Explicit refs
+        # from a validation dispatch take precedence over these defaults.
+        if [[ "$CI_EVENT" = pull_request ]] && \
+          jq -e 'type == "object" and length == 0' <<< "$RECIPE_REFS" >/dev/null && \
+          jq -e --arg branch "$PR_HEAD_REF" '.head_ref == $branch' "$tooling/devops/integration/pr-refs.json" >/dev/null; then
+          RECIPE_REFS=$(jq -ce --arg subject "${SUBJECT_REPOSITORY##*/}" \
+            '.recipes | del(.[$subject])' "$tooling/devops/integration/pr-refs.json")
+          printf 'Using reviewed companion revisions for coordinated PR branch %s.\n' "$PR_HEAD_REF"
         fi
         bash "$tooling/devops/integration/run.sh" \
           --subject "$SUBJECT" \

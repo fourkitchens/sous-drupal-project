@@ -8,7 +8,7 @@ weight: 0
 stackable: false
 no_patching: false
 storage: folder
-folder: ../config/splits/local
+folder: ../config/local
 module: {  }
 theme: {  }
 complete_list: {  }

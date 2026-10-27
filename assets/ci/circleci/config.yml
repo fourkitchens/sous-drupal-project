@@ -1,0 +1,32 @@
+# Opt-in example for a generated site, not for maintaining the Sous product.
+# Copy to .circleci/config.yml in the generated site's own repository.
+# Uses the site's DDEV runtime and committed Composer/root/theme lockfiles.
+# A theme-less installation should replace the theme commands with its checks.
+version: 2.1
+
+jobs:
+  build:
+    machine:
+      image: ubuntu-2404:current
+    steps:
+      - checkout
+      - run:
+          name: Install the reviewed DDEV runtime
+          command: |
+            curl -fsSL https://raw.githubusercontent.com/ddev/ddev/5da91aeb9ebab0b0e66171c450b72099308d332c/scripts/install_ddev.sh -o /tmp/install-ddev.sh
+            bash /tmp/install-ddev.sh v1.25.4
+      - run:
+          name: Validate and build the generated site
+          command: |
+            ddev start
+            ddev composer validate --no-check-publish
+            ddev composer install --no-interaction --prefer-dist
+            ddev npm ci --include=dev
+            ddev npm run theme-ci
+            ddev npm run lint
+            ddev npm run theme-build
+
+workflows:
+  build:
+    jobs:
+      - build

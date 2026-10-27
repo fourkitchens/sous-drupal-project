@@ -1,0 +1,35 @@
+# Opt-in example for a generated site, not the Sous product integration/release.
+# Copy to .github/workflows/build.yml in the generated site's own repository.
+# A theme-less installation should replace the theme commands with its checks.
+name: Site build
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the reviewed DDEV runtime
+        uses: ddev/github-action-setup-ddev@fdf2f5c97943bae638f31df6df86f1defa6210c0 # v1.12.1
+        with:
+          version: '1.25.4'
+          autostart: false
+          installScriptUrl: https://raw.githubusercontent.com/ddev/ddev/5da91aeb9ebab0b0e66171c450b72099308d332c/scripts/install_ddev.sh
+      - name: Validate and build the generated site
+        run: |
+          ddev start
+          ddev composer validate --no-check-publish
+          ddev composer install --no-interaction --prefer-dist
+          ddev npm ci --include=dev
+          ddev npm run theme-ci
+          ddev npm run lint
+          ddev npm run theme-build

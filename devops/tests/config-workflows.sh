@@ -75,7 +75,7 @@ done
 pass 'production permits configuration deployment but never local refresh hooks'
 reset_project; export SOUS_RUNTIME=native
 expect_failure helper get-db.sh
-contains "$TEST_ROOT/output" 'requires local or nonproduction'
+contains "$TEST_ROOT/output" 'requires local or staging'
 pass 'native development requires an explicit environment'
 reset_project; mkdir -p "$PROJECT/web/themes/custom/a theme"
 export SOUS_RUNTIME=native SOUS_ENVIRONMENT=local
@@ -95,7 +95,7 @@ calls_assert '[.[]|select(.tool=="drush")|.command]==["recipe"]'
 pass 'canonical recipe application stops before cache rebuild on failure'
 
 # These archives are all local fixtures, including deliberately malformed bytes.
-reset_project; export SOUS_ENVIRONMENT=nonproduction
+reset_project; export SOUS_ENVIRONMENT=staging
 mkdir -p "$PROJECT/selected backups"
 printf "SELECT 'selected backup';\n" > "$PROJECT/selected backups/site dump.sql"
 gzip -c "$PROJECT/selected backups/site dump.sql" > "$PROJECT/selected backups/site dump.sql.gz"
@@ -128,7 +128,7 @@ for selected in '' 'missing dump.sql.gz'; do
 done
 expect_failure helper get-db.sh ''
 pass 'explicit missing/empty paths never select a valid default'
-reset_project; export SOUS_ENVIRONMENT=nonproduction
+reset_project; export SOUS_ENVIRONMENT=staging
 : > "$PROJECT/empty.sql"; printf '' | gzip > "$PROJECT/empty.sql.gz"
 printf 'SELECT 1;\n' > "$PROJECT/plain.sql.gz"
 printf 'SELECT 1;\n' | gzip > "$PROJECT/compressed.sql"
@@ -159,7 +159,7 @@ fi
 chmod 600 "$PROJECT/unreadable.sql"
 pass 'nonregular and unreadable backups are rejected when permissions are enforced'
 reset_project; printf 'SELECT 1;\n' > "$PROJECT/backup.sql"
-export SOUS_ENVIRONMENT=nonproduction
+export SOUS_ENVIRONMENT=staging
 for pair in 'ddev import-db' 'native sql:drop' 'native sql:cli'; do
   read -r runtime command <<< "$pair"; export SOUS_RUNTIME="$runtime"
   export TEST_COMMAND_STATUSES="{\"$command\":47,\"cache:rebuild\":49,\"post-import\":51,\"active\":53}"

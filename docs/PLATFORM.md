@@ -70,15 +70,15 @@ relative.
 
 | Choice | Expected result |
 | --- | --- |
-| `0` Default | Gin + generated Emulsify theme; Page with editable/rendered Body, metadata/tags/teasers, media support and Linkit |
-| `1` Layout Builder | Default Page plus native core Layout Builder, existing visible Body field block, Basic inline blocks, and saved per-Page overrides |
-| `2` Paragraphs | Page Body plus Image, Text, Text with Media, and Video composition through the public host recipe; media/icons/revisions and rendered components |
+| `0` Default | Gin + generated Emulsify theme; Page and Frontpage Body/SEO/metadata/teasers, title-based aliases, media and native management Views |
+| `1` Layout Builder | Both starter types plus native core Layout Builder, visible Body blocks, Basic inline blocks and per-node overrides |
+| `2` Paragraphs | Both starter types with Body and Image, Text, Text with Media and Video components through the bundled extension of the public host |
 | `3` Admin only | Gin/Navigation/authorization and generated Emulsify theme, without optional Page or content-composition recipes |
 
-No current recipe seeds a Frontpage content type, homepage/error-page content,
-Entity Browser collection, or Role Delegation configuration. Those were stale
-claims from the old partial export. [Features](FEATURES.md) describes current
-capabilities; each recipe README defines its own supported Minimal baseline.
+The starter's bundled recipes supply Frontpage; they do not seed homepage/error
+content, enforce a single Frontpage node, or configure Entity Browser/Role
+Delegation. [Features](FEATURES.md) describes the supported compositions and
+[the configuration audit](CONFIGURATION_AUDIT.md) records ownership/restoration.
 
 ## Local tooling and hosting
 

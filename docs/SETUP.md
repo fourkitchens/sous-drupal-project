@@ -8,7 +8,7 @@ NVM is one optional way to select them. DDEV supplies the application/runtime
 and build tools. Terminus is needed only for an explicitly chosen Pantheon
 workflow, not normal setup.
 
-The [environment contract](ENVIRONMENTS.md) defines safe local/nonproduction/
+The [environment contract](ENVIRONMENTS.md) defines safe local/staging/
 production settings and command context. Unset environments default to local
 only inside actual DDEV, otherwise production. A local settings file never
 selects the environment; existing sites adopt the ordered include explicitly.
@@ -185,7 +185,7 @@ For an existing site, review these hook files and the mail/cron runtime policy
 together when adopting the helpers. Composer preserves owned settings files;
 it does not add new overrides to an existing `settings.sous.php` automatically.
 
-They run only in local/nonproduction through the selected project runtime, from
+They run only in local/staging through the selected project runtime, from
 the project root. Make their project-specific shutdown operations idempotent,
 verify the resulting state, and return nonzero if a required safeguard cannot
 be established. Use project Drush/runtime helpers and retain any supplied target
@@ -194,7 +194,7 @@ systems a generated site owns; fill them with those integrations' real kill
 switches and checks. Do not copy client-specific module lists or disable
 unrelated production capabilities.
 
-The standard settings already capture native nonproduction Drupal mail and
+The standard settings already capture native staging Drupal mail and
 disable Drupal's automated cron trigger through runtime overrides, so ordinary
 configuration import cannot reactivate those defaults. Custom transports,
 schedulers and synchronization clients need their own settings/state policy.
@@ -235,7 +235,7 @@ The refresh follow-up was checked on fresh, disposable Drupal 11.4.11/Drush
 | Sanitization/login | Failed safeguards prevented dependent work; the deferred import → configuration safeguards → sanitization → login sequence passed |
 | Download completion | Private validated backup completed at mode `0600`; failed producer preserved the existing target and removed partial files |
 | Invalid selections | Corrupt gzip, empty selected paths and an empty ZIP disguised as SQL were rejected before database replacement; a valid default was never substituted for an explicit empty path |
-| Automated Cron absent | Fresh Minimal without the module or stored config passed the active guard with effective nonproduction interval zero |
+| Automated Cron absent | Fresh Minimal without the module or stored config passed the active guard with effective staging interval zero |
 | Focused regressions | 34 command/refresh tests passed on the host and inside DDEV with no skips; 34 installer and seven settings tests passed on the host |
 | Dependency checks | The minimal fixture's Composer manifest validation, platform checks and security audit all exited zero |
 

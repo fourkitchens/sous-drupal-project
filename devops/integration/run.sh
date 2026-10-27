@@ -252,7 +252,7 @@ provision() {
   jq '.repositories |= map(select(.type!="path"))' composer.json > "$work/composer.json"
   mv "$work/composer.json" composer.json
   mkdir -p "$work/bin"
-  printf '#!/bin/sh\nexec ddev exec --raw php "$@"\n' > "$work/bin/php"
+  printf '#!/bin/sh\nexec ddev exec --dir=/var/www/html --raw php "$@"\n' > "$work/bin/php"
   chmod 755 "$work/bin/php"
   PATH="$work/bin:$PATH" must generate-project-metadata sh devops/scripts/sous-setup.sh
   # Source-generation cleanup deliberately removes maintainer tooling. Restore
@@ -279,7 +279,9 @@ provision() {
   ln -s ../../node_modules .integration/original-starter/node_modules
   directories=("$original")
   for name in "${owned[@]}"; do directories+=("/var/www/html/.integration/recipes/$name"); done
+  directories+=("/var/www/html/.integration/recipes/sous-paragraphs")
   dd source-validation exec env SOUS_INTEGRATION_AUTOLOAD=/var/www/html/vendor/autoload.php php devops/integration/validate-recipes.php "${directories[@]}"
+  dd starter-defaults exec -d "$original" env SOUS_INTEGRATION_AUTOLOAD=/var/www/html/vendor/autoload.php php devops/tests/starter-defaults.php
   dd documentation-validation exec bash devops/tests/documentation.sh --sources /var/www/html/.integration/sources
   for name in sous-drupal-project "${owned[@]}"; do
     if [ "$name" = sous-drupal-project ]; then local_source="$site/.integration/original-starter"; container=$original
@@ -289,7 +291,7 @@ provision() {
   done
   dd php-lint exec npm run lint:php
   dd javascript-lint exec npm run lint:js
-  for test in install-workflows config-workflows environment-settings lint-workflows integration-audit integration-action artifact; do
+  for test in install-workflows config-workflows environment-settings lint-workflows integration-audit integration-action ci-templates artifact; do
     dd "$test" exec -d "$original" bash "devops/tests/$test.sh"
   done
   dd environment-service-isolation exec env SOUS_INTEGRATION_AUTOLOAD=/var/www/html/vendor/autoload.php php devops/tests/environment-services.php
@@ -337,10 +339,9 @@ option_case() {
     choice=$1
     dd "$choice-reset" snapshot restore integration-base || return 1
     case "$choice" in
-      default) recipe=sous-content-types; mode=default ;;
-      paragraphs) recipe=sous-paragraphs; mode=paragraphs ;;
+      default) recipe=sous-starter-content; mode=default ;;
+      paragraphs) recipe=sous-starter-paragraphs; mode=paragraphs ;;
       layout-builder)
-        dd layout-builder-page-prerequisite install-recipe fourkitchens/sous-content-types || return 1
         recipe=sous-layout-builder; mode=core-layout-builder ;;
       admin-only) recipe=; mode=admin-only ;;
     esac
@@ -439,14 +440,16 @@ environments() {
   sync="$site/config/default"
   base="$work/environment-base-config"
   cp -pR "$sync" "$base"
-  folders="$site/config/splits"
+  folders="$site/config"
   hidden="$work/optional-folders-not-installed"
-  mv "$folders" "$hidden"
+  mkdir -p "$hidden"
+  for split_folder in _splits local staging; do mv "$folders/$split_folder" "$hidden/$split_folder"; done
   update_result '.environments={}'
   for split in plain split; do
     if [ "$split" = split ]; then
-      mv "$hidden" "$folders"
+      for split_folder in _splits local staging; do mv "$hidden/$split_folder" "$folders/$split_folder"; done
       dd environment-optional-package composer require 'drupal/config_split:^2.0.2' --no-interaction
+      dd environment-native-split-transforms exec php devops/tests/config-splits.php
       dd environment-optional-recipe install-recipe fourkitchens/sous-config-split
       environment_exec environment-split-defaults local env SOUS_DISPOSABLE_TEST=1 vendor/bin/drush php:script web/recipes/sous-config-split/tests/verify-defaults.php
       probe split-prepare local
@@ -456,7 +459,7 @@ environments() {
       cp -pR "$sync" "$base"
       snapshot_name=environment-split-base
     else snapshot_name=environment-base; fi
-    for environment_name in local nonproduction production; do
+    for environment_name in local staging production; do
       key="$environment_name-$split"
       dd "environment-$key-reset" snapshot restore "$snapshot_name"
       rm -rf "$sync"
@@ -470,10 +473,10 @@ environments() {
       if [ "$split" = split ]; then
         probe split-verify "$environment_name"
         if [ "$environment_name" != production ]; then
-          definition="$sync/config_split.config_split.sous_$environment_name.yml"
+          definition="$folders/_splits/config_split.config_split.sous_$environment_name.yml"
           cp "$definition" "$work/split-original"
           [ "$(grep -c '^folder:' "$definition")" -eq 1 ] || fail 'Expected one split folder setting.'
-          for unsafe_folder in ../config/splits/missing-incoming sites/default; do
+          for unsafe_folder in ../config/missing-incoming sites/default; do
             if [ "$unsafe_folder" = sites/default ]; then reason='outside the public web root'; else reason='active split directory must exist'; fi
             sed "s|^folder:.*|folder: $unsafe_folder|" "$work/split-original" > "$definition"
             negative_helper confim "$environment_name" "$reason"
@@ -504,7 +507,7 @@ environments() {
     if [ "$split" = plain ]; then environment_negatives; fi
   done
   audit environment-composer-audit composer "$site/composer.lock" ddev exec composer audit --format=json
-  dd environment-native-ci-build exec env IS_DDEV_PROJECT= SOUS_RUNTIME=native SOUS_ENVIRONMENT=nonproduction sh devops/scripts/theme-build.sh
+  dd environment-native-ci-build exec env IS_DDEV_PROJECT= SOUS_RUNTIME=native SOUS_ENVIRONMENT=staging sh devops/scripts/theme-build.sh
 }
 
 cd "$work"

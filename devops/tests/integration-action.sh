@@ -6,6 +6,7 @@ awk '/      run: \|/{inside=1;next} inside{if($0!~/^        /&&$0!~/^$/)exit;sub
 central="$TEST_ROOT/downloaded central action"; action="$central/.github/actions/integration"
 workspace="$TEST_ROOT/caller workspace with spaces"; tooling="$workspace/.sous-tooling"
 mkdir -p "$action" "$tooling/devops/integration" "$TEST_ROOT/working directory"
+cp "$SOURCE/devops/integration/pr-refs.json" "$tooling/devops/integration/pr-refs.json"
 # Only the additional Git checkout contains maintainer files; this reproduces
 # GitHub's export-ignore archive behavior without fetching a remote repository.
 cat > "$tooling/devops/integration/run.sh" <<'SH'
@@ -31,6 +32,7 @@ expected_ref="$SOUS_TOOLING_REF"
 subject="$TEST_ROOT/subject \$(touch injected-subject)"; mkdir "$subject"
 export GITHUB_ACTION_PATH="$action" GITHUB_OUTPUT="$TEST_ROOT/github-output" RUNNER_TEMP="$TEST_ROOT/runner temporary directory" SUBJECT="$subject" SUBJECT_REPOSITORY=fourkitchens/sous-formats
 export GITHUB_WORKSPACE="$workspace"
+export CI_EVENT=pull_request PR_HEAD_REF=codex/release-2026-10-26
 export RECIPE_REFS='{"sous-formats":"$(touch injected-ref); echo untrusted"}'
 # Checkout inputs must capture the parent context, keep credentials transient,
 # and use the fixed path consumed by the shell below, with no moving-ref fallback.
@@ -54,6 +56,24 @@ for status in 0 42; do
   [ -z "$(find "$TEST_ROOT" -name injected-subject -o -name injected-ref)" ] || fail 'untrusted input was executed'
   pass "archive omission/full source checkout, literal arguments and runner exit $status"
 done
+export TEST_EXIT_CODE=0 RECIPE_REFS='{}' SUBJECT_REPOSITORY=fourkitchens/sous-media
+expect_status 0 bash -e -o pipefail "$TEST_ROOT/action.sh"
+expected_refs="$(jq -c '.recipes | del(.["sous-media"])' "$SOURCE/devops/integration/pr-refs.json")"
+jq -e --arg refs "$expected_refs" '.refs_json==$refs' "$expected/result.json" >/dev/null || fail 'coordinated PR did not use reviewed companion revisions or replaced its subject'
+jq -e '.recipes | length == 6 and all(.[]; test("^[0-9a-f]{40}$"))' "$SOURCE/devops/integration/pr-refs.json" >/dev/null || fail 'coordinated refs must be explicit reviewed commit SHAs'
+pass 'coordinated PR tests reviewed companion SHAs while preserving its subject checkout'
+export RECIPE_REFS='{"sous-formats":"main"}'
+expect_status 0 bash -e -o pipefail "$TEST_ROOT/action.sh"
+jq -e --arg refs "$RECIPE_REFS" '.refs_json==$refs' "$expected/result.json" >/dev/null || fail 'manual companion refs were replaced'
+pass 'explicit companion revision selection takes precedence'
+export RECIPE_REFS='{}'
+for event_branch in 'pull_request unrelated-branch' 'push codex/release-2026-10-26' 'workflow_dispatch codex/release-2026-10-26'; do
+  read -r CI_EVENT PR_HEAD_REF <<< "$event_branch"
+  export CI_EVENT PR_HEAD_REF
+  expect_status 0 bash -e -o pipefail "$TEST_ROOT/action.sh"
+  jq -e '.refs_json=="{}"' "$expected/result.json" >/dev/null || fail 'temporary PR pins affected unrelated validation or publication'
+done
+pass 'unrelated PRs, normal pushes and publication dispatches use merged dependencies'
 for incorrect_ref in '' 0000000000000000000000000000000000000000; do
   export SOUS_TOOLING_REF="$incorrect_ref"
   rm -f "$expected/result.json"

@@ -14,7 +14,7 @@ not installed extensions with an update lifecycle. See the official
 
 | Layer | Reusable responsibility |
 | --- | --- |
-| Starter | Composer/runtime/scaffold setup, installation choices, frontend tools, and an initially empty site sync directory |
+| Starter | Scaffold/setup and bundled Frontpage, alias, native View and content-composition defaults; initially empty site sync directory |
 | Sous Admin | Gin, Navigation, administration defaults, the `superuser` role, and the offered editorial/operations conveniences |
 | Sous Emulsify | Theme dependencies and the default frontend theme; no roles or user assignments |
 | Sous Formats | Text formats/editor defaults and the shared Linkit profile subrecipe |
@@ -53,11 +53,12 @@ the modes.
 ## The sync directory belongs to the site
 
 The configured path remains **`config/default`** for compatibility. The starter's
-129 legacy YAML files were a partial historic export, with obsolete Frontpage
-and field models and no `core.extension.yml` or `system.site.yml`. Fresh setup
-did not import them. They overlapped 82 recipe files and were not a supported
-installation baseline. The source template now contains only a marker and
-ownership README there.
+129 legacy YAML files were a partial historic export without `core.extension.yml`
+or `system.site.yml`. Removing that partial export must retain the starter's
+useful defaults: bundled recipes now restore Frontpage, Page/Frontpage aliases
+and current native Views. Existing recipe/module providers retain Page, media,
+Paragraph types and Superuser. See the complete [configuration audit](CONFIGURATION_AUDIT.md).
+The source sync directory contains only a marker and ownership README.
 
 Fresh installation runs native configuration export after its recipes, theme,
 and administrator setup, before success or bootstrap cleanup. Commit that
@@ -104,7 +105,7 @@ The `confex` helper checks and exports through the site's configured sync
 directory and native transforms. `confim` checks source configuration, uses
 native `drush deploy` for database updates, import, cache work and deployment
 hooks, then checks the active state. The [environment contract](ENVIRONMENTS.md)
-defines local/nonproduction/production policy, guarded commands, and explicit
+defines local/staging/production policy, guarded commands, and explicit
 adoption for existing settings files. The preserved Pantheon helper
 `devops/ci/drush-config-import SITE ENV` invokes that command on the selected
 remote site's own configured directory. It does not search the caller's files
@@ -112,7 +113,7 @@ to decide whether the remote site should import. No remote deployment was
 performed while changing these helpers.
 
 Config Split is optional. The bundled `sous-config-split` recipe supplies
-inactive local/nonproduction definitions only when explicitly selected; sites
+inactive local/staging definitions only when explicitly selected; sites
 own its package, lists and exported split files. Ordinary configuration commands
 also work without it or its directories. There is no `config/_splits` import,
 meta-split ordering or broad Config Ignore policy. Follow the

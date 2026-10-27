@@ -29,9 +29,9 @@ if (!in_array($combination, ['default', 'paragraphs', 'core-layout-builder', 'ad
 $recipes_directory = getenv('SOUS_INTEGRATION_RECIPES_DIR') ?: DRUPAL_ROOT . '/recipes';
 $recipes = $combination === 'admin-only'
   ? ['sous-admin']
-  : ['sous-admin', 'sous-emulsify', 'sous-content-types', 'sous-formats', 'sous-media'];
+  : ['sous-admin', 'sous-emulsify', 'sous-content-types', 'sous-formats', 'sous-media', 'sous-starter-content'];
 if ($combination === 'paragraphs') {
-  $recipes = array_merge($recipes, ['sous-paragraph-types', 'sous-paragraphs']);
+  $recipes = array_merge($recipes, ['sous-paragraph-types', 'sous-paragraphs', 'sous-starter-paragraphs']);
 }
 if ($combination === 'core-layout-builder') {
   $recipes[] = 'sous-layout-builder';
@@ -106,6 +106,7 @@ $run = static function (string $relative) use ($recipes_directory, &$checks): vo
   $checks[] = ['script' => $relative, 'output' => $output];
 };
 $run('sous-admin/tests/verify-navigation.php');
+$run('sous-starter-content/tests/verify-defaults.php');
 if ($combination !== 'admin-only') {
   $run('sous-formats/tests/verify-formats.php');
 }

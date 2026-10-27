@@ -1,76 +1,100 @@
 # Optional Config Split defaults
 
-Use this bundled native recipe only when module enablement or stored
-configuration must differ between environments. The
-[environment contract](../../../docs/ENVIRONMENTS.md) owns runtime policy and
-command/adoption instructions. Logging, debugging, mail
-capture and similar simple runtime values use the starter's environment
-overrides instead. This recipe is not an additional Composer package and does
-not install development tools, a mail module, file proxy, or Config Ignore.
+Use this bundled native recipe when modules or stored configuration must differ
+between environments. Simple differences such as logging, debugging and mail
+capture use [runtime settings](../../../docs/ENVIRONMENTS.md). This recipe adds
+no development module, mail module, file proxy, or Config Ignore rule.
 
 ## Explicit adoption
 
-The consuming project's administrator chooses this feature. From its root:
+From the generated project root:
 
 ```sh
 ddev composer require drupal/config_split:^2.0.2
 ddev install-recipe fourkitchens/sous-config-split
+ddev npm run confex
 ```
 
-The second command addresses the already bundled recipe by its basename; it
-does not download a package named `fourkitchens/sous-config-split`. An equivalent
-native path is `/var/www/html/web/recipes/sous-config-split` in DDEV. Config Split
-is an optional application dependency, not a default or `require-dev` package:
-its module must remain available on environments importing the site's export.
+The recipe is already bundled; the second command does not download a package
+named `fourkitchens/sous-config-split`. Config Split remains a runtime dependency
+on every environment importing the site's export. The reviewed 2.0.2 baseline
+contains the fix for [SA-CONTRIB-2025-017](https://www.drupal.org/project/config_split/releases/2.0.2).
 
-Version 2.0.2 is the newest stable release verified against official Composer
-metadata for this implementation. It supports the selected Drupal 11 baseline
-and fixes [SA-CONTRIB-2025-017](https://www.drupal.org/project/config_split/releases/2.0.2).
-Older 2.0.0/2.0.1 releases do not contain that fix. A project lockfile records
-the resolved version; future upgrades require another reviewed update.
+## Definitions and values
 
-The recipe supplies `sous_local` and `sous_nonproduction` definitions, inactive
-in stored/exported configuration. The starter selects the corresponding status
-through its validated `SOUS_ENVIRONMENT` contract. Production uses the ordinary
-complete base with both splits inactive; it has no extra production split.
-The real project directories are `config/splits/local` and
-`config/splits/nonproduction`, outside the public `web` root and outside the
-complete `config/default` sync directory. Keep these directories present before
-activation; do not rely on the module silently creating a missing path.
+The recipe's `config/` files are the authoritative reusable defaults. Once
+applied, the generated project owns its definitions and exported values:
 
-## Project-owned module separation
+| Location | Purpose |
+|---|---|
+| `config/default` | Complete production base, including the `_splits` bootstrap definition |
+| `config/_splits` | Environment split definitions, written by the first native export |
+| `config/local` | Values/modules owned by `sous_local` |
+| `config/staging` | Values/modules owned by `sous_staging` |
 
-Definitions start with empty module/theme/complete/partial lists. Choose only
-the environment differences the project actually needs, configure the lists
-through the module's UI or reviewed project config, then export in that
-environment. Native `config:export` and `deploy` incorporate the active split;
-no separate `--partial` import or hardcoded import ordering is necessary.
+This restores the useful SFASU pattern: an always-active `_splits` split routes
+environment definitions into one directory. Its own small definition stays in
+the complete base, so a fresh import can discover it before any active split
+exists. A native Config Split priority imports definitions before environment
+values and exports them afterward. Do not move the bootstrap into itself or
+remove that priority without testing fresh configuration imports.
 
-Do not combine a module owned by a split with Drupal's
-`$settings['config_exclude_modules']`. Core removes excluded modules and their
-dependent configuration at export priority 500, before Config Split's default
-priority 0, so that data cannot reach the split. On import core deliberately
-preserves already active excluded modules; exclusions are not a production
-uninstall or safety policy. Sous ships no such list. The project owns any
-existing exclusions and must review overlap before enabling this optional
-feature.
+The source directories start empty; the recipe supplies definitions at install
+time and the first export writes them into `config/_splits`. No partial import
+of an absent folder, duplicate YAML source, or custom loader is required.
+Keep the directories and exported definitions under project version control.
 
-The recipe preserves an existing split definition, including custom lists and
-paths. Updating a package does not update applied configuration. Review active
-definitions, retained directories and runtime status overrides before adopting
-or modifying the feature; use the project's normal configuration migration and
-deployment process. See [configuration ownership](../../../docs/MAINTENANCE.md)
-and [setup](../../../docs/SETUP.md) in the starter source checkout.
+`sous_local` and `sous_staging` start with empty module/theme/complete/partial
+lists and stored `status: false`. Project settings select only the applicable
+split. Production uses the complete base with both inactive:
 
-## Disposable defaults check
+| Deployment environment | Explicit `SOUS_ENVIRONMENT` |
+|---|---|
+| DDEV/local workstation | `local` (DDEV default) |
+| dev, test, staging or multidev | `staging` |
+| live/production | `production` (default outside DDEV) |
 
-Immediately after applying the recipe to a fresh disposable fixture:
+Hosting config sets the variable; Sous does not infer safety from a provider or
+hostname. Projects needing separate dev/test/multidev differences add their own
+definitions to `_splits.complete_list`, choose separate directories, and select
+their statuses in project-owned settings. The three runtime safety policies do
+not limit the number of native Config Split definitions a project can use.
+
+## Project-owned changes
+
+Configure module/config lists through Config Split's UI or reviewed project
+configuration and export in the relevant environment. Normal `config:export`
+and `deploy` use native transformations; no separate `--partial` import or
+hand-written import ordering is needed. Keep every active folder outside `web`
+and present before import/export.
+
+Do not combine split-owned modules with `$settings['config_exclude_modules']`:
+core removes excluded modules before they can reach a split, while import can
+preserve already active excluded modules. Exclusions are not an uninstall
+policy. Sous supplies no such list.
+
+The recipe preserves existing site-owned definitions. Package updates do not
+rewrite already applied configuration. For an existing installation, review
+the old definitions, move split values to the selected directories, rename the
+staging definition and matching settings explicitly, and export/deploy through
+the project's normal [configuration migration process](../../../docs/MAINTENANCE.md).
+Do not merely rename a folder while active definitions still point to it.
+
+## Checks
+
+On a fresh disposable fixture immediately after recipe application:
 
 ```sh
 ddev exec env SOUS_DISPOSABLE_TEST=1 vendor/bin/drush php:script web/recipes/sous-config-split/tests/verify-defaults.php
 ```
 
-This checks the created definitions and their native typed-config schema. Full
-environment export/import and production-safety checks belong to the shared
-integration suite. Do not run the fresh-default comparison after replacing the
-lists with project-specific choices.
+Maintainers can exercise native definition export and fresh environment import
+transforms without bootstrapping a site or connecting to a database:
+
+```sh
+ddev exec php devops/tests/config-splits.php
+```
+
+The latter needs installed Drupal and Config Split dependencies. It uses only
+memory storage and private temporary files. Full module/configuration round
+trips remain part of the disposable integration suite.

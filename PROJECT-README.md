@@ -17,9 +17,9 @@ run upstream product checks from a separate Sous source checkout.
 | Supported runtime | [Platform and Emulsify versions](docs/PLATFORM.md) |
 | Build tools | [Project-local npm and Emulsify tooling](docs/BUILD_TOOLS.md) |
 | Configuration | Complete project-owned `config/default` export |
-| Environment policy | [Local/nonproduction/production and optional Config Split](docs/ENVIRONMENTS.md) |
+| Environment policy | [Local/staging/production and optional Config Split](docs/ENVIRONMENTS.md) |
 | Hosting and deployment | Project-owned; [deployment guide](docs/DEPLOYMENT.md) |
-| CI | Configure application checks; copied Sous product CI is scoped to Sous repositories |
+| CI | Opt-in [CircleCI or GitHub Actions application templates](docs/CI.md) |
 
 ## Develop and restore
 
@@ -53,8 +53,8 @@ production is the default outside DDEV unless explicitly selected otherwise.
 - [Upstream integration checks](docs/INTEGRATION.md)
 - [Upstream coordinated releases](docs/RELEASES.md)
 
-The inherited product CI skips renamed generated repositories. Configure and
-verify this application's checks before enabling releases. Review release
+Sous product workflows are removed during generation. Choose and verify this
+application's [CI template](docs/CI.md) before enabling releases. Review release
 branches and permissions; its private npm release tooling uses this project's
 Git origin, commit history, and tags. Application deployment is not implied by
 an upstream Sous release.

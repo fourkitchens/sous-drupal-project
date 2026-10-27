@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.frontpage.body
+    - field.field.node.frontpage.field_metadata
+    - field.field.node.frontpage.field_seo_title
+    - field.field.node.frontpage.field_teaser_image
+    - field.field.node.frontpage.field_teaser_text
+    - node.type.frontpage
+  module:
+    - text
+    - user
+id: node.frontpage.default
+targetEntityType: node
+bundle: frontpage
+mode: default
+content:
+  body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  field_metadata: true
+  field_seo_title: true
+  field_teaser_image: true
+  field_teaser_text: true
+  links: true
+  published_at: true

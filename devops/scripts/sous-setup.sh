@@ -89,3 +89,7 @@ fi
 # Retain an empty location for the generated site's own future tests.
 rm -rf devops/integration devops/tests
 mkdir -p devops/tests
+
+# The product's workflows test coordinated Sous sources and publish its releases.
+# Generated sites opt into their own CI from assets/ci; retain other GitHub files.
+rm -rf .github/workflows .github/actions

@@ -10,16 +10,22 @@ Every starter choice includes Gin administration and a generated Emulsify theme.
 
 | Choice | Content authoring defaults |
 | --- | --- |
-| Default | Page with visible Body, metadata, tags, teaser text and media support |
-| Paragraphs | Page plus Image, Text, Text with Media, and Video components through the companion Sous Paragraphs host |
-| Native Layout Builder | Page with its visible field formatters retained as blocks, native Basic inline blocks, and per-Page layout overrides |
+| Default | Page and Frontpage with visible Body, metadata, SEO and teasers; Page also has tags; both have title-based URL aliases |
+| Paragraphs | Both content types plus Image, Text, Text with Media, and Video components through the starter's extension of the Sous Paragraphs host |
+| Native Layout Builder | Both content types with their visible field formatters retained as blocks, native Basic inline blocks, and per-node layout overrides |
 | Admin only | Administration and theme setup without the optional Page/content recipe |
 
-The historic Frontpage type, seeded homepage/access-denied/not-found content,
-Entity Browser collection, and Role Delegation defaults are not supplied by the
-current recipes. Their presence in the old partial `config/default` directory
-did not make them part of fresh recipe installation. Projects can add these
-features deliberately; the legacy partial export is not an installation input.
+The bundled `sous-starter-content` recipe restores Frontpage and both alias
+patterns without requiring Paragraphs in the default composition. The original
+type neither created a homepage node nor enforced a singleton; those remain
+project decisions, as do homepage/error-page content, Entity Browser and Role
+Delegation. The [configuration audit](CONFIGURATION_AUDIT.md) accounts for every
+removed file. The complete generated-site export remains in `config/default`.
+
+Full content installations also import the ten historic Views from current
+core/module defaults, preserving existing customized Views. Management screens
+are restored without copying obsolete routes/permissions from old exports.
+Glossary remains disabled, and user-listing blocks remain unplaced by default.
 
 ## Media and editing
 

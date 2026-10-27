@@ -14,7 +14,7 @@ if (getenv('SOUS_DISPOSABLE_TEST') !== '1') {
 if (!\Drupal::moduleHandler()->moduleExists('config_split')) {
   throw new RuntimeException('Apply the optional Config Split recipe first.');
 }
-foreach (['sous_local', 'sous_nonproduction'] as $id) {
+foreach (['_splits', 'sous_local', 'sous_staging'] as $id) {
   $name = 'config_split.config_split.' . $id;
   $expected = Yaml::parseFile(dirname(__DIR__) . '/config/' . $name . '.yml');
   $actual = \Drupal::configFactory()->getEditable($name)->getRawData();
@@ -31,4 +31,4 @@ foreach (['sous_local', 'sous_nonproduction'] as $id) {
     throw new RuntimeException('The project-owned split directory is missing: ' . $id);
   }
 }
-print "PASS: optional local/nonproduction split defaults, native schema, and tracked directories.\n";
+print "PASS: optional definition/local/staging split defaults, native schema, and tracked directories.\n";

@@ -71,6 +71,8 @@ web/profiles/contrib
 /web/recipes/*
 !/web/recipes/sous-layout-builder/
 !/web/recipes/sous-config-split/
+!/web/recipes/sous-starter-content/
+!/web/recipes/sous-starter-paragraphs/
 web/themes/contrib
 web/.gitignore
 

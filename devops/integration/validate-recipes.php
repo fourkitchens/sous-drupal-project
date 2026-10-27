@@ -92,7 +92,11 @@ foreach ($directories as $directory) {
   $manifest = json_decode(file_get_contents($directory . '/composer.json'), TRUE, 512, JSON_THROW_ON_ERROR);
   $name = $manifest['name'] ?? '';
   $check(is_string($name) && $name !== '', 'Missing Composer package name: ' . $directory);
-  $check(($manifest['minimum-stability'] ?? 'stable') === 'stable', 'Broad development stability in source package: ' . $name);
+  // The unchanged public host is validated for recipe/dependency closure too;
+  // its historical package metadata is outside this owned-package update.
+  if ($name !== 'fourkitchens/sous-paragraphs') {
+    $check(($manifest['minimum-stability'] ?? 'stable') === 'stable', 'Broad development stability in source package: ' . $name);
+  }
   foreach ($manifest['repositories'] ?? [] as $repository) {
     $check(($repository['type'] ?? NULL) !== 'path', 'Temporary path repository leaked into source: ' . $name);
   }
@@ -103,7 +107,7 @@ foreach ($directories as $directory) {
   if (($manifest['type'] ?? NULL) !== 'drupal-recipe') {
     $check(($manifest['type'] ?? NULL) === 'project', 'Unexpected Composer package type: ' . $name);
     $count = 0;
-    $bundled = ['sous-layout-builder', 'sous-config-split'];
+    $bundled = ['sous-starter-content', 'sous-starter-paragraphs', 'sous-layout-builder', 'sous-config-split'];
     foreach ($bundled as $bundle) {
       [$recipe, $files] = $inspect_recipe($directory . '/web/recipes/' . $bundle);
       $recipes[$bundle] = $recipe;

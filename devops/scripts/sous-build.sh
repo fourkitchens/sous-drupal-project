@@ -2,7 +2,7 @@
 
 # Bootstrap a newly named Sous project, then retire its one-time setup helpers.
 # Called by setup.sh fresh (also exposed as npm run sous-build); no arguments.
-# Requires local/nonproduction and may replace its database with Minimal Drupal.
+# Requires local/staging and may replace its database with Minimal Drupal.
 # The workflow prompts for content composition, builds the theme, and verifies
 # export/metadata/login before cleanup or success output. Failures stop dependent
 # phases and retain remaining bootstrap files for diagnosis and a reviewed retry.
@@ -91,13 +91,12 @@ case $RESP in
     # The default Page model pulls in its shared formats and media dependencies.
     run_composer require fourkitchens/sous-content-types:dev-main fourkitchens/sous-formats:dev-main fourkitchens/sous-media:dev-main
     run_drush_yes cr
-    ./devops/scripts/install-recipe.sh fourkitchens/sous-content-types
+    ./devops/scripts/install-recipe.sh fourkitchens/sous-starter-content
     ;;
   1)
     run_composer require fourkitchens/sous-content-types:dev-main fourkitchens/sous-formats:dev-main fourkitchens/sous-media:dev-main
     run_drush_yes cr
-    # Rebuild field/block discovery between Page creation and layout enabling.
-    ./devops/scripts/install-recipe.sh fourkitchens/sous-content-types
+    # The bundled layout recipe creates both starter types before enabling layouts.
     ./devops/scripts/install-recipe.sh fourkitchens/sous-layout-builder
     ;;
   2)
@@ -105,7 +104,7 @@ case $RESP in
     # the canonical application helper preserves a failed child recipe's status.
     run_composer require fourkitchens/sous-paragraphs:dev-main fourkitchens/sous-paragraph-types:dev-main fourkitchens/sous-content-types:dev-main fourkitchens/sous-formats:dev-main fourkitchens/sous-media:dev-main
     run_drush_yes cr
-    ./devops/scripts/install-recipe.sh fourkitchens/sous-paragraphs
+    ./devops/scripts/install-recipe.sh fourkitchens/sous-starter-paragraphs
     ;;
   *)
     echo "No additional recipe required."

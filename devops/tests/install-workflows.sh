@@ -6,9 +6,9 @@ REAL_COMPOSER="$(command -v composer)"
 fixture() {
   reset_project
   for name in composer.json package.json package-lock.json .gitignore README.md PROJECT-README.md; do cp "$SOURCE/$name" "$PROJECT/$name"; done
-  for name in docs .husky assets config/default config/splits; do mkdir -p "$PROJECT/$(dirname "$name")"; cp -R "$SOURCE/$name" "$PROJECT/$name"; done
+  for name in docs .husky .github assets config/default config/_splits config/local config/staging; do mkdir -p "$PROJECT/$(dirname "$name")"; cp -R "$SOURCE/$name" "$PROJECT/$name"; done
   mkdir -p "$PROJECT/web/recipes" "$PROJECT/web/sites/default" "$PROJECT/web/themes/custom/sous-project"
-  for recipe in sous-layout-builder sous-config-split; do cp -R "$SOURCE/web/recipes/$recipe" "$PROJECT/web/recipes/$recipe"; done
+  for recipe in sous-starter-content sous-starter-paragraphs sous-layout-builder sous-config-split; do cp -R "$SOURCE/web/recipes/$recipe" "$PROJECT/web/recipes/$recipe"; done
   cp "$SOURCE/.ddev/config.yaml" "$PROJECT/.ddev/config.yaml"
   printf '<?php\n// local defaults\n' > "$PROJECT/web/sites/example.settings.local.php"
   printf '<?php\n// core defaults and Sous additions\n' > "$PROJECT/web/sites/default/default.settings.php"
@@ -51,7 +51,7 @@ cp "$SOURCE/assets/scaffold/files/settings.sous.php" "$PROJECT/web/sites/default
 cp "$SOURCE/assets/scaffold/files/sous.production.services.yml" "$PROJECT/web/sites/sous.production.services.yml"
 git -C "$PROJECT" add .
 git -C "$PROJECT" ls-files > "$TEST_ROOT/tracked"
-for name in composer.json composer.lock config/default/core.extension.yml config/default/system.site.yml web/sites/default/settings.sous.php web/sites/sous.production.services.yml devops/hooks/post-import.sh devops/hooks/post-config-import.sh web/recipes/sous-layout-builder/recipe.yml web/recipes/sous-config-split/recipe.yml web/themes/custom/projectwithspaces/src/index.js; do contains "$TEST_ROOT/tracked" "$name"; done
+for name in composer.json composer.lock config/default/core.extension.yml config/default/system.site.yml web/sites/default/settings.sous.php web/sites/sous.production.services.yml devops/hooks/post-import.sh devops/hooks/post-config-import.sh web/recipes/sous-starter-content/recipe.yml web/recipes/sous-starter-paragraphs/recipe.yml web/recipes/sous-layout-builder/recipe.yml web/recipes/sous-config-split/recipe.yml web/themes/custom/projectwithspaces/src/index.js; do contains "$TEST_ROOT/tracked" "$name"; done
 for pattern in web/core/ web/modules/contrib/ web/themes/contrib/ web/storybook/ /node_modules/ /dist/; do excludes "$TEST_ROOT/tracked" "$pattern"; done
 excludes "$TEST_ROOT/tracked" 'web/themes/custom/projectwithspaces/components/'
 contains "$TEST_ROOT/tracked" 'web/themes/custom/projectwithspaces/src/components/source.yml'
@@ -68,6 +68,10 @@ printf '\nDeveloper additions.\n' >> "$PROJECT/README.md"; cp "$PROJECT/README.m
 expect_status 0 naming
 cmp "$PROJECT/README.md" "$TEST_ROOT/readme" || fail 'naming retry overwrote README'
 pass 'naming retries preserve a generated README'
+[ ! -d "$PROJECT/.github/workflows" ] && [ ! -d "$PROJECT/.github/actions" ] || fail 'generated site retained product workflows'
+[ -f "$PROJECT/.github/PULL_REQUEST_TEMPLATE.md" ] || fail 'naming removed unrelated GitHub files'
+[ -f "$PROJECT/assets/ci/circleci/config.yml" ] && [ -f "$PROJECT/assets/ci/github-actions/build.yml" ] || fail 'generated CI choices missing'
+pass 'generation separates product workflows from opt-in site CI templates'
 
 # Each failure is injected at an actual child command; the real shell must stop.
 for row in \
@@ -77,7 +81,7 @@ for row in \
   '1|recipe recipes/sous-layout-builder' \
   '0|composer --no-ansi install' \
   '3|npm ci' \
-  '0|recipe recipes/sous-content-types' \
+  '0|recipe recipes/sous-starter-content' \
   '3|uli --name=sous_chef' \
   '3|config:export' \
   '3|metadata-write'; do
@@ -90,8 +94,8 @@ for row in \
   pass "failed $failed stops dependent work and keeps bootstrap"
 done
 fixture; expect_status 0 generate 2
-calls_assert 'any(.[];(.argv|join(" ")|contains("fourkitchens/sous-paragraph-types:dev-main"))) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-paragraphs"))!=null)'
-pass 'Paragraphs installs its declared component recipe'
+calls_assert 'any(.[];(.argv|join(" ")|contains("fourkitchens/sous-paragraph-types:dev-main"))) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-starter-paragraphs"))!=null)'
+pass 'Paragraphs installs the starter composition for both content types'
 fixture; expect_status 0 generate 1
 calls_assert 'any(.[];.command=="recipe" and (.argv|index("recipes/sous-layout-builder"))!=null) and all(.[];(.argv|join(" ")|contains("require fourkitchens/sous-layout-builder")|not))'
 pass 'Layout Builder applies bundled core source without Gin Layout Builder'

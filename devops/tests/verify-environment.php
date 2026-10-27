@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * Run seed, rebuild caches, verify, snapshot, confex, mutate, confim, roundtrip.
  * With the optional recipe, run split-prepare once before the shared database
- * baseline, split-configure in local/nonproduction, and split-verify after
+ * baseline, split-configure in local/staging, and split-verify after
  * export/import. The integration runner owns database resets and file copies.
  */
 
@@ -20,7 +20,7 @@ if (getenv('SOUS_DISPOSABLE_TEST') !== '1') {
   throw new RuntimeException('Set SOUS_DISPOSABLE_TEST=1 only for a disposable installation.');
 }
 $environment = getenv('SOUS_ENVIRONMENT');
-if (!in_array($environment, ['local', 'nonproduction', 'production'], TRUE)) {
+if (!in_array($environment, ['local', 'staging', 'production'], TRUE)) {
   throw new InvalidArgumentException('Select a supported SOUS_ENVIRONMENT for this test.');
 }
 $stage = getenv('SOUS_ENVIRONMENT_TEST');
@@ -103,14 +103,14 @@ elseif ($stage === 'verify') {
     $check(Settings::get('rebuild_access', FALSE) === FALSE, 'Production permits the development rebuild endpoint.');
   }
   else {
-    $check($backend instanceof TestMailCollector, 'Nonproduction did not select the native mail collector.');
+    $check($backend instanceof TestMailCollector, 'Local/staging did not select the native mail collector.');
     $previous = $state->get('system.test_mail_collector');
     $marker = 'Sous environment ' . bin2hex(random_bytes(8));
     try {
       $check($backend->mail(['id' => $marker, 'to' => 'sous-environment-test@example.invalid', 'subject' => $marker, 'body' => [$marker]]) === TRUE, 'The native mail collector failed.');
       $messages = $state->get('system.test_mail_collector', []);
       $captured = end($messages);
-      $check(is_array($captured) && ($captured['id'] ?? NULL) === $marker, 'The nonproduction message was not captured.');
+      $check(is_array($captured) && ($captured['id'] ?? NULL) === $marker, 'The test message was not captured.');
     }
     finally {
       if ($previous === NULL) {
@@ -122,7 +122,7 @@ elseif ($stage === 'verify') {
     }
   }
   if (\Drupal::moduleHandler()->moduleExists('config_split')) {
-    foreach (['local', 'nonproduction'] as $name) {
+    foreach (['local', 'staging'] as $name) {
       $split = 'config_split.config_split.sous_' . $name;
       $check(\Drupal::config($split)->get('status') === ($environment === $name), 'The optional split did not follow the explicit environment.');
       $check(($storage->read($split)['status'] ?? NULL) === FALSE, 'An environment override changed a stored split status.');
@@ -146,15 +146,15 @@ elseif ($stage === 'split-prepare') {
   $check(\Drupal::moduleHandler()->moduleExists('config_split') && !\Drupal::moduleHandler()->moduleExists('contact'), 'Prepare the optional fixture from a baseline with Config Split and without Contact.');
   // Module ownership is project configuration, never a runtime override. Both
   // definitions remain identical across every environment and database copy.
-  foreach (['local', 'nonproduction'] as $name) {
+  foreach (['local', 'staging'] as $name) {
     \Drupal::configFactory()->getEditable('config_split.config_split.sous_' . $name)->set('module', ['contact' => 0])->save();
   }
   $state->delete('sous.environment.split_fixture');
 }
 elseif ($stage === 'split-configure') {
-  $check($environment !== 'production' && \Drupal::moduleHandler()->moduleExists('config_split'), 'Configure the optional split fixture only in local/nonproduction with Config Split installed.');
+  $check($environment !== 'production' && \Drupal::moduleHandler()->moduleExists('config_split'), 'Configure the optional split fixture only in local/staging with Config Split installed.');
   $check(!\Drupal::moduleHandler()->moduleExists('contact'), 'The Contact fixture requires a baseline without Contact.');
-  foreach (['local', 'nonproduction'] as $name) {
+  foreach (['local', 'staging'] as $name) {
     $check(($storage->read('config_split.config_split.sous_' . $name)['module'] ?? NULL) === ['contact' => 0], 'Prepare stable split module lists before restoring the per-environment database baseline.');
   }
   \Drupal::service('module_installer')->install(['contact']);
@@ -163,8 +163,8 @@ elseif ($stage === 'split-configure') {
 }
 elseif ($stage === 'split-verify') {
   $fixture = $state->get('sous.environment.split_fixture');
-  $check($environment === 'production' || in_array($fixture, ['local', 'nonproduction'], TRUE), 'Configure and export the optional split fixture first.');
-  foreach (['local', 'nonproduction'] as $name) {
+  $check($environment === 'production' || in_array($fixture, ['local', 'staging'], TRUE), 'Configure and export the optional split fixture first.');
+  foreach (['local', 'staging'] as $name) {
     $check(($storage->read('config_split.config_split.sous_' . $name)['module'] ?? NULL) === ['contact' => 0], 'Export/import changed a stored split module list.');
   }
   $enabled = $environment === $fixture;
@@ -177,7 +177,13 @@ elseif ($stage === 'split-verify') {
   }
   $export = \Drupal::service('config.storage.export');
   $check(!isset($export->read('core.extension')['module']['contact']) && !$export->listAll('contact.'), 'Contact or its module-owned configuration leaked into the transformed production base.');
-  if (in_array($fixture, ['local', 'nonproduction'], TRUE)) {
+  $check($export->exists('config_split.config_split._splits'), 'The complete export lost its split-definition bootstrap.');
+  $definitions = DRUPAL_ROOT . '/../config/_splits';
+  foreach (['local', 'staging'] as $name) {
+    $filename = 'config_split.config_split.sous_' . $name;
+    $check(!$export->exists($filename) && is_file($definitions . '/' . $filename . '.yml'), 'An environment split definition was not routed to config/_splits.');
+  }
+  if (in_array($fixture, ['local', 'staging'], TRUE)) {
     $directory = DRUPAL_ROOT . '/' . $storage->read('config_split.config_split.sous_' . $fixture)['folder'];
     $check(is_file($directory . '/contact.settings.yml') && is_file($directory . '/contact.form.personal.yml'), 'The active split export did not preserve module-owned configuration.');
     $form = Yaml::parseFile($directory . '/contact.form.personal.yml');

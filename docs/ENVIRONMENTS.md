@@ -5,7 +5,7 @@ Sous uses one provider-neutral runtime setting:
 | `SOUS_ENVIRONMENT` | Runtime policy |
 | --- | --- |
 | `local` | Local settings may load; development services/debugging are available; native Drupal mail uses a collector |
-| `nonproduction` | Production-style caches/error display, no local settings file; native Drupal mail uses a collector |
+| `staging` | Production-style caches/error display, no local settings file; native Drupal mail uses a collector |
 | `production` | Production caches/error display, no local settings, no capture backend or file-proxy origin; ordinary complete base configuration |
 
 An explicit value wins. If unset, actual DDEV (`IS_DDEV_PROJECT=true`) defaults
@@ -14,6 +14,11 @@ settings load. File existence, PHP CLI, domain names, hosting variables and
 organization names never select an environment. Set the variable in the
 project's deployment/runtime environment; no credentials or endpoints are
 provided by Sous.
+
+Set `staging` explicitly for dev/test/multidev environments that share the same
+safety policy, and `production` for live. Project-owned settings can activate
+additional native split definitions when those environments need distinct
+module/configuration values. The safety policy names do not limit split count.
 
 ## Settings, services, and production safety
 
@@ -36,17 +41,17 @@ them in their owned service file. Production server owners must independently
 disable debug extensions such as Xdebug; PHP settings cannot reliably unload an
 extension enabled by server configuration.
 
-Local/nonproduction use core's `test_mail_collector`; it records native Drupal
+Local/staging use core's `test_mail_collector`; it records native Drupal
 mail in state rather than sending it. Production retains its real stored mail
 transport and never selects that collector through Sous defaults. Specific
 per-module transport mappings and mail systems that bypass Drupal's native
 mail manager require project review; the helper rejects uncaptured native
-nonproduction mappings rather than assuming the default overrides every
+staging mappings rather than assuming the default overrides every
 integration. Production-mode testing inside DDEV checks application policy;
 DDEV's own mail infrastructure is still local infrastructure. No production
 mail is sent by the fixture.
 
-Local/nonproduction also override `automated_cron.settings:interval` to zero,
+Local/staging also override `automated_cron.settings:interval` to zero,
 disabling Drupal's page-request cron trigger. This does not stop an external
 job runner or every contributed scheduler. Those and project-specific outbound
 integrations need project-owned runtime/state safeguards, repeated by the
@@ -54,7 +59,7 @@ integrations need project-owned runtime/state safeguards, repeated by the
 Production keeps its stored cron policy and never runs those development hooks.
 
 No file proxy is installed or origin inferred. A project choosing local file
-proxying supplies its own reviewed nonproduction origin and development package;
+proxying supplies its own reviewed staging origin and development package;
 production policy clears the origin and the safety check rejects the module in
 production configuration. Keep production credentials, data, integration
 settings and file origins out of examples and source defaults.
@@ -77,14 +82,42 @@ Config Split **2.0.2** is the latest stable verified from official Composer
 metadata and [release notes](https://www.drupal.org/project/config_split/releases/2.0.2).
 Its application lockfile is reproducible. It remains a production dependency
 when selected, because imports need the module; it is not a new Sous package or
-a default dependency. The bundled native recipe supplies two inactive entities,
-`sous_local` and `sous_nonproduction`, and tracked directories
-`config/splits/local` and `config/splits/nonproduction`, outside the public root.
-Production uses the complete base with both inactive; there is no production
-meta-split. Only status is selected at runtime. Module/theme/complete/partial
-lists are ordinary stored, reviewed project configuration, identical across
-environments. The [bundle README](../web/recipes/sous-config-split/README.md)
-describes adoption and preserving existing definitions.
+a default dependency. The bundled native recipe supplies inactive `sous_local`
+and `sous_staging` definitions plus the native `_splits` definition split:
+
+| Directory | Ownership |
+| --- | --- |
+| `config/default` | Complete production base, retaining `_splits` as the import bootstrap |
+| `config/_splits` | Environment split definitions, written by the first normal export |
+| `config/local` | Local modules/configuration values |
+| `config/staging` | Staging modules/configuration values |
+
+This restores the useful SFASU layout without copying its hosting assumptions.
+The reusable YAML has one source in the bundled recipe; generated sites own
+their exported definitions. Runtime settings keep `_splits` active and select
+only the applicable environment split. A native priority imports definitions
+before their values and exports them afterward, including on fresh imports.
+Production keeps both environment splits inactive. Module/theme/complete/partial
+lists remain stored, reviewed project configuration. The [bundle README](../web/recipes/sous-config-split/README.md)
+explains adoption, adding dev/test/multidev definitions and preserving overrides.
+
+For separate deployment-specific splits, add the definitions to
+`_splits.complete_list` and select their statuses in project-owned settings.
+For example, a project can set its own `PROJECT_DEPLOYMENT` variable and append
+this after the Sous settings include, while separately selecting `staging` or
+`production` as its runtime safety policy:
+
+```php
+$deployment = getenv('PROJECT_DEPLOYMENT') ?: '';
+foreach (['dev', 'test', 'multidev', 'live'] as $split) {
+  $config['config_split.config_split.' . $split]['status'] = $deployment === $split;
+}
+```
+
+Define those four ordinary splits with stored inactive statuses and unique
+directories. Use distinct IDs from `sous_local`/`sous_staging`, whose statuses
+the scaffold owns. This example is a project decision, not an additional
+automatic hosting detector or a limit to three deployment environments.
 
 Configure the needed lists before enabling development modules, export in the
 appropriate environment, and review both base and split files. A split can
@@ -93,9 +126,10 @@ an artifact: use reviewed `require-dev` dependencies for development tools and
 production `composer install --no-dev` as appropriate. Do not remove Config
 Split itself while its configuration/import transformations remain in use.
 
-Use native `config:export` and `deploy`. There is no unconditional `_splits`
-partial import, recursive meta-split, Config Filter requirement, or broad Config
-Ignore policy. Sous does not set `config_exclude_modules`: core strips those
+Use native `config:export` and `deploy`. `_splits` uses Config Split's native
+transforms; there is no unconditional partial import or custom loader. Sous
+supplies no Config Filter requirement or broad Config Ignore policy and does
+not set `config_exclude_modules`: core strips those
 modules before split export and preserves already-active excluded modules on
 import. The helper rejects overlap with split-owned modules and development
 exclusions in production. See the official [per-environment guidance](https://www.drupal.org/docs/contributed-modules/configuration-split/per-environment-configuration).
@@ -108,7 +142,7 @@ same helpers always use native project tools, so they never invoke DDEV
 recursively. A prepared CI/build environment explicitly selects native mode:
 
 ```sh
-SOUS_RUNTIME=native SOUS_ENVIRONMENT=nonproduction npm run confex
+SOUS_RUNTIME=native SOUS_ENVIRONMENT=staging npm run confex
 SOUS_RUNTIME=native SOUS_ENVIRONMENT=production npm run confim
 ```
 
@@ -135,7 +169,7 @@ native deploy, and checks the resulting active state. Guards reject known
 development modules, capture transports, proxy settings, debug/aggregation
 defaults, active stored Sous split statuses and broad Config Ignore rules in
 the production base. After attempted deployment it also attempts cache cleanup
-and the nonproduction post-config-import hook, including partial failures;
+and the staging post-config-import hook, including partial failures;
 the original failure status wins over cleanup errors. See the
 [refresh safeguards](SETUP.md#post-import-and-post-config-import-safeguards).
 Add project-specific development module IDs to tracked
@@ -165,9 +199,12 @@ Back up and use a disposable database copy. Composer preserves an existing
 changes does not rewrite them. Replace legacy unconditional local/DDEV includes
 with the scaffold's ordered block, review any project database/environment
 integration, and adopt the owned environment/services files explicitly. Remove
-old provider/meta-split activation and broad ignore rules through reviewed site
-configuration. Keep module/config lists stored, and keep exported split statuses
-inactive. Do not blindly overwrite a project's complete export or custom
+old unconditional partial-import scripts and broad ignore rules through reviewed
+site configuration. Rename an existing `sous_nonproduction` definition and its
+folder/settings explicitly to `sous_staging`; move its values to `config/staging`
+and export definitions into `config/_splits`. Package updates do not perform
+that migration. Keep environment split statuses inactive in stored exports;
+the native `_splits` bootstrap stays active. Do not blindly overwrite a complete export or custom
 key/value mappings. If an older database cannot bootstrap a preflight, perform
 its reviewed native database updates/cache rebuild first, then run the checked
 configuration workflow on the copy; no old-major upgrade is implied by this
@@ -182,7 +219,13 @@ project-owned check of the complete export, runtime, extensions and artifacts.
 
 ## Verification
 
-The shared full integration adds one Page baseline with local/nonproduction/
+The historical runs below predate the staging rename and restored definition
+split. They establish the earlier baseline, not validation of this revision.
+The current `devops/tests/config-splits.php` separately exercises native
+definition export, fresh local/staging/production imports, and unsafe nested
+folder rejection using memory storage and private files without a site/database.
+
+The shared full integration adds one Page baseline with local/staging/
 production export/import cases, with and without the optional split, rather
 than multiplying all four content choices. Explicit single-option debug runs
 retain their selected site and skip this additional matrix. Focused tests cover
@@ -198,11 +241,11 @@ Config Split 2.0.2. Actual results:
 
 | Check | Result |
 | --- | --- |
-| Local/nonproduction/production, without Config Split | All three helper export/deploy round trips passed with split directories physically absent |
+| Local/staging/production, without Config Split | All three helper export/deploy round trips passed with split directories physically absent |
 | The same environments with Config Split | All three passed; stable stored module lists, exclusive runtime statuses and split-only configuration verified |
-| Copied local/nonproduction database → production | Both removed Contact and its owned configuration through native deployment; copied development UI flags could not activate debug/null caches |
+| Copied local/staging database → production | Both removed Contact and its owned configuration through native deployment; copied development UI flags could not activate debug/null caches |
 | Unsafe staged base defaults | Five deliberate module/mail/logging/aggregation/ignore changes rejected before deployment; active configuration unchanged |
-| Split directory guards | Missing active directories rejected by export/import; incoming missing/public paths rejected before import, in local and nonproduction |
+| Split directory guards | Missing active directories rejected by export/import; incoming missing/public paths rejected before import, in local and staging |
 | Context and durability | 34 installer/Git/scaffold regressions, 19 command regressions and seven settings tests passed inside DDEV; missing guard mode rejected |
 | Existing product options | Default, Paragraphs, native Layout Builder and admin-only passed, including actual HTTPS Page authoring |
 | Frontend | Theme generation, production assets, Storybook, lint and explicit prepared-native build passed |
@@ -245,7 +288,7 @@ seven repositories, including staged entries, were preserved on dedicated
 | Files | Purpose |
 | --- | --- |
 | `composer.json`, `.gitignore`, `assets/scaffold/files/` | Once-only environment settings/services, ordered DDEV include, local isolation and trackable source |
-| `config/splits/`, `web/recipes/sous-config-split/` | Optional inactive native split definitions, directories, adoption guide and defaults probe |
+| `config/{_splits,local,staging}/`, `web/recipes/sous-config-split/` | Native definition split, inactive environment definitions, values directories and adoption guide |
 | `devops/scripts/`, `.ddev/commands/web/install-recipe` | Shared project runtime, guarded export/deploy, explicit safe development workflows and consistent entry points |
-| `devops/integration/{run.py,validate-recipes.php}`, `devops/tests/` | Six-case native environment coverage, unsafe-default/path regressions, settings/services and command/Git checks |
+| `devops/integration/{run.sh,validate-recipes.php}`, `devops/tests/` | Six-case native environment coverage, unsafe-default/path regressions, settings/services and command/Git checks |
 | `README.md`, `PROJECT-README.md`, setup/platform/build/maintenance/deployment/integration guides and this guide | One environment contract with linked operating instructions and explicit existing-site adoption |

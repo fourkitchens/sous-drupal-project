@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Replace a local/nonproduction database from a selected .sql/.sql.gz backup.
+# Replace a local/staging database from a selected .sql/.sql.gz backup.
 # Usage: npm run import-data -- [--defer-sanitize] [BACKUP]
 # Paths are absolute or project-root relative; the default is
 # reference/site-db.sql.gz. Validate a private SQL snapshot before replacement,

@@ -13,6 +13,37 @@ versions are checked before dependency installation.
 The [environment contract](ENVIRONMENTS.md) defines the additional runtime and
 optional Config Split checks described below.
 
+## PR 130 configuration review
+
+The October 27 review separates [product/application CI](CI.md), restores
+starter-owned Page/Frontpage compositions, and restores native split-definition
+storage under `config/_splits`. [The configuration audit](CONFIGURATION_AUDIT.md)
+accounts for all 129 removed export files and their current providers.
+
+Focused local verification passes 98 shell check groups, starter lint, manifest
+and YAML validation, source prerequisite validation and documentation checks.
+The additional native Config Split memory test verifies definition export,
+fresh imports, nested-folder checks and rejection of unsafe raw stored split
+statuses before export transformations.
+
+The full disposable run passes dependency resolution, source/security gates,
+maintainer checks, role/migration checks and production theme compilation. It
+stops at the stock generated-theme JavaScript lint: 303 errors, predominantly
+compiled `dist/js` files plus a source formatting error. Later frontend gates
+are not reached. This remains a failed full gate; paired-source Composer
+success is not a claim that PR #130 is green.
+
+Local evidence is retained in `reference/pr130-review/`. The separate
+configuration-only diagnostic omits independent frontend gates in a temporary
+source snapshot; it never changes the checked-in gate or establishes frontend
+acceptance. That diagnostic passed **213 recorded commands**, all four content
+choices (including both starter types' forms/save/render/aliases and real HTTPS
+Page authoring), and all six local/staging/production round trips with/without
+Config Split. Missing/public split paths, production transitions and safety
+guards also passed. Its owned containers, database and workspace were removed.
+The JSON result explicitly records `frontend_gates_run: false`; the failed full
+run and passing configuration result remain separate evidence.
+
 ## Current shell/packaging verification
 
 The simplified runner and all seven former Python test suites now use Bash
@@ -144,13 +175,13 @@ Emulsify, and the generated theme; each option starts from that snapshot.
 
 | Installer choice | Applied composition | Required result |
 | --- | --- | --- |
-| Default | Current Sous Content Types, Formats, Media | Usable Page form, create/edit/save/render, Linkit filtering and entity resolution |
-| Paragraphs | Source Sous Paragraphs + current Paragraph Types/Content Types | Four component forms, media, revisions, icons, Body and component rendering |
-| Layout Builder | Bundled `web/recipes/sous-layout-builder` | Core layout enabled, existing Body field block retained, per-Page overrides persist and render |
+| Default | Bundled `sous-starter-content` plus Admin/Content Types/Formats/Media | Page and Frontpage forms/create/edit/save/render, aliases, native Views and shared defaults |
+| Paragraphs | Bundled `sous-starter-paragraphs` plus public Paragraphs host | Both content types keep Body and four component types; media, revisions, icons and rendering |
+| Layout Builder | Bundled `web/recipes/sous-layout-builder` | Both content types retain Body field blocks with layouts and per-node overrides |
 | Admin only | Shared base, with no optional Page recipe | Gin and Navigation work without requiring a Page content type |
 
 Layout Builder uses core native actions `enableLayoutBuilder` and
-`allowLayoutOverrides`. Core converts the Page's visible formatters into field
+`allowLayoutOverrides`. Core converts both types' visible formatters into field
 blocks; the recipe does not replace the layout with an empty section. The
 native Basic Block recipe supplies usable inline blocks. The previously offered
 public Sous Layout Builder package and its incompatible Gin Layout Builder RC
@@ -175,20 +206,20 @@ UUIDs/settings hashes.
 ## One baseline, three environments
 
 After the content options, the full run uses the actual `confex`/`confim`
-helpers on local, nonproduction and production copies of one Page baseline.
+helpers on local, staging and production copies of one Page baseline.
 It tests ordinary complete exports with the optional split directories absent,
 then installs stable Config Split 2.0.2 and applies the bundled optional recipe.
 The same three environments round-trip through native transforms; core Contact
 provides disposable module/config differences, with identical stored split
-lists and runtime status overrides. A local and a nonproduction database copy
+lists and runtime status overrides. A local and a staging database copy
 then each switch to production, which must remove their split-only module and
 configuration. No development package, client integration or production mail
 transport is exercised by these fixtures.
 
 The probe seeds core's database-backed development UI switches and verifies
-that production/nonproduction services keep debug and null caches disabled
+that production/staging services keep debug and null caches disabled
 without mutating the stored switches. Local settings load only locally; native
-nonproduction mail is actually captured. Production checks send no mail.
+staging mail is actually captured. Production checks send no mail.
 Deliberately unsafe staged module, capture, logging, aggregation and broad-ignore
 defaults must fail before deployment and leave active configuration unchanged.
 Production restore must fail before database replacement. An explicit prepared
@@ -247,10 +278,12 @@ resulting HEAD and leaves the caller's subject checkout separate. This needs
 only the existing read permission. GitHub Enterprise deployments would need to check that feature's
 availability before adopting this configuration.
 
-Source-name guards keep same-name forks testable and skip the copied product
-workflow in renamed generated projects. Generated applications use their own
-build/lint scripts and need project-specific CI; the product runner requires
-its seven known source identities and ungenerated bootstrap files.
+Source-name guards keep same-name forks testable. Product workflows are excluded
+from generated distributions and removed by source-based naming; applications
+opt into their own [CircleCI or Actions template](CI.md). The product runner
+requires known Sous sources and ungenerated bootstrap files. PR #130's temporary,
+branch-scoped companion SHA map tests its coordinated unmerged changes; normal
+release gates still require merged dependencies. See [CI diagnosis/cutover](CI.md#pr-130-and-the-ci-cutover).
 
 ## Remote cutover
 

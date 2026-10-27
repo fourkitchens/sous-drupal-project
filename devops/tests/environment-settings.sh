@@ -17,7 +17,7 @@ $settings['local_loaded'] = TRUE;
 $settings['rebuild_access'] = TRUE;
 $settings['cache']['bins']['render'] = 'cache.backend.null';
 $settings['container_yamls'][] = $app_root . '/sites/development.services.yml';
-$config['config_split.config_split.sous_nonproduction']['status'] = TRUE;
+$config['config_split.config_split.sous_staging']['status'] = TRUE;
 $config['system.mail']['interface']['default'] = 'devel_mail_log';
 PHP
 cp "$SITE/settings.local.php" "$TEST_ROOT/local-original"
@@ -42,40 +42,40 @@ probe() (
   seed="${3:-}"; [ -n "$seed" ] || seed='{}'
   php -d display_errors=1 "$TEST_ROOT/probe.php" "$SITE/settings.php" "$WEB" "$seed"
 )
-for row in '__unset__ false production' '__unset__ true local' 'production true production' 'nonproduction true nonproduction' 'local false local'; do
+for row in '__unset__ false production' '__unset__ true local' 'production true production' 'staging true staging' 'local false local'; do
   read -r supplied ddev expected <<< "$row"
   expect_status 0 probe "$supplied" "$ddev"
   jq -e --arg expected "$expected" --argjson ddev "$ddev" '.settings.sous_environment==$expected and (.settings.local_loaded//false)==($expected=="local") and (.settings.ddev_loaded//false)==$ddev' "$TEST_ROOT/output" >/dev/null || fail 'environment precedence/local-file gate'
   cmp "$SITE/settings.local.php" "$TEST_ROOT/local-original" || fail 'local settings overwritten'
 done
 pass 'explicit environment precedence and local-file isolation'
-for supplied in '' staging LOCAL ' production' 'local '; do
+for supplied in '' nonproduction LOCAL ' production' 'local '; do
   expect_status 42 probe "$supplied" true
   json_assert "$TEST_ROOT/output" '.error=="InvalidArgumentException" and (.settings|has("local_loaded")|not)'
 done
 pass 'invalid values fail before loading local settings'
-for supplied in local nonproduction production; do
+for supplied in local staging production; do
   expect_status 0 probe "$supplied" false
   jq -e --arg expected "$supplied" '.display_errors==(if $expected=="local" then "1" else "0" end)' "$TEST_ROOT/output" >/dev/null || fail 'PHP error display policy'
 done
 pass 'nonlocal PHP error display is disabled'
 seed="$(jq -cn --arg dev "$WEB/sites/development.services.yml" '{settings:{rebuild_access:true,cache:{default:"cache.backend.null",bins:{render:"cache.backend.null",discovery:"cache.backend.redis"}},container_yamls:[$dev,"/project/services.yml"]}}')"
-for supplied in production nonproduction; do
+for supplied in production staging; do
   expect_status 0 probe "$supplied" true "$seed"
   jq -e --arg services "$WEB/sites/sous.production.services.yml" '.settings.rebuild_access==false and (.settings.cache|has("default")|not) and (.settings.cache.bins|has("render")|not) and .settings.cache.bins.discovery=="cache.backend.redis" and .settings.container_yamls==["/project/services.yml",$services] and .config["system.logging"].error_level=="hide" and .config["system.performance"].css.preprocess and .config["system.performance"].js.preprocess' "$TEST_ROOT/output" >/dev/null || fail 'nonlocal service/cache policy'
 done
 pass 'nonlocal policy wins over prior DDEV/development settings'
-for supplied in local nonproduction; do
+for supplied in local staging; do
   expect_status 0 probe "$supplied" false
   json_assert "$TEST_ROOT/output" '.config["system.mail"].interface.default=="test_mail_collector" and .config["automated_cron.settings"].interval==0'
 done
 seed='{"config":{"system.mail":{"interface":{"default":"project_transport","project_module":"project_transport","old_development":"devel_mail_log"}},"automated_cron.settings":{"interval":10800}}}'
 expect_status 0 probe production false "$seed"
 json_assert "$TEST_ROOT/output" '.config["system.mail"].interface=={default:"project_transport",project_module:"project_transport"} and .config["automated_cron.settings"].interval==10800 and .config["stage_file_proxy.settings"].origin==""'
-pass 'capture and automatic-cron policy are nonproduction-only'
-for supplied in local nonproduction production; do
+pass 'capture and automatic-cron policy are local/staging-only'
+for supplied in local staging production; do
   expect_status 0 probe "$supplied" false
-  jq -e --arg env "$supplied" '.config["config_split.config_split.sous_local"].status==($env=="local") and .config["config_split.config_split.sous_nonproduction"].status==($env=="nonproduction") and (.config|has("core.extension")|not) and (.settings|has("config_exclude_modules")|not)' "$TEST_ROOT/output" >/dev/null || fail 'split selection'
+  jq -e --arg env "$supplied" '.config["config_split.config_split._splits"].status==true and .config["config_split.config_split.sous_local"].status==($env=="local") and .config["config_split.config_split.sous_staging"].status==($env=="staging") and .settings.config_split_priorities._splits== -100 and (.config|has("core.extension")|not) and (.settings|has("config_exclude_modules")|not)' "$TEST_ROOT/output" >/dev/null || fail 'split selection'
 done
 pass 'split overrides are exclusive and do not enable modules'
 rm "$WEB/sites/sous.production.services.yml"

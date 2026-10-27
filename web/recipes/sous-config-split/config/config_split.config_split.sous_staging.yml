@@ -1,0 +1,15 @@
+langcode: en
+status: false
+dependencies: {  }
+id: sous_staging
+label: 'Sous staging'
+description: 'Project-owned module and configuration differences for shared staging environments.'
+weight: 0
+stackable: false
+no_patching: false
+storage: folder
+folder: ../config/staging
+module: {  }
+theme: {  }
+complete_list: {  }
+partial_list: {  }

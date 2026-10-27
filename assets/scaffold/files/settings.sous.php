@@ -9,8 +9,8 @@ $sous_environment = getenv('SOUS_ENVIRONMENT');
 if ($sous_environment === FALSE) {
   $sous_environment = getenv('IS_DDEV_PROJECT') === 'true' ? 'local' : 'production';
 }
-if (!in_array($sous_environment, ['local', 'nonproduction', 'production'], TRUE)) {
-  throw new InvalidArgumentException('SOUS_ENVIRONMENT must be local, nonproduction, or production.');
+if (!in_array($sous_environment, ['local', 'staging', 'production'], TRUE)) {
+  throw new InvalidArgumentException('SOUS_ENVIRONMENT must be local, staging, or production.');
 }
 
 // File presence does not choose an environment. Existing local files remain
@@ -22,8 +22,12 @@ $settings['sous_environment'] = $sous_environment;
 
 // These overrides do not enable Config Split or create configuration. Optional
 // split definitions and their directories remain an explicit site decision.
+$config['config_split.config_split._splits']['status'] = TRUE;
 $config['config_split.config_split.sous_local']['status'] = $sous_environment === 'local';
-$config['config_split.config_split.sous_nonproduction']['status'] = $sous_environment === 'nonproduction';
+$config['config_split.config_split.sous_staging']['status'] = $sous_environment === 'staging';
+// Export definitions after their values; import definitions before the module
+// discovers environment splits. The bootstrap definition stays in base sync.
+$settings['config_split_priorities']['_splits'] = -100;
 
 $config['system.performance']['css']['preprocess'] = $sous_environment !== 'local';
 $config['system.performance']['js']['preprocess'] = $sous_environment !== 'local';

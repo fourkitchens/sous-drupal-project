@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Complete a local/nonproduction backup download without exposing a partial file.
+# Complete a local/staging backup download without exposing a partial file.
 # Usage: npm run get-db -- [DESTINATION.sql|DESTINATION.sql.gz]
 # The default is reference/site-db.sql.gz; paths are project-root relative or
 # absolute. Projects configure devops/hooks/download-db.sh explicitly. Its sole
