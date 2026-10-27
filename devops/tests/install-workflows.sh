@@ -41,6 +41,12 @@ contains "$GIT_CONFIG_GLOBAL" 'developer-preference'
 json_assert "$PROJECT/composer.json" '.name=="project/project-with-spaces" and (.scripts|has("post-create-project-cmd")|not)'
 json_assert "$PROJECT/package.json" '.private and (.scripts|has("sous-build")|not) and (.repository|not) and .scripts.lint=="npm run lint:project"'
 json_assert "$PROJECT/package-lock.json" '.name=="project-with-spaces" and .packages[""].name=="project-with-spaces"'
+for script in theme-build.sh theme-watch.sh; do
+  [ -x "$PROJECT/devops/scripts/$script" ] || fail 'generation removed a theme wrapper'
+  contains "$PROJECT/devops/scripts/$script" 'theme_directory=web/themes/custom/projectwithspaces'
+  excludes "$PROJECT/devops/scripts/$script" sous-project
+done
+json_assert "$PROJECT/package.json" '.scripts["theme-build"]=="./devops/scripts/theme-build.sh" and .scripts["theme-watch"]=="./devops/scripts/theme-watch.sh"'
 mkdir -p "$PROJECT/web/core" "$PROJECT/web/modules/contrib/example" "$PROJECT/web/themes/contrib/example" "$PROJECT/web/storybook" "$PROJECT/web/themes/custom/projectwithspaces/node_modules" "$PROJECT/web/themes/custom/projectwithspaces/dist"
 touch "$PROJECT/web/core/core.php" "$PROJECT/web/modules/contrib/example/example.php" "$PROJECT/web/themes/contrib/example/example.info.yml" "$PROJECT/web/storybook/index.html" "$PROJECT/web/themes/custom/projectwithspaces/node_modules/a.js" "$PROJECT/web/themes/custom/projectwithspaces/dist/a.js"
 # Core 4's mirror is output for the generated theme; source and another custom
@@ -51,7 +57,7 @@ cp "$SOURCE/assets/scaffold/files/settings.sous.php" "$PROJECT/web/sites/default
 cp "$SOURCE/assets/scaffold/files/sous.production.services.yml" "$PROJECT/web/sites/sous.production.services.yml"
 git -C "$PROJECT" add .
 git -C "$PROJECT" ls-files > "$TEST_ROOT/tracked"
-for name in composer.json composer.lock config/default/core.extension.yml config/default/system.site.yml web/sites/default/settings.sous.php web/sites/sous.production.services.yml devops/hooks/post-import.sh devops/hooks/post-config-import.sh web/themes/custom/projectwithspaces/src/index.js; do contains "$TEST_ROOT/tracked" "$name"; done
+for name in composer.json composer.lock config/default/core.extension.yml config/default/system.site.yml web/sites/default/settings.sous.php web/sites/sous.production.services.yml devops/hooks/post-import.sh devops/hooks/post-config-import.sh devops/scripts/theme-build.sh devops/scripts/theme-watch.sh web/themes/custom/projectwithspaces/src/index.js; do contains "$TEST_ROOT/tracked" "$name"; done
 excludes "$TEST_ROOT/tracked" 'web/recipes/'
 for pattern in web/core/ web/modules/contrib/ web/themes/contrib/ web/storybook/ /node_modules/ /dist/; do excludes "$TEST_ROOT/tracked" "$pattern"; done
 excludes "$TEST_ROOT/tracked" 'web/themes/custom/projectwithspaces/components/'
@@ -230,14 +236,14 @@ expect_status 0 helper setup.sh fresh; contains "$TEST_ROOT/output" fresh
 expect_status 0 helper setup.sh restore; contains "$TEST_ROOT/output" restore
 rm "$PROJECT/devops/scripts/sous-build.sh"; reset_log
 expect_status 0 helper setup.sh; contains "$TEST_ROOT/output" restore
-calls_assert 'any(.[];.tool=="npm" and .argv==["run","theme-ci"]) and any(.[];.tool=="npm" and .argv==["run","theme-build"])'
+calls_assert 'any(.[];.tool=="npm" and .argv==["run","theme-ci"]) and any(.[];.tool=="npm" and .argv==["--prefix","web/themes/custom/sous-project","run","build","--"])'
 pass 'setup requires a choice before bootstrap and defaults to restore afterward'
 
 fixture
 expect_failure helper setup.sh restore
 calls_assert 'all(.[];.command!="import-db" and .command!="deploy" and .command!="uli")'
 pass 'missing restore backup stops before database/configuration/login'
-for failed in import-db deploy 'run theme-ci' 'run theme-build'; do
+for failed in import-db deploy 'run theme-ci' 'run build'; do
   fixture; mkdir -p "$PROJECT/reference"; printf 'SELECT 1;\n' | gzip > "$PROJECT/reference/site-db.sql.gz"
   export FAIL_MATCH="$failed"; expect_status 42 helper setup.sh restore
   calls_assert 'all(.[];.command!="uli")'
@@ -250,10 +256,10 @@ calls_assert '[.[]|select(.tool=="drush" or .tool=="hook-probe")|.command]|index
 calls_assert 'all(.[];.command!="site:install")'
 pass 'restore sanitizes its import, deploys configuration and prints login last'
 
-calls_assert '[.[]|select(.tool=="npm")|.argv|join(" ")]|index("run theme-ci")<index("run theme-build")'
+calls_assert '[.[]|select(.tool=="npm")|.argv]|.[0]==["run","theme-ci"] and .[1]==["--prefix","web/themes/custom/sous-project","run","build","--"]'
 fixture; mkdir -p "$PROJECT/reference"; printf 'SELECT 1;\n' | gzip > "$PROJECT/reference/site-db.sql.gz"
 expect_status 0 helper rebuild.sh
-calls_assert 'all(.[];(.argv|index("theme-ci"))==null and (.argv|index("theme-build"))==null) and any(.[];.command=="uli")'
+calls_assert 'all(.[];(.argv|index("theme-ci"))==null and (.argv|index("theme-build"))==null and (.argv|index("build"))==null) and any(.[];.command=="uli")'
 pass 'plain rebuild refreshes data without theme installation or build'
 fixture; export SOUS_ENVIRONMENT=production
 for script in setup.sh rebuild.sh import-data.sh local-data-bak.sh get-db.sh; do

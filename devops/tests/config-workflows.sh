@@ -43,23 +43,49 @@ for runtime in ddev native; do
 done
 pass 'runtime adapters use named DDEV commands or prepared native tools'
 
-run_theme_task() { (cd "$PROJECT"; PATH="$BIN:$PATH" sh -c "$(jq -r --arg task "$1" '.scripts[$task]' "$SOURCE/package.json")"); }
+run_theme_task() {
+  local task="$1"; shift
+  (cd "$PROJECT"; PATH="$BIN:$PATH" sh -c "$(jq -r --arg task "$task" '.scripts[$task]' "$SOURCE/package.json") \"\$@\"" sh "$@")
+}
+json_assert "$SOURCE/package.json" '.scripts["theme-build"]=="./devops/scripts/theme-build.sh" and .scripts["theme-watch"]=="./devops/scripts/theme-watch.sh"'
+for runtime in ddev native; do
+  reset_project; export SOUS_RUNTIME="$runtime" SOUS_ENVIRONMENT=local
+  for task in theme-build theme-watch; do
+    if [ "$task" = theme-build ]; then command=build; else command=develop; fi
+    for directory in default 'web/themes/custom/other theme'; do
+      reset_log
+      if [ "$directory" = default ]; then
+        theme_directory=web/themes/custom/sous-project
+        expect_status 0 run_theme_task "$task" '--mode=two words' --verbose
+      else
+        theme_directory="$directory"
+        expect_status 0 run_theme_task "$task" "$directory" '--mode=two words' --verbose
+      fi
+      arguments=$(jq -cn --arg directory "$theme_directory" --arg command "$command" '["--prefix",$directory,"run",$command,"--","--mode=two words","--verbose"]')
+      calls_assert "[.[]|select(.tool==\"npm\")|.argv]==[$arguments]"
+      if [ "$runtime" = ddev ]; then
+        calls_assert "any(.[];.tool==\"ddev\" and .argv==([\"npm\"]+$arguments))"
+      else calls_assert 'all(.[];.tool!="ddev")'; fi
+    done
+    export TEST_COMMAND_STATUSES='{"--prefix":42}'
+    expect_status 42 run_theme_task "$task"
+    export TEST_COMMAND_STATUSES='{}'
+  done
+  export SOUS_ENVIRONMENT=production; reset_log
+  expect_status 0 run_theme_task theme-build
+  calls_assert 'any(.[];.tool=="npm" and .argv==["--prefix","web/themes/custom/sous-project","run","build","--"])'
+  reset_log; expect_failure run_theme_task theme-watch
+  [ ! -s "$COMMAND_LOG" ] || fail 'production watch invoked a tool'
+done
+pass 'theme wrappers route tools, preserve custom paths/arguments and child errors, and limit watch to development'
 reset_project
 mkdir -p "$PROJECT/web/themes/custom/sous-project" "$PROJECT/web/storybook"
-for task in theme-build theme-watch theme-storybook; do
-  reset_log; expect_status 0 run_theme_task "$task"
-  case "$task" in
-    theme-build) arguments='["--prefix","web/themes/custom/sous-project","run","build"]' ;;
-    theme-watch) arguments='["--prefix","web/themes/custom/sous-project","run","develop"]' ;;
-    theme-storybook) arguments='["--prefix","web/themes/custom/sous-project","run","storybook-build","--","--output-dir","../../../storybook"]' ;;
-  esac
-  calls_assert "length==1 and .[0].tool==\"npm\" and .[0].argv==$arguments"
-  export TEST_COMMAND_STATUSES='{"npm":42}'
-  expect_status 42 run_theme_task "$task"
-  export TEST_COMMAND_STATUSES='{}'
-done
+expect_status 0 run_theme_task theme-storybook
+calls_assert 'length==1 and .[0].tool=="npm" and .[0].argv==["--prefix","web/themes/custom/sous-project","run","storybook-build","--","--output-dir","../../../storybook"]'
+export TEST_COMMAND_STATUSES='{"npm":42}'
+expect_status 42 run_theme_task theme-storybook
 [ "$(cd "$PROJECT/web/themes/custom/sous-project/../../../storybook" && pwd -P)" = "$(cd "$PROJECT/web/storybook" && pwd -P)" ] || fail 'Storybook output escapes web/storybook'
-pass 'theme npm tasks use the configured prefix, correct Storybook output and child exit status'
+pass 'Storybook stays a direct npm task with the correct output and child exit status'
 reset_project; export SOUS_RUNTIME=ddev IS_DDEV_PROJECT=true
 expect_status 0 helper confex.sh
 calls_assert 'all(.[];.tool!="ddev")'

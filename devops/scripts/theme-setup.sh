@@ -45,5 +45,5 @@ runtime_exec sh -c 'cd "$1"; if [ -f package-lock.json ]; then npm ci --include=
 # Normalize the pinned starter's stock source and generated-output check scope.
 # This is first setup, not the routine locked theme-ci/theme-build workflow.
 runtime_exec node devops/scripts/theme-initialize.mjs "$theme_directory"
-runtime_npm --prefix "$theme_directory" run build
+sh devops/scripts/theme-build.sh "$theme_directory"
 runtime_exec touch "$theme_directory/.sous-initialized"

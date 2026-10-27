@@ -35,7 +35,7 @@ case "$1" in
     runtime_require_development
     runtime_start
     runtime_npm run theme-ci
-    runtime_npm run theme-build
+    sh devops/scripts/theme-build.sh
     # Replace the dispatcher so callers receive the child workflow's exit code.
     exec ./devops/scripts/rebuild.sh "$@"
     ;;

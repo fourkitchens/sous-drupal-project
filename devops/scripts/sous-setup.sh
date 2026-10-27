@@ -42,6 +42,8 @@ replace_token() {
 # Emulsify directory name intentionally differs from DDEV's dashed identifier.
 replace_token "sous-project" "$dashed_project_name" ".ddev/config.yaml"
 replace_token "sous-project" "$emulsify_project_name" ".gitignore"
+replace_token "sous-project" "$emulsify_project_name" "devops/scripts/theme-build.sh"
+replace_token "sous-project" "$emulsify_project_name" "devops/scripts/theme-watch.sh"
 replace_token "sous-project" "$emulsify_project_name" "devops/scripts/theme-setup.sh"
 replace_token "sous-project" "$emulsify_project_name" "devops/scripts/sous-build.sh"
 replace_token "sous-project" "$emulsify_project_name" "docs/BUILD_TOOLS.md"

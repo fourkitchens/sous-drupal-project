@@ -30,6 +30,18 @@ path in the npm tasks and documentation.
 | `ddev npm run theme-storybook` | Build a static Storybook at `web/storybook` |
 | `ddev composer build-assets` | Install PHP and root/theme npm dependencies, then build production assets |
 
+The build and watch scripts remain available after setup. Their npm aliases
+call `devops/scripts/theme-build.sh` and `devops/scripts/theme-watch.sh`.
+CI calls the same build script directly:
+
+```sh
+sh devops/scripts/theme-build.sh
+```
+
+The script uses DDEV from the host. Set `SOUS_RUNTIME=native` when CI provides
+the npm tools directly; `devops/ci/build/theme` uses that default. See
+[Environments](ENVIRONMENTS.md) for runtime selection.
+
 The individual theme tasks use installed dependencies. `build-assets` also runs
 Composer installation with `--no-dev`; Storybook is a separate optional build.
 
