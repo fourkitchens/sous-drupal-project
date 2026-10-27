@@ -74,6 +74,11 @@ if ($selection !== 'paragraphs') {
     $check(!is_dir('web/modules/contrib/' . $module), 'Unselected Paragraphs module directory exists: ' . $module);
   }
 }
+if (!$split) {
+  foreach (['config/_splits/*.yml', 'config/local/*.yml', 'config/staging/*.yml', 'config/default/config_split.config_split.*.yml'] as $pattern) {
+    $check(glob($pattern) === [], 'Unselected Config Split payload leaked into a plain consumer: ' . $pattern);
+  }
+}
 $has_split = in_array('drupal/config_split', array_column($lock['packages'], 'name'), TRUE);
 $check($has_split === $split && is_dir('web/modules/contrib/config_split') === $split, 'Config Split must remain independently optional.');
 print json_encode(['result' => 'pass', 'selection' => $selection, 'config_split' => $split, 'retained_recipes' => $actual, 'dist_only' => TRUE], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;

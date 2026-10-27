@@ -97,6 +97,13 @@ finish() {
     update_result '.status="fail" | .cleanup_error="Cannot remove disposable resources safely; inspect cleanup logs and workspace ownership."'
     status=1
   elif [ "$keep" -eq 0 ]; then
+    # Drupal protects sites/default after install. Restore write permission on
+    # these owned fixture directories only before host-side recursive removal.
+    for directory in "$site/web/sites/default" "$site/.integration/clean-clone/web/sites/default"; do
+      if [ -d "$directory" ]; then
+        if ! chmod u+w "$directory"; then update_result '.status="fail" | .cleanup_error="Could not restore owned fixture directory permissions."'; status=1; fi
+      fi
+    done
     if ! rm -rf -- "$work"; then update_result '.status="fail" | .cleanup_error="Could not remove owned workspace."'; status=1; fi
   fi
   echo "Sous integration result: $(jq -r '.status' "$result") ($artifacts)"
@@ -198,6 +205,17 @@ acquire() {
   cp -pR "$work/sources/sous-drupal-packages" "$site/.integration/packages"
   mkdir -p "$site/.integration/sources"
   cp -pR "$work/sources/." "$site/.integration/sources/"
+  if [ "$candidate" -eq 1 ]; then
+    mkdir -p "$site/.integration/publication"
+    # Supervised by DDEV so settings restarts and database snapshot restores
+    # cannot silently kill the cold-cache ZIP server.
+    cat > "$site/.ddev/config.integration.yaml" <<'YAML'
+web_extra_daemons:
+  - name: sous-package-index
+    command: "php -S 127.0.0.1:18737 -t /var/www/html/.integration/publication"
+    directory: /var/www/html
+YAML
+  fi
   mkdir -p "$site/devops/integration"
   cp -pR "$harness/devops/integration/." "$site/devops/integration/"
   jq '.sources' "$result" > "$artifacts/sources.json"
@@ -238,7 +256,6 @@ provision() {
   update_result --arg php "$php_version" --arg node "$node_version" --arg npm "$npm_version" --arg composer "$expected_composer" '.runtime={php:$php,node:$node,npm:$npm,composer:$composer}'
   if [ "$candidate" -eq 1 ]; then
     dd build-candidate-zips exec node .integration/packages/tools/build.mjs --version 2.0.0 --reference "$packages_revision" --output .integration/publication --dist-base-url http://127.0.0.1:18737/dist/
-    dd serve-candidate-zips exec bash -c 'nohup php -S 127.0.0.1:18737 -t .integration/publication >.integration/publication/http.log 2>&1 </dev/null &'
     dd candidate-index-ready exec curl --retry 5 --retry-connrefused --retry-delay 1 --fail http://127.0.0.1:18737/site/packages.json
     jq '.repositories=([{type:"composer",url:"http://127.0.0.1:18737/site",canonical:true,only:["fourkitchens/sous-admin","fourkitchens/sous-config-split","fourkitchens/sous-content-types","fourkitchens/sous-core-layout-builder","fourkitchens/sous-emulsify","fourkitchens/sous-formats","fourkitchens/sous-media","fourkitchens/sous-paragraph-types","fourkitchens/sous-paragraphs"]}]+[.repositories[] | select(((.only//[]) | index("fourkitchens/sous-admin")) | not)]) | .config["secure-http"]=false' composer.json > "$work/composer.json"
     mv "$work/composer.json" composer.json
@@ -287,7 +304,7 @@ provision() {
   done
   dd php-lint exec npm run lint:php
   dd javascript-lint exec npm run lint:js
-  for test in install-workflows config-workflows environment-settings lint-workflows integration-audit integration-action ci-templates artifact; do
+  for test in install-workflows config-workflows environment-settings lint-workflows integration-audit integration-action integration-clone ci-templates artifact; do
     dd "$test" exec -d "$original" bash "devops/tests/$test.sh"
   done
   dd environment-service-isolation exec env SOUS_INTEGRATION_AUTOLOAD=/var/www/html/vendor/autoload.php php devops/tests/environment-services.php
@@ -301,6 +318,8 @@ provision() {
   audit theme-audit npm "$site/web/themes/custom/integration/package-lock.json" ddev exec -d /var/www/html/web/themes/custom/integration npm audit --include=dev --json
   dd generated-project-lint exec npm run lint:project
   dd baseline-snapshot snapshot --name=integration-base
+  dd baseline-config-export drush config:export --yes
+  cp -pR config "$work/baseline-config"
   cp composer.json "$work/baseline-composer.json"
   cp composer.lock "$work/baseline-composer.lock"
   for manifest in composer.json composer.lock package.json package-lock.json; do cp "$manifest" "$artifacts/generated-$manifest"; done
@@ -337,29 +356,31 @@ authorization() {
 verify_selected() {
   selection=$1
   split=$2
-  must "$selection-$split-package-boundaries" ddev exec env "SOUS_INTEGRATION_SELECTION=$selection" "SOUS_INTEGRATION_SPLIT=$split" php devops/integration/verify-packages.php
+  must "$selection-$split-package-boundaries" ddev exec env SOUS_DISPOSABLE_TEST=1 "SOUS_INTEGRATION_SELECTION=$selection" "SOUS_INTEGRATION_SPLIT=$split" php devops/integration/verify-packages.php
 }
 
 cold_clone() {
   label=$1
   # Commit only generated application source, never downloaded code or probes.
   if [ ! -d .git ]; then
-    must clone-source-init git init --quiet
-    printf '/.integration/\n/devops/integration/\n/devops/tests/\n' >> .git/info/exclude
+    must clone-source-init git init --quiet || return 1
+    printf '/.integration/\n/.ddev/config.integration.yaml\n/devops/integration/\n/devops/tests/\n' >> .git/info/exclude || return 1
   fi
-  must "$label-stage-source" git add --all
-  must "$label-stage-lock" git add --force composer.json composer.lock patches.lock.json
-  must "$label-source-commit" git -c user.name='Sous integration' -c user.email=sous-tests@example.invalid commit --quiet --allow-empty -m 'Disposable application source'
+  must "$label-stage-source" git add --all || return 1
+  must "$label-stage-lock" git add --force composer.json composer.lock patches.lock.json || return 1
+  must "$label-source-commit" git -c user.name='Sous integration' -c user.email=sous-tests@example.invalid commit --quiet --allow-empty -m 'Disposable application source' || return 1
   clone="$site/.integration/clean-clone"
-  rm -rf "$clone"
-  must "$label-clone" git clone --quiet --no-hardlinks "$site" "$clone"
-  [ ! -e "$clone/vendor" ] && [ ! -e "$clone/web/recipes" ] || fail 'Composer-managed files entered the source clone.'
-  dd "$label-clone-install" exec -d /var/www/html/.integration/clean-clone env COMPOSER_HOME=/var/www/html/.integration/clone-home COMPOSER_CACHE_DIR="/var/www/html/.integration/cache-$label" composer install --no-interaction --prefer-dist
-  cmp -s composer.lock "$clone/composer.lock" || fail 'Clone install changed lock bytes.'
+  rm -rf "$clone" || return 1
+  must "$label-clone" git clone --quiet --no-hardlinks "$site" "$clone" || return 1
+  [ ! -e "$clone/vendor" ] && [ ! -e "$clone/web/recipes" ] || { fail 'Composer-managed files entered the source clone.'; return 1; }
+  dd "$label-clone-install" exec -d /var/www/html/.integration/clean-clone env COMPOSER_HOME=/var/www/html/.integration/clone-home COMPOSER_CACHE_DIR="/var/www/html/.integration/cache-$label" composer install --no-interaction --prefer-dist || return 1
+  cmp -s composer.lock "$clone/composer.lock" || { fail 'Clone install changed lock bytes.'; return 1; }
   clone_recipes=()
-  while IFS= read -r name; do clone_recipes+=("$name"); done < <(jq -r '.packages[] | select(.name | startswith("fourkitchens/sous-")) | .name' composer.lock)
-  dd "$label-clone-prefer-source" exec -d /var/www/html/.integration/clean-clone env COMPOSER_HOME=/var/www/html/.integration/clone-home COMPOSER_CACHE_DIR="/var/www/html/.integration/source-cache-$label" composer reinstall "${clone_recipes[@]}" --prefer-source --no-interaction
-  must "$label-clone-boundaries" ddev exec -d /var/www/html/.integration/clean-clone env "SOUS_INTEGRATION_SELECTION=$choice" "SOUS_INTEGRATION_SPLIT=$split" php /var/www/html/devops/integration/verify-packages.php
+  jq -r '.packages[] | select(.name | startswith("fourkitchens/sous-")) | .name' composer.lock > "$work/clone-recipes.txt" || return 1
+  while IFS= read -r name; do clone_recipes+=("$name"); done < "$work/clone-recipes.txt"
+  [ "${#clone_recipes[@]}" -gt 0 ] || { fail 'Clone lock lost its selected recipe records.'; return 1; }
+  dd "$label-clone-prefer-source" exec -d /var/www/html/.integration/clean-clone env COMPOSER_HOME=/var/www/html/.integration/clone-home COMPOSER_CACHE_DIR="/var/www/html/.integration/source-cache-$label" composer reinstall "${clone_recipes[@]}" --prefer-source --no-interaction || return 1
+  must "$label-clone-boundaries" ddev exec -d /var/www/html/.integration/clean-clone env SOUS_DISPOSABLE_TEST=1 "SOUS_INTEGRATION_SELECTION=$choice" "SOUS_INTEGRATION_SPLIT=$split" php /var/www/html/devops/integration/verify-packages.php || return 1
 }
 
 option_case() {
@@ -367,8 +388,10 @@ option_case() {
     split=$2
     label="$choice-$split"
     dd "$label-reset" snapshot restore integration-base || return 1
-    cp "$work/baseline-composer.json" composer.json
-    cp "$work/baseline-composer.lock" composer.lock
+    rm -rf config || return 1
+    cp -pR "$work/baseline-config" config || return 1
+    cp "$work/baseline-composer.json" composer.json || return 1
+    cp "$work/baseline-composer.lock" composer.lock || return 1
     dd "$label-base-packages" composer install --no-interaction --prefer-dist || return 1
     case "$choice" in
       default) recipe=sous-content-types; mode=default ;;
@@ -381,7 +404,7 @@ option_case() {
       dd "$label-apply" install-recipe "fourkitchens/$recipe" || return 1
     fi
     if [ "$split" = split ]; then
-      mkdir -p config/_splits config/local config/staging
+      mkdir -p config/_splits config/local config/staging || return 1
       dd "$label-split-package" composer require 'fourkitchens/sous-config-split:^2.0' --no-interaction || return 1
       dd "$label-split-apply" install-recipe fourkitchens/sous-config-split || return 1
     fi
