@@ -30,7 +30,8 @@
     "theme-ci": "npm --prefix web/themes/custom/sous-project ci --include=dev",
     "theme-storybook": "./devops/scripts/theme-storybook.sh",
     "release": "semantic-release",
-    "release:dry-run": "semantic-release --dry-run"
+    "release:dry-run": "semantic-release --dry-run",
+    "check:environment": "./devops/scripts/check-environment.sh"
   },
   "repository": {
     "type": "git",

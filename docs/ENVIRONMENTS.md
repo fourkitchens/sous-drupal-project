@@ -45,9 +45,8 @@ Local/staging use core's `test_mail_collector`; it records native Drupal
 mail in state rather than sending it. Production retains its real stored mail
 transport and never selects that collector through Sous defaults. Specific
 per-module transport mappings and mail systems that bypass Drupal's native
-mail manager require project review; the helper rejects uncaptured native
-staging mappings rather than assuming the default overrides every
-integration. Production-mode testing inside DDEV checks application policy;
+mail manager require project review; the explicit runtime check verifies the
+default collector, which does not override every integration. Production-mode testing inside DDEV checks application policy;
 DDEV's own mail infrastructure is still local infrastructure. No production
 mail is sent by the fixture.
 
@@ -134,8 +133,7 @@ transforms; there is no unconditional partial import or custom loader. Sous
 supplies no Config Filter requirement or broad Config Ignore policy and does
 not set `config_exclude_modules`: core strips those
 modules before split export and preserves already-active excluded modules on
-import. The helper rejects overlap with split-owned modules and development
-exclusions in production. See the official [per-environment guidance](https://www.drupal.org/docs/contributed-modules/configuration-split/per-environment-configuration).
+import. Review those exclusions alongside split ownership. See the official [per-environment guidance](https://www.drupal.org/docs/contributed-modules/configuration-split/per-environment-configuration).
 
 ## Commands and execution context
 
@@ -166,34 +164,39 @@ accept their optional project-contained directory followed by tool arguments.
 The canonical recipe implementation is the existing install-recipe script;
 the DDEV command delegates to it. Pure build commands install no dependencies.
 
-`confex` validates the native transformed export before writing the complete
-base. `confim` checks the complete source/native production transform, runs
-native deploy, and checks the resulting active state. Guards reject known
-development modules, capture transports, proxy settings, debug/aggregation
-defaults, active stored Sous split statuses and broad Config Ignore rules in
-the production base. After attempted deployment it also attempts cache cleanup
-and the staging post-config-import hook, including partial failures;
-the original failure status wins over cleanup errors. See the
-[refresh safeguards](SETUP.md#post-import-and-post-config-import-safeguards).
-Add project-specific development module IDs to tracked
-`$settings['sous_development_modules']`; this is not an exhaustive classification
-of every third-party module.
+`confex` exports configuration and `confim` runs native Drush deploy. They do
+not run the environment checker automatically. A nonproduction deployment also
+runs the optional post-config-import hook, including after a failed deploy;
+the deploy failure takes precedence over a hook failure. Development setup and
+database restoration reject production before calling tools. Import validates
+a non-empty SQL file and gzip integrity before database work, then rebuilds
+caches, runs an optional post-import hook and sanitizes. Final login follows a
+successful import and deployment. See the [restore guide](SETUP.md#restore-an-existing-generated-site).
 
-Active split directories must exist before export/import; inactive optional
-directories are not imported unconditionally. Import validates incoming as well
-as active split definitions, with the same runtime overrides as Config Split's
-native importer; staged folder changes cannot create missing/public split
-directories implicitly. The guard uses the selected Config Split 2.x manager
-API, which must be rechecked during that package's major upgrade. Fresh setup and database
-restore/sanitization are development workflows and reject production before
-destructive work. Restore validates readable/nonempty SQL and compression
-signatures/integrity before replacement. It attempts cache cleanup, its
-post-import hook and the active check even after partial failure; sanitization
-waits for import/safeguards to succeed. Final login waits for deployment and
-its repeated safeguards too. Downloads require an explicitly configured project
-hook and complete atomically with restrictive permissions. The
-[restore guide](SETUP.md#restore-an-existing-generated-site) is authoritative
-for paths, commands, hook implementation and recovery.
+## Explicit environment checks
+
+Run these commands against a bootstrapped site after adopting `settings.sous.php`:
+
+```sh
+ddev npm run check:environment -- config
+ddev npm run check:environment -- runtime
+```
+
+`config` is the default mode. It checks `config/default` for development modules,
+verbose/all error display, capture mail backends and disabled CSS/JS aggregation.
+The development-module list is `devel`, `devel_generate`, `webprofiler`,
+`stage_file_proxy`, `reroute_email` and `devel_mail_log`, plus IDs in
+`$settings['sous_development_modules']`.
+
+`runtime` checks effective settings. Outside local mode, Twig debug must be off,
+Twig cache on, the render cache must not be null, and rebuild access must be off.
+Production must have no capture mail backend. Local and staging require the
+default `test_mail_collector` backend and an automated-cron interval of `0`.
+
+Each rule prints one `PASS` or `FAIL` line; any failure exits with status `1`.
+A missing `sous_environment` setting fails with an adoption message. These checks
+read the production base or current runtime; they do not transform/import
+configuration or inspect Config Split folders and stored statuses.
 
 ## Existing-site adoption
 

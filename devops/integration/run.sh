@@ -119,6 +119,8 @@ if [ -n "$packages" ]; then step packages-path use_packages; fi
 created=1
 step ddev-config ddev config --project-name "$project"
 step fresh-install fresh
+step environment-config ddev npm run check:environment -- config
+step environment-runtime ddev npm run check:environment -- runtime
 step bootstrap bootstrapped
 step front-page front_page
 step login-url login_url
