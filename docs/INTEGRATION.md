@@ -64,7 +64,7 @@ The runner snapshots tracked and non-ignored source files, excludes installed
 code/caches/reference artifacts and records each actual revision plus copied
 source digest. Symlinks leaving a source checkout are rejected. Candidate ZIPs
 are built by the package repository's deterministic builder and served through
-an owned loopback HTTP index inside the disposable container. Production runs
+an owned loopback HTTP index supervised by DDEV inside the disposable container. Production runs
 obtain the reviewed package source revision from published dist metadata.
 
 Use `--artifacts DIRECTORY` to retain logs and machine-readable `result.json`.
@@ -92,8 +92,8 @@ records, and no maintainer probe ships in a package ZIP.
 | Admin only | None | Gin, Navigation and Superuser; no Page/Frontpage or Sous media bundles |
 
 Each choice runs with and without `fourkitchens/sous-config-split`, giving eight
-combinations. The runner restores the baseline database and Composer manifest/
-lock before each case, then resolves only the selected composition and its
+combinations. The runner restores the baseline database, exported configuration directory
+and Composer manifest/lock before each case, then resolves only the selected composition and its
 shared dependencies. It checks retained ZIP-only lock records and actual module
 and recipe directories. Layout Builder must never resolve/install Paragraphs.
 Paragraphs/default must omit the Core Layout Builder composition. Navigation

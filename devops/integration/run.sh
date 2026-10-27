@@ -256,6 +256,7 @@ provision() {
   update_result --arg php "$php_version" --arg node "$node_version" --arg npm "$npm_version" --arg composer "$expected_composer" '.runtime={php:$php,node:$node,npm:$npm,composer:$composer}'
   if [ "$candidate" -eq 1 ]; then
     dd build-candidate-zips exec node .integration/packages/tools/build.mjs --version 2.0.0 --reference "$packages_revision" --output .integration/publication --dist-base-url http://127.0.0.1:18737/dist/
+    cp .integration/publication/release-manifest.json "$artifacts/candidate-package-manifest.json"
     dd candidate-index-ready exec curl --retry 5 --retry-connrefused --retry-delay 1 --fail http://127.0.0.1:18737/site/packages.json
     jq '.repositories=([{type:"composer",url:"http://127.0.0.1:18737/site",canonical:true,only:["fourkitchens/sous-admin","fourkitchens/sous-config-split","fourkitchens/sous-content-types","fourkitchens/sous-core-layout-builder","fourkitchens/sous-emulsify","fourkitchens/sous-formats","fourkitchens/sous-media","fourkitchens/sous-paragraph-types","fourkitchens/sous-paragraphs"]}]+[.repositories[] | select(((.only//[]) | index("fourkitchens/sous-admin")) | not)]) | .config["secure-http"]=false' composer.json > "$work/composer.json"
     mv "$work/composer.json" composer.json
