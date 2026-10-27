@@ -316,11 +316,10 @@ provision() {
   done
   dd php-lint exec npm run lint:php
   dd javascript-lint exec npm run lint:js
-  for test in install-workflows config-workflows environment-settings lint-workflows integration-audit integration-action integration-clone integration-index ci-templates artifact; do
+  for test in install-workflows config-workflows environment-settings lint-workflows integration-audit integration-clone integration-index ci-templates; do
     dd "$test" exec -d "$original" bash "devops/tests/$test.sh"
   done
   dd environment-service-isolation exec env SOUS_INTEGRATION_AUTOLOAD=/var/www/html/vendor/autoload.php php devops/tests/environment-services.php
-  dd release-regressions exec -d "$original" npm run release:test
   dd cli-cache-regression exec -d "$original" node devops/tests/verify-cli-cache.mjs
   dd minimal-install drush --yes site:install minimal --account-name=integration_admin --account-pass=integration-disposable --site-name='Sous integration'
   for recipe in sous-emulsify sous-admin; do dd "base-$recipe" install-recipe "fourkitchens/$recipe"; done

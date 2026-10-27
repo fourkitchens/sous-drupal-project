@@ -13,7 +13,7 @@ changes. See [release coordination](RELEASES.md) before choosing a published tag
 | PHP | 8.4 in DDEV; Composer platform 8.4.0 and requirement `^8.4` | `.ddev/config.yaml`, `composer.json` |
 | Composer | 2.10.3 | `.ddev/config.yaml` |
 | Drush | 13.8.0 / `^13.8.0` | `composer.json`; generated lockfile |
-| DDEV | `>=1.25.2 <2`; shared CI installs 1.25.4 | `.ddev/config.yaml`, `.github/workflows/integration.yml` |
+| DDEV | `>=1.25.2 <2`; shared CI installs 1.25.4 | `.ddev/config.yaml`, `.github/workflows/ci.yml` |
 | Database | MariaDB 10.11 | `.ddev/config.yaml` |
 | Node.js | 24.22.1 | Root and generated theme `.nvmrc`, DDEV config/image, npm engines |
 | npm | 11.21.1 | `packageManager`, DDEV image, release workflow |

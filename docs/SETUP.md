@@ -72,12 +72,11 @@ after content selection, defaults to no, and initializes its project-owned
 directories when selected. A directory without Git is initialized on `main`
 without changing global Git preferences.
 
-Git and Composer archives exclude `devops/integration/` and every maintainer
-test file, including hidden placeholders. Project naming also removes those
-files for source-based installs and recreates an empty `devops/tests/` for the
-application's own checks. It removes the maintainer-only `release:test` npm
-alias; the source checkout retains that alias and its tests. Keep the original
-starter checkout separate when maintaining Sous itself.
+Git archive rules exclude `devops/integration/` and every maintainer test file,
+including hidden placeholders. Project naming also removes those files for
+source-based installs and recreates an empty `devops/tests/` for the
+application's own checks. Keep the original starter checkout separate when
+maintaining Sous itself.
 
 After naming, the equivalent explicit fresh command is:
 

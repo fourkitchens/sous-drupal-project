@@ -208,14 +208,5 @@
             "@php -r \"if (!file_exists('web/sites/default/settings.local.php') && !is_link('web/sites/default/settings.local.php') && !copy('web/sites/example.settings.local.php', 'web/sites/default/settings.local.php')) { exit(1); }\"",
             "@php -r \"if (!file_exists('web/sites/default/settings.php') && !is_link('web/sites/default/settings.php') && !copy('web/sites/default/default.settings.php', 'web/sites/default/settings.php')) { exit(1); }\""
         ]
-    },
-    "archive": {
-        "exclude": [
-            "/.github/workflows",
-            "/.github/actions",
-            "/devops/integration",
-            "/devops/tests/*",
-            "/devops/tests/.*"
-        ]
     }
 }

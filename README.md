@@ -1,4 +1,4 @@
-[![Sous CI](https://github.com/fourkitchens/sous-drupal-project/actions/workflows/semantic-release.yml/badge.svg?branch=main)](https://github.com/fourkitchens/sous-drupal-project/actions/workflows/semantic-release.yml)
+[![Sous CI](https://github.com/fourkitchens/sous-drupal-project/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fourkitchens/sous-drupal-project/actions/workflows/ci.yml)
 
 # Sous Drupal starter
 
@@ -74,16 +74,17 @@ site. Use the [maintenance workflow](docs/MAINTENANCE.md).
 
 ## Work on Sous itself
 
-Pull requests run focused source checks without starting DDEV or installing a
-Drupal site. With the reviewed Node/npm and PHP tools installed, run the same
-checks from this source checkout:
+Pull requests, release-branch pushes and manual runs use
+`.github/workflows/ci.yml` for source checks and full integration. With the
+reviewed Node/npm and PHP tools installed, run the local source checks from
+this checkout:
 
 ```sh
 bash devops/tests/check.sh
 ```
 
-Full product integration runs after the focused checks on release-branch pushes
-and manual runs, and must pass before publication from `main`. It tests the
+Full product integration runs after the source checks and must pass before
+publication from a push to canonical `main`. It tests the
 starter with the companion packages repository in its own disposable site. See
 [Integration checks](docs/INTEGRATION.md) for the published-index gate and the
 explicit candidate-commit mode. For local edits, the source parent contains

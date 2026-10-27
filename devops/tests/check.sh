@@ -8,8 +8,7 @@ cd "$root"
 npm run lint:starter
 php devops/tests/starter-defaults.php
 bash devops/tests/documentation.sh
-for test in install-workflows config-workflows environment-settings lint-workflows integration-audit integration-action integration-clone integration-index ci-templates artifact; do
+for test in install-workflows config-workflows environment-settings lint-workflows integration-audit integration-clone integration-index ci-templates; do
   bash "devops/tests/$test.sh"
 done
-npm run release:test
 node devops/tests/verify-cli-cache.mjs

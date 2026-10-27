@@ -1,0 +1,119 @@
+name: Sous CI
+
+on:
+  push:
+    branches: [main, next, next-major, alpha, beta, '*.x']
+  pull_request:
+    branches: [main, next, next-major, alpha, beta, '*.x']
+  workflow_dispatch:
+    inputs:
+      packages_ref:
+        description: Optional full reviewed packages commit (validation only)
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          tools: composer:2.10.3
+          coverage: none
+      - run: npm ci
+      - run: npm run lint
+      - name: Check shell scripts
+        run: find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
+      - name: Check installation and environment helpers
+        run: |
+          bash devops/tests/install-workflows.sh
+          bash devops/tests/config-workflows.sh
+          bash devops/tests/environment-settings.sh
+
+  integration:
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Initialize diagnostic artifacts
+        run: |
+          mkdir -p "$RUNNER_TEMP/sous-integration-results"
+          printf 'Artifact collection initialized before checkout and DDEV setup.\n' > "$RUNNER_TEMP/sous-integration-results/workflow-setup.txt"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install reviewed DDEV
+        uses: ddev/github-action-setup-ddev@fdf2f5c97943bae638f31df6df86f1defa6210c0 # v1.12.1
+        with:
+          version: '1.25.4'
+          autostart: false
+          installScriptUrl: https://raw.githubusercontent.com/ddev/ddev/5da91aeb9ebab0b0e66171c450b72099308d332c/scripts/install_ddev.sh
+      - name: Validate the integrated product
+        env:
+          PACKAGES_REF: ${{ inputs.packages_ref || '' }}
+          SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          if [[ -z "$PACKAGES_REF" ]] && jq -e --arg branch "$SOURCE_BRANCH" '.head_ref == $branch' devops/integration/pr-refs.json >/dev/null; then
+            PACKAGES_REF=$(jq -er '.packages_ref' devops/integration/pr-refs.json)
+          fi
+          args=()
+          if [[ -n "$PACKAGES_REF" ]]; then
+            args+=(--packages-ref "$PACKAGES_REF")
+          fi
+          bash devops/integration/run.sh \
+            --subject "$GITHUB_WORKSPACE" \
+            --subject-repository "$GITHUB_REPOSITORY" \
+            --artifacts "$RUNNER_TEMP/sous-integration-results" \
+            "${args[@]}"
+      - name: Upload integration diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sous-integration-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sous-integration-results
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    needs: [checks, integration]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'fourkitchens/sous-drupal-project' && !inputs.packages_ref
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

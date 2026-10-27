@@ -36,6 +36,8 @@ runtime_npm --prefix "$theme_directory" pkg set \
   'overrides.@emulsify/core.@storybook/react-dom-shim=10.6.4' \
   'overrides.@emulsify/core.eslint-plugin-storybook=10.6.4'
 # A newly generated theme has no lockfile. Subsequent installs reproduce it.
+# The selected runtime expands the theme path.
+# shellcheck disable=SC2016
 runtime_exec sh -c 'cd "$1"; if [ -f package-lock.json ]; then npm ci --include=dev; else npm install --include=dev; fi' sh "$theme_directory"
 # Normalize the pinned starter's stock source and generated-output check scope.
 # This is first setup, not the routine locked theme-ci/theme-build workflow.

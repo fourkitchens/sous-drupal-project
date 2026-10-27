@@ -10,10 +10,10 @@ settings. Existing sites retain their database and complete configuration export
 and adopt source/configuration changes through the [maintenance workflow](MAINTENANCE.md).
 
 Keep `feat!:` or a `BREAKING CHANGE:` footer in the final merge/squash commit.
-Native semantic-release checks cover the `7.0.1` → `8.0.0` decision. Only the
-canonical `main` publication job creates starter tags and releases.
-Pull requests run focused source checks, while release-branch pushes and manual
-runs retain full integration before publication.
+Native semantic-release selects `8.0.0` from the breaking changes after `7.0.1`.
+Only a push to canonical `main` can publish starter tags and releases after
+checks and full integration pass. Pull requests and manual runs also run the
+full integration gate without publishing.
 
 ## Current two-repository release sequence
 

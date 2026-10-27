@@ -6,6 +6,8 @@ set -eu
 [ "${SOUS_DISPOSABLE_TEST:-}" = 1 ] || { echo 'Use an owned disposable fixture.' >&2; exit 1; }
 service=webextradaemons:sous-package-index
 log=$(mktemp "${TMPDIR:-/tmp}/sous-index-ready.XXXXXX")
+# Invoked by the EXIT trap.
+# shellcheck disable=SC2329
 finish() {
   status=$?
   trap - EXIT

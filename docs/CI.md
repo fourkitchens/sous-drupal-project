@@ -6,16 +6,12 @@ policy. These are separate configurations even when both use GitHub Actions.
 
 ## Maintained source repository
 
-`.github/workflows/` and `.github/actions/` contain the Sous integration/release
-pipeline. Checks are split by cost:
-
-- **Pull requests:** native PHP/JavaScript lint, installer/runtime helper
-  regressions, documentation paths, CLI-cache checks and semantic-release dry
-  runs. These use `bash devops/tests/check.sh` without DDEV or a Drupal database.
-- **Release-branch pushes and manual runs:** the focused checks followed by the
-  full disposable Drupal installation, optional-package, environment and
-  generated-theme matrix. Publication from canonical `main` requires both jobs
-  to pass.
+`.github/workflows/ci.yml` contains the checks, integration and release jobs.
+Pull requests, release-branch pushes and manual runs first run PHP/JavaScript
+lint, ShellCheck and the installation/configuration/environment helper suites,
+then the full disposable Drupal installation, optional-package, environment and
+generated-theme matrix. Publication requires both jobs to pass and runs only
+for pushes to canonical `main` without a `packages_ref` override.
 
 Review branches run through the pull-request event instead of duplicate branch
 push and pull-request events. A newer PR update cancels its superseded check
@@ -26,12 +22,9 @@ index. Explicit candidate mode builds ZIPs from one reviewed package commit for
 prepublication acceptance. These jobs do not deploy client sites. See
 [integration](INTEGRATION.md).
 
-The Git archive excludes product workflows; Composer archives also exclude the
-composite-action metadata. One-time project naming removes both directories
-from source-based installs too, retaining other GitHub files such as the PR
-template. The action metadata must remain in GitHub's source archive because
-GitHub downloads it to execute the product action; setup removes it before a
-generated installation finishes.
+Git archive rules exclude product workflows and maintainer tooling. One-time
+project naming removes those files from source-based installs too, retaining
+other GitHub files such as the PR template.
 
 ## Generated applications
 
@@ -67,8 +60,7 @@ The old repositories remain historical download sources; the starter no longer
 combines their floating branches. Package CI owns syntax/style checks and
 automatic semantic publication from `main`;
 starter CI retains the full theme, installation and environment acceptance gate
-for release-branch pushes and manual runs. Pull requests use the focused checks
-above; a passing PR source check alone does not establish product acceptance.
+on pull requests, release-branch pushes and manual runs.
 
 At the October 27, 2026 cutover review, package source is merged but ZIPs/index
 are unpublished. The explicit reviewed-commit candidate input tests this branch

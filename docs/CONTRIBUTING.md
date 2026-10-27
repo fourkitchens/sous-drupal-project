@@ -102,12 +102,12 @@ generated project. Review autofix changes before committing them.
 The ungenerated starter's focused regressions use Bash, jq, Git, PHP, Composer,
 and the reviewed Node/npm tools; they are distinct from generated-site checks.
 Run the relevant scripts in `devops/tests` before changing their shared
-installation, configuration, lint, or release implementations. With the reviewed
-Node/npm and PHP tools prepared, `bash devops/tests/check.sh` runs the focused
-checks used on pull requests without a Drupal database or DDEV. Release-branch
-pushes and manual runs then use the [integration runner](INTEGRATION.md) to cover
-the generated theme, all four installation options, configuration export/deploy,
-and Page authoring. That full gate creates and removes its own database.
+installation, configuration or lint implementations. With the reviewed Node/npm
+and PHP tools prepared, `bash devops/tests/check.sh` runs the local source checks
+without a Drupal database or DDEV. CI uses the [integration runner](INTEGRATION.md)
+on pull requests, release-branch pushes and manual runs to cover the generated
+theme, all four installation options, configuration export/deploy and Page
+authoring. That full gate creates and removes its own database.
 These checks stay in the source checkout. Generated sites receive an empty
 `devops/tests/` and supply their own application checks.
 

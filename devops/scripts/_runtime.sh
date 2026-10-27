@@ -12,7 +12,7 @@
 # $0 belongs to the calling script, whose location is two levels below the root.
 # Resolve physical paths once so relative backup/theme paths use a stable base.
 SOUS_PROJECT_ROOT="$(CDPATH='' cd "$(dirname "$0")/../.." && pwd -P)"
-cd "$SOUS_PROJECT_ROOT"
+cd "$SOUS_PROJECT_ROOT" || exit
 
 # A real DDEV container always uses its prepared tools directly. Host scripts
 # default to DDEV; native host/CI execution must be selected explicitly.
@@ -90,6 +90,8 @@ runtime_drush() {
   else
     # DDEV normally supplies this URI through its Drush command wrapper. Keep
     # it while explicitly forwarding the environment to the project binary.
+    # The selected runtime expands the URI and positional arguments.
+    # shellcheck disable=SC2016
     runtime_exec sh -c 'exec vendor/bin/drush --uri="${DDEV_PRIMARY_URL:-http://localhost}" "$@"' sh "$@"
   fi
 }
@@ -179,6 +181,7 @@ runtime_target_command() (
     post-import|post-config-import)
       # Resolve the environment inside the target runtime before opening a hook.
       # Production skips local hooks entirely; other targets require the file.
+      # shellcheck disable=SC2016
       runtime_exec sh -c '
         if [ "${SOUS_ENVIRONMENT+x}" = x ]; then
           hook_environment=$SOUS_ENVIRONMENT
@@ -234,6 +237,7 @@ runtime_require_development() {
     return 1
   fi
   # An explicit native host/CI is production-safe by default; DDEV is local.
+  # shellcheck disable=SC2016
   runtime_exec sh -c '
     environment=${SOUS_ENVIRONMENT:-}
     if [ -z "$environment" ]; then

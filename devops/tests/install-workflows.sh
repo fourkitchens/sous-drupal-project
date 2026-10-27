@@ -74,7 +74,7 @@ printf '\nDeveloper additions.\n' >> "$PROJECT/README.md"; cp "$PROJECT/README.m
 expect_status 0 naming
 cmp "$PROJECT/README.md" "$TEST_ROOT/readme" || fail 'naming retry overwrote README'
 pass 'naming retries preserve a generated README'
-[ ! -d "$PROJECT/.github/workflows" ] && [ ! -d "$PROJECT/.github/actions" ] || fail 'generated site retained product workflows'
+[ ! -d "$PROJECT/.github/workflows" ] || fail 'generated site retained product workflows'
 [ -f "$PROJECT/.github/PULL_REQUEST_TEMPLATE.md" ] || fail 'naming removed unrelated GitHub files'
 [ -f "$PROJECT/assets/ci/circleci/config.yml" ] && [ -f "$PROJECT/assets/ci/github-actions/build.yml" ] || fail 'generated CI choices missing'
 pass 'generation separates product workflows from opt-in site CI templates'

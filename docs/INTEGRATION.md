@@ -1,14 +1,15 @@
 # Sous integration and release checks
 
-Pull requests run focused source checks in `devops/tests/check.sh`. The full
-product gate in `devops/integration/run.sh` runs on release-branch pushes and
-manual dispatches after those focused checks. It creates
+The checks job in `.github/workflows/ci.yml` runs lint, ShellCheck and the
+installation/configuration/environment helper suites. The full product gate in
+`devops/integration/run.sh` then runs on pull requests, release-branch pushes
+and manual dispatches. It creates
 an owned disposable DDEV application, exercises the generated theme, installs
 only selected package ZIPs, and checks configuration and environment behavior.
 The packages repository separately runs syntax, code-sniff and formatting checks.
 Neither gate modifies a developer database or publishes a package release.
 
-## Focused pull-request checks
+## Local source checks
 
 With the reviewed Node/npm and PHP tools prepared, run:
 
@@ -17,14 +18,13 @@ bash devops/tests/check.sh
 ```
 
 The entry point checks PHP/JavaScript syntax and lint, starter defaults,
-installation/configuration/environment command helpers, workflow/artifact
-handling, documentation paths, CLI-cache behavior and native semantic-release
-version decisions. It needs no DDEV, Composer dependency installation or Drupal
+installation/configuration/environment command helpers, documentation paths
+and CLI-cache behavior. It needs no DDEV, Composer dependency installation or Drupal
 database. It does not build a generated theme or exercise the runtime matrices.
 
-GitHub Actions runs these checks once per PR update, cancels superseded PR runs,
-and runs the full gate on release-branch pushes and manual runs. The canonical
-`main` publisher still depends on both the focused checks and full integration.
+GitHub Actions runs checks and integration once per PR update and cancels
+superseded PR runs. Both jobs must pass before a push to canonical `main` can
+publish; manual runs validate without publishing.
 
 ## Review branch and publication status
 
@@ -40,8 +40,8 @@ The review branch `codex/release-starter-8.x` explicitly validates the
 reviewed packages commit in `devops/integration/pr-refs.json`. This override is
 limited to the disposable test application. Its temporary loopback index and
 candidate lockfiles are diagnostic artifacts, not publishable starter locks.
-Only a canonical `main` run with no candidate override may enter the starter
-publication job. Both the caller and reusable publisher enforce that guard.
+Only a push to canonical `main` with no candidate override may enter the starter
+publication job. The guard lives in the single workflow.
 
 Earlier PR #130 full runs failed the generated-theme lint gate. Their separate
 configuration diagnostics did not establish full acceptance. The migration
@@ -94,8 +94,8 @@ the runner verifies the registered DDEV application's actual directory before
 deleting its own containers/database/workspace. It never deletes a project by
 name alone. `--option default|paragraphs|layout-builder|admin-only` narrows content
 checks while keeping both split states; `all` also runs the six environment
-cases. Release-branch pushes and manual CI runs execute the full gate, without
-`--keep`; ordinary pull requests run the focused checks instead.
+cases. Pull requests, release-branch pushes and manual CI runs execute the full
+gate, without `--keep`.
 
 ## Generated application and optional packages
 
@@ -151,13 +151,12 @@ The generated-theme gate runs the selected Emulsify/UI Kit source checks,
 formatting, production asset build, Storybook, Drupal theme/asset assertions,
 generated-project lint and a native prepared build. Source checks validate the
 starter and all nine package manifests/YAML, documentation paths and licenses,
-installer/runtime/action/artifact regressions, PHP/JavaScript lint and native
-semantic-release dry runs. Composer and npm audits include development tools;
+installer/runtime regressions and PHP/JavaScript lint. Composer and npm audits include development tools;
 [audit policy](../devops/integration/audit-policy.json) applies only its existing
 narrow exceptions and does not hide newly introduced findings.
 
-Maintainer source validation remains excluded from generated Git/Composer
-artifacts through archive rules and one-time naming cleanup. Application CI
+Maintainer source validation remains excluded from generated sites through Git
+archive rules and one-time naming cleanup. Application CI
 continues to come from the optional [CircleCI or Actions templates](CI.md).
 A passing candidate full gate verifies the starter against reviewed package
 source. The public index and a cold-cache public consumer installation must be verified

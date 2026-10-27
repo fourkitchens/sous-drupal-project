@@ -60,11 +60,11 @@ replace_token '"lint": "npm run lint:starter"' '"lint": "npm run lint:project"' 
 
 # Remove the starter's npm repository field so release tooling discovers the
 # generated site's own Git origin instead of targeting the Sous repository.
+# shellcheck disable=SC2016 # PHP expands these variables, not the shell.
 php -r '
 $file = "package.json";
 $package = json_decode(file_get_contents($file), true, 512, JSON_THROW_ON_ERROR);
 unset($package["repository"]);
-unset($package["scripts"]["release:test"]);
 $json = json_encode($package, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 if (file_put_contents($file, $json . PHP_EOL) === false) {
   throw new RuntimeException("Unable to update {$file}");
@@ -84,7 +84,7 @@ if [ -f "PROJECT-README.md" ]; then
   mv "PROJECT-README.md" "README.md"
 fi
 
-# GitHub/Composer distributions exclude maintainer checks. A source-based
+# Git distributions exclude maintainer checks. A source-based
 # create-project or contributor clone needs the same boundary after naming.
 # Retain an empty location for the generated site's own future tests.
 rm -rf devops/integration devops/tests
@@ -92,4 +92,4 @@ mkdir -p devops/tests
 
 # The product's workflows test coordinated Sous sources and publish its releases.
 # Generated sites opt into their own CI from assets/ci; retain other GitHub files.
-rm -rf .github/workflows .github/actions
+rm -rf .github/workflows
