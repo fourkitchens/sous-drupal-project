@@ -266,7 +266,7 @@ provision() {
   case "$composer_version" in "Composer version $expected_composer "*) ;; *) fail 'Unexpected Composer runtime.' ;; esac
   update_result --arg php "$php_version" --arg node "$node_version" --arg npm "$npm_version" --arg composer "$expected_composer" '.runtime={php:$php,node:$node,npm:$npm,composer:$composer}'
   if [ "$candidate" -eq 1 ]; then
-    dd build-candidate-zips exec node .integration/packages/tools/build.mjs --version 1.0.0 --reference "$packages_revision" --output .integration/publication --dist-base-url http://127.0.0.1:18737/dist/
+    dd build-candidate-zips exec node .integration/packages/tools/build.mjs --version 2.0.0 --reference "$packages_revision" --output .integration/publication --dist-base-url http://127.0.0.1:18737/dist/
     cp .integration/publication/release-manifest.json "$artifacts/candidate-package-manifest.json"
     dd candidate-index-ready exec curl --retry 5 --retry-connrefused --retry-delay 1 --fail http://127.0.0.1:18737/site/packages.json
     jq '.repositories=([{type:"composer",url:"http://127.0.0.1:18737/site",canonical:true,only:["fourkitchens/sous-admin","fourkitchens/sous-config-split","fourkitchens/sous-content-types","fourkitchens/sous-core-layout-builder","fourkitchens/sous-emulsify","fourkitchens/sous-formats","fourkitchens/sous-media","fourkitchens/sous-paragraph-types","fourkitchens/sous-paragraphs"]}]+[.repositories[] | select(((.only//[]) | index("fourkitchens/sous-admin")) | not)]) | .config["secure-http"]=false' composer.json > "$work/composer.json"
@@ -383,12 +383,12 @@ option_case() {
       admin-only) recipe=; mode=admin-only ;;
     esac
     if [ -n "$recipe" ]; then
-      dd "$label-package" composer require "fourkitchens/$recipe:^1.0" --no-interaction || return 1
+      dd "$label-package" composer require "fourkitchens/$recipe:^2.0" --no-interaction || return 1
       dd "$label-apply" install-recipe "fourkitchens/$recipe" || return 1
     fi
     if [ "$split" = split ]; then
       mkdir -p config/_splits config/local config/staging || return 1
-      dd "$label-split-package" composer require 'fourkitchens/sous-config-split:^1.0' --no-interaction || return 1
+      dd "$label-split-package" composer require 'fourkitchens/sous-config-split:^2.0' --no-interaction || return 1
       dd "$label-split-apply" install-recipe fourkitchens/sous-config-split || return 1
     fi
     verify_selected "$choice" "$split" || return 1
@@ -482,7 +482,7 @@ environments() {
   cp "$work/baseline-composer.json" composer.json
   cp "$work/baseline-composer.lock" composer.lock
   dd environment-base-packages composer install --no-interaction --prefer-dist
-  dd environment-content-package composer require 'fourkitchens/sous-content-types:^1.0' --no-interaction
+  dd environment-content-package composer require 'fourkitchens/sous-content-types:^2.0' --no-interaction
   dd environment-page-apply install-recipe fourkitchens/sous-content-types
   probe seed local
   environment_exec environment-local-cache local vendor/bin/drush cache:rebuild
@@ -503,7 +503,7 @@ environments() {
       for split_folder in _splits local staging; do
         if [ -d "$hidden/$split_folder" ]; then mv "$hidden/$split_folder" "$folders/$split_folder"; else mkdir -p "$folders/$split_folder"; fi
       done
-      dd environment-optional-package composer require 'fourkitchens/sous-config-split:^1.0' --no-interaction
+      dd environment-optional-package composer require 'fourkitchens/sous-config-split:^2.0' --no-interaction
       dd environment-native-split-transforms exec php devops/tests/config-splits.php
       dd environment-optional-recipe install-recipe fourkitchens/sous-config-split
       probe split-prepare local

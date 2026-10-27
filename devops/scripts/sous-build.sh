@@ -96,17 +96,17 @@ fi
 case $RESP in
   0)
     # The default Page model pulls in its shared formats and media dependencies.
-    run_composer require 'fourkitchens/sous-content-types:^1.0'
+    run_composer require 'fourkitchens/sous-content-types:^2.0'
     ./devops/scripts/install-recipe.sh fourkitchens/sous-content-types
     ;;
   1)
-    run_composer require 'fourkitchens/sous-core-layout-builder:^1.0'
+    run_composer require 'fourkitchens/sous-core-layout-builder:^2.0'
     ./devops/scripts/install-recipe.sh fourkitchens/sous-core-layout-builder
     ;;
   2)
     # The Paragraphs host recipe composes the checked dependency recipes; using
     # the canonical application helper preserves a failed child recipe's status.
-    run_composer require 'fourkitchens/sous-paragraphs:^1.0'
+    run_composer require 'fourkitchens/sous-paragraphs:^2.0'
     ./devops/scripts/install-recipe.sh fourkitchens/sous-paragraphs
     ;;
   *)
@@ -123,7 +123,7 @@ fi
 case "$SPLITS" in
   [yY]|[yY][eE][sS])
     mkdir -p config/_splits config/local config/staging
-    run_composer require 'fourkitchens/sous-config-split:^1.0'
+    run_composer require 'fourkitchens/sous-config-split:^2.0'
     ./devops/scripts/install-recipe.sh fourkitchens/sous-config-split
     ;;
 esac

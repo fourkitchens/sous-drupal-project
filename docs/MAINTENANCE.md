@@ -235,8 +235,8 @@ requires a breaking-change note and appropriate SemVer treatment. The theme's
 authorization removal and Admin's new shared Formats dependency are such
 compatibility changes, even though an existing active role is retained.
 
-The starter targets `^1.0` through the scoped static Composer index. The
-collection starts at `1.0.0` and publishes shared semantic releases from `main`.
+The starter targets `^2.0` through the scoped static Composer index. The
+collection starts at `2.0.0` and publishes shared semantic releases from `main`.
 Candidate integration against an explicit reviewed commit is validation only;
 verify the published packages and index before the starter release. Retain
 historical repositories/tags/download URLs for older locks. Existing sites

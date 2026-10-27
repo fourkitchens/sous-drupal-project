@@ -11,7 +11,7 @@ Neither gate modifies a developer database or publishes a package release.
 The package sources are consolidated in
 [fourkitchens/sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages).
 The starter's production Composer root targets the scoped public index and
-stable `^1.0` requirements. The package collection starts at `1.0.0` and
+stable `^2.0` requirements. The package collection starts at `2.0.0` and
 publishes semantic releases, package ZIPs and the static index automatically
 from `main`. A normal installation requires that published index; it must not
 silently substitute branches or local sources.
@@ -46,7 +46,7 @@ Before publication, select an explicit reviewed full commit:
 
 ```sh
 bash devops/integration/run.sh \
-  --packages-ref 283f18089ecb86bd6b495253357a117c8f7f81a1
+  --packages-ref 53bd45f61b3003fb3f2d7f82ecde9cfa879785fd
 ```
 
 To test local edits, provide the monorepo checkout instead:

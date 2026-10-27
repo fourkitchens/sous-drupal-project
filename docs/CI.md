@@ -59,7 +59,7 @@ Neither a configuration-only pass nor the package fixture replaces that gate.
 At the October 27, 2026 cutover review, package source is merged but ZIPs/index
 are unpublished. The explicit reviewed-commit candidate input tests this branch
 without publication: a manual dispatch's `packages_ref` must be a full reviewed
-commit, such as `283f18089ecb86bd6b495253357a117c8f7f81a1`.
+commit, such as `53bd45f61b3003fb3f2d7f82ecde9cfa879785fd`.
 Candidate runs cannot publish a starter release. After the
 package release and public index are verified, run the normal published-index
 gate before starter publication. See [Integration](INTEGRATION.md) for inputs

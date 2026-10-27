@@ -5,16 +5,18 @@
 The active development repositories are this starter and
 [Sous Drupal Packages](https://github.com/fourkitchens/sous-drupal-packages).
 Each package retains its Composer name and independent dependency graph. The
-collection starts at `1.0.0` with bounded `^1.0` sibling requirements and one
+collection starts at `2.0.0` with bounded `^2.0` sibling requirements and one
 shared version for all package ZIPs. The compatible starter candidate remains
 `8.0.0`; preserve the starter's breaking-change semantics when merging.
+The packages repository uses a tag-only `1.0.0` history baseline; downloadable
+collection releases begin at `2.0.0`.
 
 1. Review the packages changes and merge them to its `main` branch. Its
    semantic-release workflow determines the version from Conventional Commits,
    creates the release and package ZIPs, and publishes the complete static
    Composer index. See the package
    [release guide](https://github.com/fourkitchens/sous-drupal-packages/blob/main/docs/RELEASING.md).
-   The first release is `1.0.0`; later `fix:`/`perf:`, `feat:` and breaking
+   The first package release is `2.0.0`; later `fix:`/`perf:`, `feat:` and breaking
    changes select patch, minor and major releases respectively.
 2. Verify the public index and a cold-cache installation. Historical release
    metadata and ZIP URLs remain available; an application can keep its lock.

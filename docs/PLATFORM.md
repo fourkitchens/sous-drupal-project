@@ -53,7 +53,7 @@ install or ignored peer dependency is part of the supported setup.
 Development uses `sous-drupal-project` for the application starter and
 [sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages) for
 all reusable source. Each recipe is an independent `fourkitchens/<name>` ZIP
-with bounded `^1.0` sibling requirements; the common release number does not
+with bounded `^2.0` sibling requirements; the common release number does not
 require every package. Legacy repositories retain historical downloads.
 
 | Starter or package | Responsibility and relationships |
@@ -120,10 +120,9 @@ that provider; it is not the default deployment system. See [deployment](DEPLOYM
 
 The starter and all nine recipes are distributed under **GPL-2.0-or-later**,
 with uppercase `LICENSE` files and preserved original notices. The collection's
-[source provenance](https://github.com/fourkitchens/sous-drupal-packages/blob/main/provenance/source-imports.json)
-records imported commits and license reconciliation, including the original
-Paragraphs MIT notice retained in that package's `NOTICE`. Earlier tags/history
-and third-party dependency notices are not rewritten.
+[copyright notices](https://github.com/fourkitchens/sous-drupal-packages/blob/main/NOTICE)
+and the Paragraphs package's `NOTICE` retain the applicable copyright and license
+terms. Third-party dependency notices remain applicable.
 
 Review responsibility and cadence are defined once in [Operations](OPERATIONS.md):
 security advisories, latest stable/major versions, Drupal support windows,
