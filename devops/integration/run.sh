@@ -137,7 +137,18 @@ must() {
   record "$@"
   [ "$last_status" -eq 0 ] || fail "$1 failed ($last_status); inspect $last_stderr."
 }
-dd() { must "$1" ddev "${@:2}"; }
+candidate_index_ready() {
+  [ "$candidate" -eq 1 ] || return 0
+  must "$1-index-ready" ddev exec env SOUS_DISPOSABLE_TEST=1 timeout --kill-after=2 45 bash devops/integration/wait-for-index.sh
+}
+dd() {
+  local label=$1
+  shift
+  must "$label" ddev "$@" || return 1
+  case "$1:${2:-}" in
+    start:*|restart:*|snapshot:restore) candidate_index_ready "$label" ;;
+  esac
+}
 sha256() { shasum -a 256 "$@" | awk '{print $1}'; }
 
 # Use Git's exact tracked/nonignored inventory where available, including local
@@ -305,7 +316,7 @@ provision() {
   done
   dd php-lint exec npm run lint:php
   dd javascript-lint exec npm run lint:js
-  for test in install-workflows config-workflows environment-settings lint-workflows integration-audit integration-action integration-clone ci-templates artifact; do
+  for test in install-workflows config-workflows environment-settings lint-workflows integration-audit integration-action integration-clone integration-index ci-templates artifact; do
     dd "$test" exec -d "$original" bash "devops/tests/$test.sh"
   done
   dd environment-service-isolation exec env SOUS_INTEGRATION_AUTOLOAD=/var/www/html/vendor/autoload.php php devops/tests/environment-services.php
