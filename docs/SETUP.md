@@ -334,10 +334,12 @@ shared Linkit subrecipe from Formats; it does not apply the full editor recipe.
 Content Types supplies its own Formats/Media/Pathauto dependencies and never
 reapplies Admin's strict Gin setup.
 
-The DDEV wrapper applies the recipe from `web/recipes` and rebuilds caches only
-after successful application. Its equivalent manual command is:
+The DDEV wrapper refreshes module/theme discovery after Composer adds code,
+applies the recipe from `web/recipes`, and rebuilds caches only after successful
+application. A manual sequence is:
 
 ```sh
+ddev drush cache:rebuild
 ddev drush recipe /var/www/html/web/recipes/sous-core-layout-builder
 ddev drush cache:rebuild
 ```

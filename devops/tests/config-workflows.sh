@@ -88,11 +88,11 @@ done
 pass 'theme paths, tool arguments and failure status survive routing'
 reset_project
 expect_status 0 helper install-recipe.sh vendor/example
-calls_assert '[.[]|select(.tool=="drush")|.command]==["recipe","cr"]'
+calls_assert '[.[]|select(.tool=="drush")|.command]==["php:eval","recipe","cr"]'
 export FAIL_MATCH='recipe recipes/example'; reset_log
 expect_status 42 helper install-recipe.sh vendor/example
-calls_assert '[.[]|select(.tool=="drush")|.command]==["recipe"]'
-pass 'canonical recipe application stops before cache rebuild on failure'
+calls_assert '[.[]|select(.tool=="drush")|.command]==["php:eval","recipe"]'
+pass 'recipe discovery precedes application and failed application skips cache rebuild'
 
 # These archives are all local fixtures, including deliberately malformed bytes.
 reset_project; export SOUS_ENVIRONMENT=staging

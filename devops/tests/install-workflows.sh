@@ -149,14 +149,15 @@ calls_assert '[.[]|select(.tool=="drush")|.command]|index("config:export")<index
 [ -f "$PROJECT/config/default/core.extension.yml" ] && [ -f "$PROJECT/config/default/system.site.yml" ] || fail 'missing complete export'
 pass 'complete configuration export precedes login and success'
 for entry in direct ddev; do
-  for failed in recipe cr; do
+  for failed in php:eval recipe cr; do
     fixture; export TEST_COMMAND_STATUSES="{\"$failed\":42}"
     if [ "$entry" = direct ]; then expect_status 42 helper install-recipe.sh fourkitchens/sous-admin
     else expect_status 42 env PATH="$BIN:$PATH" bash "$PROJECT/.ddev/commands/web/install-recipe" fourkitchens/sous-admin; fi
     if [ "$failed" = recipe ]; then calls_assert 'all(.[];.command!="cr")'; fi
+    if [ "$failed" = php:eval ]; then calls_assert 'all(.[];.command!="recipe" and .command!="cr")'; fi
   done
 done
-pass 'both recipe entry points propagate application/cache failures'
+pass 'both recipe entry points propagate discovery/application/cache failures'
 fixture
 for selector in sous-admin vendor/.. vendor/name/extra; do
   reset_log; expect_status 2 helper install-recipe.sh "$selector"; [ ! -s "$COMMAND_LOG" ] || fail 'invalid selector ran commands'

@@ -3,8 +3,8 @@
 # Apply one already installed recipe through the shared DDEV/native entry point.
 # Usage: npm run install-recipe -- vendor/package
 # The package basename identifies the Composer-managed web/recipes/<name>.
-# This command does not download or unpack Composer packages. A failed
-# application stops before cache rebuild so a later success cannot hide it.
+# This command does not download or unpack Composer packages. Refresh extension
+# discovery before validation; rebuild caches only after a successful recipe.
 set -euo pipefail
 # shellcheck source=_runtime.sh
 source "$(dirname "$0")/_runtime.sh"
@@ -28,5 +28,8 @@ fi
 
 # Core resolves recipe includes relative to the Drupal root, not project root.
 cd web
+# Composer can add extensions after Drupal cached the available module/theme
+# lists. Reset those native lists so Core validates the files just installed.
+runtime_drush php:eval '\Drupal::service("extension.list.module")->reset(); \Drupal::service("extension.list.theme")->reset();'
 runtime_drush recipe "recipes/$recipe_directory_name"
 runtime_drush cr
