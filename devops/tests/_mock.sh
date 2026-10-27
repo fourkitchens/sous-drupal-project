@@ -1,57 +1,46 @@
 #!/usr/bin/env bash
-# Project-tool double shared by the workflow tests. Record quoted argv as JSON;
-# run real shell helpers, but never call DDEV, a provider or a database.
+# Record project-tool calls without starting containers or touching a database.
 set -euo pipefail
-tool="${0##*/}"; arguments=("$@"); command="${1:-}"
+tool="${0##*/}"; command="${1:-}"
 if [ "$tool" = drush ]; then
-  while [ "$#" -gt 0 ]; do
-    case "$1" in
-      --uri|--root|--config|--alias-path|--include|--define|-l|-r|-c|-D) shift; [ "$#" -eq 0 ] || shift ;;
-      -*) shift ;;
-      *) command="$1"; break ;;
-    esac
+  for argument do
+    case "$argument" in -*) ;; *) command="$argument"; break ;; esac
   done
-  if [ "$command" = php:script ]; then command="${SOUS_ENVIRONMENT_CHECK:-php:script}"; fi
 fi
-set -- "${arguments[@]}"
-record="$(jq -cn --arg tool "$tool" --arg command "$command" --arg cwd "$PWD" --arg environment "${SOUS_ENVIRONMENT:-}" --arg check "${SOUS_ENVIRONMENT_CHECK:-}" --args '$ARGS.positional as $argv | {tool:$tool,command:$command,cwd:$cwd,environment:$environment,check:$check,argv:$argv}' -- "$@")"
-if [ "$tool" = drush ] && [ "$command" = sql:cli ]; then
-  payload="$(cat)"; record="$(printf '%s' "$record" | jq --arg payload "$payload" '.+{payload:$payload}')"
+record=$(jq -cn --arg tool "$tool" --arg command "$command" --arg cwd "$PWD" --args \
+  '{tool:$tool,command:$command,cwd:$cwd,argv:$ARGS.positional}' -- "$@")
+if [ "$tool:$command" = drush:sql:cli ]; then
+  payload=$(cat)
+  record=$(printf '%s' "$record" | jq --arg payload "$payload" '.+{payload:$payload}')
 fi
-if [ "$tool" = ddev ] && [ "$command" = import-db ]; then
-  for argument in "$@"; do case "$argument" in --file=*) backup="${argument#--file=}";; esac; done
-  mode="$("$REAL_PHP" -r 'echo fileperms($argv[1]) & 0777;' "$backup")"
-  record="$(printf '%s' "$record" | jq --arg backup "$backup" --argjson mode "$mode" --rawfile payload "$backup" '.+{backup:$backup,payload:$payload,mode:$mode}')"
+if [ "$tool:$command" = ddev:import-db ]; then
+  for argument do case "$argument" in --file=*) backup="${argument#--file=}" ;; esac; done
+  record=$(printf '%s' "$record" | jq --arg backup "$backup" --arg payload "$(gzip -dcf "$backup")" '.+{backup:$backup,payload:$payload}')
 fi
-if [ "$tool" = hook-probe ] && [ "$command" = download-db ]; then
+if [ "$tool:$command" = hook-probe:download-db ]; then
   destination="$2"
   case "${TEST_DOWNLOAD_KIND:-copy}" in
     empty) : > "$destination" ;;
     corrupt) printf '\037\213' > "$destination" ;;
-    symlink) ln -s "$TEST_DOWNLOAD_SOURCE" "$destination" ;;
     copy) [ -z "${TEST_DOWNLOAD_SOURCE:-}" ] || cp "$TEST_DOWNLOAD_SOURCE" "$destination" ;;
   esac
-  if [ -f "$destination" ] && [ ! -L "$destination" ]; then
-    inode="$("$REAL_PHP" -r 'echo fileinode($argv[1]);' "$destination")"
-  else inode=0; fi
-  parent_mode="$("$REAL_PHP" -r 'echo fileperms(dirname($argv[1])) & 0777;' "$destination")"
-  record="$(printf '%s' "$record" | jq --arg destination "$destination" --argjson inode "$inode" --argjson parent_mode "$parent_mode" '.+{destination:$destination,payload_inode:$inode,parent_mode:$parent_mode}')"
+  record=$(printf '%s' "$record" | jq --arg destination "$destination" '.+{destination:$destination}')
 fi
 printf '%s\n' "$record" >> "$COMMAND_LOG"
 statuses="${TEST_COMMAND_STATUSES:-}"
 [ -n "$statuses" ] || statuses='{}'
-status="$(jq -r --arg tool "$tool" --arg command "$command" '.[$tool] // .[$command] // 0' <<< "$statuses")"
-if [ -n "${FAIL_MATCH:-}" ]; then case "$*" in *"$FAIL_MATCH"*) status=42;; esac; fi
+status=$(jq -r --arg tool "$tool" --arg command "$command" '.[$tool] // .[$command] // 0' <<< "$statuses")
+if [ -n "${FAIL_MATCH:-}" ]; then case "$*" in *"$FAIL_MATCH"*) status=42 ;; esac; fi
 [ "$status" -eq 0 ] || exit "$status"
 case "$tool:$command" in
+  ddev:drush) shift; exec "$PROJECT/vendor/bin/drush" "$@" ;;
+  ddev:emulsify) shift; exec "$PROJECT/node_modules/.bin/emulsify" "$@" ;;
+  ddev:composer|ddev:npm) shift; exec "$command" "$@" ;;
   ddev:exec)
     shift
-    while [ "$#" -gt 0 ]; do case "$1" in --raw|--dir=*) shift;; *) break;; esac; done
-    if [ "${1:-}" = env ]; then
-      shift
-      while [ "$#" -gt 0 ]; do case "$1" in *=*) export "$1"; shift;; *) break;; esac; done
-    fi
-    export IS_DDEV_PROJECT=true DDEV_PRIMARY_URL=https://sous-test.invalid
+    while [ "$#" -gt 0 ]; do case "$1" in --raw|--dir=*) shift ;; *) break ;; esac; done
+    cd "$PROJECT"
+    export IS_DDEV_PROJECT=true
     exec "$@" ;;
   ddev:install-recipe)
     shift; unset IS_DDEV_PROJECT

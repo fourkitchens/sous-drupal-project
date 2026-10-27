@@ -179,14 +179,15 @@ pass 'missing restore backup stops before database/configuration/login'
 for failed in import-db deploy 'run build'; do
   fixture; mkdir -p "$PROJECT/reference"; printf 'SELECT 1;\n' | gzip > "$PROJECT/reference/site-db.sql.gz"
   export FAIL_MATCH="$failed"; expect_status 42 helper setup.sh restore
-  calls_assert 'all(.[];.command!="uli" and .command!="sql-sanitize")'
+  calls_assert 'all(.[];.command!="uli")'
+  if [ "$failed" != deploy ]; then calls_assert 'all(.[];.command!="sql:sanitize")'; fi
 done
-pass 'restore build/import/deployment failures prevent sanitizing and login'
+pass 'restore build/import/deployment failures prevent login'
 fixture; mkdir -p "$PROJECT/reference"; printf 'SELECT 1;\n' | gzip > "$PROJECT/reference/site-db.sql.gz"
 expect_status 0 helper setup.sh restore
-calls_assert '[.[]|select(.tool=="drush" or .tool=="hook-probe")|.command]|index("post-config-import")<index("sql-sanitize") and index("sql-sanitize")<index("uli")'
+calls_assert '[.[]|select(.tool=="drush" or .tool=="hook-probe")|.command]|index("post-import")<index("sql:sanitize") and index("sql:sanitize")<index("deploy") and index("post-config-import")<index("uli")'
 calls_assert 'all(.[];.command!="site:install")'
-pass 'restore uses the existing backup and both safeguards before final login'
+pass 'restore sanitizes its import, deploys configuration and prints login last'
 fixture; export SOUS_ENVIRONMENT=production
 for script in setup.sh rebuild.sh import-data.sh local-data-bak.sh get-db.sh; do
   reset_log

@@ -44,10 +44,16 @@ reset_project() {
   for hook in post-import post-config-import download-db; do
     printf '#!/bin/sh\nexec hook-probe %s "$@"\n' "$hook" > "$PROJECT/devops/hooks/$hook.sh"
   done
+  cat > "$PROJECT/devops/scripts/runtime-probe.sh" <<'PROBE'
+#!/bin/sh
+set -eu
+. "$(dirname "$0")/_runtime.sh"
+"$@"
+PROBE
   export TEST_COMMAND_STATUSES='{}' FAIL_MATCH='' TEST_DOWNLOAD_SOURCE='' TEST_DOWNLOAD_KIND=copy
-  unset SOUS_RUNTIME SOUS_ENVIRONMENT SOUS_ENVIRONMENT_CHECK IS_DDEV_PROJECT DDEV_PRIMARY_URL DDEV_PROJECT DDEV_SITENAME TERMINUS_SITE TERMINUS_ENV || :
+  unset SOUS_RUNTIME SOUS_ENVIRONMENT IS_DDEV_PROJECT DDEV_PRIMARY_URL DDEV_PROJECT DDEV_SITENAME TERMINUS_SITE TERMINUS_ENV || :
 }
 # Run scripts by absolute path from a subdirectory to exercise root resolution.
 helper() { (cd "$PROJECT/web"; PATH="$BIN:$PATH" bash "$PROJECT/devops/scripts/$1" "${@:2}"); }
 reset_log() { : > "$COMMAND_LOG"; }
-no_import() { calls_assert 'all(.[]; (.command|IN("import-db","sql:drop","sql:cli","sql-sanitize","post-import","post-config-import","uli"))|not)'; }
+no_import() { calls_assert 'all(.[]; (.command|IN("import-db","sql:drop","sql:cli","sql:sanitize","post-import","post-config-import","uli"))|not)'; }

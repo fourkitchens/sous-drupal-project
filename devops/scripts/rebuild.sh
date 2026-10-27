@@ -15,9 +15,6 @@ runtime_composer install
 runtime_npm ci --include=dev
 runtime_npm run theme-ci
 sh devops/scripts/theme-build.sh
-# Defer sanitization until BOTH import and configuration safeguards pass, so
-# neither a failed safety hook nor failed deployment can produce a login link.
-sh devops/scripts/import-data.sh --defer-sanitize "$@"
+sh devops/scripts/import-data.sh "$@"
 sh devops/scripts/confim.sh
-runtime_drush sql-sanitize -y --sanitize-password=admin --sanitize-email=user-%uid@example.com
 runtime_drush uli --name=sous_chef

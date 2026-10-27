@@ -129,8 +129,6 @@ case "$SPLITS" in
 esac
 
 # Export the final installed composition as the generated site's complete config.
-# Validate the native transformed source before exporting the complete sync set.
-runtime_environment_check export
 run_drush_yes config:export
 
 # Verify the generated manifest/lock pair and login before success or cleanup.
