@@ -53,7 +53,7 @@ install or ignored peer dependency is part of the supported setup.
 Development uses `sous-drupal-project` for the application starter and
 [sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages) for
 all reusable source. Each recipe is an independent `fourkitchens/<name>` ZIP
-with bounded `^2.0` sibling requirements; the common release number does not
+with bounded `^1.0` sibling requirements; the common release number does not
 require every package. Legacy repositories retain historical downloads.
 
 | Starter or package | Responsibility and relationships |

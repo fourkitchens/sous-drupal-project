@@ -4,32 +4,29 @@
 
 The active development repositories are this starter and
 [Sous Drupal Packages](https://github.com/fourkitchens/sous-drupal-packages).
-The seven existing Composer names are preserved; Core Layout Builder and Config
-Split are independent additions. All nine target the coordinated stable
-`2.0.0` collection line with bounded `^2.0` sibling requirements. The compatible
-starter candidate is `8.0.0`; preserve breaking-change semantics when merging.
+Each package retains its Composer name and independent dependency graph. The
+collection starts at `1.0.0` with bounded `^1.0` sibling requirements and one
+shared version for all package ZIPs. The compatible starter candidate remains
+`8.0.0`; preserve the starter's breaking-change semantics when merging.
 
-As checked on October 27, 2026, collection source is merged at
-`d3dcd219d251e322a3b206a6bf12889712b2b3f0`, but no ZIP release or public Composer
-index exists. This starter branch prepares the scoped production index and
-uses explicit reviewed candidate source only for acceptance. It does not
-publish package assets, create tags, enable Pages or authorize starter release.
-
-1. Pass the full starter acceptance gate against the reviewed package commit,
+1. Review the packages changes and merge them to its `main` branch. Its
+   semantic-release workflow determines the version from Conventional Commits,
+   creates the release and package ZIPs, and publishes the complete static
+   Composer index. See the package
+   [release guide](https://github.com/fourkitchens/sous-drupal-packages/blob/main/docs/RELEASING.md).
+   The first release is `1.0.0`; later `fix:`/`perf:`, `feat:` and breaking
+   changes select patch, minor and major releases respectively.
+2. Verify the public index and a cold-cache installation. Historical release
+   metadata and ZIP URLs remain available; an application can keep its lock.
+3. Pass the full starter acceptance gate against those published packages,
    including generated-theme lint/build, all content choices, optional Config
-   Split, environments and clean-clone recovery. Candidate validation alone
-   cannot publish a starter release.
-2. Review and manually publish the package collection using its protected,
-   opt-in [publisher](https://github.com/fourkitchens/sous-drupal-packages/blob/main/docs/RELEASING.md).
-   Verify immutable uploaded/public ZIP bytes before deploying the complete
-   static index. Preserve prior version metadata and every historical URL.
-3. Verify a cold-cache public install and rerun the starter's published-index
-   gate with no candidate/path overrides. Resolve real public ZIP distributions;
+   Split, environments and clean-clone recovery. An explicit candidate commit
+   can be used before package publication for review, but cannot publish a
+   starter release. Resolve public ZIPs for the final gate;
    `composer update --lock` does not convert a path distribution to a ZIP.
-4. Review and publish the compatible starter release. Existing applications
-   retain their database/complete export and adopt 2.x explicitly. Historical
-   legacy repositories/tags/Packagist metadata remain available; do not move old
-   tags or repoint legacy `dev-main` as a shortcut.
+4. Review and merge the compatible starter changes. Its own semantic-release
+   workflow runs after the published-index gate. Existing applications retain
+   their database and complete export and adopt configuration changes explicitly.
 
 The static index is canonical only for the exact nine package names, preserving
 access to unrelated Four Kitchens packages. Selected recipes remain in root
@@ -42,7 +39,7 @@ Application CI/deployment remains independent of both upstream publishers.
 The remaining review below records the earlier multi-repository release setup.
 Its per-repository version proposals, temporary ref maps and rollout state are
 historical evidence, superseded by the sequence above; do not follow that old
-publication order for the 2.x collection.
+publication order for the shared package collection.
 
 Later simplification replaced maintainer Python entry points with shell, excluded product integration/tests from generated projects, and removed the custom theme helper/CLI patch. Historical file lists below retain the earlier review scope; source CI still gates publication on the current integration checks.
 

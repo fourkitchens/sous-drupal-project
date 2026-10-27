@@ -83,7 +83,7 @@ pass 'generation separates product workflows from opt-in site CI templates'
 for row in \
   '0|recipe recipes/sous-admin' \
   '0|require fourkitchens/sous-content-types' \
-  '2|require fourkitchens/sous-paragraphs:^2.0' \
+  '2|require fourkitchens/sous-paragraphs:^1.0' \
   '1|recipe recipes/sous-core-layout-builder' \
   '0|composer --no-ansi install' \
   '3|npm ci' \
@@ -100,10 +100,10 @@ for row in \
   pass "failed $failed stops dependent work and keeps bootstrap"
 done
 fixture; expect_status 0 generate 2
-calls_assert 'any(.[];(.argv|index("fourkitchens/sous-paragraphs:^2.0"))!=null) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-paragraphs"))!=null) and all(.[];(.argv|join(" ")|contains("sous-core-layout-builder")|not))'
+calls_assert 'any(.[];(.argv|index("fourkitchens/sous-paragraphs:^1.0"))!=null) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-paragraphs"))!=null) and all(.[];(.argv|join(" ")|contains("sous-core-layout-builder")|not))'
 pass 'Paragraphs selects only its published composition and shared dependencies'
 fixture; expect_status 0 generate 1
-calls_assert 'any(.[];(.argv|index("fourkitchens/sous-core-layout-builder:^2.0"))!=null) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-core-layout-builder"))!=null) and all(.[];(.argv|join(" ")|contains("sous-paragraph")|not))'
+calls_assert 'any(.[];(.argv|index("fourkitchens/sous-core-layout-builder:^1.0"))!=null) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-core-layout-builder"))!=null) and all(.[];(.argv|join(" ")|contains("sous-paragraph")|not))'
 pass 'Layout Builder selects its package without requesting Paragraphs'
 fixture; expect_status 0 generate 3
 calls_assert 'all(.[];(.argv|index("require"))==null)'
@@ -112,11 +112,11 @@ for selection in 0 1 2 3; do
   fixture
   rm -rf "$PROJECT/config/_splits" "$PROJECT/config/local" "$PROJECT/config/staging"
   expect_status 0 generate "$selection" y
-  calls_assert 'any(.[];(.argv|index("fourkitchens/sous-config-split:^2.0"))!=null) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-config-split"))!=null)'
+  calls_assert 'any(.[];(.argv|index("fourkitchens/sous-config-split:^1.0"))!=null) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-config-split"))!=null)'
   for directory in _splits local staging; do [ -d "$PROJECT/config/$directory" ] || fail 'optional split directory not initialized'; done
 done
 pass 'Config Split can be selected independently with all four compositions'
-for failed in 'require fourkitchens/sous-config-split:^2.0' 'recipe recipes/sous-config-split'; do
+for failed in 'require fourkitchens/sous-config-split:^1.0' 'recipe recipes/sous-config-split'; do
   fixture; export FAIL_MATCH="$failed"
   expect_status 42 generate 3 y; preserved
   calls_assert 'all(.[];.command!="uli" and .command!="config:export")'

@@ -3,7 +3,7 @@
 The starter owns one full product gate in `devops/integration/run.sh`. It creates
 an owned disposable DDEV application, exercises the generated theme, installs
 only selected package ZIPs, and checks configuration and environment behavior.
-The packages repository separately owns package/archive/consumer validation.
+The packages repository separately runs syntax, code-sniff and formatting checks.
 Neither gate modifies a developer database or publishes a package release.
 
 ## Review branch and publication status
@@ -11,9 +11,10 @@ Neither gate modifies a developer database or publishes a package release.
 The package sources are consolidated in
 [fourkitchens/sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages).
 The starter's production Composer root targets the scoped public index and
-stable `^2.0` requirements. At this migration's review, packages `2.0.0` and the
-public index are not yet published. A normal installation must fail until that
-index is available; it must not silently substitute branches or local sources.
+stable `^1.0` requirements. The package collection starts at `1.0.0` and
+publishes semantic releases, package ZIPs and the static index automatically
+from `main`. A normal installation requires that published index; it must not
+silently substitute branches or local sources.
 
 The review branch `codex/release-starter-packages-2.0` explicitly validates the
 reviewed packages commit in `devops/integration/pr-refs.json`. This override is
@@ -45,7 +46,7 @@ Before publication, select an explicit reviewed full commit:
 
 ```sh
 bash devops/integration/run.sh \
-  --packages-ref d3dcd219d251e322a3b206a6bf12889712b2b3f0
+  --packages-ref 283f18089ecb86bd6b495253357a117c8f7f81a1
 ```
 
 To test local edits, provide the monorepo checkout instead:
@@ -86,10 +87,10 @@ records, and no maintainer probe ships in a package ZIP.
 
 | Content choice | Additional package | Native assertions |
 | --- | --- | --- |
-| Default | `fourkitchens/sous-content-types` | Page/Frontpage widgets, Body, save/edit/render, aliases and HTTPS Page authoring |
-| Paragraphs | `fourkitchens/sous-paragraphs` | Both host fields, four component types, Body tabs, media/icons/revisions and rendering |
+| Default | `fourkitchens/sous-content-types` | Page/Frontpage setup and HTTPS Page authoring |
+| Paragraphs | `fourkitchens/sous-paragraphs` | Selected host fields and absence of Layout Builder composition |
 | Layout Builder | `fourkitchens/sous-core-layout-builder` | Body field blocks, Basic inline blocks, enabled layouts and saved per-node overrides |
-| Admin only | None | Gin, Navigation and Superuser; no Page/Frontpage or Sous media bundles |
+| Admin only | None | Gin; no Page/Frontpage or Sous media bundles |
 
 Each choice runs with and without `fourkitchens/sous-config-split`, giving eight
 combinations. The runner restores the baseline database, exported configuration directory
@@ -104,16 +105,15 @@ Each case commits only the generated application's source and manifests into a
 disposable Git fixture, clones it with no Composer-managed code/recipes, then
 installs its exact lock from a new cache and reinstalls selected Sous packages
 with `--prefer-source`. Dist-only metadata must still use individual ZIPs.
-Recipe source includes, nested Linkit paths and Admin migration paths remain
+Recipe source includes and nested Linkit paths remain
 available without copying sibling packages. Project recipe directories stay
 ignored; a recipe update never implicitly reapplies configuration.
 
 Every runtime case exports complete configuration, deliberately mutates the
 site name, runs native Drush deployment/import, and compares all active
-configuration collections. Imported package probes are mounted from the
-monorepo source test tree rather than placed inside consumer ZIPs. Additional
-checks preserve existing Superuser memberships and custom Linkit profiles and
-exercise the explicit missing-role migration twice.
+configuration collections. Starter-owned checks cover its installation,
+environment and theme workflows; it does not load feature probes from the
+packages repository.
 
 ## Environments, frontend and source checks
 
@@ -138,7 +138,7 @@ narrow exceptions and does not hide newly introduced findings.
 Maintainer source validation remains excluded from generated Git/Composer
 artifacts through archive rules and one-time naming cleanup. Application CI
 continues to come from the optional [CircleCI or Actions templates](CI.md).
-A passing candidate full gate permits package publication review; the public
-index and a cold-cache public consumer installation still must be verified
+A passing candidate full gate verifies the starter against reviewed package
+source. The public index and a cold-cache public consumer installation must be verified
 before the starter's final release. This review branch never publishes tags,
 releases or Pages deployments.

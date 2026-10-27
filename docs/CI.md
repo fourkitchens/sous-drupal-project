@@ -51,14 +51,15 @@ management without removing duplicated runtime ownership.
 The package source is consolidated in
 [sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages).
 The old repositories remain historical download sources; the starter no longer
-combines their floating branches. Package CI owns archive/index validation;
+combines their floating branches. Package CI owns syntax/style checks and
+automatic semantic publication from `main`;
 starter CI retains the full theme, installation and environment acceptance gate.
 Neither a configuration-only pass nor the package fixture replaces that gate.
 
 At the October 27, 2026 cutover review, package source is merged but ZIPs/index
 are unpublished. The explicit reviewed-commit candidate input tests this branch
 without publication: a manual dispatch's `packages_ref` must be a full reviewed
-commit, such as `d3dcd219d251e322a3b206a6bf12889712b2b3f0`.
+commit, such as `283f18089ecb86bd6b495253357a117c8f7f81a1`.
 Candidate runs cannot publish a starter release. After the
 package release and public index are verified, run the normal published-index
 gate before starter publication. See [Integration](INTEGRATION.md) for inputs

@@ -19,12 +19,12 @@ Sous now has two development repositories: this starter and
 [Sous Drupal Packages](https://github.com/fourkitchens/sous-drupal-packages),
 which keeps the seven existing Composer names and adds separate Core Layout
 Builder and Config Split packages. This starter branch targets the coordinated
-`^2.0` line through its scoped static Composer index.
+`^1.0` line through its scoped static Composer index.
 
-As checked on October 27, 2026, package source is merged at reviewed commit
-`d3dcd219d251e322a3b206a6bf12889712b2b3f0`, but no package ZIP release or index
-is published. Ordinary Composer resolution against that future index cannot
-succeed yet. Validate candidate source through the explicit mode in
+The package collection starts at `1.0.0` and publishes semantic releases, ZIPs
+and its index automatically from `main`. Until its first publication completes,
+ordinary Composer resolution against that index cannot succeed. Validate
+candidate source through the explicit mode in
 [Integration](INTEGRATION.md); it builds disposable package ZIPs without
 publishing or putting candidate sources in a production lockfile. The existing
 public starter 7.0.1 does not contain this cutover.
@@ -40,7 +40,7 @@ This is the published-project command shape, not a claim that a future tag
 exists or that Packagist delivery was tested. [Release maintenance](RELEASES.md)
 defines package publication, public cold-cache verification and starter release
 order. The existing explicit Login Destination beta exception remains root
-policy; sibling Sous dependencies use bounded stable `^2.0` constraints.
+policy; sibling Sous dependencies use bounded stable `^1.0` constraints.
 
 ## Fresh installation and contributor clones
 
@@ -279,7 +279,7 @@ To test the merged reviewed package candidate instead of local working files:
 
 ```sh
 bash devops/integration/run.sh \
-  --packages-ref d3dcd219d251e322a3b206a6bf12889712b2b3f0
+  --packages-ref 283f18089ecb86bd6b495253357a117c8f7f81a1
 ```
 
 Omit both package-source options only when testing the actual published index;
@@ -324,7 +324,7 @@ admin only adds none. Config Split is an independent choice. After the public
 an optional composition, for example:
 
 ```sh
-ddev composer require fourkitchens/sous-core-layout-builder:^2.0
+ddev composer require fourkitchens/sous-core-layout-builder:^1.0
 ddev install-recipe fourkitchens/sous-core-layout-builder
 ```
 

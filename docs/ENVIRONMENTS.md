@@ -74,7 +74,7 @@ logging, aggregation, debug or mail differences.
 When stored module/configuration differences are needed, explicitly opt in:
 
 ```sh
-ddev composer require fourkitchens/sous-config-split:^2.0
+ddev composer require fourkitchens/sous-config-split:^1.0
 mkdir -p config/_splits config/local config/staging
 ddev install-recipe fourkitchens/sous-config-split
 ```

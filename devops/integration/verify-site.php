@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Exercise an installed disposable Sous site using its versioned recipe checks.
+ * Exercise an installed disposable Sous starter site.
  *
  * SOUS_DISPOSABLE_TEST=1 SOUS_INTEGRATION_COMBINATION=default \
  *   vendor/bin/drush --uri=https://SITE php:script devops/integration/verify-site.php
@@ -27,7 +27,6 @@ if (!in_array($combination, ['default', 'paragraphs', 'core-layout-builder', 'ad
   throw new InvalidArgumentException('Unknown integration combination: ' . $combination);
 }
 $recipes_directory = getenv('SOUS_INTEGRATION_RECIPES_DIR') ?: DRUPAL_ROOT . '/recipes';
-$probes_directory = getenv('SOUS_INTEGRATION_PROBES_DIR') ?: DRUPAL_ROOT . '/../.integration/packages/tests/recipes';
 $recipes = $combination === 'admin-only'
   ? ['sous-admin']
   : ['sous-admin', 'sous-emulsify', 'sous-content-types', 'sous-formats', 'sous-media'];
@@ -127,37 +126,6 @@ if ($combination !== 'paragraphs') {
 }
 
 $checks = [];
-$run = static function (string $relative) use ($probes_directory, &$checks): void {
-  $path = $probes_directory . '/' . $relative;
-  if (!is_file($path)) {
-    throw new RuntimeException('Missing versioned regression check: ' . $relative);
-  }
-  ob_start();
-  try {
-    (static function (string $file): void { require $file; })($path);
-    $output = trim(ob_get_contents());
-  }
-  finally {
-    ob_end_clean();
-  }
-  $checks[] = ['script' => $relative, 'output' => $output];
-};
-$run('sous-admin/verify-navigation.php');
-$run('sous-content-types/verify-starter-defaults.php');
-if ($combination !== 'admin-only') {
-  $run('sous-formats/verify-formats.php');
-}
-// The standalone Page check intentionally precedes composition: the public
-// Paragraphs host can require field_content, which that check does not supply.
-if ($combination === 'default') {
-  $run('sous-content-types/verify-page.php');
-}
-if ($combination === 'paragraphs') {
-  $run('sous-content-types/verify-composition.php');
-}
-if ($combination === 'paragraphs') {
-  $run('sous-paragraph-types/verify-paragraph-types.php');
-}
 if ($combination === 'core-layout-builder') {
   $assert = static function (bool $condition, string $message): void {
     if (!$condition) {

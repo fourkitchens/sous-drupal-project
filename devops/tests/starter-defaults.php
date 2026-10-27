@@ -18,7 +18,7 @@ sort($ignored);
 sort($ids);
 $check($ignored === $ids, 'Native unpack exclusions must contain exactly the nine independent names.');
 foreach (['sous-admin', 'sous-emulsify'] as $base) {
-  $check(($manifest['require']['fourkitchens/' . $base] ?? NULL) === '^2.0', 'Starter base must retain the stable package requirement: ' . $base);
+  $check(($manifest['require']['fourkitchens/' . $base] ?? NULL) === '^1.0', 'Starter base must retain the stable package requirement: ' . $base);
 }
 foreach (['sous-content-types', 'sous-paragraphs', 'sous-paragraph-types', 'sous-core-layout-builder', 'sous-config-split'] as $optional) {
   $check(!isset($manifest['require']['fourkitchens/' . $optional]), 'An optional package became an unconditional root requirement: ' . $optional);

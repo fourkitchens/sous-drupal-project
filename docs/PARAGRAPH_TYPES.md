@@ -1,6 +1,6 @@
 # Paragraph Types integration follow-up
 
-For the 2.x collection, source lives under
+For the shared collection, source lives under
 [`packages/sous-paragraph-types`](https://github.com/fourkitchens/sous-drupal-packages/tree/main/packages/sous-paragraph-types).
 Paragraphs and Core Layout Builder are separate optional ZIP packages; the
 starter no longer ships bundled composition recipes. Current operation and

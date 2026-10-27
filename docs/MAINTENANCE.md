@@ -146,7 +146,7 @@ for adoption. Existing `settings.local.php` files remain untouched by Composer.
 
    Replace the example package name. Commit the resulting manifest/lockfile.
    This repository's [dependency review](DEPENDENCY_UPGRADE.md) records current
-   historical constraints, patch migrations and advisories. For the 2.x line,
+   historical constraints, patch migrations and advisories. For the shared collection,
    keep selected Sous requirements/locks and the root's exact nine-name native
    recipe-unpack exclusions. A clean locked install restores their files from
    independent ZIPs; downloaded recipe directories stay ignored. Other recipes
@@ -208,23 +208,16 @@ installations now obtain authorization from their site's chosen base layer.
 
 An existing site that already has the role needs no role rewrite: keep its role
 and assignments, verify a real active administrator account other than UID 1,
-and export. For a site missing the role, review and explicitly apply only the
-versioned migration supplied in Admin:
-
-```sh
-ddev drush recipe /var/www/html/web/recipes/sous-admin/migrations/2026-10-superuser-role
-ddev drush cache:rebuild
-ddev drush config:export --yes
-```
-
-This migration uses native `createIfNotExists`, leaves existing role data/UUIDs
-and memberships intact on repeat application, and assigns no users. If a
-trusted administrator needs membership, assign it deliberately through Drupal
+and export. For a site missing the role, review its authorization policy and
+create the appropriate role through Drupal, then export the application-owned
+configuration. The package collection provides fresh-install defaults rather
+than an existing-site migration recipe. If a trusted administrator needs
+membership, assign it deliberately through Drupal
 or `ddev drush user:role:add superuser ACCOUNT_NAME`. User assignments are
 database data, not configuration export. Carry any assignment change through
 the project's normal account-management process for each environment.
 Changing an existing role's privilege policy requires a separate reviewed site
-decision. See the migration's README and the disposable authorization checks.
+decision.
 
 ## Compatibility and releases
 
@@ -242,14 +235,13 @@ requires a breaking-change note and appropriate SemVer treatment. The theme's
 authorization removal and Admin's new shared Formats dependency are such
 compatibility changes, even though an existing active role is retained.
 
-The starter targets `^2.0` through the scoped static Composer index. At this
-cutover's October 27, 2026 review, merged source exists but the package ZIPs/index
-are unpublished. Candidate integration against an explicit reviewed commit is
-validation only; publish and verify immutable packages before the starter
-release. Retain historical repositories/tags/download URLs for older locks.
-Moving source does not upgrade existing `^1` or `dev-main` clients; those sites
-adopt 2.x deliberately, reviewing customized recipe folders before Composer
-takes ownership. Review the [release sequence](RELEASES.md).
+The starter targets `^1.0` through the scoped static Composer index. The
+collection starts at `1.0.0` and publishes shared semantic releases from `main`.
+Candidate integration against an explicit reviewed commit is validation only;
+verify the published packages and index before the starter release. Retain
+historical repositories/tags/download URLs for older locks. Existing sites
+review customized recipe folders before Composer takes ownership and adopt
+configuration changes explicitly. Review the [release sequence](RELEASES.md).
 
 Keep the scoped index restricted to the nine IDs. Its canonical priority does
 not fall through to legacy metadata when an incompatible version is requested.

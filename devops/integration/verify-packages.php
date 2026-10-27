@@ -50,7 +50,7 @@ foreach ($lock['packages'] as $package) {
     continue;
   }
   $actual[] = $package['name'];
-  $check(preg_match('/^2\.[0-9]+\.[0-9]+$/', $package['version']) === 1 && ($package['dist']['type'] ?? '') === 'zip' && !isset($package['source']), 'Recipes must retain stable dist-only lock records: ' . $package['name']);
+  $check(preg_match('/^[1-9][0-9]*\.[0-9]+\.[0-9]+$/', $package['version']) === 1 && ($package['dist']['type'] ?? '') === 'zip' && !isset($package['source']), 'Recipes must retain stable dist-only lock records: ' . $package['name']);
   $check(is_file('web/recipes/' . basename($package['name']) . '/recipe.yml'), 'Missing Composer-managed recipe files: ' . $package['name']);
   $check(!is_dir('web/recipes/' . basename($package['name']) . '/tests'), 'Maintainer probes leaked into consumer ZIP.');
 }

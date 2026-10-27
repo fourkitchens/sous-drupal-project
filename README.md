@@ -32,11 +32,11 @@ integration/tests from a Sous source checkout, not a generated application.
 - [Coordinated releases](docs/RELEASES.md) — dependency order, Conventional Commits, and publication gates.
 - [Maintenance ownership and cadence](docs/OPERATIONS.md) — security, dependency/support reviews, patches, and downstream instructions.
 
-This release branch targets the coordinated `^2.0` package line through a
-scoped static Composer index. As checked on October 27, 2026, package source is
-merged, but its ZIP release/index is not yet published. Candidate integration
-uses an explicit reviewed package commit; it does not make the public starter
-release installable. An older published starter tag does not contain this
+This release branch targets the shared `^1.0` package line through a scoped
+static Composer index. The package collection starts at `1.0.0`; merges to its
+`main` branch publish semantic releases, package ZIPs and the index. Until that
+first publication completes, candidate integration uses an explicit reviewed
+package commit. An older published starter tag does not contain this
 implementation. Follow
 [setup](docs/SETUP.md) to select a published release or test the checked-out
 sources; do not assume an unqualified create-project command retrieves local

@@ -44,8 +44,10 @@ supported branches and publish downstream upgrade instructions with the release.
 
 Use clean checkouts for `sous-drupal-project` and
 [sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages).
-The latter contains all nine packages in `packages/` with one catalog and shared
-contributor tests. The [integration runner](INTEGRATION.md) tests the starter
+The latter contains reusable packages in `packages/` with one catalog, shared
+semantic releases, and syntax/style checks in `devops/tests/`. Use
+`npm run create-package sous-event` there to scaffold a new recipe. The
+[integration runner](INTEGRATION.md) tests the starter
 with released ZIPs by default or explicit candidate source for review. Local
 `--packages /path/to/sous-drupal-packages` selects that working checkout;
 `--packages-ref COMMIT` selects an exact reviewed commit. See that guide for

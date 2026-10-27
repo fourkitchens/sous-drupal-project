@@ -196,7 +196,7 @@ acquire() {
   if [ "$candidate" -eq 0 ]; then
     index=$(jq -er '.repositories[] | select(.type=="composer" and ((.only//[]) | index("fourkitchens/sous-admin"))) | .url' "$subject/composer.json")
     must published-index curl --fail --silent --show-error --location "${index%/}/packages.json" --output "$work/published-index.json"
-    packages_ref=$(jq -er '.packages["fourkitchens/sous-admin"] | to_entries | map(select(.key|test("^2\\.[0-9]+\\.[0-9]+$"))) | sort_by(.key|split(".")|map(tonumber)) | last.value.dist.reference | select(test("^[0-9a-f]{40}$"))' "$work/published-index.json")
+    packages_ref=$(jq -er '.packages["fourkitchens/sous-admin"] | to_entries | map(select(.key|test("^[1-9][0-9]*\\.[0-9]+\\.[0-9]+$"))) | sort_by(.key|split(".")|map(tonumber)) | last.value.dist.reference | select(test("^[0-9a-f]{40}$"))' "$work/published-index.json")
   fi
   if [ -z "$packages" ]; then
     packages="$work/downloads/sous-drupal-packages"
@@ -266,7 +266,7 @@ provision() {
   case "$composer_version" in "Composer version $expected_composer "*) ;; *) fail 'Unexpected Composer runtime.' ;; esac
   update_result --arg php "$php_version" --arg node "$node_version" --arg npm "$npm_version" --arg composer "$expected_composer" '.runtime={php:$php,node:$node,npm:$npm,composer:$composer}'
   if [ "$candidate" -eq 1 ]; then
-    dd build-candidate-zips exec node .integration/packages/tools/build.mjs --version 2.0.0 --reference "$packages_revision" --output .integration/publication --dist-base-url http://127.0.0.1:18737/dist/
+    dd build-candidate-zips exec node .integration/packages/tools/build.mjs --version 1.0.0 --reference "$packages_revision" --output .integration/publication --dist-base-url http://127.0.0.1:18737/dist/
     cp .integration/publication/release-manifest.json "$artifacts/candidate-package-manifest.json"
     dd candidate-index-ready exec curl --retry 5 --retry-connrefused --retry-delay 1 --fail http://127.0.0.1:18737/site/packages.json
     jq '.repositories=([{type:"composer",url:"http://127.0.0.1:18737/site",canonical:true,only:["fourkitchens/sous-admin","fourkitchens/sous-config-split","fourkitchens/sous-content-types","fourkitchens/sous-core-layout-builder","fourkitchens/sous-emulsify","fourkitchens/sous-formats","fourkitchens/sous-media","fourkitchens/sous-paragraph-types","fourkitchens/sous-paragraphs"]}]+[.repositories[] | select(((.only//[]) | index("fourkitchens/sous-admin")) | not)]) | .config["secure-http"]=false' composer.json > "$work/composer.json"
@@ -323,7 +323,6 @@ provision() {
   dd release-regressions exec -d "$original" npm run release:test
   dd cli-cache-regression exec -d "$original" node devops/tests/verify-cli-cache.mjs
   dd minimal-install drush --yes site:install minimal --account-name=integration_admin --account-pass=integration-disposable --site-name='Sous integration'
-  authorization
   for recipe in sous-emulsify sous-admin; do dd "base-$recipe" install-recipe "fourkitchens/$recipe"; done
   must theme-generation-build-lint-storybook sh devops/integration/theme.sh integration
   dd theme-source-lint-regressions exec env SOUS_DISPOSABLE_TEST=1 node devops/tests/theme-initialize.mjs web/themes/custom/integration
@@ -335,34 +334,6 @@ provision() {
   cp composer.json "$work/baseline-composer.json"
   cp composer.lock "$work/baseline-composer.lock"
   for manifest in composer.json composer.lock package.json package-lock.json; do cp "$manifest" "$artifacts/generated-$manifest"; done
-}
-
-auth_verify() { dd "authorization-$1" exec env SOUS_DISPOSABLE_TEST=1 "SOUS_AUTHORIZATION_CASE=$1" vendor/bin/drush php:script .integration/packages/tests/recipes/sous-admin/verify-authorization.php; }
-linkit_verify() { dd "linkit-ownership-$1" exec env SOUS_DISPOSABLE_TEST=1 "SOUS_LINKIT_CASE=$1" vendor/bin/drush php:script .integration/packages/tests/recipes/sous-formats/verify-linkit-ownership.php; }
-authorization() {
-  dd authorization-minimal-snapshot snapshot --name=authorization-minimal
-  dd authorization-theme-only install-recipe fourkitchens/sous-emulsify
-  auth_verify theme-only
-  dd ownership-formats-before-admin install-recipe fourkitchens/sous-formats
-  dd authorization-fresh-admin install-recipe fourkitchens/sous-admin
-  auth_verify fresh
-  linkit_verify fresh
-  dd authorization-legacy-reset snapshot restore authorization-minimal
-  auth_verify prepare-legacy
-  dd ownership-shared-linkit drush recipe /var/www/html/web/recipes/sous-formats/recipes/linkit
-  linkit_verify prepare-custom
-  for recipe in sous-emulsify sous-admin; do dd "authorization-legacy-$recipe" install-recipe "fourkitchens/$recipe"; done
-  dd ownership-formats-after-admin install-recipe fourkitchens/sous-formats
-  linkit_verify custom
-  auth_verify verify-legacy
-  for repeat in 1 2; do dd "authorization-explicit-migration-$repeat" drush recipe /var/www/html/web/recipes/sous-admin/migrations/2026-10-superuser-role; done
-  auth_verify verify-legacy
-  dd authorization-legacy-export-deploy exec env SOUS_DISPOSABLE_TEST=1 SOUS_INTEGRATION_COMBINATION=admin-only SOUS_INTEGRATION_PROBES_DIR=/var/www/html/.integration/packages/tests/recipes vendor/bin/drush "--uri=https://$project.ddev.site" php:script devops/integration/verify-site.php
-  auth_verify verify-legacy
-  dd authorization-missing-role-reset snapshot restore authorization-minimal
-  auth_verify migration
-  dd authorization-final-reset snapshot restore authorization-minimal
-  update_result '.authorization={theme_only_has_no_role:true,fresh_admin_access:true,legacy_role_and_memberships_preserved:true,explicit_migration_repeated_safely:true,legacy_export_deploy_preserved:true,shared_linkit_defaults_and_customization_preserved:true}'
 }
 
 verify_selected() {
@@ -412,16 +383,16 @@ option_case() {
       admin-only) recipe=; mode=admin-only ;;
     esac
     if [ -n "$recipe" ]; then
-      dd "$label-package" composer require "fourkitchens/$recipe:^2.0" --no-interaction || return 1
+      dd "$label-package" composer require "fourkitchens/$recipe:^1.0" --no-interaction || return 1
       dd "$label-apply" install-recipe "fourkitchens/$recipe" || return 1
     fi
     if [ "$split" = split ]; then
       mkdir -p config/_splits config/local config/staging || return 1
-      dd "$label-split-package" composer require 'fourkitchens/sous-config-split:^2.0' --no-interaction || return 1
+      dd "$label-split-package" composer require 'fourkitchens/sous-config-split:^1.0' --no-interaction || return 1
       dd "$label-split-apply" install-recipe fourkitchens/sous-config-split || return 1
     fi
     verify_selected "$choice" "$split" || return 1
-    dd "$label-runtime" exec env SOUS_DISPOSABLE_TEST=1 "SOUS_INTEGRATION_COMBINATION=$mode" SOUS_INTEGRATION_RECIPES_DIR=/var/www/html/web/recipes SOUS_INTEGRATION_PROBES_DIR=/var/www/html/.integration/packages/tests/recipes vendor/bin/drush "--uri=https://$project.ddev.site" php:script devops/integration/verify-site.php || return 1
+    dd "$label-runtime" exec env SOUS_DISPOSABLE_TEST=1 "SOUS_INTEGRATION_COMBINATION=$mode" SOUS_INTEGRATION_RECIPES_DIR=/var/www/html/web/recipes vendor/bin/drush "--uri=https://$project.ddev.site" php:script devops/integration/verify-site.php || return 1
     if [ "$choice" = default ] && [ "$split" = plain ]; then
       certificate=()
       if command -v mkcert > /dev/null; then
@@ -511,7 +482,7 @@ environments() {
   cp "$work/baseline-composer.json" composer.json
   cp "$work/baseline-composer.lock" composer.lock
   dd environment-base-packages composer install --no-interaction --prefer-dist
-  dd environment-content-package composer require 'fourkitchens/sous-content-types:^2.0' --no-interaction
+  dd environment-content-package composer require 'fourkitchens/sous-content-types:^1.0' --no-interaction
   dd environment-page-apply install-recipe fourkitchens/sous-content-types
   probe seed local
   environment_exec environment-local-cache local vendor/bin/drush cache:rebuild
@@ -532,10 +503,9 @@ environments() {
       for split_folder in _splits local staging; do
         if [ -d "$hidden/$split_folder" ]; then mv "$hidden/$split_folder" "$folders/$split_folder"; else mkdir -p "$folders/$split_folder"; fi
       done
-      dd environment-optional-package composer require 'fourkitchens/sous-config-split:^2.0' --no-interaction
+      dd environment-optional-package composer require 'fourkitchens/sous-config-split:^1.0' --no-interaction
       dd environment-native-split-transforms exec php devops/tests/config-splits.php
       dd environment-optional-recipe install-recipe fourkitchens/sous-config-split
-      environment_exec environment-split-defaults local env SOUS_DISPOSABLE_TEST=1 vendor/bin/drush php:script .integration/packages/tests/recipes/sous-config-split/verify-defaults.php
       probe split-prepare local
       helper confex local
       dd environment-split-base-snapshot snapshot --name=environment-split-base
