@@ -40,11 +40,11 @@ case "$tool:$command" in
     shift
     while [ "$#" -gt 0 ]; do case "$1" in --raw|--dir=*) shift ;; *) break ;; esac; done
     cd "$PROJECT"
-    export IS_DDEV_PROJECT=true
+    export IS_DDEV_PROJECT=true DDEV_APPROOT="$PROJECT"
     exec "$@" ;;
   ddev:install-recipe)
-    shift; unset IS_DDEV_PROJECT
-    exec bash .ddev/commands/web/install-recipe "$@" ;;
+    shift; export IS_DDEV_PROJECT=true DDEV_APPROOT="$PROJECT"
+    exec sh "$PROJECT/.ddev/commands/web/install-recipe" "$@" ;;
   npm:pkg)
     if [ "${2:-}" = delete ] && [ "${3:-}" = scripts.sous-build ]; then
       jq 'del(.scripts["sous-build"])' package.json > package.tmp && mv package.tmp package.json

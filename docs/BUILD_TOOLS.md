@@ -38,9 +38,8 @@ CI calls the same build script directly:
 sh devops/scripts/theme-build.sh
 ```
 
-The script uses DDEV from the host. Set `SOUS_RUNTIME=native` when CI provides
-the npm tools directly; `devops/ci/build/theme` uses that default. See
-[Environments](ENVIRONMENTS.md) for runtime selection.
+The script calls `ddev npm` from the host and the container's npm inside DDEV.
+CI uses DDEV too. See [Environments](ENVIRONMENTS.md) for environment settings.
 
 The individual theme tasks use installed dependencies. `build-assets` also runs
 Composer installation with `--no-dev`; Storybook is a separate optional build.

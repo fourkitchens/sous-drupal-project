@@ -185,7 +185,7 @@ for failed in 'composer --no-ansi update --lock' 'composer --no-ansi validate'; 
   expect_status 42 generate 3; preserved
 done
 pass 'lock refresh/validation failures never retire bootstrap'
-# Keep this list limited to native setup work; removed theme rewrites are not prerequisites.
+# Fail actual setup commands before theme enabling or account creation.
 for failed in 'theme-initialize.mjs --check' 'system install' 'pkg set' 'if [ -f package-lock.json ]' 'run build'; do
   fixture; export FAIL_MATCH="$failed"
   expect_status 42 generate 0; preserved
@@ -210,12 +210,15 @@ for failed in 'pkg delete scripts.sous-build' 'config --unset scripts.post-creat
     json_assert "$PROJECT/package.json" '.scripts|has("sous-build")'
   else json_assert "$PROJECT/package.json" '.scripts|has("sous-build")|not'; fi
 done
-pass 'native metadata cleanup failures keep bootstrap files for recovery'
+pass 'metadata cleanup failures keep bootstrap files for recovery'
 for entry in direct ddev; do
   for failed in php:eval recipe cr; do
     fixture; export TEST_COMMAND_STATUSES="{\"$failed\":42}"
     if [ "$entry" = direct ]; then expect_status 42 helper install-recipe.sh fourkitchens/sous-admin
-    else expect_status 42 env PATH="$BIN:$PATH" bash "$PROJECT/.ddev/commands/web/install-recipe" fourkitchens/sous-admin; fi
+    else expect_status 42 env IS_DDEV_PROJECT=true DDEV_APPROOT="$PROJECT" PATH="$BIN:$PATH" sh "$PROJECT/.ddev/commands/web/install-recipe" fourkitchens/sous-admin; fi
+    if [ "$entry" = direct ]; then
+      calls_assert '[.[]|select(.tool=="ddev")|.command]==["install-recipe"]'
+    else calls_assert 'all(.[];.tool!="ddev")'; fi
     if [ "$failed" = recipe ]; then calls_assert 'all(.[];.command!="cr")'; fi
     if [ "$failed" = php:eval ]; then calls_assert 'all(.[];.command!="recipe" and .command!="cr")'; fi
   done

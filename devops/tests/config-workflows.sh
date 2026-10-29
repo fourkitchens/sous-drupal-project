@@ -2,9 +2,9 @@
 # Exercise the shipped config/data scripts with isolated tools and SQL fixtures.
 source "$(dirname "$0")/_test.sh"
 
-reset_project
-for runtime in ddev native; do
-  export SOUS_RUNTIME="$runtime" SOUS_ENVIRONMENT=local
+for context in host container; do
+  reset_project; [ "$context" != container ] || export IS_DDEV_PROJECT=true
+  export SOUS_ENVIRONMENT=local
   for status in 0 42; do
     export TEST_COMMAND_STATUSES="{\"config:export\":$status}"; reset_log
     expect_status "$status" helper confex.sh '--destination=path with spaces'
@@ -12,9 +12,10 @@ for runtime in ddev native; do
   done
 done
 pass 'configuration export routes directly and preserves arguments and status'
-for runtime in ddev native; do
+for context in host container; do
   for failures in '{}' '{"deploy":43}' '{"post-config-import":45}' '{"deploy":43,"post-config-import":45}'; do
-    reset_project; export SOUS_RUNTIME="$runtime" SOUS_ENVIRONMENT=local TEST_COMMAND_STATUSES="$failures"
+    reset_project; [ "$context" != container ] || export IS_DDEV_PROJECT=true
+    export SOUS_ENVIRONMENT=local TEST_COMMAND_STATUSES="$failures"
     expected=$(jq '.deploy // .["post-config-import"] // 0' <<< "$failures")
     expect_status "$expected" helper confim.sh
     calls_assert '[.[]|select(.tool=="drush" or .tool=="hook-probe")|.command]==["deploy","post-config-import"]'
@@ -29,27 +30,29 @@ expect_status 0 helper confim.sh
 calls_assert '[.[]|select(.tool=="drush")|.command]==["deploy"]'
 pass 'missing configuration hooks and production hooks are skipped'
 
-for runtime in ddev native; do
-  reset_project; export SOUS_RUNTIME="$runtime" SOUS_ENVIRONMENT=local
+for context in host container; do
+  reset_project; [ "$context" != container ] || export IS_DDEV_PROJECT=true
+  export SOUS_ENVIRONMENT=local
   expect_status 0 helper runtime-probe.sh runtime_exec hook-probe 'two words'
   expect_status 0 helper runtime-probe.sh runtime_composer install
   expect_status 0 helper runtime-probe.sh runtime_npm ci
   expect_status 0 helper runtime-probe.sh runtime_start
-  if [ "$runtime" = ddev ]; then
+  if [ "$context" = host ]; then
     calls_assert '[.[]|select(.tool=="ddev")|.command]==["exec","composer","npm","start"]'
     calls_assert 'any(.[];.tool=="ddev" and .command=="exec" and (.argv|index("--dir=/var/www/html"))!=null)'
   else calls_assert 'all(.[];.tool!="ddev")'; fi
   calls_assert 'any(.[];.tool=="hook-probe" and .argv==["two words"])'
 done
-pass 'runtime adapters use named DDEV commands or prepared native tools'
+pass 'host adapters use DDEV commands and container adapters use project tools'
 
 run_theme_task() {
   local task="$1"; shift
   (cd "$PROJECT"; PATH="$BIN:$PATH" sh -c "$(jq -r --arg task "$task" '.scripts[$task]' "$SOURCE/package.json") \"\$@\"" sh "$@")
 }
 json_assert "$SOURCE/package.json" '.scripts["theme-build"]=="./devops/scripts/theme-build.sh" and .scripts["theme-watch"]=="./devops/scripts/theme-watch.sh"'
-for runtime in ddev native; do
-  reset_project; export SOUS_RUNTIME="$runtime" SOUS_ENVIRONMENT=local
+for context in host container; do
+  reset_project; [ "$context" != container ] || export IS_DDEV_PROJECT=true
+  export SOUS_ENVIRONMENT=local
   for task in theme-build theme-watch; do
     if [ "$task" = theme-build ]; then command=build; else command=develop; fi
     for directory in default 'web/themes/custom/other theme'; do
@@ -63,7 +66,7 @@ for runtime in ddev native; do
       fi
       arguments=$(jq -cn --arg directory "$theme_directory" --arg command "$command" '["--prefix",$directory,"run",$command,"--","--mode=two words","--verbose"]')
       calls_assert "[.[]|select(.tool==\"npm\")|.argv]==[$arguments]"
-      if [ "$runtime" = ddev ]; then
+      if [ "$context" = host ]; then
         calls_assert "any(.[];.tool==\"ddev\" and .argv==([\"npm\"]+$arguments))"
       else calls_assert 'all(.[];.tool!="ddev")'; fi
     done
@@ -86,19 +89,15 @@ export TEST_COMMAND_STATUSES='{"npm":42}'
 expect_status 42 run_theme_task theme-storybook
 [ "$(cd "$PROJECT/web/themes/custom/sous-project/../../../storybook" && pwd -P)" = "$(cd "$PROJECT/web/storybook" && pwd -P)" ] || fail 'Storybook output escapes web/storybook'
 pass 'Storybook stays a direct npm task with the correct output and child exit status'
-reset_project; export SOUS_RUNTIME=ddev IS_DDEV_PROJECT=true
+reset_project; export IS_DDEV_PROJECT=true
 expect_status 0 helper confex.sh
 calls_assert 'all(.[];.tool!="ddev")'
-unset IS_DDEV_PROJECT; export SOUS_RUNTIME=native
 rm "$PROJECT/vendor/bin/drush"; reset_log
 expect_failure helper confex.sh
 [ ! -s "$COMMAND_LOG" ] || fail 'missing project Drush fell back to global Drush'
-pass 'container execution is native and native Drush never falls back globally'
-for runtime in ddev native; do
-  reset_project; export SOUS_RUNTIME="$runtime"
-  expect_status 0 helper runtime-probe.sh runtime_environment
-  if [ "$runtime" = ddev ]; then contains "$TEST_ROOT/output" local; else contains "$TEST_ROOT/output" production; fi
-  export IS_DDEV_PROJECT=true
+pass 'container commands avoid DDEV recursion and never fall back to global Drush'
+for context in host container; do
+  reset_project; [ "$context" != container ] || export IS_DDEV_PROJECT=true
   expect_status 0 helper runtime-probe.sh runtime_environment
   contains "$TEST_ROOT/output" local
   for environment in local staging production; do
@@ -107,7 +106,7 @@ for runtime in ddev native; do
     contains "$TEST_ROOT/output" "$environment"
   done
 done
-pass 'runtime environment defaults depend on DDEV and explicit valid values win'
+pass 'helpers default to local in both DDEV contexts and explicit valid values win'
 for value in invalid ''; do
   reset_project; export SOUS_ENVIRONMENT="$value"
   expect_failure helper runtime-probe.sh runtime_environment
@@ -116,31 +115,27 @@ for value in invalid ''; do
     [ ! -s "$COMMAND_LOG" ] || fail 'invalid environment invoked a tool'
   done
 done
-reset_project; export SOUS_RUNTIME=invalid
-expect_failure helper confex.sh
-[ ! -s "$COMMAND_LOG" ] || fail 'invalid runtime invoked a tool'
-pass 'invalid environment/runtime values fail before work'
-for runtime in ddev native; do
-  reset_project; export SOUS_RUNTIME="$runtime" SOUS_ENVIRONMENT=production
+pass 'invalid environment values fail before work'
+for context in host container; do
+  reset_project; [ "$context" != container ] || export IS_DDEV_PROJECT=true
+  export SOUS_ENVIRONMENT=production
   for script in import-data.sh get-db.sh rebuild.sh local-data-bak.sh; do
     reset_log; expect_failure helper "$script"
     [ ! -s "$COMMAND_LOG" ] || fail 'production development command invoked a tool'
   done
 done
-reset_project; export SOUS_RUNTIME=native
-expect_failure helper get-db.sh
-[ ! -s "$COMMAND_LOG" ] || fail 'native default production invoked a tool'
 pass 'destructive commands refuse production before any tool call'
 
-for runtime in ddev native; do
-  reset_project; export SOUS_RUNTIME="$runtime" SOUS_ENVIRONMENT=staging
+for context in host container; do
+  reset_project; [ "$context" != container ] || export IS_DDEV_PROJECT=true
+  export SOUS_ENVIRONMENT=staging
   mkdir -p "$PROJECT/selected backups"
   printf "SELECT 'selected backup';\n" > "$PROJECT/selected backups/site dump.sql"
   gzip -c "$PROJECT/selected backups/site dump.sql" > "$PROJECT/selected backups/site dump.sql.gz"
   for extension in sql sql.gz; do
     reset_log; expect_status 0 helper import-data.sh "$PROJECT/selected backups/site dump.$extension"
     calls_assert '[.[]|select(.tool=="drush" or .tool=="hook-probe")|.command]|index("cache:rebuild")<index("post-import") and index("post-import")<index("sql:sanitize")'
-    if [ "$runtime" = ddev ]; then
+    if [ "$context" = host ]; then
       calls_assert 'any(.[];.command=="import-db" and (.payload|contains("selected backup")))'
     else
       calls_assert 'all(.[];.tool!="ddev") and any(.[];.command=="sql:cli" and (.payload|contains("selected backup")))'
@@ -154,10 +149,11 @@ for runtime in ddev native; do
     reset_log; expect_failure helper import-data.sh "$PROJECT/$name"; no_import
   done
 done
-pass 'plain/gzip backups with spaces import in either runtime; invalid backups fail before database commands'
-for pair in 'ddev import-db' 'native sql:drop' 'native sql:cli'; do
-  reset_project; read -r runtime command <<< "$pair"
-  export SOUS_RUNTIME="$runtime" SOUS_ENVIRONMENT=staging TEST_COMMAND_STATUSES="{\"$command\":47,\"post-import\":51}"
+pass 'plain/gzip backups import in both DDEV contexts; invalid backups fail before database commands'
+for pair in 'host import-db' 'container sql:drop' 'container sql:cli'; do
+  reset_project; read -r context command <<< "$pair"
+  [ "$context" != container ] || export IS_DDEV_PROJECT=true
+  export SOUS_ENVIRONMENT=staging TEST_COMMAND_STATUSES="{\"$command\":47,\"post-import\":51}"
   printf 'SELECT 1;\n' > "$PROJECT/backup.sql"
   expect_status 47 helper import-data.sh "$PROJECT/backup.sql"
   calls_assert 'any(.[];.command=="post-import") and all(.[];.command!="cache:rebuild" and .command!="sql:sanitize" and .command!="uli")'

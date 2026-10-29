@@ -4,7 +4,7 @@
 # Usage: npm run setup -- [fresh|restore] [backup.sql|backup.sql.gz]
 # Fresh installs replace the development database; restore forwards the optional
 # backup to rebuild.sh. Both reject production before destructive work. Shared
-# runtime helpers select host DDEV or prepared native tools and resolve the root.
+# Shared helpers use DDEV and resolve the project root.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
 

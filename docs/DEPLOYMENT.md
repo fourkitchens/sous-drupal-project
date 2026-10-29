@@ -58,29 +58,29 @@ root to `web/`; configuration and `vendor/` belong outside it.
    updates using the project's Drush:
 
    ```sh
-   SOUS_RUNTIME=native SOUS_ENVIRONMENT=production \
-     sh devops/scripts/confim.sh --uri=https://YOUR_SITE
+   SOUS_ENVIRONMENT=production \
+     vendor/bin/drush deploy --yes --uri=https://YOUR_SITE
    ```
 
    Replace the URI with the destination URL. This runs `drush deploy --yes`,
    including database updates, configuration import, cache work, and deployment
-   hooks. Production skips the optional post-config-import shell hook.
+   hooks.
 4. Run the explicit environment checks on the bootstrapped destination:
 
    ```sh
-   SOUS_RUNTIME=native SOUS_ENVIRONMENT=production \
-     sh devops/scripts/check-environment.sh config
-   SOUS_RUNTIME=native SOUS_ENVIRONMENT=production \
-     sh devops/scripts/check-environment.sh runtime
+   SOUS_ENVIRONMENT=production vendor/bin/drush --uri=https://YOUR_SITE \
+     php:script devops/scripts/environment-check.php -- config
+   SOUS_ENVIRONMENT=production vendor/bin/drush --uri=https://YOUR_SITE \
+     php:script devops/scripts/environment-check.php -- runtime
    ```
 
 5. Check important pages, administrator access, rendered assets, logs, cron,
    queues, and project integrations.
 
-The server needs PHP, Composer, Node/npm when building there, and the installed
-project dependencies; it does not need DDEV. [Environments](ENVIRONMENTS.md)
-explains runtime selection and what the checks cover. `confim` does not run
-those checks automatically or apply recipe changes.
+The server needs PHP and the installed project dependencies. Build assets with
+DDEV before delivering them. Run deployment and checks through the project's
+Drush directly. [Environments](ENVIRONMENTS.md) explains what the checks cover.
+Deployment does not run those checks automatically or apply recipe changes.
 
 If deployment fails, stop dependent steps and follow the site's rollback
 procedure. A schema or data change can require restoring the database together

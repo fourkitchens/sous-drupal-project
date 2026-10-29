@@ -1,6 +1,6 @@
 # Set up a site
 
-Use DDEV, Docker, and Git for local development. Creating a project with
+Use DDEV for local development. Install Docker and Git. Creating a project with
 Composer also requires PHP and Composer on your computer. See
 [Platform](PLATFORM.md) for supported versions and [Features](FEATURES.md) for
 the installation choices.
@@ -109,8 +109,9 @@ Optional `devops/hooks/post-import.sh` and `post-config-import.sh` run after
 import and deployment respectively. Use `runtime_drush` in these scripts for
 project commands. A failed import still attempts its hook; a failed deployment
 still attempts its hook. The original failure remains the command's exit status.
-Hooks do not run in production. See [Environments](ENVIRONMENTS.md) for routing
-and environment selection.
+Hooks do not run in production. Local helpers use DDEV from the host or the
+container's project tools inside DDEV. See [Environments](ENVIRONMENTS.md) for
+environment settings.
 
 Save a local backup before changing data:
 

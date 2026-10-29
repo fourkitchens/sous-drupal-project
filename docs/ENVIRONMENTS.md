@@ -103,18 +103,15 @@ Pass additional Drush arguments after `--`. Outside production, deployment also
 attempts the optional `devops/hooks/post-config-import.sh`, even if deployment
 failed. A deployment failure takes precedence over a hook failure.
 
-Shell helpers called from the host use DDEV. Inside DDEV they call the installed
-project tools directly. On a server with its tools and database prepared, select
-the tools and environment explicitly:
+Shell helpers use DDEV from the host and the container's project tools inside
+DDEV. They default to `local`. The project must provide `vendor/bin/drush`;
+the helpers do not use global Drush.
 
-```sh
-SOUS_RUNTIME=native SOUS_ENVIRONMENT=production sh devops/scripts/confim.sh
-```
-
-The project must provide `vendor/bin/drush`; the helpers do not use global Drush.
-Set environment variables in the destination runtime; host variables are not
-forwarded automatically into DDEV. Database refresh and setup commands refuse
-production before calling tools. See [Setup](SETUP.md) for those commands.
+Set environment variables in DDEV; host variables are not forwarded
+automatically into the container. Database refresh and setup commands refuse an
+explicit `production` environment before calling tools. See [Setup](SETUP.md)
+for those commands. On production servers, run the project's Drush directly as
+shown in [Deployment](DEPLOYMENT.md#deploy-code-and-configuration).
 
 ## Check configuration and runtime settings
 

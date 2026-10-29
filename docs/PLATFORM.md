@@ -34,9 +34,9 @@ and Composer first. Run application platform checks in DDEV:
 ddev composer check-platform-reqs
 ```
 
-Use the Node major in `.nvmrc` for host npm commands. Generated-site CI installs
-current DDEV; `.ddev/config.yaml` limits the supported range. Choose hosting,
-credentials and deployment tools for your site as described in
+Use DDEV's npm for local commands; `.nvmrc` sets the Node major. Generated-site CI
+installs current DDEV; `.ddev/config.yaml` limits the supported range. Choose
+hosting, credentials and deployment tools for your site as described in
 [Deployment](DEPLOYMENT.md).
 
 The starter and Sous packages use GPL-2.0-or-later. Retain their license and

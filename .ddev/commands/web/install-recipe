@@ -1,14 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
 ## Description: Install a Drupal recipe
 ## Usage: install-recipe [full package name]
 ## Example: ddev install-recipe fourkitchens/sous-admin
 
-set -euo pipefail
-if [[ "${IS_DDEV_PROJECT:-}" == true && -f /var/www/html/devops/scripts/install-recipe.sh ]]; then
-  project_root=/var/www/html
-else
-  project_root="$(cd "$(dirname "$0")/../../.." && pwd)"
-fi
-export SOUS_RUNTIME=native
-exec "$project_root/devops/scripts/install-recipe.sh" "$@"
+set -eu
+exec "$DDEV_APPROOT/devops/scripts/install-recipe.sh" "$@"

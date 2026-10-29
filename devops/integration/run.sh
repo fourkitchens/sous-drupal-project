@@ -34,7 +34,7 @@ project=$(printf 'sous-smoke-%s' "${work##*.}" | tr '[:upper:]' '[:lower:]')
 site="$work/$project"
 result="$artifacts/result.json"
 created=0
-export HUSKY=0 SOUS_RUNTIME=ddev SOUS_ENVIRONMENT=local COMPOSER_NO_INTERACTION=1
+export HUSKY=0 SOUS_ENVIRONMENT=local COMPOSER_NO_INTERACTION=1
 jq -n --arg option "$option" --arg project "$project" --arg workspace "$work" --argjson split "$split" \
   '{status:"running",option:$option,config_split:($split==1),project:$project,workspace:$workspace,steps:[]}' > "$result"
 

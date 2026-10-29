@@ -13,11 +13,11 @@ case "$backup" in
   *) echo 'Use a .sql or .sql.gz database backup.' >&2; exit 2 ;;
 esac
 status=0
-if [ "$SOUS_RUNTIME" = ddev ]; then
-  ddev import-db --file="$backup" || status=$?
-else
+if [ "${IS_DDEV_PROJECT:-}" = true ]; then
   runtime_drush sql:drop --yes || status=$?
   if [ "$status" -eq 0 ]; then gzip -dcf -- "$backup" | runtime_drush sql:cli || status=$?; fi
+else
+  ddev import-db --file="$backup" || status=$?
 fi
 if [ "$status" -ne 0 ]; then
   if [ "$(runtime_environment)" != production ] && [ -f devops/hooks/post-import.sh ]; then
