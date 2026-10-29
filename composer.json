@@ -62,7 +62,10 @@
         "zaporylie/composer-drupal-optimizations": "^1.2.0"
     },
     "conflict": {
-        "drupal/drupal": "*"
+        "drupal/drupal": "*",
+        "drupal/emulsify": "<7.3.0",
+        "drupal/metatag": "<2.2.3",
+        "drupal/paragraphs_features": "<2.3.0"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,

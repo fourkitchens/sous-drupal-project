@@ -19,7 +19,7 @@ record the exact package versions installed there.
 | Node.js | 24.x | `.nvmrc`; DDEV and npm engines use the same major |
 | npm | Bundled with Node.js | Node.js installation |
 | Sous packages | `^2.0` | `composer.json` and the selected packages' manifests |
-| Emulsify / Emulsify Tools | `^7.2.1` / `^2.2.2` | Sous Emulsify package manifest |
+| Emulsify / Emulsify Tools | `^7.3.0` / `^2.2.2` | Sous Emulsify package manifest |
 | Emulsify CLI | `^2.4.1` | Root `package.json` and lockfile |
 | Emulsify UI Kit | 1.9.0, Drupal variant | `devops/scripts/theme-setup.sh` |
 
