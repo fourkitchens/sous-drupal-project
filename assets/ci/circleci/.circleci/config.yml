@@ -1,0 +1,54 @@
+# Run composer ci to validate and build this site.
+# The steps live in composer.json; change them there.
+version: 2.1
+
+orbs:
+  node: circleci/node@7.2.1
+
+jobs:
+  build:
+    docker:
+      # Same PHP as .ddev/config.yaml; this image includes Composer 2.
+      - image: cimg/php:8.4
+    environment:
+      HUSKY: '0'
+    steps:
+      - checkout
+      - node/install
+      - restore_cache:
+          keys:
+            - deps-v1-{{ checksum "composer.lock" }}-{{ checksum "package-lock.json" }}
+      - run:
+          name: Check the site
+          # CircleCI has no total job timeout; bound the shared command's run time.
+          command: timeout 30m composer ci
+          no_output_timeout: 30m
+      - save_cache:
+          key: deps-v1-{{ checksum "composer.lock" }}-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.cache/composer
+            - ~/.npm
+
+  # Supply host delivery and alias credentials; see docs/DEPLOYMENT.md.
+  # deploy:
+  #   docker:
+  #     - image: cimg/php:8.4
+  #   environment:
+  #     HUSKY: '0'
+  #   steps:
+  #     - checkout
+  #     - node/install
+  #     - run: timeout 30m composer build-assets
+  #     # Deliver the build to your host here.
+  #     - run: sh devops/scripts/confim.sh @your-site.env
+
+workflows:
+  # Project triggers select pull requests/main pushes; manual runs use this too.
+  build:
+    jobs:
+      - build
+      # - deploy:
+      #     requires: [build]
+      #     filters:
+      #       branches:
+      #         only: main

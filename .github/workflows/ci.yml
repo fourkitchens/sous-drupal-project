@@ -46,6 +46,11 @@ jobs:
       - name: Check shell scripts
         run: find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
       - run: composer validate --no-check-publish
+      - name: Parse site CI templates
+        run: |
+          yq '.' assets/ci/github/.github/workflows/build.yml > /dev/null
+          yq '.' assets/ci/gitlab/.gitlab-ci.yml > /dev/null
+          yq '.' assets/ci/circleci/.circleci/config.yml > /dev/null
 
   integration:
     needs: checks

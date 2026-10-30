@@ -104,22 +104,41 @@ Preserve administrator accounts and roles; account assignments live in each data
 
 ## Set up site CI
 
-For GitHub Actions:
+The base configurations provide PHP 8.4 and Node.js 24 and run `composer ci`
+to install locked dependencies, build the theme, lint and check coding standards.
+The steps live in `composer.json`; change them there so every provider and local
+checks run the same commands. CI runs without DDEV.
+
+| Provider | Template folder | File in the site |
+| --- | --- | --- |
+| GitHub Actions | `assets/ci/github/` | `.github/workflows/build.yml` |
+| GitLab CI/CD | `assets/ci/gitlab/` | `.gitlab-ci.yml` |
+| CircleCI | `assets/ci/circleci/` | `.circleci/config.yml` |
+
+Setup does not install a CI configuration yet. Choose one provider and copy its
+folder's contents, including hidden files, into the generated site's project
+root. For example, GitHub Actions:
 
 ```sh
-mkdir -p .github/workflows
-cp assets/ci/github-actions/build.yml .github/workflows/build.yml
+cp -R assets/ci/github/. .
 ```
 
-For CircleCI:
+Use `circleci` or `gitlab` instead of `github` for the other providers.
+GitHub sites keep `.github/dependabot.yml` so Dependabot updates action pins.
 
-```sh
-mkdir -p .circleci
-cp assets/ci/circleci/config.yml .circleci/config.yml
-```
+For CircleCI, make `main` the default branch and configure pull-request events
+and default-branch pushes in
+[Project Settings > Triggers](https://circleci.com/docs/guides/orchestrate/github-trigger-event-options/).
+GitHub OAuth projects can enable **Only build pull requests**, which also builds
+the default branch. Manual pipeline runs use the same workflow.
 
-The examples provide PHP 8.4 and Node.js 24 and run `composer ci` to install
-locked dependencies, build the theme, lint and check coding standards.
-Adapt theme commands for a site without Emulsify. Add artifact storage,
-deployment credentials and release conditions for your hosting.
+Each template includes a commented deployment job or stage after its checks;
+nothing deploys by default. To enable it, restrict deployment to `main`, run
+`composer build-assets`, deliver the build to your host, then apply configuration
+with `sh devops/scripts/confim.sh @your-site.env`. Configure credentials and the
+Drush alias as described in [Build and deploy](#build-and-deploy).
+
+CircleCI sites deploying to Pantheon or Acquia can adopt
+[Four Kitchens' POTS](https://github.com/fourkitchens/pots) instead for its
+hosting-specific deployment workflows.
 Keep local `setup.sh` database restores in DDEV.

@@ -30,6 +30,7 @@ npm run lint
 find devops -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
 composer validate --no-check-publish
 actionlint .github/workflows/ci.yml
+actionlint assets/ci/github/.github/workflows/build.yml
 ```
 
 Commit candidates before smoke testing: the runner exports `HEAD` with
