@@ -50,8 +50,8 @@ actionlint .github/workflows/ci.yml
 actionlint assets/ci/github/.github/workflows/build.yml
 bash devops/integration/run.sh --ci github
 bash devops/integration/run.sh --ci gitlab --option layout-builder
-bash devops/integration/run.sh --ci circleci --option paragraphs --config-split
-bash devops/integration/run.sh --ci none --option admin-only
+bash devops/integration/run.sh --ci circleci --option paragraphs --recipes sous-config-split
+bash devops/integration/run.sh --ci none --option admin-only --recipes sous-media
 ```
 
 For unpublished package changes, append `--packages /path/to/sous-drupal-packages`.

@@ -13,7 +13,7 @@ and delete it on exit. Commit first: uncommitted changes are not tested.
 Options:
   --option default|layout-builder|paragraphs|admin-only
                         Content composition (default: default).
-  --config-split        Include Config Split (default: off).
+  --recipes LIST        Add comma-separated Sous recipe names (default: empty).
   --ci circleci|github|gitlab|none
                         Site CI provider (default: github).
   --packages PATH       Use PATH/packages/* at version 2.0.0, copied by Composer
@@ -48,7 +48,7 @@ EOF
 # Read options before creating a workspace or registering cleanup traps.
 parse_options() {
   option=default
-  split=0
+  recipes=''
   ci=github
   packages=''
   keep=0
@@ -56,7 +56,7 @@ parse_options() {
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
-      --option|--ci|--packages|--artifacts)
+      --option|--recipes|--ci|--packages|--artifacts)
         if [ "$#" -lt 2 ]; then
           usage >&2
           exit 2
@@ -69,9 +69,9 @@ parse_options() {
         option=$2
         shift 2
         ;;
-      --config-split)
-        split=1
-        shift
+      --recipes)
+        recipes=$2
+        shift 2
         ;;
       --ci)
         ci=$2
@@ -130,10 +130,7 @@ prepare_workspace() {
   result_file="$artifacts/result.json"
 
   export HUSKY=0 COMPOSER_NO_INTERACTION=1 SOUS_CONTENT="$option"
-  export SOUS_CONFIG_SPLIT=no SOUS_CI="$ci"
-  if [ "$split" -ne 0 ]; then
-    export SOUS_CONFIG_SPLIT=yes
-  fi
+  export SOUS_RECIPES="$recipes" SOUS_CI="$ci"
   jq -n --arg site "$site_dir" --arg option "$option" \
     '{status: "running", site: $site, option: $option}' > "$result_file"
 }
@@ -231,11 +228,12 @@ check_site_responds() {
   expect_line front-page 200
 }
 
-# Check the selected content composition and independent Config Split option in Drupal.
+# Check the selected content composition and optional Config Split recipe in Drupal.
 check_composition() {
   local composition_checks
   composition_checks=$(cat <<'PHP'
 $option = getenv("SOUS_SMOKE_OPTION");
+$recipes = preg_split('/[\s,]+/', getenv("SOUS_SMOKE_RECIPES"), -1, PREG_SPLIT_NO_EMPTY);
 $page = \Drupal::entityTypeManager()->getStorage("node_type")->load("page");
 $display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.page.default");
 $checks = [
@@ -245,9 +243,13 @@ $checks = [
   "Paragraphs" => \Drupal::moduleHandler()->moduleExists("paragraphs") === ($option === "paragraphs"),
   // Layout Builder is enabled on the Page display only when selected.
   "Layout Builder" => (bool) $display?->getThirdPartySetting("layout_builder", "enabled", FALSE) === ($option === "layout-builder"),
-  // Config Split follows its own flag rather than the content composition.
-  "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split") === (getenv("SOUS_SMOKE_SPLIT") === "1"),
+  // Config Split is enabled only when its optional recipe was selected.
+  "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split") === in_array("sous-config-split", $recipes, TRUE),
 ];
+if (in_array("sous-media", $recipes, TRUE)) {
+  // Media bundles prove the building-block recipe was applied on its own.
+  $checks["Media types"] = count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video"])) === 3;
+}
 foreach ($checks as $name => $passed) {
   if (!$passed) {
     throw new \RuntimeException("Unexpected composition: $name");
@@ -257,7 +259,7 @@ echo "Selected composition matches.\n";
 PHP
   )
   step composition ddev exec --raw env SOUS_SMOKE_OPTION="$option" \
-    SOUS_SMOKE_SPLIT="$split" vendor/bin/drush php:eval "$composition_checks"
+    SOUS_SMOKE_RECIPES="$recipes" vendor/bin/drush php:eval "$composition_checks"
 }
 
 # Check that archive exclusions kept maintainer tooling out of the generated site.

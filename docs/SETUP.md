@@ -12,8 +12,18 @@ cd my-site
 
 Composer's post-create hook runs `sous-build.sh` once. It names the project from
 its directory, stores the theme name in `package.json`'s `config.theme`, asks for
-a content composition, optional Config Split and a CI provider, then starts DDEV
-and installs. The CI question is:
+a content composition, optional recipes and a CI provider, then starts DDEV
+and installs. After the content choice, it reads the published Sous 2.x index
+and lists recipes not already included by the base setup or chosen composition.
+The menu updates as recipes are published; no question appears if none remain.
+Choose numbered entries or short names such as `sous-config-split`, separated by
+spaces or commas:
+
+```text
+Add recipes (numbers or names, separated by spaces; Enter for none):
+```
+
+Enter or end of input skips additional recipes. The CI question follows:
 
 ```text
 CI: [0] CircleCI [1] GitHub Actions [2] GitLab CI/CD [3] None:
@@ -22,16 +32,23 @@ CI: [0] CircleCI [1] GitHub Actions [2] GitLab CI/CD [3] None:
 For unattended installation, set all three answers:
 
 ```sh
-SOUS_CONTENT=layout-builder SOUS_CONFIG_SPLIT=yes SOUS_CI=gitlab \
+SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-config-split SOUS_CI=gitlab \
   composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
 ```
 
 `SOUS_CONTENT` accepts `default`, `layout-builder`, `paragraphs` or `admin-only`
-(and menu numbers `0`–`3`). `SOUS_CONFIG_SPLIT` accepts `yes` or `no`, defaulting
-to no. `SOUS_CI` accepts `circleci` (`0`), `github` (`1`), `gitlab` (`2`) or
-`none` (`3`). Noninteractive installation requires explicit content and CI choices.
+(and menu numbers `0`–`3`). `SOUS_CI` accepts `circleci` (`0`), `github` (`1`),
+`gitlab` (`2`) or `none` (`3`). Noninteractive installation requires explicit
+content and CI choices. Set `SOUS_RECIPES` to short names separated by spaces or
+commas, or `SOUS_RECIPES=''` for none; setting it skips both the menu and index
+fetch. These names are not checked against the index, so unpublished path
+packages work and Composer rejects unknown names. Use `SOUS_CONTENT` for the
+content compositions; the base recipes are already included.
+
 The installer creates `sous_chef` with the `superuser` role, blocks `superuser_1`,
-builds the theme, exports configuration and prints a login link.
+builds the theme, applies the composition and optional recipes in the chosen
+order, exports configuration and prints a login link. Config Split is selected
+with `SOUS_RECIPES=sous-config-split` or from the recipe menu.
 
 Commit manifests, lockfiles, `patches.lock.json`, custom code/theme and the complete
 `config/default` export, including `core.extension.yml`, `system.site.yml` and UUIDs.

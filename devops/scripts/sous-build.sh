@@ -16,15 +16,96 @@ case "$SOUS_CONTENT" in
   admin-only|3) content='' ;;
   *) echo 'SOUS_CONTENT must be default, layout-builder, paragraphs, or admin-only.' >&2; exit 2 ;;
 esac
-if [ "${SOUS_CONFIG_SPLIT+x}" != x ]; then
-  printf 'Install Config Split? [y/N] '
-  read -r SOUS_CONFIG_SPLIT || SOUS_CONFIG_SPLIT=no
+recipe_menu=''
+if [ "${SOUS_RECIPES+x}" != x ]; then
+  recipe_menu=$(php -- "$content" <<'PHP'
+<?php
+$indexLocation = 'https://fourkitchens.github.io/sous-drupal-packages/packages.json';
+$index = json_decode(file_get_contents($indexLocation), true, 512, JSON_THROW_ON_ERROR);
+
+// Use the newest 2.x metadata for menu descriptions and recipe dependencies.
+$catalog = [];
+foreach ($index['packages'] as $name => $versions) {
+  if (!preg_match('~^fourkitchens/sous-[a-z0-9-]+$~', $name)) {
+    continue;
+  }
+  $releases = array_filter(array_keys($versions), static fn($version) => preg_match('/^2\.\d/', $version));
+  usort($releases, 'version_compare');
+  if ($releases) {
+    $catalog[$name] = $versions[end($releases)];
+  }
+}
+
+// Hide this setup and its dependencies without traversing other compositions.
+$excluded = [];
+$pending = ['fourkitchens/sous-admin', 'fourkitchens/sous-emulsify'];
+if ($argv[1] !== '') {
+  $pending[] = 'fourkitchens/' . $argv[1];
+}
+while ($pending) {
+  $name = array_pop($pending);
+  if (isset($excluded[$name])) {
+    continue;
+  }
+  $excluded[$name] = true;
+  foreach (array_keys($catalog[$name]['require'] ?? []) as $dependency) {
+    if (str_starts_with($dependency, 'fourkitchens/sous-')) {
+      $pending[] = $dependency;
+    }
+  }
+}
+foreach (['sous-content-types', 'sous-core-layout-builder', 'sous-paragraphs'] as $composition) {
+  $excluded['fourkitchens/' . $composition] = true;
+}
+
+ksort($catalog);
+foreach ($catalog as $name => $metadata) {
+  if (!isset($excluded[$name])) {
+    echo substr($name, strlen('fourkitchens/')), "\t", $metadata['description'], "\n";
+  }
+}
+PHP
+  )
+  SOUS_RECIPES=''
+  if [ -n "$recipe_menu" ]; then
+    printf '%s\n' "$recipe_menu" | awk -F '\t' '{printf "%d. %s: %s\n", NR, $1, $2}'
+    printf 'Add recipes (numbers or names, separated by spaces; Enter for none): '
+    read -r SOUS_RECIPES || SOUS_RECIPES=''
+  fi
 fi
-case "$SOUS_CONFIG_SPLIT" in
-  yes|y|Y) split=yes ;;
-  no|n|N|'') split=no ;;
-  *) echo 'SOUS_CONFIG_SPLIT must be yes or no.' >&2; exit 2 ;;
-esac
+
+# Split selections as words without expanding them as filesystem patterns.
+recipe_choices=$(printf '%s' "$SOUS_RECIPES" | tr ',' ' ')
+set -f
+# shellcheck disable=SC2086
+set -- $recipe_choices
+set +f
+recipes=''
+for recipe do
+  case "$recipe" in
+    *[!0-9]*) ;;
+    *)
+      recipe=$(printf '%s\n' "$recipe_menu" | awk -F '\t' -v number="$recipe" 'NR == number {print $1}')
+      if [ -z "$recipe" ]; then
+        echo 'Recipe number is not listed in the menu.' >&2
+        exit 2
+      fi
+      ;;
+  esac
+  case "$recipe" in
+    sous-admin|sous-emulsify|sous-content-types|sous-core-layout-builder|sous-paragraphs)
+      echo "$recipe belongs to the setup selected by SOUS_CONTENT." >&2
+      exit 2
+      ;;
+    sous-?*)
+      case "$recipe" in
+        *[!a-z0-9-]*) echo "Invalid recipe name: $recipe" >&2; exit 2 ;;
+      esac
+      ;;
+    *) echo "Invalid recipe choice: $recipe" >&2; exit 2 ;;
+  esac
+  recipes="${recipes:+$recipes }$recipe"
+done
 
 if [ "${SOUS_CI+x}" != x ]; then
   printf 'CI: [0] CircleCI [1] GitHub Actions [2] GitLab CI/CD [3] None: '
@@ -85,15 +166,22 @@ runtime_drush -y user:role:add superuser superuser_1
 runtime_drush -y user:role:add superuser sous_chef
 
 # Apply optional recipes before exporting the site's complete configuration.
+set --
 if [ -n "$content" ]; then
-  runtime_composer require "fourkitchens/$content:^2.0"
+  set -- "fourkitchens/$content:^2.0"
+fi
+for recipe in $recipes; do
+  set -- "$@" "fourkitchens/$recipe:^2.0"
+done
+if [ "$#" -gt 0 ]; then
+  runtime_composer require "$@"
+fi
+if [ -n "$content" ]; then
   sh devops/scripts/install-recipe.sh "fourkitchens/$content"
 fi
-if [ "$split" = yes ]; then
-  mkdir -p config/local config/staging
-  runtime_composer require 'fourkitchens/sous-config-split:^2.0'
-  sh devops/scripts/install-recipe.sh fourkitchens/sous-config-split
-fi
+for recipe in $recipes; do
+  sh devops/scripts/install-recipe.sh "fourkitchens/$recipe"
+done
 # Validate the finished site and its login before retiring this installer.
 runtime_drush -y config:export
 runtime_composer validate --no-check-publish

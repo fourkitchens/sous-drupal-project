@@ -64,8 +64,8 @@ jobs:
           '[{"option":"default","ci":"github"}]' ||
           '[{"option":"default","ci":"github"},
           {"option":"layout-builder","ci":"gitlab"},
-          {"option":"paragraphs","ci":"circleci","config_split":true},
-          {"option":"admin-only","ci":"none"}]') }}
+          {"option":"paragraphs","ci":"circleci","recipes":"sous-config-split"},
+          {"option":"admin-only","ci":"none","recipes":"sous-media"}]') }}
     steps:
       - name: Initialize diagnostic artifacts
         run: |
@@ -92,16 +92,13 @@ jobs:
           PACKAGES_REF: ${{ inputs.packages_ref || '' }}
           OPTION: ${{ matrix.option }}
           CI_PROVIDER: ${{ matrix.ci }}
-          CONFIG_SPLIT: ${{ matrix.config_split || false }}
+          RECIPES: ${{ matrix.recipes || '' }}
         run: |
-          args=(--option "$OPTION" --ci "$CI_PROVIDER" --artifacts "$RUNNER_TEMP/sous-integration-results")
+          args=(--option "$OPTION" --recipes "$RECIPES" --ci "$CI_PROVIDER" --artifacts "$RUNNER_TEMP/sous-integration-results")
           if [[ -n "$PACKAGES_REF" ]]; then
             git clone --quiet --no-checkout https://github.com/fourkitchens/sous-drupal-packages.git "$RUNNER_TEMP/sous-packages"
             git -C "$RUNNER_TEMP/sous-packages" checkout --quiet --detach "$PACKAGES_REF"
             args+=(--packages "$RUNNER_TEMP/sous-packages")
-          fi
-          if [[ "$CONFIG_SPLIT" == true ]]; then
-            args+=(--config-split)
           fi
           bash devops/integration/run.sh "${args[@]}"
       - name: Upload integration diagnostics

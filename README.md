@@ -16,8 +16,9 @@ Your site owns its configuration, custom code, dependencies and deployment.
 | `2` Paragraphs | Page and Frontpage with Body and Image, Text, Text with Media and Video components |
 | `3` Admin only | Administration and theme without Page or Frontpage |
 
-Config Split is a separate yes/no choice, defaulting to no. Layout Builder and
-Paragraphs are separate compositions; installation downloads only your selection.
+Layout Builder and Paragraphs are separate compositions; installation downloads
+only your selection. Optional recipes, including Config Split, can be added from
+the setup menu or with `SOUS_RECIPES`.
 CI is a separate choice: CircleCI, GitHub Actions, GitLab CI/CD or None.
 
 ## Quickstart

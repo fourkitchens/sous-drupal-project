@@ -41,12 +41,13 @@ Run `bash devops/integration/run.sh --help` for options, checks and cleanup deta
 ```sh
 bash devops/integration/run.sh --ci github --artifacts /tmp/sous-default
 bash devops/integration/run.sh --ci gitlab --option layout-builder
-bash devops/integration/run.sh --ci circleci --option paragraphs --config-split
-bash devops/integration/run.sh --ci none --option admin-only
+bash devops/integration/run.sh --ci circleci --option paragraphs --recipes sous-config-split
+bash devops/integration/run.sh --ci none --option admin-only --recipes sous-media
 ```
 
 `--ci` accepts `github` (the default), `gitlab`, `circleci` and `none`.
-Config Split is independent of the content option. Append
+`--recipes` takes comma-separated short names and defaults to empty. The runner
+always sets `SOUS_RECIPES`, so smoke tests never fetch the recipe menu. Append
 `--packages /path/to/sous-drupal-packages` for an unpublished package checkout;
 omit it to test the published Composer index. A package checkout uses absolute
 `PATH/packages/*`, version `2.0.0`, copied packages and
@@ -67,8 +68,9 @@ Generated sites choose their own [CI and deployment](../DEPLOYMENT.md).
 
 PRs test default content with GitHub Actions. Main pushes, nightly runs at 06:17 UTC
 and manual runs add Layout Builder with GitLab, Paragraphs with CircleCI and
-Config Split, and admin-only with no CI. Each matrix leg supplies its content,
-CI provider and Config Split settings as data. Manual `packages_ref` selects an
+`sous-config-split`, and admin-only with no CI plus `sous-media`. The last pairing
+exercises a building-block recipe on its own. Each matrix leg supplies its
+content, CI provider and recipes as data. Manual `packages_ref` selects an
 explicit packages commit; CI clones it and passes `--packages`.
 Actions stay pinned to SHAs. Checks have read access; publishing alone has write
 access. Require source checks and smoke jobs in branch protection.
