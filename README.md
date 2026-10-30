@@ -34,7 +34,8 @@ ddev npm run theme-watch
 ## Work on Sous itself
 
 Use a source checkout to change the starter or recipes. Keep it separate from
-client sites. Run a smoke install with Docker and DDEV available:
+client sites. Commit candidate changes, then run a smoke install with host PHP,
+Composer, Docker and DDEV available:
 
 ```sh
 bash devops/integration/run.sh --option default

@@ -6,7 +6,7 @@ separately; a site installs only the packages it selects.
 ## Publish packages, then the starter
 
 1. Test package changes with the starter's [smoke runner](INTEGRATION.md), using
-   `--packages PATH` or `--packages-ref SHA` when needed.
+   `--packages PATH` when needed, after committing the candidate starter changes.
 2. Merge the packages changes to their `main` branch. Follow the package
    [release guide](https://github.com/fourkitchens/sous-drupal-packages/blob/main/docs/RELEASING.md)
    to publish a shared semantic version, individual package ZIPs and the static

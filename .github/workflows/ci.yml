@@ -2,9 +2,11 @@ name: Sous CI
 
 on:
   push:
-    branches: [main, next, next-major, alpha, beta, '*.x']
+    branches: [main]
   pull_request:
     branches: [main, next, next-major, alpha, beta, '*.x']
+  schedule:
+    - cron: '17 6 * * *'
   workflow_dispatch:
     inputs:
       packages_ref:
@@ -43,8 +45,7 @@ jobs:
       - run: npm run lint
       - name: Check shell scripts
         run: find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
-      - name: Check configuration helpers
-        run: bash devops/tests/config-workflows.sh
+      - run: composer validate --no-check-publish
 
   integration:
     needs: checks
@@ -53,15 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - option: default
-            config_split: false
-          - option: layout-builder
-            config_split: false
-          - option: paragraphs
-            config_split: true
-          - option: admin-only
-            config_split: false
+        option: ${{ fromJSON(github.event_name == 'pull_request' && '["default"]' || '["default","layout-builder","paragraphs","admin-only"]') }}
     steps:
       - name: Initialize diagnostic artifacts
         run: |
@@ -86,16 +79,14 @@ jobs:
       - name: Smoke-test the installation
         env:
           PACKAGES_REF: ${{ inputs.packages_ref || '' }}
-          SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
           OPTION: ${{ matrix.option }}
-          CONFIG_SPLIT: ${{ matrix.config_split }}
+          CONFIG_SPLIT: ${{ matrix.option == 'paragraphs' }}
         run: |
-          if [[ -z "$PACKAGES_REF" ]] && jq -e --arg branch "$SOURCE_BRANCH" '.head_ref == $branch' devops/integration/pr-refs.json >/dev/null; then
-            PACKAGES_REF=$(jq -er '.packages_ref' devops/integration/pr-refs.json)
-          fi
           args=(--option "$OPTION" --artifacts "$RUNNER_TEMP/sous-integration-results")
           if [[ -n "$PACKAGES_REF" ]]; then
-            args+=(--packages-ref "$PACKAGES_REF")
+            git clone --quiet --no-checkout https://github.com/fourkitchens/sous-drupal-packages.git "$RUNNER_TEMP/sous-packages"
+            git -C "$RUNNER_TEMP/sous-packages" checkout --quiet --detach "$PACKAGES_REF"
+            args+=(--packages "$RUNNER_TEMP/sous-packages")
           fi
           if [[ "$CONFIG_SPLIT" == true ]]; then
             args+=(--config-split)

@@ -36,11 +36,17 @@ Use `!` for breaking changes.
 
 ## Verify
 
-Run from the repo root:
+Run from the repo root. Commit candidate changes before smoke tests; they
+export `HEAD`.
 
 ```sh
+npm ci
+npm run lint
 find devops -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
 composer validate --no-check-publish
-npm run lint
+actionlint .github/workflows/ci.yml
 bash devops/integration/run.sh --option default
+bash devops/integration/run.sh --option paragraphs --config-split
 ```
+
+For unpublished package changes, append `--packages /path/to/sous-drupal-packages`.
