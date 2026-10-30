@@ -2,6 +2,7 @@
 # Apply downloaded recipes from Drupal's root so relative includes resolve.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
+runtime_require_ddev
 [ "$#" -eq 1 ] || { echo 'Usage: npm run install-recipe -- vendor/package' >&2; exit 2; }
 # Host callers use the DDEV command to reach the container's project tools.
 if [ "${IS_DDEV_PROJECT:-}" != true ]; then exec ddev install-recipe "$@"; fi

@@ -21,20 +21,21 @@ DDEV supplies the local runtime. Project creation also needs host PHP and Compos
 
 ## Build and deploy
 
+Run the shared build commands with PHP 8.4 and Node.js 24, locally, in CI or on
+the host. Tools run directly where DDEV is absent; local scripts use DDEV when
+it is installed. Run `composer ci` before preparing the production build:
+
 ```sh
-ddev start
-ddev composer validate --no-check-publish
-ddev composer build-assets
-ddev composer check-platform-reqs
-ddev npm run lint
-ddev composer audit --abandoned=report
-ddev npm audit
-ddev npm --prefix "web/themes/custom/<theme>" audit
+composer build-assets
+composer check-platform-reqs
+composer audit --abandoned=report
+npm audit
+npm --prefix "web/themes/custom/<theme>" audit
 ```
 
 `build-assets` installs production PHP dependencies and the npm tools needed to
-build the theme. Build optional Storybook with `ddev npm run theme-storybook`.
-Resolve audit findings before release.
+build the theme. Build optional Storybook with `npm run theme-storybook`.
+Audits are release checks; resolve findings before release.
 
 Ship `vendor/`, Drupal core, contributed extensions, libraries, recipes, custom
 source, configuration, settings and deployment scripts. Include the theme's
@@ -43,13 +44,30 @@ Exclude `node_modules`, local settings, caches and database backups.
 Keep secrets and uploaded/private files on the host. Use `web/` as the document root.
 
 Test against a database copy. Back up the destination database and files,
-deliver the build, then run its Drush from the destination project root:
+deliver the build, then apply configuration from the destination project root:
 
 ```sh
-vendor/bin/drush deploy --yes --uri=https://YOUR_SITE
+sh devops/scripts/confim.sh --uri=https://YOUR_SITE
 ```
 
-This applies database updates, configuration, caches and deployment hooks.
+From CI or a laptop, pass a leading Drush alias instead:
+
+```sh
+sh devops/scripts/confim.sh @mysite.prod
+```
+
+For Acquia, authenticate Acquia CLI and download aliases with
+[`acli remote:aliases:download`](https://docs.acquia.com/acquia-cloud-platform/add-ons/acquia-cli/commands/remote%3Aaliases%3Adownload).
+For Pantheon, authenticate Terminus, run
+[`terminus aliases`](https://docs.pantheon.io/guides/drush/drush-aliases), and
+[add an SSH key](https://docs.pantheon.io/ssh-keys) for remote access.
+Make downloaded aliases available to the Drush process running the script;
+Drush requires global alias paths to be configured explicitly. For other hosts,
+define [`drush/sites/*.site.yml`](https://www.drush.org/13.x/site-aliases/)
+with the remote host, SSH user, Drupal root and URI.
+
+`confim` runs Drush deploy for database updates, configuration, caches and
+deployment hooks, then the project's post-config-import hook with the alias.
 Check pages, editing, assets, logs, cron, queues and integrations.
 Follow the site's rollback procedure if deployment fails.
 
@@ -100,15 +118,8 @@ mkdir -p .circleci
 cp assets/ci/circleci/config.yml .circleci/config.yml
 ```
 
-The examples use DDEV to install locked dependencies, lint and build the theme.
+The examples provide PHP 8.4 and Node.js 24 and run `composer ci` to install
+locked dependencies, build the theme, lint and check coding standards.
 Adapt theme commands for a site without Emulsify. Add artifact storage,
 deployment credentials and release conditions for your hosting.
-
-For Pantheon with authenticated Terminus, run:
-
-```sh
-bash devops/ci/drush-config-import SITE ENV
-```
-
-It invokes remote `drush deploy --yes`. `TERMINUS_SITE` and `TERMINUS_ENV` can
-supply the arguments. Keep local `setup.sh` database restores in DDEV.
+Keep local `setup.sh` database restores in DDEV.

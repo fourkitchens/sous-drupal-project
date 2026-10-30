@@ -1,5 +1,0 @@
-#!/bin/sh
-# Legacy CI callers must run from the project root with npm_package_config_theme set.
-# Current CI templates use npm run theme-build, which supplies the theme name.
-set -eu
-exec sh devops/scripts/theme-build.sh

@@ -2,6 +2,7 @@
 # Composer runs this installer once; setup.sh restores sites after installation.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
+runtime_require_ddev
 
 # Collect choices before Composer, npm or Drush can consume the input stream.
 if [ "${SOUS_CONTENT+x}" != x ]; then

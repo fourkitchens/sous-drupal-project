@@ -56,8 +56,11 @@ sh devops/scripts/local-data-bak.sh
 ```
 
 Sanitization sets user passwords to `admin` and emails to `user-%uid@example.com`.
-Optional `post-import.sh` and `post-config-import.sh` hooks in `devops/hooks/`
-run after import and deployment. Use `runtime_drush` for project commands there.
+The optional `devops/hooks/post-import.sh` runs after local database imports.
+`devops/hooks/post-config-import.sh` runs after every `confim`, locally, in CI or
+on a host, and receives the Drush alias as `$1` when one was given.
+Use `runtime_drush` for project commands there; put local-only values in
+`settings.local.php`.
 
 ## Add a recipe
 

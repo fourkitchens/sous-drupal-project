@@ -19,7 +19,9 @@ Site docs explain setup, development and maintenance.
 - Don't work around upstream bugs (Emulsify, contrib modules) with scripts
   here. Use a Composer patch with an issue link, or fix the upstream project.
 - No defensive checks for situations the scripts can't reach.
-  Setup scripts only run in local DDEV.
+  Setup, restore, import and recipe scripts stop unless DDEV is present.
+  theme-build, confex, confim and composer ci also run in CI and on hosts,
+  where tools run directly.
 - Comments: at most two lines, plain English. Explain why; in scripts longer
   than about 40 lines, also head each function or section with what it does.
 - Docs: edit an existing file rather than adding one.

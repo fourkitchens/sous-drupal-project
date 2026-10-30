@@ -3,6 +3,7 @@
 # Fresh create-project installations use sous-build.sh instead.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
+runtime_require_ddev
 
 # Install and build this checkout before loading its database and configuration.
 runtime_start

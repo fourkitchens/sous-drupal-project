@@ -29,7 +29,7 @@ Checks, in order:
   4. Product-only devops/integration, docs/maintainers and .github/workflows
      are absent from the generated site.
   5. Drush deploy succeeds and config:status reports no changes.
-  6. For the default option, back up and restore the database, then bootstrap.
+  6. For the default option, run Composer CI, back up and restore, then bootstrap.
 
 The artifacts directory keeps each step's log, config-status.stderr,
 cleanup.log (unless --keep), and result.json with status, site, option,
@@ -290,8 +290,9 @@ main() {
   check_composition
   check_product_files_absent
   check_clean_deploy
-  # Restore is the same for every composition, so exercise it only for default.
+  # CI and restore are the same for every composition, so exercise them for default.
   if [ "$option" = default ]; then
+    step ci ddev composer ci
     check_backup_restore
   fi
 }

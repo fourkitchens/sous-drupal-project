@@ -1,6 +1,5 @@
-# Opt-in example for a generated site, not the Sous product integration/release.
 # Copy to .github/workflows/build.yml in the generated site's own repository.
-# A theme-less installation should replace the theme commands with its checks.
+# Keep site checks in composer ci so local and CI runs use the same commands.
 name: Site build
 
 on:
@@ -18,16 +17,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install DDEV
-        uses: ddev/github-action-setup-ddev@fdf2f5c97943bae638f31df6df86f1defa6210c0 # v1.12.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          autostart: false
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          extensions: gd
+          tools: composer:2.10.3
+          coverage: none
       - name: Validate and build the generated site
-        run: |
-          ddev start
-          ddev composer validate --no-check-publish
-          ddev composer install --no-interaction --prefer-dist
-          ddev npm ci --include=dev
-          ddev npm run theme-ci
-          ddev npm run lint
-          ddev npm run theme-build
+        run: composer ci

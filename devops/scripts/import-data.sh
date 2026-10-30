@@ -3,6 +3,7 @@
 # setup.sh uses this same import flow when restoring a complete site.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
+runtime_require_ddev
 
 # Use the shared backup path by default; get-db.sh can fetch it when needed.
 [ "$#" -le 1 ] || { echo 'Usage: import-data.sh [BACKUP.sql|BACKUP.sql.gz]' >&2; exit 2; }

@@ -157,24 +157,38 @@
         ],
         "build-assets": [
             "composer install --optimize-autoloader --no-dev",
-            "npm ci --include=dev",
-            "npm run theme-ci",
             "@build-theme"
         ],
         "build-theme": [
+            "npm ci --include=dev",
+            "npm run theme-ci",
             "npm run theme-build"
+        ],
+        "ci": [
+            "@composer validate --no-check-publish",
+            "@composer install",
+            "@build-theme",
+            "@lint",
+            "@code-sniff"
         ],
         "build-storybook": [
             "npm run theme-storybook"
         ],
         "lint": "npm run lint",
-        "code-sniff": [
-            "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,info,txt,md --ignore=node_modules,bower_components,vendor ./web/modules/custom",
-            "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,info --ignore=node_modules,dist,bower_components,vendor ./web/themes/custom"
-        ],
+        "code-sniff": "phpcs",
+        "code-fix": "phpcbf",
         "post-drupal-scaffold-cmd": [
             "test -e web/sites/default/settings.local.php || cp web/sites/example.settings.local.php web/sites/default/settings.local.php",
             "test -e web/sites/default/settings.php || cp web/sites/default/default.settings.php web/sites/default/settings.php"
         ]
+    },
+    "require-dev": {
+        "drupal/coder": "^9.0"
+    },
+    "scripts-descriptions": {
+        "ci": "Install development dependencies, build the theme, lint and check coding standards.",
+        "build-assets": "Install production PHP dependencies and build the theme for deployment.",
+        "code-sniff": "Check custom modules and themes against Drupal and DrupalPractice standards.",
+        "code-fix": "Fix custom module and theme coding standards using phpcs.xml.dist."
     }
 }

@@ -9,9 +9,7 @@ Install the committed root and theme lockfiles:
 
 ```sh
 ddev start
-ddev npm ci --include=dev
-ddev npm run theme-ci
-ddev npm run theme-build
+ddev composer build-theme
 ```
 
 Keep development dependencies installed for builds. Commit both npm manifests
@@ -24,7 +22,9 @@ Use routine build tasks after setup; `theme-setup.sh` initializes a theme once.
 | `ddev npm run theme-build` | Production theme assets |
 | `ddev npm run theme-watch` | Theme development task |
 | `ddev npm run theme-storybook` | Static Storybook at `web/storybook` |
-| `ddev composer build-assets` | Install PHP/root/theme dependencies and build assets |
+| `ddev composer build-theme` | Install root/theme npm dependencies and build assets |
+| `ddev composer build-assets` | Install production PHP dependencies, then run `build-theme` |
+| `ddev composer ci` | Install development dependencies, build, lint and check coding standards |
 
 Edit `src/`. Emulsify generates `dist/` and a `components/` mirror; include both
 in deployments. Local Storybook is served at `/storybook/`.
@@ -63,12 +63,20 @@ See [Deployment](DEPLOYMENT.md) for dependency and patch updates.
 ## Check and review
 
 ```sh
+ddev composer ci
 ddev npm run lint
+ddev composer code-sniff
+ddev composer code-fix
 ddev npm run prettier
 ddev npm run theme-build
 ```
 
+`ddev composer ci` runs the same command as every CI provider: validate Composer,
+install PHP development dependencies, install and build the front end, lint and
+check coding standards. It keeps PHP development dependencies installed locally.
 Lint checks custom PHP syntax, JavaScript and the installed theme's JS/SCSS.
+`code-sniff`, `code-fix` and editors share `phpcs.xml.dist` for the Drupal and
+DrupalPractice standards; review changes after `code-fix`.
 Use [Drupal coding standards](https://project.pages.drupalcode.org/coding_standards/).
 Review source changes after autofixing:
 
