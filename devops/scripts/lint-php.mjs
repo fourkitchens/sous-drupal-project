@@ -3,6 +3,7 @@
 import { globSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
+// Skip dependencies and uploaded files; only project PHP belongs in this check.
 // Stable ordering makes lint failures easier to compare.
 const files = globSync(
   [
@@ -20,6 +21,7 @@ if (files.length === 0) {
 for (const file of files) {
   // Direct calls preserve filenames and PHP's original diagnostics.
   const result = spawnSync('php', ['-l', file], { stdio: 'inherit' });
+  // Propagate failures so npm cannot treat an incomplete syntax check as a pass.
   if (result.error) {
     console.error(result.error.message);
     process.exit(1);

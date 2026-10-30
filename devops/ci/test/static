@@ -1,4 +1,6 @@
 #!/bin/bash
+# Legacy site checks write reports under test-results and collect analysis failures.
+# Current Sous CI uses npm lint and the create-project smoke test instead.
 
 if [[ -z "$DOCROOT" ]]; then
   DOCROOT=web
@@ -17,6 +19,7 @@ fi
 if [[ -z "$SKIP_PHPSTAN" ]]; then
   SKIP_PHPSTAN=NO
 fi
+# Use the site's PHPStan configuration so analysis follows the project's rules.
 if [[ "$SKIP_PHPSTAN" != "YES" ]]; then
   if [[ -z "$PHPSTAN_CONFIG_FILE" ]]; then
     if [[ -f phpstan.neon ]]; then
@@ -47,23 +50,22 @@ done < <( git diff --check | grep -oP ".*(?=: leftover conflict marker)" )
 echo "</testsuites>" >> $RESULTS_DIR/git-merge-marker.xml
 
 
-# Lint php code for syntax errors
+# A site's Composer lint task owns its checks; fallbacks support older sites.
 if composer run --list | grep -q "  lint"; then
   echo "Custom composer lint script detected. Running composer lint."
   set -eo pipefail
   composer -n lint
   set +eo pipefail
 else
-  # Default PHP Linting
+  # Syntax errors stop the job before later analyzers inspect invalid PHP.
 
-  # PHP Lint
   echo "Running PHP Lint"
 
   set -eo pipefail
   find $PHP_SCRIPTS \( -iname  '*.php' -o -iname '*.inc' -o -iname '*.module' -o -iname '*.install'-o -iname '*.theme' \) '!' -path '*/node_modules/*' -print0 | xargs -0 -n1 -P8 php -l
   set +eo pipefail
 
-  # Default ESLinting if availible
+  # Save the lint report while allowing later analyzers to report their results.
   if [[ -f ./node_modules/.bin/eslint ]] && [[ $SKIP_ESLINT != "YES" ]]; then
     echo "Running ESlint."
     ./node_modules/.bin/eslint --format json --output-file "$RESULTS_DIR/eslint.json" .
@@ -73,7 +75,7 @@ else
   fi
 fi
 
-# Checking for stinky code.
+# Prefer the project's coding-standard task before using the generic scanner.
 if composer run --list | grep -q "  code-sniff"; then
   echo "Custom composer code-sniff script detected. Running composer code-sniff."
   composer -n code-sniff
@@ -81,7 +83,7 @@ if composer run --list | grep -q "  code-sniff"; then
     FAIL=YES
   fi
 else
-  # Check coding standards
+  # The fallback needs a site-owned ruleset to select the project's standards.
   if composer exec --list | grep -q 'phpcs' && [[ "$SKIP_CODE_SNIFF" != "YES" ]]; then
     if [[ -f phpcs.xml  || -f phpcs.xml.dist ]]; then
       echo "Running PHPCS"
@@ -89,22 +91,19 @@ else
       if [ $? -ne 0 ]; then
         FAIL=YES
       fi
-      # TODO Add a default phpcs config to check coding standards of PHP files
-      # to Drupal core's base standard.
     fi
   fi
 fi
 
-# Check for deprecations.
+# PHPStan is optional until the site supplies its configuration and dependencies.
 if composer exec --list | grep -q 'phpstan' && [[ "$SKIP_PHPSTAN" != "YES" ]]; then
   echo "Running PHPStan"
   composer exec -- phpstan analyze -c $PHPSTAN_CONFIG_FILE --error-format=junit > $RESULTS_DIR/phpstan.xml
   if [ $? -ne 0 ]; then
     FAIL=YES
   fi
-  # TODO Add a default phpstan config to check coding deprecations of PHP files
-  # to Drupal core's base standard.
 fi
+# Report accumulated lint and analysis failures after every available check has run.
 if [ $FAIL == "YES" ]; then
   echo "Tests Failed"
   exit 1

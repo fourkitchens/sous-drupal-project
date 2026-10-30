@@ -2,6 +2,6 @@
 set -eu
 . "$(dirname "$0")/../scripts/_runtime.sh"
 
-# Write the backup to "$1"; omit --gzip for a plain .sql destination.
+# Write "$1" for get-db to validate before replacement; omit --gzip for plain SQL.
 # runtime_drush @source sql:dump --gzip > "$1"
 :

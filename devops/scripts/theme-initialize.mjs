@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
 // The pinned upstream starter does not yet pass Core's lint and asset checks.
+// Keep these temporary changes limited to the generated theme's first setup.
 import { createRequire } from 'node:module';
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
+// The check-only pass runs before system installation can touch theme source.
 const checkOnly = process.argv[2] === '--check';
 const directory = resolve(process.argv[checkOnly ? 3 : 2]);
 const marker = join(directory, '.sous-initialized');
@@ -15,15 +17,18 @@ if (metadata.project?.generatedFrom !== 'emulsify-drupal' || !metadata.project.g
   throw new Error('Theme initialization requires an Emulsify Drupal 7 starter.');
 }
 if (checkOnly) process.exit(0);
+// Full normalization is tied to the reviewed UI Kit and Core versions.
 if (metadata.system?.checkout !== '1.9.0') throw new Error('Theme initialization requires the reviewed UI Kit 1.9.0 source.');
 const manifestPath = join(directory, 'package.json');
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+// Use the parser and formatter installed with this theme's Core toolchain.
 const require = createRequire(manifestPath);
 if (!JSON.parse(readFileSync(join(directory, 'node_modules/@emulsify/core/package.json'), 'utf8')).version.startsWith('4.')) {
   throw new Error('Theme initialization requires the reviewed Emulsify Core 4 toolchain.');
 }
 const scss = require('postcss-scss'); // Already required by Core's Stylelint config.
 
+// Stop on the first lint failure before the next lint or formatting phase runs.
 manifest.scripts.lint = 'npm run lint-js && npm run lint-styles';
 manifest.scripts['lint-fix'] = 'npm run lint-js -- --fix && npm run lint-styles -- --fix';
 manifest.scripts.format = 'npm run lint-fix && npm run prettier-fix';
@@ -35,11 +40,13 @@ for (const output of ['dist', '.out', '.coverage', 'components']) {
   }
 }
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+// The component mirror is build output, so formatting should target its source.
 const ignorePath = join(directory, 'config/emulsify-core/.prettierignore');
 const ignores = readFileSync(ignorePath, 'utf8').trimEnd().split('\n');
 if (!ignores.includes('/components/')) ignores.push('/components/');
 writeFileSync(ignorePath, `${ignores.join('\n')}\n`);
 
+// Normalize copied UI Kit SCSS before its first lint and build.
 function normalize(folder) {
   for (const entry of readdirSync(folder, { withFileTypes: true })) {
     if (entry.isSymbolicLink()) throw new Error(`Unexpected source symlink: ${join(folder, entry.name)}`);
@@ -76,6 +83,7 @@ writeFileSync(announcement, readFileSync(announcement, 'utf8').replaceAll(
   /\.\.\/\.\.\/\.\.\/assets\/images\/example\/announcement-icon--(?:dark|light)\.svg/g,
   '../../../assets/icons/star-solid.svg',
 ));
+// Finish with the installed tools so the first build receives lintable source.
 for (const task of ['lint-styles', 'prettier-fix']) {
   execFileSync('npm', ['run', task, ...(task === 'lint-styles' ? ['--', '--fix'] : [])], {
     cwd: directory, stdio: 'inherit',

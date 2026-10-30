@@ -10,6 +10,5 @@ if [[ -z "$P_SITE" ]] || [[ -z "$P_ENV" ]]; then
   exit 1
 fi
 
-# Keep the existing Pantheon entry point; the target site's native Drush
-# validates its configured sync directory rather than inspecting local files.
+# Let the destination site's Drush deploy using its own configuration directory.
 exec terminus -n drush "$P_SITE.$P_ENV" -- deploy --yes

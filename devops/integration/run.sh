@@ -24,6 +24,7 @@ result="$artifacts/result.json"; log="$artifacts/export.log"
 export HUSKY=0 COMPOSER_NO_INTERACTION=1 SOUS_CONTENT="$option" SOUS_CONFIG_SPLIT=no
 [ "$split" -eq 0 ] || export SOUS_CONFIG_SPLIT=yes
 jq -n --arg site "$site" --arg option "$option" '{status:"running",site:$site,option:$option}' > "$result"
+# Record the outcome on exit; --keep retains the site for inspection.
 finish() {
   status=$?; trap - EXIT; set +e
   [ "$status" -eq 0 ] || cat "$log"
@@ -37,8 +38,10 @@ finish() {
 }
 trap finish EXIT
 trap 'exit 130' INT; trap 'exit 143' TERM
+# Log commands without catching failures so the first error reaches the exit trap.
 run() { local name=$1; shift; log="$artifacts/$name.log"; echo "Smoke test: $name"; "$@" > "$log" 2>&1; }
 mkdir -p "$work/template"
+# Test committed source with the same distribution exclusions as a downloaded project.
 git -C "$source_root" archive HEAD | tar -x -C "$work/template" 2> "$log"
 if [ -n "$packages" ]; then
   versions=$(jq -s 'map({key:.name,value:"2.0.0"})|from_entries' "$packages"/packages/*/composer.json)
@@ -73,8 +76,10 @@ for path in devops/integration docs/maintainers .github/workflows; do
 done
 run deploy ddev drush deploy --yes
 log="$artifacts/config-status.log"
+# Keep Drush notices out of the JSON used to check for configuration changes.
 ddev drush config:status --format=json > "$log" 2> "$artifacts/config-status.stderr"
 jq -e 'length == 0' "$log"
+# Restore is shared by all compositions, so exercise it once with the default site.
 if [ "$option" = default ]; then
   run backup ddev npm run local-data-bak
   dumps=(reference/db-*.sql.gz)

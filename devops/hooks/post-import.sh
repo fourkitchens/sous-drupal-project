@@ -2,6 +2,6 @@
 set -eu
 . "$(dirname "$0")/../scripts/_runtime.sh"
 
-# Optional project adjustments after a database import.
+# Put project cleanup here so imported data is ready for sanitization.
 # runtime_drush config:set system.site name "Local site" --yes
 :
