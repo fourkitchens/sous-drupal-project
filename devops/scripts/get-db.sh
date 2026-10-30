@@ -2,7 +2,6 @@
 # Download to a partial file and replace the destination only after validation.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
-runtime_require_development
 [ "$#" -le 1 ] || { echo 'Usage: get-db.sh [DESTINATION.sql|DESTINATION.sql.gz]' >&2; exit 2; }
 destination=${1-reference/site-db.sql.gz}
 case "$destination" in

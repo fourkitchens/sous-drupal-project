@@ -11,7 +11,7 @@ The workflow runs on pull requests and pushes to `main`, `next`, `next-major`,
 
 | Job | Purpose |
 | --- | --- |
-| `checks` | PHP/JavaScript lint, ShellCheck, starter defaults and the three shell suites |
+| `checks` | PHP/JavaScript lint, ShellCheck and the install/config workflow suites |
 | `integration` | Four parallel smoke installs; Paragraphs also enables Config Split |
 | `release` | Publish after both jobs pass, only on pushes to canonical `main` without a package override |
 

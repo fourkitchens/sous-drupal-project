@@ -52,35 +52,24 @@ root to `web/`; configuration and `vendor/` belong outside it.
 1. Test the build and configuration changes against a database copy. Back up the
    destination database and files before deploying.
 2. Deliver the build through the site's deployment pipeline. Supply its database
-   settings, writable paths, and `SOUS_ENVIRONMENT=production`. Use the versions
-   in [Platform](PLATFORM.md) and disable server debugging extensions.
+   settings and writable paths. Use the versions in [Platform](PLATFORM.md) and
+   disable server debugging extensions.
 3. From the destination's project root, deploy its configuration and database
    updates using the project's Drush:
 
    ```sh
-   SOUS_ENVIRONMENT=production \
-     vendor/bin/drush deploy --yes --uri=https://YOUR_SITE
+   vendor/bin/drush deploy --yes --uri=https://YOUR_SITE
    ```
 
    Replace the URI with the destination URL. This runs `drush deploy --yes`,
    including database updates, configuration import, cache work, and deployment
    hooks.
-4. Run the explicit environment checks on the bootstrapped destination:
-
-   ```sh
-   SOUS_ENVIRONMENT=production vendor/bin/drush --uri=https://YOUR_SITE \
-     php:script devops/scripts/environment-check.php -- config
-   SOUS_ENVIRONMENT=production vendor/bin/drush --uri=https://YOUR_SITE \
-     php:script devops/scripts/environment-check.php -- runtime
-   ```
-
-5. Check important pages, administrator access, rendered assets, logs, cron,
+4. Check important pages, administrator access, rendered assets, logs, cron,
    queues, and project integrations.
 
 The server needs PHP and the installed project dependencies. Build assets with
-DDEV before delivering them. Run deployment and checks through the project's
-Drush directly. [Environments](ENVIRONMENTS.md) explains what the checks cover.
-Deployment does not run those checks automatically or apply recipe changes.
+DDEV before delivering them. Run deployment through the project's Drush directly.
+Apply recipe changes explicitly.
 
 If deployment fails, stop dependent steps and follow the site's rollback
 procedure. A schema or data change can require restoring the database together
@@ -121,5 +110,5 @@ bash devops/ci/drush-config-import SITE ENV
 ```
 
 It runs `terminus -n drush SITE.ENV -- deploy --yes`. The same values can be set
-with `TERMINUS_SITE` and `TERMINUS_ENV`. Configure environment settings and run
-the explicit checks on the destination as part of that project's pipeline.
+with `TERMINUS_SITE` and `TERMINUS_ENV`. Supply host settings through the site's
+deployment pipeline.

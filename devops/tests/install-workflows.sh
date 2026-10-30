@@ -6,7 +6,7 @@ REAL_COMPOSER="$(command -v composer)"
 fixture() {
   reset_project
   for name in composer.json package.json package-lock.json .gitignore README.md PROJECT-README.md; do cp "$SOURCE/$name" "$PROJECT/$name"; done
-  for name in docs .husky .github assets config/default config/_splits config/local config/staging; do mkdir -p "$PROJECT/$(dirname "$name")"; cp -R "$SOURCE/$name" "$PROJECT/$name"; done
+  for name in docs .husky .github assets config/default; do mkdir -p "$PROJECT/$(dirname "$name")"; cp -R "$SOURCE/$name" "$PROJECT/$name"; done
   mkdir -p "$PROJECT/web/recipes" "$PROJECT/web/sites/default" "$PROJECT/web/themes/custom/sous-project"
   # Stand in for Composer-managed packages, never copy optional payloads out of
   # the starter. The smoke test checks the selected installed composition.
@@ -53,11 +53,9 @@ touch "$PROJECT/web/core/core.php" "$PROJECT/web/modules/contrib/example/example
 # theme's own components must still be tracked without broad folder exclusions.
 mkdir -p "$PROJECT/web/themes/custom/projectwithspaces/components" "$PROJECT/web/themes/custom/projectwithspaces/src/components" "$PROJECT/web/themes/custom/handmade/components"
 touch "$PROJECT/web/themes/custom/projectwithspaces/components/output.yml" "$PROJECT/web/themes/custom/projectwithspaces/src/components/source.yml" "$PROJECT/web/themes/custom/handmade/components/source.yml"
-cp "$SOURCE/assets/scaffold/files/settings.sous.php" "$PROJECT/web/sites/default/settings.sous.php"
-cp "$SOURCE/assets/scaffold/files/sous.production.services.yml" "$PROJECT/web/sites/sous.production.services.yml"
 git -C "$PROJECT" add .
 git -C "$PROJECT" ls-files > "$TEST_ROOT/tracked"
-for name in composer.json composer.lock config/default/core.extension.yml config/default/system.site.yml web/sites/default/settings.sous.php web/sites/sous.production.services.yml devops/hooks/post-import.sh devops/hooks/post-config-import.sh devops/scripts/theme-build.sh devops/scripts/theme-watch.sh web/themes/custom/projectwithspaces/src/index.js; do contains "$TEST_ROOT/tracked" "$name"; done
+for name in composer.json composer.lock config/default/core.extension.yml config/default/system.site.yml devops/hooks/post-import.sh devops/hooks/post-config-import.sh devops/scripts/theme-build.sh devops/scripts/theme-watch.sh web/themes/custom/projectwithspaces/src/index.js; do contains "$TEST_ROOT/tracked" "$name"; done
 excludes "$TEST_ROOT/tracked" 'web/recipes/'
 for pattern in web/core/ web/modules/contrib/ web/themes/contrib/ web/storybook/ /node_modules/ /dist/; do excludes "$TEST_ROOT/tracked" "$pattern"; done
 excludes "$TEST_ROOT/tracked" 'web/themes/custom/projectwithspaces/components/'
@@ -161,10 +159,8 @@ calls_assert 'all(.[];(.argv|index("require"))==null)'
 pass 'Admin only requests no optional content or split package'
 for selection in 0 1 2 3; do
   fixture
-  rm -rf "$PROJECT/config/_splits" "$PROJECT/config/local" "$PROJECT/config/staging"
   expect_status 0 generate "$selection" y
   calls_assert 'any(.[];(.argv|index("fourkitchens/sous-config-split:^2.0"))!=null) and any(.[];.command=="recipe" and (.argv|index("recipes/sous-config-split"))!=null)'
-  for directory in _splits local staging; do [ -d "$PROJECT/config/$directory" ] || fail 'optional split directory not initialized'; done
 done
 pass 'Config Split can be selected independently with all four compositions'
 for failed in 'require fourkitchens/sous-config-split:^2.0' 'recipe recipes/sous-config-split'; do
@@ -264,14 +260,6 @@ fixture; mkdir -p "$PROJECT/reference"; printf 'SELECT 1;\n' | gzip > "$PROJECT/
 expect_status 0 helper rebuild.sh
 calls_assert 'all(.[];(.argv|index("theme-ci"))==null and (.argv|index("theme-build"))==null and (.argv|index("build"))==null) and any(.[];.command=="uli")'
 pass 'plain rebuild refreshes data without theme installation or build'
-fixture; export SOUS_ENVIRONMENT=production
-for script in setup.sh rebuild.sh import-data.sh local-data-bak.sh get-db.sh; do
-  reset_log
-  if [ "$script" = setup.sh ]; then expect_failure helper "$script" fresh; else expect_failure helper "$script"; fi
-  [ ! -s "$COMMAND_LOG" ] || fail 'production refresh invoked a tool'
-done
-pass 'production rejects destructive development workflows before work'
-
 # Execute Composer's real scaffold callbacks, including preserved dangling links.
 fixture; expect_status 0 scaffold
 cmp "$PROJECT/web/sites/default/settings.local.php" "$PROJECT/web/sites/example.settings.local.php" || fail 'missing local initialization'

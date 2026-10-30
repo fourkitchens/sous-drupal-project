@@ -39,7 +39,7 @@ sh devops/scripts/theme-build.sh
 ```
 
 The script calls `ddev npm` from the host and the container's npm inside DDEV.
-CI uses DDEV too. See [Environments](ENVIRONMENTS.md) for environment settings.
+CI uses DDEV too.
 
 The individual theme tasks use installed dependencies. `build-assets` also runs
 Composer installation with `--no-dev`; Storybook is a separate optional build.

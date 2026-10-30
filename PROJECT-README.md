@@ -22,7 +22,7 @@ Storybook and lint. Site-specific tests belong in `devops/tests/`.
 
 - [Contribution workflow](docs/CONTRIBUTING.md)
 - [Features and optional packages](docs/FEATURES.md)
-- [Environment settings and Config Split](docs/ENVIRONMENTS.md)
+- [Local settings and Config Split](docs/SETUP.md#local-and-host-settings)
 - [Dependency updates and configuration](docs/MAINTENANCE.md)
 - [Deployment and site CI](docs/DEPLOYMENT.md)
 

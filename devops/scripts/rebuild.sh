@@ -1,13 +1,10 @@
 #!/bin/sh
 
-# Restore an existing generated site in local/staging, replacing its DB.
+# Restore a local DDEV site, replacing its database.
 # Usage: npm run rebuild -- [BACKUP.sql|BACKUP.sql.gz]
-# setup.sh restore delegates here. The backup selection/default is owned by
-# import-data.sh. Failures stop dependent work; login is the final step only.
 
 set -eu
 . "$(dirname "$0")/_runtime.sh"
-runtime_require_development
 
 echo "Verify project dependencies are installed..."
 # Refresh root dependencies; setup restore separately installs/builds the theme.

@@ -1,17 +1,13 @@
-/**
- * Set config sync directory.
- */
 $settings['config_sync_directory'] = '../config/default';
 
-/**
- * Load DDEV's connection settings before the project environment policy.
- * The direct include also prevents DDEV appending another include after it.
- */
-if (getenv('IS_DDEV_PROJECT') === 'true' && is_readable($app_root . '/' . $site_path . '/settings.ddev.php')) {
-  require $app_root . '/' . $site_path . '/settings.ddev.php';
+// Load DDEV first so it does not append its connection settings after local overrides.
+if (getenv('IS_DDEV_PROJECT') === 'true' && file_exists($app_root . '/' . $site_path . '/settings.ddev.php')) {
+  include $app_root . '/' . $site_path . '/settings.ddev.php';
 }
 
-/**
- * Project-owned environment policy; initialized once by Composer scaffolding.
- */
-require $app_root . '/' . $site_path . '/settings.sous.php';
+if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+  include $app_root . '/' . $site_path . '/settings.local.php';
+}
+
+// Add the hosting include for Pantheon or Acquia here, for example:
+// require __DIR__ . '/settings.pantheon.php';

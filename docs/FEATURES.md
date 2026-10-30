@@ -17,8 +17,8 @@ Navigation enables Drupal's `layout_builder` module in every option, so check
 the Page display settings when identifying the chosen composition.
 
 Config Split is a separate yes/no choice and defaults to no. When selected, it
-adds `_splits`, local and staging definitions. Follow
-[Environments](ENVIRONMENTS.md) to control their activation.
+adds inactive local and staging definitions. Follow
+[Setup](SETUP.md#local-and-host-settings) to control their activation.
 
 ## Add reusable configuration
 

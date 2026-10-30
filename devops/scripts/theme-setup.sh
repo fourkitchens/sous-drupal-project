@@ -8,7 +8,6 @@
 
 set -eu
 . "$(dirname "$0")/_runtime.sh"
-runtime_require_development
 
 # Keep the theme path relative to this project in either runtime.
 theme_directory="${1:-web/themes/custom/sous-project}"

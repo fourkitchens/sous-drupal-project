@@ -134,16 +134,6 @@
                     "mode": "replace",
                     "path": "assets/scaffold/files/development.services.yml",
                     "overwrite": false
-                },
-                "[web-root]/sites/default/settings.sous.php": {
-                    "mode": "replace",
-                    "path": "assets/scaffold/files/settings.sous.php",
-                    "overwrite": false
-                },
-                "[web-root]/sites/sous.production.services.yml": {
-                    "mode": "replace",
-                    "path": "assets/scaffold/files/sous.production.services.yml",
-                    "overwrite": false
                 }
             },
             "omit-defaults": false

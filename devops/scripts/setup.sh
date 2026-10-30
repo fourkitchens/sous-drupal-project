@@ -2,9 +2,6 @@
 
 # Select fresh/restore; after bootstrap, an omitted mode restores the site.
 # Usage: npm run setup -- [fresh|restore] [backup.sql|backup.sql.gz]
-# Fresh installs replace the development database; restore forwards the optional
-# backup to rebuild.sh. Both reject production before destructive work. Shared
-# Shared helpers use DDEV and resolve the project root.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
 
@@ -20,7 +17,6 @@ fi
 case "$1" in
   fresh)
     if [ "$#" -ne 1 ]; then echo 'Fresh setup does not accept a database backup.' >&2; exit 2; fi
-    runtime_require_development
     # Successful bootstrap removes this child, so a generated site cannot
     # accidentally repeat fresh installation through the normal setup command.
     if [ ! -f ./devops/scripts/sous-build.sh ]; then
@@ -32,7 +28,6 @@ case "$1" in
   restore)
     # Consume only the mode; keep the selected backup as one quoted argument.
     shift
-    runtime_require_development
     runtime_start
     runtime_npm run theme-ci
     sh devops/scripts/theme-build.sh

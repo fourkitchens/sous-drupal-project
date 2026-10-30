@@ -43,11 +43,10 @@ jobs:
       - run: npm run lint
       - name: Check shell scripts
         run: find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
-      - name: Check installation and environment helpers
+      - name: Check installation and configuration helpers
         run: |
           bash devops/tests/install-workflows.sh
           bash devops/tests/config-workflows.sh
-          bash devops/tests/environment-settings.sh
 
   integration:
     needs: checks

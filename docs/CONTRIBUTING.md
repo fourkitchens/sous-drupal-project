@@ -20,7 +20,7 @@ git diff -- config
 
 Keep the complete site export and its UUIDs. Review additions and deletions
 before committing. Put environment values and secrets in the settings described
-in [Environments](ENVIRONMENTS.md), then follow
+in [Setup](SETUP.md#local-and-host-settings), then follow
 [Maintenance](MAINTENANCE.md) for package or configuration updates.
 
 ## Check your work

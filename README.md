@@ -19,7 +19,7 @@ Start with [setup](docs/SETUP.md), then use these guides:
 - [Features and installation choices](docs/FEATURES.md)
 - [Platform requirements](docs/PLATFORM.md)
 - [Build tools and theme commands](docs/BUILD_TOOLS.md)
-- [Environment settings and Config Split](docs/ENVIRONMENTS.md)
+- [Local settings and Config Split](docs/SETUP.md#local-and-host-settings)
 - [Site updates and configuration](docs/MAINTENANCE.md)
 - [Site contribution workflow](docs/CONTRIBUTING.md)
 - [Deployment and site CI](docs/DEPLOYMENT.md)

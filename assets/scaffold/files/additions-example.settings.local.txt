@@ -1,7 +1,5 @@
-/**
- * Sous loads this file only for SOUS_ENVIRONMENT=local.
- * DDEV supplies local connection settings before this file is loaded.
- * Other environments own their database credentials and hash salt; no shared
- * credentials, mail transport, or file-proxy origin belongs in this example.
- * Final environment policy preserves production-safe non-local defaults.
- */
+$settings['cache']['bins']['render'] = 'cache.backend.null';
+$settings['cache']['bins']['page'] = 'cache.backend.null';
+$settings['cache']['bins']['dynamic_page_cache'] = 'cache.backend.null';
+
+$config['config_split.config_split.local']['status'] = TRUE;

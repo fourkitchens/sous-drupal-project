@@ -16,7 +16,7 @@ ddev drush status --field=config
 Set the intended tracked directory in
 `settings.php` before exporting. Keep existing settings and local includes;
 Composer initializes missing settings files but does not rewrite existing ones.
-Follow [Environments](ENVIRONMENTS.md) to adopt `settings.sous.php` and optional
+See [Setup](SETUP.md#local-and-host-settings) for local settings and optional
 Config Split definitions.
 
 Export changes made through Drupal, then review the diff:
@@ -28,8 +28,7 @@ git diff -- config
 
 Use settings overrides for environment values and credentials. They change the
 configuration Drupal reads without becoming stored defaults in the export.
-Keep `config/default` suitable for production; use the explicit environment
-checks in [Environments](ENVIRONMENTS.md). Never replace the complete export
+Keep `config/default` suitable for production. Never replace the complete export
 with a recipe's partial `config` directory or a new starter's empty directory.
 
 ## Update dependencies

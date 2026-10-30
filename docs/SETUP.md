@@ -42,6 +42,25 @@ the custom theme source, and the complete configuration export. Dependencies,
 compiled assets, local settings, and database backups stay out of source Git.
 [Deployment](DEPLOYMENT.md) explains which generated files belong in a build.
 
+## Local and host settings
+
+`settings.php` uses Drupal's standard local include:
+
+```php
+if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+  include $app_root . '/' . $site_path . '/settings.local.php';
+}
+```
+
+DDEV supplies database credentials through `settings.ddev.php`; keep
+`settings.local.php` untracked. Export production defaults with aggregation on
+and errors hidden; supply credentials and services through the host's settings.
+
+With Config Split, enable local in `settings.local.php`:
+`$config['config_split.config_split.local']['status'] = TRUE;`
+For staging, put `$config['config_split.config_split.staging']['status'] = TRUE;` in the staging host's settings.
+Keep both splits inactive in exported configuration.
+
 ## Restore an existing site
 
 Clone the site's repository, including its lockfiles, custom theme, and complete
@@ -55,7 +74,7 @@ sh devops/scripts/setup.sh restore "reference/site-db.sql.gz"
 This starts DDEV, installs and builds the theme, installs root dependencies,
 imports and sanitizes the database, and runs Drush deployment. It prints a
 `sous_chef` login link only after import and deployment succeed. Restoration
-replaces the local database and refuses the production environment.
+replaces the local DDEV database.
 
 After a completed bootstrap, omitting the mode also selects restore:
 
@@ -109,9 +128,8 @@ Optional `devops/hooks/post-import.sh` and `post-config-import.sh` run after
 import and deployment respectively. Use `runtime_drush` in these scripts for
 project commands. A failed import still attempts its hook; a failed deployment
 still attempts its hook. The original failure remains the command's exit status.
-Hooks do not run in production. Local helpers use DDEV from the host or the
-container's project tools inside DDEV. See [Environments](ENVIRONMENTS.md) for
-environment settings.
+Local helpers use DDEV from the host or the container's project tools inside
+DDEV.
 
 Save a local backup before changing data:
 

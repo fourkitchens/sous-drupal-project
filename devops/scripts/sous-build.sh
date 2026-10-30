@@ -2,13 +2,8 @@
 
 # Bootstrap a newly named Sous project, then retire its one-time setup helpers.
 # Called by setup.sh fresh (also exposed as npm run sous-build); no arguments.
-# Requires local/staging and may replace its database with Minimal Drupal.
-# The workflow prompts for content composition, builds the theme, and verifies
-# export/metadata/login before cleanup or success output. Failures stop dependent
-# phases and retain remaining bootstrap files for diagnosis and a reviewed retry.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
-runtime_require_development
 
 # Read both selections before tools can consume stdin or installation starts.
 read_response() {
@@ -128,7 +123,7 @@ esac
 
 case "$SPLITS" in
   [yY]|[yY][eE][sS])
-    mkdir -p config/_splits config/local config/staging
+    mkdir -p config/local config/staging
     run_composer require 'fourkitchens/sous-config-split:^2.0'
     ./devops/scripts/install-recipe.sh fourkitchens/sous-config-split
     ;;

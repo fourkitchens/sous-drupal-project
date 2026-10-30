@@ -34,8 +34,8 @@ and `SOUS_CONFIG_SPLIT`. Add new test inputs to Git before running it.
 
 Each option must bootstrap Drupal, serve the front page with HTTP 200 and return
 a login URL. The runner checks Page, Paragraphs, the Page Layout Builder display
-and Config Split against the selected option. It also runs both environment
-checks, project lint and a configuration export/import round trip.
+and Config Split against the selected option. It also runs project lint and a
+configuration export/import round trip.
 
 The default option additionally backs up and restores the database, checks
 bootstrap again, and runs `composer audit --abandoned=report` and
@@ -56,7 +56,6 @@ npm run lint
 find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
 bash devops/tests/install-workflows.sh
 bash devops/tests/config-workflows.sh
-bash devops/tests/environment-settings.sh
 ```
 
 [CI](CI.md) runs these checks and all four smoke options. See

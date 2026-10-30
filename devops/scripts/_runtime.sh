@@ -18,12 +18,3 @@ else
   runtime_emulsify() { ddev emulsify "$@"; }
   runtime_start() { ddev start; }
 fi
-runtime_environment() {
-  if [ "${SOUS_ENVIRONMENT+x}" = x ]; then
-    case "$SOUS_ENVIRONMENT" in local|staging|production) printf '%s\n' "$SOUS_ENVIRONMENT" ;; *) echo 'SOUS_ENVIRONMENT must be local, staging, or production.' >&2; return 2 ;; esac
-  else echo local; fi
-}
-runtime_require_development() {
-  _sous_environment=$(runtime_environment) || return $?
-  [ "$_sous_environment" != production ] || { echo 'This development workflow is disabled in production.' >&2; return 1; }
-}

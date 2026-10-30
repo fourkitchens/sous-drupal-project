@@ -34,7 +34,7 @@ project=$(printf 'sous-smoke-%s' "${work##*.}" | tr '[:upper:]' '[:lower:]')
 site="$work/$project"
 result="$artifacts/result.json"
 created=0
-export HUSKY=0 SOUS_ENVIRONMENT=local COMPOSER_NO_INTERACTION=1
+export HUSKY=0 COMPOSER_NO_INTERACTION=1
 jq -n --arg option "$option" --arg project "$project" --arg workspace "$work" --argjson split "$split" \
   '{status:"running",option:$option,config_split:($split==1),project:$project,workspace:$workspace,steps:[]}' > "$result"
 
@@ -95,7 +95,7 @@ fresh() {
   # Discard DDEV's generated defaults so Composer exercises its first-install copies.
   rm -f web/sites/default/settings.php web/sites/default/settings.local.php
   ddev composer install || return
-  ddev exec env HUSKY=0 SOUS_ENVIRONMENT=local COMPOSER_NO_INTERACTION=1 \
+  ddev exec env HUSKY=0 COMPOSER_NO_INTERACTION=1 \
     SOUS_CONTENT="$option" SOUS_CONFIG_SPLIT="$answer" composer run-script post-create-project-cmd
 }
 bootstrapped() { ddev drush status --field=bootstrap | grep -Fx Successful; }
@@ -126,8 +126,6 @@ if [ -n "$packages" ]; then step packages-path use_packages; fi
 created=1
 step ddev-config ddev config --project-name "$project"
 step fresh-install fresh
-step environment-config ddev npm run check:environment -- config
-step environment-runtime ddev npm run check:environment -- runtime
 step bootstrap bootstrapped
 step front-page front_page
 step login-url login_url
