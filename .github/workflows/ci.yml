@@ -43,10 +43,8 @@ jobs:
       - run: npm run lint
       - name: Check shell scripts
         run: find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
-      - name: Check installation and configuration helpers
-        run: |
-          bash devops/tests/install-workflows.sh
-          bash devops/tests/config-workflows.sh
+      - name: Check configuration helpers
+        run: bash devops/tests/config-workflows.sh
 
   integration:
     needs: checks
@@ -74,6 +72,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          tools: composer:2.10.3
+          coverage: none
       - name: Install reviewed DDEV
         uses: ddev/github-action-setup-ddev@fdf2f5c97943bae638f31df6df86f1defa6210c0 # v1.12.1
         with:

@@ -60,7 +60,7 @@ with a recipe's partial `config` directory or a new starter's empty directory.
    `ddev npm run confim` against the local copy to check import and deployment
    hooks. Review and commit the complete configuration diff and lockfiles.
 6. Build from committed locks and follow [Deployment](DEPLOYMENT.md). Use
-   [Build tools](BUILD_TOOLS.md) for root/theme installs and builds. `rebuild`
+   [Build tools](BUILD_TOOLS.md) for root/theme installs and builds. `setup.sh`
    restores a local database backup; it is not a production update command.
 
 `composer install` and `npm ci` reproduce lockfiles. They do not request future

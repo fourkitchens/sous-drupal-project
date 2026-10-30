@@ -1,7 +1,7 @@
 # Set up a site
 
-Use DDEV for local development. Install Docker and Git. Creating a project with
-Composer also requires PHP and Composer on your computer. See
+Use DDEV for local development. Install Docker, DDEV, PHP and Composer on your
+computer. DDEV supplies Node.js, npm and Git for setup. See
 [Platform](PLATFORM.md) for supported versions and [Features](FEATURES.md) for
 the installation choices.
 
@@ -14,10 +14,11 @@ composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
 cd my-site
 ```
 
-The Composer hook names the project from its directory and asks which content
-composition to install and whether to add Config Split. It starts DDEV after
-both questions. Choose the content option explicitly;
-Config Split defaults to no.
+Composer's post-create hook runs the one-time `sous-build.sh` installer. It names
+the project from its directory, records the theme name in `package.json` under
+`config.theme`, and asks which content composition to install and whether to add
+Config Split. It starts DDEV after both questions. Choose the content option
+explicitly; Config Split defaults to no.
 
 For an unattended install, set both answers before running Composer:
 
@@ -32,10 +33,10 @@ or `no`. Invalid values stop the bootstrap before Drupal or theme installation.
 When input is unavailable, an unset content choice stops setup; an unset Config
 Split choice uses no.
 
-Setup installs Drupal, applies the selected recipes, builds the custom theme,
-exports configuration to `config/default`, and prints a login link. It creates
-the `sous_chef` administrator account and blocks the initial `superuser_1`
-account. Successful setup removes its one-time installer files.
+The post-create hook installs Drupal, applies the selected recipes, builds the
+custom theme, exports configuration to `config/default`, and prints a login
+link. It creates the `sous_chef` administrator account and blocks the initial
+`superuser_1` account.
 
 Commit the resulting Composer and npm manifests and lockfiles, `patches.lock.json`,
 the custom theme source, and the complete configuration export. Dependencies,
@@ -68,32 +69,14 @@ configuration export. Get a database backup and any uploaded files the site
 needs. From the project root, run:
 
 ```sh
-sh devops/scripts/setup.sh restore "reference/site-db.sql.gz"
+sh devops/scripts/setup.sh "reference/site-db.sql.gz"
 ```
 
-This starts DDEV, installs and builds the theme, installs root dependencies,
-imports and sanitizes the database, and runs Drush deployment. It prints a
-`sous_chef` login link only after import and deployment succeed. Restoration
-replaces the local DDEV database.
-
-After a completed bootstrap, omitting the mode also selects restore:
-
-```sh
-sh devops/scripts/setup.sh
-```
-
-Before bootstrap finishes, choose `fresh` or `restore` explicitly. A Git clone
-alone does not select restore. Do not run fresh installation in a site that
-contains data you need to keep.
-
-## Refresh a local database
-
-For an already configured site, refresh dependencies and the database without
-rebuilding the theme:
-
-```sh
-sh devops/scripts/rebuild.sh "reference/site-db.sql.gz"
-```
+This starts DDEV, installs dependencies, builds the theme, imports and sanitizes
+the database, and runs Drush deployment. It prints a `sous_chef` login link only
+after import and deployment succeed. It replaces the local DDEV database and
+can be run whenever the site needs restoring. Omit the backup argument to use
+`reference/site-db.sql.gz`.
 
 To import and sanitize only, without deploying configuration or printing a
 login link:
@@ -156,9 +139,6 @@ manifest, lockfile, and configuration. [Features](FEATURES.md) lists the package
 
 ## Recover from an interrupted setup
 
-Read the first failing command before retrying. Fix its dependency, database,
-or configuration error first. If the one-time installer still exists, rerun
-`sh devops/scripts/setup.sh fresh` only when replacing that database is intended.
-Keep the original starter checkout separate from generated sites: naming edits
-files, and successful installation removes the bootstrap helpers. Use a new
-project directory when you need to start over without preserving partial work.
+Read the first failing command and fix its dependency, database or configuration
+error before creating the project again in a new directory. Installation runs
+only through Composer's post-create hook; `setup.sh` restores an existing site.

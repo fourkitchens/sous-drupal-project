@@ -26,9 +26,10 @@ to use the published Composer index. `--packages PATH` uses a local packages
 checkout. `--packages-ref SHA` clones the packages repository at a full commit
 SHA. Both overrides use a Composer path repository inside the test project.
 
-The runner copies tracked files from the working tree, runs
-`sh devops/scripts/sous-setup.sh`, then runs `setup.sh fresh` with `SOUS_CONTENT`
-and `SOUS_CONFIG_SPLIT`. Add new test inputs to Git before running it.
+The runner copies tracked files from the working tree, installs dependencies in
+DDEV, then dispatches Composer's post-create hook from the host with
+`SOUS_CONTENT` and `SOUS_CONFIG_SPLIT`. Restoration uses `setup.sh` with the
+backup path. Add new test inputs to Git before running it.
 
 ## Understand the checks
 
@@ -54,7 +55,6 @@ Use Node from `.nvmrc`, Composer, PHP and ShellCheck:
 npm ci
 npm run lint
 find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
-bash devops/tests/install-workflows.sh
 bash devops/tests/config-workflows.sh
 ```
 

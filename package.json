@@ -2,6 +2,9 @@
   "name": "sous-project",
   "version": "0.0.1",
   "description": "A starter kit for a Drupal project",
+  "config": {
+    "theme": "sous-project"
+  },
   "scripts": {
     "setup": "./devops/scripts/setup.sh",
     "confim": "./devops/scripts/confim.sh",
@@ -11,30 +14,21 @@
     "husky:commit-msg": "commitlint --edit $1",
     "husky:pre-commit": "npm run lint",
     "import-data": "./devops/scripts/import-data.sh",
-    "lint": "npm run lint:starter",
+    "lint": "npm run lint:php && npm run lint:js && (test ! -d \"web/themes/custom/$npm_package_config_theme\" || npm --prefix \"web/themes/custom/$npm_package_config_theme\" run lint)",
     "lint:js": "eslint .",
     "lint:php": "node devops/scripts/lint-php.mjs",
-    "lint:styles": "npm --prefix web/themes/custom/sous-project run lint-styles",
-    "prettier": "npm --prefix web/themes/custom/sous-project run prettier -- --check",
+    "lint:styles": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run lint-styles",
+    "prettier": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run prettier -- --check",
     "local-data-bak": "./devops/scripts/local-data-bak.sh",
     "prepare": "husky",
     "publish": "semantic-release",
     "publish-test": "semantic-release --dry-run --debug",
-    "rebuild": "./devops/scripts/rebuild.sh",
     "theme-build": "./devops/scripts/theme-build.sh",
     "theme-watch": "./devops/scripts/theme-watch.sh",
-    "sous-build": "./devops/scripts/sous-build.sh",
-    "lint:starter": "npm run lint:php && npm run lint:js",
-    "lint:theme": "npm --prefix web/themes/custom/sous-project run lint-js && npm --prefix web/themes/custom/sous-project run lint-styles",
-    "lint:project": "npm run lint:starter && npm run lint:theme",
-    "theme-ci": "npm --prefix web/themes/custom/sous-project ci --include=dev",
-    "theme-storybook": "npm --prefix web/themes/custom/sous-project run storybook-build -- --output-dir ../../../storybook",
+    "theme-ci": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" ci --include=dev",
+    "theme-storybook": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run storybook-build -- --output-dir ../../../storybook",
     "release": "semantic-release",
     "release:dry-run": "semantic-release --dry-run"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/fourkitchens/sous-drupal-project.git"
   },
   "keywords": [
     "sous"

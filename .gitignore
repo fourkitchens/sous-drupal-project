@@ -84,9 +84,7 @@ node_modules/
 /web/themes/custom/*/.coverage/
 /web/themes/custom/*/.publish/
 /web/storybook/
-# The selected Core 4 build mirrors this generated theme's src/components here.
-# Naming setup scopes this rule to that theme; other themes may own components.
-/web/themes/custom/sous-project/components/
+/web/themes/custom/*/components/
 
 # Ignore generated linting files
 /web/.eslintignore

@@ -42,11 +42,11 @@ Drupal standard. Review autofix changes before committing:
 
 ```sh
 ddev npm run lint:js -- --fix
-ddev npm --prefix web/themes/custom/sous-project run lint-fix
-ddev npm --prefix web/themes/custom/sous-project run prettier-fix
+ddev npm --prefix "web/themes/custom/<theme>" run lint-fix
+ddev npm --prefix "web/themes/custom/<theme>" run prettier-fix
 ```
 
-Setup replaces `sous-project` with the site's theme name. Check affected pages,
+Use the theme name from `package.json`'s `config.theme`. Check affected pages,
 editor workflows, permissions, keyboard use and accessibility. Add site tests
 when the change needs them.
 

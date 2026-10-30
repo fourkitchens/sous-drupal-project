@@ -1,7 +1,8 @@
 # Platform requirements
 
-Use DDEV for local development. Install Docker and Git, then follow
-[Setup](SETUP.md). DDEV supplies PHP, Composer, Node.js, npm and MariaDB.
+Use DDEV for local development. Creating a project requires Docker, DDEV, PHP
+satisfying `^8.4` and Composer 2.x on your computer. Follow [Setup](SETUP.md).
+DDEV supplies PHP, Composer, Node.js, npm, Git and MariaDB for project commands.
 
 ## Versions and their source
 
@@ -25,10 +26,9 @@ record the exact package versions installed there.
 
 Generated themes keep their own npm manifest and lockfile. See
 [Build tools](BUILD_TOOLS.md) for theme dependencies, builds and overrides.
-Use `npm ci` when a lockfile exists. Keep root and theme lockfiles committed.
+Use `ddev npm ci` when a lockfile exists. Keep root and theme lockfiles committed.
 
-If running the Composer bootstrap on the host, install PHP satisfying `^8.4`
-and Composer first. Run application platform checks in DDEV:
+Run application platform checks in DDEV:
 
 ```sh
 ddev composer check-platform-reqs

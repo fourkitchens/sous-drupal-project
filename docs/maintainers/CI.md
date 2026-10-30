@@ -11,7 +11,7 @@ The workflow runs on pull requests and pushes to `main`, `next`, `next-major`,
 
 | Job | Purpose |
 | --- | --- |
-| `checks` | PHP/JavaScript lint, ShellCheck and the install/config workflow suites |
+| `checks` | PHP/JavaScript lint, ShellCheck and the config workflow suite |
 | `integration` | Four parallel smoke installs; Paragraphs also enables Config Split |
 | `release` | Publish after both jobs pass, only on pushes to canonical `main` without a package override |
 
@@ -38,7 +38,7 @@ first run. Disable any obsolete CircleCI project connection and remove its
 required status check when moving the starter to Actions. These are service
 settings; deleting a repository file does not disable an external integration.
 
-Product workflows, integration scripts, tests and maintainer guides are excluded
-from Git archives and removed by project naming. Keep that boundary when adding
-maintainer files. Client-site CI and deployment belong in the generated site's
+`.gitattributes` export-ignore rules omit product workflows, integration scripts,
+tests and maintainer guides from release archives. Keep that boundary when
+adding maintainer files. Client-site CI and deployment belong in the generated site's
 repository. See [release setup](RELEASES.md) for publication rules.

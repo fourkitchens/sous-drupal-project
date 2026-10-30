@@ -48,8 +48,8 @@ bash devops/integration/run.sh --option paragraphs --config-split \
 - [Package and starter releases](docs/maintainers/RELEASES.md)
 - [Dependency reviews and support](docs/maintainers/OPERATIONS.md)
 
-Generated sites exclude maintainer guides, product workflows, integration scripts
-and upstream tests. They keep an empty `devops/tests/` for site-specific checks.
+`.gitattributes` export-ignore rules omit maintainer guides, product workflows,
+integration scripts and upstream tests from release archives.
 
 ## License
 

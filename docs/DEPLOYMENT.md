@@ -14,7 +14,7 @@ ddev start
 ddev composer validate --no-check-publish
 ddev composer build-assets
 ddev composer check-platform-reqs
-ddev npm run lint:project
+ddev npm run lint
 ```
 
 `build-assets` installs production PHP dependencies, installs the root and theme
@@ -27,7 +27,7 @@ Run dependency audits as part of the project's release checks:
 ```sh
 ddev composer audit --abandoned=report
 ddev npm audit
-ddev npm --prefix web/themes/custom/sous-project audit
+ddev npm --prefix "web/themes/custom/<theme>" audit
 ```
 
 Resolve findings or document how the project handles them before deployment.
@@ -73,8 +73,8 @@ Apply recipe changes explicitly.
 
 If deployment fails, stop dependent steps and follow the site's rollback
 procedure. A schema or data change can require restoring the database together
-with compatible code. Local `setup restore`, `rebuild`, and `import-data` replace
-and sanitize a database; use them for development, not production deployment.
+with compatible code. Local `setup.sh` and `import-data.sh` replace and sanitize
+a database; use them for development, not production deployment.
 
 ## Choose site CI
 
@@ -97,8 +97,9 @@ Both examples start DDEV, validate Composer metadata, install locked PHP and npm
 dependencies, run lint, and build production theme assets. They do not deploy
 or publish a release. Add the project's checks, artifact storage, deployment
 credentials, and release conditions. Replace theme tasks if the site has no
-Emulsify theme. The starter's own GitHub workflows are removed during project
-naming; these examples are the site's starting point.
+Emulsify theme. `.gitattributes` export-ignore rules omit the starter's own
+GitHub workflows from release archives; these examples are the site's starting
+point.
 
 ## Deploy with Pantheon
 

@@ -20,8 +20,8 @@ The compiled browser assets do not contain those build tools.
 
 ## Build assets or Storybook
 
-The theme lives at `web/themes/custom/sous-project`. Project naming updates this
-path in the npm tasks and documentation.
+The theme lives at `web/themes/custom/<theme>`, where `<theme>` is the name in
+`package.json`'s `config.theme`. Root npm commands derive the theme path from it.
 
 | Command | Purpose |
 | --- | --- |
@@ -32,10 +32,10 @@ path in the npm tasks and documentation.
 
 The build and watch scripts remain available after setup. Their npm aliases
 call `devops/scripts/theme-build.sh` and `devops/scripts/theme-watch.sh`.
-CI calls the same build script directly:
+Pass the theme directory when calling a script directly:
 
 ```sh
-sh devops/scripts/theme-build.sh
+sh devops/scripts/theme-build.sh "web/themes/custom/<theme>"
 ```
 
 The script calls `ddev npm` from the host and the container's npm inside DDEV.
@@ -55,7 +55,7 @@ in deployments. Local Storybook output is available at `/storybook/`. See
 The project installs its CLI locally. Run theme commands from the theme directory:
 
 ```sh
-cd web/themes/custom/sous-project
+cd "web/themes/custom/<theme>"
 ddev emulsify component list
 ```
 
@@ -75,18 +75,17 @@ dependencies pass install, lint and builds. Use the routine tasks above after se
 
 | Command | Checks |
 | --- | --- |
-| `ddev npm run lint` | PHP/JavaScript checks and the generated theme's checks |
+| `ddev npm run lint` | PHP/JavaScript checks and theme checks when the theme exists |
 | `ddev npm run lint:php` | PHP syntax in custom code and project scripts |
 | `ddev npm run lint:js` | Root and custom-module JavaScript |
-| `ddev npm run lint:theme` | Theme JavaScript and SCSS |
 | `ddev npm run prettier` | Theme formatting |
 
 PHP lint uses `php -l`. Generated assets and downloaded dependencies are excluded
 from source checks. To fix theme lint or formatting, run its tasks directly:
 
 ```sh
-ddev npm --prefix web/themes/custom/sous-project run lint-fix
-ddev npm --prefix web/themes/custom/sous-project run prettier-fix
+ddev npm --prefix "web/themes/custom/<theme>" run lint-fix
+ddev npm --prefix "web/themes/custom/<theme>" run prettier-fix
 ```
 
 Review the changed source before committing. [Contributing](CONTRIBUTING.md)
@@ -105,7 +104,7 @@ For an older child theme with favicon configuration incompatible with Emulsify
 Tools 2, use its repair command after updating the packages:
 
 ```sh
-ddev drush emulsify_tools:repair-favicon-config sous-project
+ddev drush emulsify_tools:repair-favicon-config "<theme>"
 ddev npm run confex
 ```
 

@@ -73,11 +73,9 @@ step() {
   if [ "$code" -ne 0 ]; then cat "$artifacts/$name.log" >&2; return "$code"; fi
 }
 copy_checkout() {
-  local file
-  while IFS= read -r -d '' file; do
-    [ -e "$source_root/$file" ] || continue
-    mkdir -p "$site/$(dirname "$file")" && cp -p "$source_root/$file" "$site/$file" || return
-  done < <(git -C "$source_root" ls-files -z)
+  local snapshot
+  snapshot=$(git -C "$source_root" stash create) || return
+  git -C "$source_root" archive "${snapshot:-HEAD}" | tar -x -C "$site"
 }
 use_packages() {
   mkdir -p .smoke-packages && cp -R "$packages/packages/." .smoke-packages/ || return
@@ -95,8 +93,7 @@ fresh() {
   # Discard DDEV's generated defaults so Composer exercises its first-install copies.
   rm -f web/sites/default/settings.php web/sites/default/settings.local.php
   ddev composer install || return
-  ddev exec env HUSKY=0 COMPOSER_NO_INTERACTION=1 \
-    SOUS_CONTENT="$option" SOUS_CONFIG_SPLIT="$answer" composer run-script post-create-project-cmd
+  SOUS_CONTENT="$option" SOUS_CONFIG_SPLIT="$answer" composer run-script post-create-project-cmd
 }
 bootstrapped() { ddev drush status --field=bootstrap | grep -Fx Successful; }
 front_page() {
@@ -110,13 +107,12 @@ clean_config() { ddev drush config:status --format=json | jq -e 'length == 0'; }
 restore() {
   local dumps=(reference/db-*.sql.gz)
   [ -f "${dumps[0]}" ] || { echo 'No database dump was created.' >&2; return 1; }
-  sh devops/scripts/setup.sh restore "${dumps[0]}"
+  sh devops/scripts/setup.sh "${dumps[0]}"
 }
 
 mkdir -p "$site"
 step copy-checkout copy_checkout
 cd "$site"
-step name-project sh devops/scripts/sous-setup.sh
 if [ -n "$packages_ref" ]; then
   step packages-clone git clone --quiet --no-checkout https://github.com/fourkitchens/sous-drupal-packages.git "$work/packages"
   step packages-checkout git -C "$work/packages" checkout --quiet --detach "$packages_ref"
@@ -144,7 +140,7 @@ $checks = [
 foreach ($checks as $name => $passed) { if (!$passed) { throw new \RuntimeException("Unexpected composition: $name"); } }
 echo "Selected composition matches.\n";
 '
-step project-lint ddev npm run lint:project
+step project-lint ddev npm run lint
 step config-export ddev npm run confex
 step config-import ddev npm run confim
 step config-clean clean_config

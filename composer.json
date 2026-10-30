@@ -153,8 +153,7 @@
             "@php -r \"@unlink('vendor/bin/composer');\""
         ],
         "post-create-project-cmd": [
-            "./devops/scripts/sous-setup.sh",
-            "./devops/scripts/setup.sh fresh"
+            "./devops/scripts/sous-build.sh"
         ],
         "build-assets": [
             "composer install --optimize-autoloader --no-dev",

@@ -30,11 +30,9 @@ printf '%s\n' "$record" >> "$COMMAND_LOG"
 statuses="${TEST_COMMAND_STATUSES:-}"
 [ -n "$statuses" ] || statuses='{}'
 status=$(jq -r --arg tool "$tool" --arg command "$command" '.[$tool] // .[$command] // 0' <<< "$statuses")
-if [ -n "${FAIL_MATCH:-}" ]; then case "$*" in *"$FAIL_MATCH"*) status=42 ;; esac; fi
 [ "$status" -eq 0 ] || exit "$status"
 case "$tool:$command" in
   ddev:drush) shift; exec "$PROJECT/vendor/bin/drush" "$@" ;;
-  ddev:emulsify) shift; exec "$PROJECT/node_modules/.bin/emulsify" "$@" ;;
   ddev:composer|ddev:npm) shift; exec "$command" "$@" ;;
   ddev:exec)
     shift
@@ -42,25 +40,4 @@ case "$tool:$command" in
     cd "$PROJECT"
     export IS_DDEV_PROJECT=true DDEV_APPROOT="$PROJECT"
     exec "$@" ;;
-  ddev:install-recipe)
-    shift; export IS_DDEV_PROJECT=true DDEV_APPROOT="$PROJECT"
-    exec sh "$PROJECT/.ddev/commands/web/install-recipe" "$@" ;;
-  npm:pkg)
-    if [ "${2:-}" = delete ] && [ "${3:-}" = scripts.sous-build ]; then
-      jq 'del(.scripts["sous-build"])' package.json > package.tmp && mv package.tmp package.json
-    fi ;;
-  composer:config)
-    if [ "${2:-}" = --unset ] && [ "${3:-}" = scripts.post-create-project-cmd ]; then
-      jq 'del(.scripts["post-create-project-cmd"])' composer.json > composer.tmp && mv composer.tmp composer.json
-    fi ;;
-  composer:*) touch composer.lock ;;
-  drush:emulsify)
-    for theme do :; done
-    mkdir -p "$PROJECT/web/themes/custom/$theme/src" "$PROJECT/web/themes/custom/$theme/dist"
-    printf 'name: Test theme\n' > "$PROJECT/web/themes/custom/$theme/$theme.info.yml"
-    : > "$PROJECT/web/themes/custom/$theme/src/index.js" ;;
-  drush:config:export)
-    mkdir -p "$PROJECT/config/default"
-    printf 'uuid: generated-site-uuid\nname: Generated site\n' > "$PROJECT/config/default/system.site.yml"
-    printf 'module:\n  system: 0\n  user: 0\n' > "$PROJECT/config/default/core.extension.yml" ;;
 esac

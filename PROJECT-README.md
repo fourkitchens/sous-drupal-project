@@ -31,8 +31,9 @@ updates do not apply new recipe configuration automatically. Review and export
 site changes before deploying them. Store credentials in environment settings,
 not configuration exports.
 
-Choose this site's CI template using the deployment guide. Sous publishing
-workflows and maintainer guides are removed during generation.
+Choose this site's CI template using the deployment guide. `.gitattributes`
+export-ignore rules omit Sous publishing workflows and maintainer guides from
+release archives.
 
 ## License
 

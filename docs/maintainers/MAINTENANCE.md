@@ -45,4 +45,4 @@ to adopt and deploy them through their [maintenance workflow](../MAINTENANCE.md)
 
 Follow [operations](OPERATIONS.md) for dependency reviews and
 [releases](RELEASES.md) for publication order. Keep product tooling and these
-guides out of generated sites with `.gitattributes` and `sous-setup.sh` cleanup.
+guides out of release archives with `.gitattributes` export-ignore rules.
