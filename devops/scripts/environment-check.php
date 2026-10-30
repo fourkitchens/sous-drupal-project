@@ -59,4 +59,6 @@ else {
     $check(\Drupal::config('automated_cron.settings')->get('interval') === 0, 'Local/staging automated cron is disabled.');
   }
 }
-exit($failed ? 1 : 0);
+if ($failed) {
+  throw new RuntimeException('Environment checks failed.');
+}

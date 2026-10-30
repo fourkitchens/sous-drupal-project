@@ -83,12 +83,20 @@ use_packages() {
   mkdir -p .smoke-packages && cp -R "$packages/packages/." .smoke-packages/ || return
   local versions
   versions=$(jq -s 'map({key:.name,value:"2.0.0"}) | from_entries' .smoke-packages/*/composer.json) || return
-  jq --argjson versions "$versions" '.repositories = [{type:"path",url:".smoke-packages/*",canonical:true,only:["fourkitchens/sous-*"],options:{symlink:false,versions:$versions}}] + .repositories' composer.json > composer.tmp && mv composer.tmp composer.json
+  jq --argjson versions "$versions" '
+    .repositories = [{type:"path",url:".smoke-packages/*",canonical:true,only:["fourkitchens/sous-*"],options:{symlink:false,versions:$versions}}] +
+      [.repositories[] | select(.url != "https://fourkitchens.github.io/sous-drupal-packages/")]
+  ' composer.json > composer.tmp && mv composer.tmp composer.json
 }
 fresh() {
   local answer=no
   [ "$split" -eq 0 ] || answer=yes
-  SOUS_CONTENT="$option" SOUS_CONFIG_SPLIT="$answer" sh devops/scripts/setup.sh fresh
+  ddev start || return
+  # Discard DDEV's generated defaults so Composer exercises its first-install copies.
+  rm -f web/sites/default/settings.php web/sites/default/settings.local.php
+  ddev composer install || return
+  ddev exec env HUSKY=0 SOUS_ENVIRONMENT=local COMPOSER_NO_INTERACTION=1 \
+    SOUS_CONTENT="$option" SOUS_CONFIG_SPLIT="$answer" composer run-script post-create-project-cmd
 }
 bootstrapped() { ddev drush status --field=bootstrap | grep -Fx Successful; }
 front_page() {
@@ -125,7 +133,7 @@ step front-page front_page
 step login-url login_url
 # PHP evaluates these variables in Drupal, not in the invoking shell.
 # shellcheck disable=SC2016
-step composition ddev exec env SOUS_SMOKE_OPTION="$option" SOUS_SMOKE_SPLIT="$split" vendor/bin/drush php:eval '
+step composition ddev exec --raw env SOUS_SMOKE_OPTION="$option" SOUS_SMOKE_SPLIT="$split" vendor/bin/drush php:eval '
 $option = getenv("SOUS_SMOKE_OPTION");
 $page = \Drupal::entityTypeManager()->getStorage("node_type")->load("page");
 $display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.page.default");

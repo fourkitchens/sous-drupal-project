@@ -1,16 +1,5 @@
 {
   "patches": {
-    "drupal/embed": [
-      {
-        "description": "Correct the Embed CKEditor 5 base-class namespace",
-        "url": "patches/embed-3517882.patch",
-        "sha256": "6d97c1444109ec13324cbba508ca726590a3ee60eb6d483a87d2ba29d9e90b0c",
-        "depth": 1,
-        "extra": {
-          "issue-tracker-url": "https://www.drupal.org/project/embed/issues/3517882"
-        }
-      }
-    ],
     "drupal/field_group": [
       {
         "description": "Focus invalid required fields inside Field Group tabs",

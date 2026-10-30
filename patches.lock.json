@@ -1,19 +1,6 @@
 {
-    "_hash": "8904fb3956a677d43858542e4277a46631c4e836dd6347cfb14c9b23dd57871a",
+    "_hash": "5b955232b2206f812008e2b5ca7422b5388d44f13fa8018d87d3169c2a8a08ba",
     "patches": {
-        "drupal/embed": [
-            {
-                "package": "drupal/embed",
-                "description": "Correct the Embed CKEditor 5 base-class namespace",
-                "url": "patches/embed-3517882.patch",
-                "sha256": "6d97c1444109ec13324cbba508ca726590a3ee60eb6d483a87d2ba29d9e90b0c",
-                "depth": 1,
-                "extra": {
-                    "issue-tracker-url": "https://www.drupal.org/project/embed/issues/3517882",
-                    "provenance": "patches-file:patches/patches.json"
-                }
-            }
-        ],
         "drupal/field_group": [
             {
                 "package": "drupal/field_group",

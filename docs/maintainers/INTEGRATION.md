@@ -53,7 +53,6 @@ Use Node from `.nvmrc`, Composer, PHP and ShellCheck:
 ```sh
 npm ci
 npm run lint
-php devops/tests/starter-defaults.php
 find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
 bash devops/tests/install-workflows.sh
 bash devops/tests/config-workflows.sh

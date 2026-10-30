@@ -76,8 +76,8 @@ recipe can reject or overwrite customized configuration. Keep the site's
 customizations and apply only the intended changes. Fields renamed by a new
 recipe also need an explicit content migration before old fields are removed.
 
-Retain the scoped Composer index and its package list in `composer.json`, and
-keep recipes under `web/recipes`. Remove local path repositories before
+Recipes are applied once during setup and then unpacked, so the site owns its
+dependencies and configuration. Remove local path repositories before
 committing an application lockfile; resolve published packages again because
 `composer update --lock` alone does not replace path distributions. See
 [Features](FEATURES.md) for package responsibilities.

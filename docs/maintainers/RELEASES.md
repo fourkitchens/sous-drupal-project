@@ -57,9 +57,8 @@ Remove test path repositories from application manifests and resolve published
 packages before committing production locks. `composer update --lock` alone
 does not turn a locked path package into a ZIP download.
 
-The starter's static index is scoped to the nine Sous package names. Keep the
-matching recipe-unpack exclusions so selected recipes remain in Composer's
-requirements and lockfile. Neither list installs an unselected package.
+Recipes are applied once during setup and then unpacked, so the site owns its
+dependencies and configuration.
 
 Use [product maintenance](MAINTENANCE.md) for package changes and
 [site maintenance](../MAINTENANCE.md) for existing-site upgrade instructions.

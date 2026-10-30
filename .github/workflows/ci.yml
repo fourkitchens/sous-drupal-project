@@ -41,7 +41,6 @@ jobs:
           coverage: none
       - run: npm ci
       - run: npm run lint
-      - run: php devops/tests/starter-defaults.php
       - name: Check shell scripts
         run: find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
       - name: Check installation and environment helpers

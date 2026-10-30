@@ -9,15 +9,7 @@
             "url": "https://fourkitchens.github.io/sous-drupal-packages/",
             "canonical": true,
             "only": [
-                "fourkitchens/sous-admin",
-                "fourkitchens/sous-config-split",
-                "fourkitchens/sous-content-types",
-                "fourkitchens/sous-core-layout-builder",
-                "fourkitchens/sous-emulsify",
-                "fourkitchens/sous-formats",
-                "fourkitchens/sous-media",
-                "fourkitchens/sous-paragraph-types",
-                "fourkitchens/sous-paragraphs"
+                "fourkitchens/sous-*"
             ]
         },
         {
@@ -62,10 +54,7 @@
         "zaporylie/composer-drupal-optimizations": "^1.2.0"
     },
     "conflict": {
-        "drupal/drupal": "*",
-        "drupal/emulsify": "<7.3.0",
-        "drupal/metatag": "<2.2.3",
-        "drupal/paragraphs_features": "<2.3.0"
+        "drupal/drupal": "*"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
@@ -162,19 +151,6 @@
         "drupal-core-vendor-hardening": {
             "composer/composer": false
         },
-        "drupal-recipe-unpack": {
-            "ignore": [
-                "fourkitchens/sous-admin",
-                "fourkitchens/sous-config-split",
-                "fourkitchens/sous-content-types",
-                "fourkitchens/sous-core-layout-builder",
-                "fourkitchens/sous-emulsify",
-                "fourkitchens/sous-formats",
-                "fourkitchens/sous-media",
-                "fourkitchens/sous-paragraph-types",
-                "fourkitchens/sous-paragraphs"
-            ]
-        },
         "composer-patches": {
             "patches-file": "patches/patches.json",
             "package-depths": {
@@ -208,8 +184,8 @@
             "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,info --ignore=node_modules,dist,bower_components,vendor ./web/themes/custom"
         ],
         "post-drupal-scaffold-cmd": [
-            "@php -r \"if (!file_exists('web/sites/default/settings.local.php') && !is_link('web/sites/default/settings.local.php') && !copy('web/sites/example.settings.local.php', 'web/sites/default/settings.local.php')) { exit(1); }\"",
-            "@php -r \"if (!file_exists('web/sites/default/settings.php') && !is_link('web/sites/default/settings.php') && !copy('web/sites/default/default.settings.php', 'web/sites/default/settings.php')) { exit(1); }\""
+            "test -e web/sites/default/settings.local.php || cp web/sites/example.settings.local.php web/sites/default/settings.local.php",
+            "test -e web/sites/default/settings.php || cp web/sites/default/default.settings.php web/sites/default/settings.php"
         ]
     }
 }
