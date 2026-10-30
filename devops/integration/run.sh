@@ -14,6 +14,8 @@ Options:
   --option default|layout-builder|paragraphs|admin-only
                         Content composition (default: default).
   --config-split        Include Config Split (default: off).
+  --ci circleci|github|gitlab|none
+                        Site CI provider (default: github).
   --packages PATH       Use PATH/packages/* at version 2.0.0, copied by Composer
                         and mounted read-only in DDEV at the same absolute path
                         (default: use the published Composer package index).
@@ -26,8 +28,8 @@ Checks, in order:
   1. Drupal bootstraps successfully.
   2. The front page returns HTTP 200.
   3. Page, Paragraphs, Layout Builder and Config Split match the chosen options.
-  4. Product-only devops/integration, docs/maintainers and .github/workflows
-     are absent from the generated site.
+  4. Maintainer tooling and assets/ci are absent; only the selected provider's
+     CI files remain, with no product ci.yml or unselected provider files.
   5. Drush deploy succeeds and config:status reports no changes.
   6. For the default option, run Composer CI, back up and restore, then bootstrap.
 
@@ -47,13 +49,14 @@ EOF
 parse_options() {
   option=default
   split=0
+  ci=github
   packages=''
   keep=0
   artifacts="$PWD/.integration-results"
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
-      --option|--packages|--artifacts)
+      --option|--ci|--packages|--artifacts)
         if [ "$#" -lt 2 ]; then
           usage >&2
           exit 2
@@ -69,6 +72,10 @@ parse_options() {
       --config-split)
         split=1
         shift
+        ;;
+      --ci)
+        ci=$2
+        shift 2
         ;;
       --packages)
         packages=$(cd "$2" && pwd -P)
@@ -100,6 +107,14 @@ parse_options() {
       exit 2
       ;;
   esac
+
+  case "$ci" in
+    circleci|github|gitlab|none) ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
 }
 
 # Create the temporary site workspace and record the running result.
@@ -114,7 +129,8 @@ prepare_workspace() {
   site_dir="$work_dir/$project_name"
   result_file="$artifacts/result.json"
 
-  export HUSKY=0 COMPOSER_NO_INTERACTION=1 SOUS_CONTENT="$option" SOUS_CONFIG_SPLIT=no
+  export HUSKY=0 COMPOSER_NO_INTERACTION=1 SOUS_CONTENT="$option"
+  export SOUS_CONFIG_SPLIT=no SOUS_CI="$ci"
   if [ "$split" -ne 0 ]; then
     export SOUS_CONFIG_SPLIT=yes
   fi
@@ -247,9 +263,38 @@ PHP
 # Check that archive exclusions kept maintainer tooling out of the generated site.
 check_product_files_absent() {
   local path
-  for path in devops/integration docs/maintainers .github/workflows; do
+  for path in devops/integration docs/maintainers; do
     step "absent-${path//\//-}" test ! -e "$path"
   done
+}
+
+# Check that only the chosen CI files remain after the installer removes its templates.
+check_generated_files() {
+  step absent-assets-ci test ! -e assets/ci
+  step scaffold-assets test -d assets/scaffold
+
+  if [ "$ci" = github ]; then
+    step ci-github-workflow test -f .github/workflows/build.yml
+    step ci-github-files ls -A1 .github/workflows
+    test "$(cat "$artifacts/ci-github-files.log")" = build.yml
+  else
+    step absent-github-workflows test ! -e .github/workflows
+  fi
+
+  if [ "$ci" = gitlab ]; then
+    step ci-gitlab test -f .gitlab-ci.yml
+    step ci-gitlab-template test -f .gitlab/merge_request_templates/Default.md
+    step absent-github test ! -e .github
+  else
+    step absent-gitlab-ci test ! -e .gitlab-ci.yml
+    step absent-gitlab-metadata test ! -e .gitlab
+  fi
+
+  if [ "$ci" = circleci ]; then
+    step ci-circleci test -f .circleci/config.yml
+  else
+    step absent-circleci test ! -e .circleci
+  fi
 }
 
 # Deploy the site and require no remaining configuration changes.
@@ -289,6 +334,7 @@ main() {
   check_site_responds
   check_composition
   check_product_files_absent
+  check_generated_files
   check_clean_deploy
   # CI and restore are the same for every composition, so exercise them for default.
   if [ "$option" = default ]; then

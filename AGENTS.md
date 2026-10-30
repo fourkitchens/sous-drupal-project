@@ -48,8 +48,10 @@ find devops -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
 composer validate --no-check-publish
 actionlint .github/workflows/ci.yml
 actionlint assets/ci/github/.github/workflows/build.yml
-bash devops/integration/run.sh --option default
-bash devops/integration/run.sh --option paragraphs --config-split
+bash devops/integration/run.sh --ci github
+bash devops/integration/run.sh --ci gitlab --option layout-builder
+bash devops/integration/run.sh --ci circleci --option paragraphs --config-split
+bash devops/integration/run.sh --ci none --option admin-only
 ```
 
 For unpublished package changes, append `--packages /path/to/sous-drupal-packages`.

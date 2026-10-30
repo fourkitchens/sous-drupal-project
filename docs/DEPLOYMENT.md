@@ -109,22 +109,27 @@ to install locked dependencies, build the theme, lint and check coding standards
 The steps live in `composer.json`; change them there so every provider and local
 checks run the same commands. CI runs without DDEV.
 
-| Provider | Template folder | File in the site |
+| Provider | Folder in the Sous release | Installed file |
 | --- | --- | --- |
 | GitHub Actions | `assets/ci/github/` | `.github/workflows/build.yml` |
 | GitLab CI/CD | `assets/ci/gitlab/` | `.gitlab-ci.yml` |
 | CircleCI | `assets/ci/circleci/` | `.circleci/config.yml` |
 
-Setup does not install a CI configuration yet. Choose one provider and copy its
-folder's contents, including hidden files, into the generated site's project
-root. For example, GitHub Actions:
+Setup installs the provider selected by `SOUS_CI`, or no configuration for `none`,
+then removes `assets/ci`. To switch providers later, check out the Sous release
+tag the site was created from in a separate starter checkout. Copy that provider
+folder's contents, including hidden files, into the site's project root:
 
 ```sh
-cp -R assets/ci/github/. .
+cp -R /path/to/sous-release/assets/ci/github/. .
 ```
 
-Use `circleci` or `gitlab` instead of `github` for the other providers.
-GitHub sites keep `.github/dependabot.yml` so Dependabot updates action pins.
+Use `circleci` or `gitlab` instead of `github` for the other providers, and remove
+the previous provider's CI file or directory. GitLab sites move the pull request
+template to `.gitlab/merge_request_templates/Default.md` and remove `.github`.
+GitHub sites keep `.github/dependabot.yml` so Dependabot updates action pins;
+restore it and the pull request template from the same release when leaving GitLab.
+Remove the old `.gitlab/merge_request_templates` directory after restoring it.
 
 For CircleCI, make `main` the default branch and configure pull-request events
 and default-branch pushes in

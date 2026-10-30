@@ -13,6 +13,9 @@ Record the project's URLs, contacts and access requirements here.
 | Admin only | Administration and theme without Page or Frontpage |
 
 Config Split is independently optional. The site's configuration records its choices.
+Setup installs the selected CI configuration at `.circleci/config.yml`,
+`.github/workflows/build.yml` or `.gitlab-ci.yml`; None installs no CI file.
+GitLab uses `.gitlab/merge_request_templates/Default.md` for merge requests.
 
 ## Work locally
 

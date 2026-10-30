@@ -12,17 +12,24 @@ cd my-site
 
 Composer's post-create hook runs `sous-build.sh` once. It names the project from
 its directory, stores the theme name in `package.json`'s `config.theme`, asks for
-a content composition and optional Config Split, then starts DDEV and installs.
-For unattended installation, set both answers:
+a content composition, optional Config Split and a CI provider, then starts DDEV
+and installs. The CI question is:
+
+```text
+CI: [0] CircleCI [1] GitHub Actions [2] GitLab CI/CD [3] None:
+```
+
+For unattended installation, set all three answers:
 
 ```sh
-SOUS_CONTENT=layout-builder SOUS_CONFIG_SPLIT=yes \
+SOUS_CONTENT=layout-builder SOUS_CONFIG_SPLIT=yes SOUS_CI=gitlab \
   composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
 ```
 
 `SOUS_CONTENT` accepts `default`, `layout-builder`, `paragraphs` or `admin-only`
 (and menu numbers `0`–`3`). `SOUS_CONFIG_SPLIT` accepts `yes` or `no`, defaulting
-to no. Noninteractive installation requires an explicit content choice.
+to no. `SOUS_CI` accepts `circleci` (`0`), `github` (`1`), `gitlab` (`2`) or
+`none` (`3`). Noninteractive installation requires explicit content and CI choices.
 The installer creates `sous_chef` with the `superuser` role, blocks `superuser_1`,
 builds the theme, exports configuration and prints a login link.
 

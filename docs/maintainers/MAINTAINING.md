@@ -39,18 +39,22 @@ repository and runs the real host `composer create-project`.
 Run `bash devops/integration/run.sh --help` for options, checks and cleanup details.
 
 ```sh
-bash devops/integration/run.sh --option default --artifacts /tmp/sous-default
-bash devops/integration/run.sh --option paragraphs --config-split \
-  --packages /path/to/sous-drupal-packages
+bash devops/integration/run.sh --ci github --artifacts /tmp/sous-default
+bash devops/integration/run.sh --ci gitlab --option layout-builder
+bash devops/integration/run.sh --ci circleci --option paragraphs --config-split
+bash devops/integration/run.sh --ci none --option admin-only
 ```
 
-`--option` also accepts `layout-builder` and `admin-only`; Config Split is
-independent. Omit `--packages` to test the published Composer index. A package
-checkout uses absolute `PATH/packages/*`, version `2.0.0`, copied packages and
+`--ci` accepts `github` (the default), `gitlab`, `circleci` and `none`.
+Config Split is independent of the content option. Append
+`--packages /path/to/sous-drupal-packages` for an unpublished package checkout;
+omit it to test the published Composer index. A package checkout uses absolute
+`PATH/packages/*`, version `2.0.0`, copied packages and
 a read-only DDEV mount at the same path. Test published ZIPs before releasing.
 
-Each smoke checks bootstrap, HTTP 200, composition, deployment and empty config
-status. The default also backs up and restores its database. Logs and
+Each smoke checks bootstrap, HTTP 200, composition, selected CI files, deployment
+and empty config status. CI template sources must be absent from generated sites.
+The default also runs `composer ci`, backs up and restores its database. Logs and
 `result.json` default to `.integration-results`; `--artifacts DIR` changes that.
 `--keep` retains the site; afterward run `ddev delete -Oy PROJECT_NAME` and remove
 its temporary workspace. Otherwise cleanup runs on exit, including failures.
@@ -61,9 +65,11 @@ Generated sites choose their own [CI and deployment](../DEPLOYMENT.md).
 
 ## CI and releases
 
-PRs test the default option. Main pushes, nightly runs at 06:17 UTC and manual
-runs test all four options, with Config Split on Paragraphs. Manual `packages_ref`
-selects an explicit packages commit; CI clones it and passes `--packages`.
+PRs test default content with GitHub Actions. Main pushes, nightly runs at 06:17 UTC
+and manual runs add Layout Builder with GitLab, Paragraphs with CircleCI and
+Config Split, and admin-only with no CI. Each matrix leg supplies its content,
+CI provider and Config Split settings as data. Manual `packages_ref` selects an
+explicit packages commit; CI clones it and passes `--packages`.
 Actions stay pinned to SHAs. Checks have read access; publishing alone has write
 access. Require source checks and smoke jobs in branch protection.
 

@@ -18,6 +18,7 @@ Your site owns its configuration, custom code, dependencies and deployment.
 
 Config Split is a separate yes/no choice, defaulting to no. Layout Builder and
 Paragraphs are separate compositions; installation downloads only your selection.
+CI is a separate choice: CircleCI, GitHub Actions, GitLab CI/CD or None.
 
 ## Quickstart
 

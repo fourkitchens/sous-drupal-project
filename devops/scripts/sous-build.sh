@@ -26,6 +26,18 @@ case "$SOUS_CONFIG_SPLIT" in
   *) echo 'SOUS_CONFIG_SPLIT must be yes or no.' >&2; exit 2 ;;
 esac
 
+if [ "${SOUS_CI+x}" != x ]; then
+  printf 'CI: [0] CircleCI [1] GitHub Actions [2] GitLab CI/CD [3] None: '
+  read -r SOUS_CI
+fi
+case "$SOUS_CI" in
+  circleci|0) ci=circleci ;;
+  github|1) ci=github ;;
+  gitlab|2) ci=gitlab ;;
+  none|3) ci=none ;;
+  *) echo 'SOUS_CI must be circleci, github, gitlab, or none.' >&2; exit 2 ;;
+esac
+
 # DDEV and the theme derive their names from the target project directory.
 # Store the theme name once so routine npm commands use the same directory.
 project_name=$(basename "$PWD" | tr '[:upper:] _' '[:lower:]--' | tr -cd 'a-z0-9-')
@@ -37,6 +49,16 @@ runtime_npm install --package-lock-only --ignore-scripts --offline
 runtime_composer config name "project/$project_name"
 # Begin the generated site with its own instructions and Git history.
 [ ! -f PROJECT-README.md ] || mv PROJECT-README.md README.md
+if [ "$ci" != none ]; then
+  cp -R "assets/ci/$ci/." .
+fi
+# GitLab uses its merge request template instead of GitHub's review tooling.
+if [ "$ci" = gitlab ]; then
+  mkdir -p .gitlab/merge_request_templates
+  mv .github/PULL_REQUEST_TEMPLATE.md .gitlab/merge_request_templates/Default.md
+  rm -rf .github
+fi
+rm -rf assets/ci
 [ -e .git ] || runtime_exec git init -b main
 
 # Renaming Composer's root package invalidates its lock hash.
