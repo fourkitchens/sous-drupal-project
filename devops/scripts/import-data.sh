@@ -1,5 +1,4 @@
 #!/bin/sh
-# Import a local SQL backup, then rebuild, run the optional hook and sanitize.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
 [ "$#" -le 1 ] || { echo 'Usage: import-data.sh [BACKUP.sql|BACKUP.sql.gz]' >&2; exit 2; }

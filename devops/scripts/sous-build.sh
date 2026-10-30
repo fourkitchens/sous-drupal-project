@@ -1,5 +1,4 @@
 #!/bin/sh
-# Install a new site once; setup.sh restores an existing site.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
 
@@ -34,7 +33,7 @@ runtime_composer config name "project/$project_name"
 [ ! -f PROJECT-README.md ] || mv PROJECT-README.md README.md
 [ -e .git ] || runtime_exec git init -b main
 
-# Composer's name change needs a fresh lock hash before locked installation.
+# Renaming Composer's root package invalidates its lock hash.
 if [ -f composer.lock ]; then runtime_composer update --lock --no-install --no-interaction; fi
 runtime_composer install
 runtime_npm ci --include=dev
@@ -66,5 +65,6 @@ runtime_drush -y config:export
 runtime_composer validate --no-check-publish
 runtime_drush uli --name=sous_chef
 runtime_composer config --unset scripts.post-create-project-cmd
+runtime_exec sed -i '/^settings\.php$/d' .gitignore
 rm devops/scripts/sous-build.sh
 printf '\nOrders up! Your Drupal site is ready.\n'

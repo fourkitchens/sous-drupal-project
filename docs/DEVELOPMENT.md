@@ -56,7 +56,7 @@ git diff -- config
 ddev npm run confim
 ```
 
-`confim` runs Drush deployment and the project's post-import hook.
+`confim` runs Drush deployment and the project's post-config-import hook.
 Keep reusable recipes in the [Sous packages repository](https://github.com/fourkitchens/sous-drupal-packages).
 See [Deployment](DEPLOYMENT.md) for dependency and patch updates.
 

@@ -7,8 +7,8 @@ runtime_exec node devops/scripts/theme-initialize.mjs --check "$theme_directory"
 (cd "$theme_directory" && runtime_emulsify system install \
   --repository https://github.com/emulsify-ds/emulsify-ui-kit.git \
   --checkout 1.9.0 --variant drupal --all --yes)
-# Keep the security overrides and one coherent Storybook peer cohort visible.
-# Addons at 10.6.5 currently require a Storybook host that is not published.
+# The published CLI and Core still need these dependency fixes.
+# Storybook addons must match their published host version.
 runtime_npm --prefix "$theme_directory" pkg set \
   'overrides.@emulsify/cli.simple-git=^4.0.2' \
   'overrides.@emulsify/core.pa11y=^10.0.0' \

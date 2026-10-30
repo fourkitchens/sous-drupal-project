@@ -24,7 +24,7 @@ jobs:
             ddev npm ci --include=dev
             ddev npm run theme-ci
             ddev npm run lint
-            sh devops/scripts/theme-build.sh
+            ddev npm run theme-build
 
 workflows:
   build:

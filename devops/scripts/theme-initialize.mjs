@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-// Normalize the pinned upstream starter once during development bootstrap.
-// Routine installs/builds remain check-only and never rewrite project source.
+// The pinned upstream starter does not yet pass Core's lint and asset checks.
 import { createRequire } from 'node:module';
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -28,7 +27,7 @@ const scss = require('postcss-scss'); // Already required by Core's Stylelint co
 manifest.scripts.lint = 'npm run lint-js && npm run lint-styles';
 manifest.scripts['lint-fix'] = 'npm run lint-js -- --fix && npm run lint-styles -- --fix';
 manifest.scripts.format = 'npm run lint-fix && npm run prettier-fix';
-// Keep all authored files in scope; Core emits dist and the root SDC mirror.
+// Core's generated output would otherwise be linted as authored source.
 for (const output of ['dist', '.out', '.coverage', 'components']) {
   const flag = `--ignore-pattern '${output}/**'`;
   for (const task of ['lint-js', 'lint-styles']) {
@@ -59,7 +58,7 @@ function normalize(folder) {
           declaration.prop = 'clip-path';
           declaration.value = 'inset(50%)';
         }
-        // MDN defines break-word as normal + overflow-wrap:anywhere.
+        // Both declarations preserve the deprecated value's wrapping behavior.
         if (declaration.prop === 'word-break' && declaration.value === 'break-word') {
           declaration.value = 'normal';
           declaration.cloneAfter({ prop: 'overflow-wrap', value: 'anywhere' });
@@ -70,8 +69,8 @@ function normalize(folder) {
   }
 }
 normalize(join(directory, 'src'));
-// UI Kit 1.9's story imports two absent example SVGs. Its Twig component
-// already renders the shipped star icon; use that same asset for the examples.
+// The Drupal variant omits the example SVGs.
+// Its Twig already uses the shipped star icon.
 const announcement = join(directory, 'src/components/announcement/announcement.stories.js');
 writeFileSync(announcement, readFileSync(announcement, 'utf8').replaceAll(
   /\.\.\/\.\.\/\.\.\/assets\/images\/example\/announcement-icon--(?:dark|light)\.svg/g,

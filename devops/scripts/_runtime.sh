@@ -1,5 +1,4 @@
 #!/bin/sh
-# DDEV helpers shared by entry points two levels below the project root.
 set -eu
 SOUS_PROJECT_ROOT="$(CDPATH='' cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$SOUS_PROJECT_ROOT" || exit

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Download to a partial file and replace the destination only after validation.
+# A failed download must not replace the last usable backup.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
 [ "$#" -le 1 ] || { echo 'Usage: get-db.sh [DESTINATION.sql|DESTINATION.sql.gz]' >&2; exit 2; }

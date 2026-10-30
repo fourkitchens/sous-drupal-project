@@ -11,8 +11,6 @@
     "confex": "./devops/scripts/confex.sh",
     "get-db": "./devops/scripts/get-db.sh",
     "install-recipe": "./devops/scripts/install-recipe.sh",
-    "husky:commit-msg": "commitlint --edit $1",
-    "husky:pre-commit": "npm run lint",
     "import-data": "./devops/scripts/import-data.sh",
     "lint": "npm run lint:php && npm run lint:js && (test ! -d \"web/themes/custom/$npm_package_config_theme\" || npm --prefix \"web/themes/custom/$npm_package_config_theme\" run lint)",
     "lint:js": "eslint .",
@@ -21,14 +19,11 @@
     "prettier": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run prettier -- --check",
     "local-data-bak": "./devops/scripts/local-data-bak.sh",
     "prepare": "husky",
-    "publish": "semantic-release",
-    "publish-test": "semantic-release --dry-run --debug",
     "theme-build": "./devops/scripts/theme-build.sh",
     "theme-watch": "./devops/scripts/theme-watch.sh",
     "theme-ci": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" ci --include=dev",
     "theme-storybook": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run storybook-build -- --output-dir ../../../storybook",
-    "release": "semantic-release",
-    "release:dry-run": "semantic-release --dry-run"
+    "release": "semantic-release"
   },
   "keywords": [
     "sous"

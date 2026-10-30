@@ -1,5 +1,4 @@
 #!/bin/sh
-# Restore a local site from an optional SQL backup.
 set -eu
 . "$(dirname "$0")/_runtime.sh"
 runtime_start
