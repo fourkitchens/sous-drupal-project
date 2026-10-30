@@ -35,6 +35,7 @@ actionlint .github/workflows/ci.yml
 Commit candidates before smoke testing: the runner exports `HEAD` with
 `git archive`, registers that template as version `8.0.0` in a Composer path
 repository and runs the real host `composer create-project`.
+Run `bash devops/integration/run.sh --help` for options, checks and cleanup details.
 
 ```sh
 bash devops/integration/run.sh --option default --artifacts /tmp/sous-default

@@ -20,8 +20,8 @@ Site docs explain setup, development and maintenance.
   here. Use a Composer patch with an issue link, or fix the upstream project.
 - No defensive checks for situations the scripts can't reach.
   Setup scripts only run in local DDEV.
-- Comments: at most two lines, plain English, explaining why.
-  Don't narrate edge cases.
+- Comments: at most two lines, plain English. Explain why; in scripts longer
+  than about 40 lines, also head each function or section with what it does.
 - Docs: edit an existing file rather than adding one.
 
 ## Size
