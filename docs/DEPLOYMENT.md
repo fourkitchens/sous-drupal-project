@@ -1,13 +1,25 @@
-# Build and deploy a site
+# Maintain and deploy this site
 
-Build from the site's committed lockfiles and complete configuration export.
-Configure its hosting, secrets, database, uploaded files, backups, and rollback
-procedure separately. Sous supplies build commands and CI examples; publishing
-a Sous package does not deploy a site.
+Build from committed lockfiles and the complete configuration export.
+Set up hosting, secrets, uploaded files, backups and rollback for this site.
+Use [Setup](SETUP.md) locally and [Development](DEVELOPMENT.md) for daily commands.
 
-## Build the site
+## Platform versions
 
-From the project root:
+The manifests set requirements; lockfiles record installed versions.
+DDEV supplies the local runtime. Project creation also needs host PHP and Composer.
+
+| Component | Version / source |
+| --- | --- |
+| Drupal / PHP | `^11.4.11` / `^8.4` in `composer.json`; DDEV PHP 8.4 |
+| Composer / Drush | 2.x / `^13.8.0` |
+| DDEV / MariaDB | `>=1.25.2 <2` / 10.11 in `.ddev/config.yaml` |
+| Node.js / npm | 24.x in `.nvmrc` and DDEV / bundled npm |
+| Sous recipes | `^2.0` in `composer.json` |
+| Emulsify / Tools | `^7.3.0` / `^2.2.2` in the Sous Emulsify recipe |
+| Emulsify Core / CLI / UI Kit | 4.5.0 / `^2.4.1` / 1.9.0 Drupal variant |
+
+## Build and deploy
 
 ```sh
 ddev start
@@ -15,70 +27,65 @@ ddev composer validate --no-check-publish
 ddev composer build-assets
 ddev composer check-platform-reqs
 ddev npm run lint
-```
-
-`build-assets` installs production PHP dependencies, installs the root and theme
-npm dependencies needed for building, and compiles the theme. Build Storybook
-separately with `ddev npm run theme-storybook` if the site publishes that preview.
-[Build tools](BUILD_TOOLS.md) lists the individual tasks.
-
-Run dependency audits as part of the project's release checks:
-
-```sh
 ddev composer audit --abandoned=report
 ddev npm audit
 ddev npm --prefix "web/themes/custom/<theme>" audit
 ```
 
-Resolve findings or document how the project handles them before deployment.
+`build-assets` installs production PHP dependencies and the npm tools needed to
+build the theme. Build optional Storybook with `ddev npm run theme-storybook`.
+Resolve audit findings before release.
 
-Package these files for the server:
+Ship `vendor/`, Drupal core, contributed extensions, libraries, recipes, custom
+source, configuration, settings and deployment scripts. Include the theme's
+`dist/` and generated `components/` despite their source Git ignores.
+Exclude `node_modules`, local settings, caches and database backups.
+Keep secrets and uploaded/private files on the host. Use `web/` as the document root.
 
-- Production PHP dependencies in `vendor/`, Drupal core, contributed extensions,
-  libraries, and the Composer-managed recipes in `web/recipes/`.
-- Custom modules and theme source, the theme's generated `components/` mirror,
-  and its compiled `dist/` directory.
-- The complete configuration export, environment settings and services files,
-  and project update/deployment scripts.
+Test against a database copy. Back up the destination database and files,
+deliver the build, then run its Drush from the destination project root:
 
-Include generated theme output even though source Git ignores it. Exclude
-`node_modules`, local settings, caches, database backups, and local reference
-files. Include `web/storybook` only when publishing it is intended. Keep secrets
-and uploaded/private files in the hosting environment. Set the public document
-root to `web/`; configuration and `vendor/` belong outside it.
+```sh
+vendor/bin/drush deploy --yes --uri=https://YOUR_SITE
+```
 
-## Deploy code and configuration
+This applies database updates, configuration, caches and deployment hooks.
+Check pages, editing, assets, logs, cron, queues and integrations.
+Follow the site's rollback procedure if deployment fails.
 
-1. Test the build and configuration changes against a database copy. Back up the
-   destination database and files before deploying.
-2. Deliver the build through the site's deployment pipeline. Supply its database
-   settings and writable paths. Use the versions in [Platform](PLATFORM.md) and
-   disable server debugging extensions.
-3. From the destination's project root, deploy its configuration and database
-   updates using the project's Drush:
+## Update dependencies and configuration
 
-   ```sh
-   vendor/bin/drush deploy --yes --uri=https://YOUR_SITE
-   ```
+Read release notes, requirements and patch changes. Update selected packages
+on a branch with a local database copy; keep Drupal core packages aligned:
 
-   Replace the URI with the destination URL. This runs `drush deploy --yes`,
-   including database updates, configuration import, cache work, and deployment
-   hooks.
-4. Check important pages, administrator access, rendered assets, logs, cron,
-   queues, and project integrations.
+```sh
+ddev composer update vendor/package --with-all-dependencies
+ddev composer validate --no-check-publish
+ddev composer check-platform-reqs
+ddev composer audit
+ddev drush updatedb --yes
+ddev drush cache:rebuild
+ddev npm run confex
+git diff -- config
+ddev npm run confim
+```
 
-The server needs PHP and the installed project dependencies. Build assets with
-DDEV before delivering them. Run deployment through the project's Drush directly.
-Apply recipe changes explicitly.
+Commit lockfiles and the complete `config/default` export. Confirm the sync path
+with `ddev drush status --field=config`. Use settings overrides for host values.
+Recipes run once and unpack; package updates do not replay configuration.
+Adopt intended recipe changes explicitly and migrate content before removing fields.
+Remove local path repositories and resolve published packages before committing locks.
+Uninstall modules in Drupal before removing their Composer packages.
+Update theme dependencies and checks as described in [Development](DEVELOPMENT.md).
 
-If deployment fails, stop dependent steps and follow the site's rollback
-procedure. A schema or data change can require restoring the database together
-with compatible code. Local `setup.sh` and `import-data.sh` replace and sanitize
-a database; use them for development, not production deployment.
+Keep patch definitions in `patches/patches.json`; commit `patches.lock.json`.
+After changes, run `ddev composer patches-relock` and `ddev composer patches-doctor`.
+Use `ddev composer patches-repatch` locally to reinstall and verify patched packages.
+After Entity Usage 2 to 5 updates, run `ddev drush entity-usage:recreate` and check references.
+Preserve administrator accounts and roles; account assignments live in each database.
 
-## Choose site CI
+## Set up site CI
 
-Copy one of the generated-site examples into the site's repository.
 For GitHub Actions:
 
 ```sh
@@ -93,23 +100,15 @@ mkdir -p .circleci
 cp assets/ci/circleci/config.yml .circleci/config.yml
 ```
 
-Both examples start DDEV, validate Composer metadata, install locked PHP and npm
-dependencies, run lint, and build production theme assets. They do not deploy
-or publish a release. Add the project's checks, artifact storage, deployment
-credentials, and release conditions. Replace theme tasks if the site has no
-Emulsify theme. `.gitattributes` export-ignore rules omit the starter's own
-GitHub workflows from release archives; these examples are the site's starting
-point.
+The examples use DDEV to install locked dependencies, lint and build the theme.
+Adapt theme commands for a site without Emulsify. Add artifact storage,
+deployment credentials and release conditions for your hosting.
 
-## Deploy with Pantheon
-
-For a project using Pantheon and an authenticated Terminus installation, the
-optional adapter accepts a site and environment:
+For Pantheon with authenticated Terminus, run:
 
 ```sh
 bash devops/ci/drush-config-import SITE ENV
 ```
 
-It runs `terminus -n drush SITE.ENV -- deploy --yes`. The same values can be set
-with `TERMINUS_SITE` and `TERMINUS_ENV`. Supply host settings through the site's
-deployment pipeline.
+It invokes remote `drush deploy --yes`. `TERMINUS_SITE` and `TERMINUS_ENV` can
+supply the arguments. Keep local `setup.sh` database restores in DDEV.

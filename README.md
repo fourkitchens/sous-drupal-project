@@ -2,56 +2,38 @@
 
 # Sous Drupal starter
 
-Create a Drupal site with Gin administration, an Emulsify theme and Page and
-Frontpage content types. Choose Layout Builder, Paragraphs or a basic Body field,
-or install administration tools without the content types. Config Split is a
-separate option.
+Sous creates a Drupal site with Gin administration, Navigation and an Emulsify
+theme. This Composer template supplies DDEV, settings and setup commands;
+[Sous packages](https://github.com/fourkitchens/sous-drupal-packages) supply recipes.
+Your site owns its configuration, custom code, dependencies and deployment.
 
-This repository provides the application template and setup commands.
-[Sous Drupal Packages](https://github.com/fourkitchens/sous-drupal-packages)
-provides the recipes. Each site keeps its own configuration, custom code,
-lockfiles and deployment process.
+## Installation options
 
-## Create and develop a site
+| Choice | Content setup |
+| --- | --- |
+| `0` Default | Page and Frontpage with Body, metadata, SEO, teasers and title-based aliases; Page also has tags |
+| `1` Layout Builder | Page and Frontpage with field blocks, Basic inline blocks and per-node layout overrides |
+| `2` Paragraphs | Page and Frontpage with Body and Image, Text, Text with Media and Video components |
+| `3` Admin only | Administration and theme without Page or Frontpage |
 
-Start with [setup](docs/SETUP.md), then use these guides:
+Config Split is a separate yes/no choice, defaulting to no. Layout Builder and
+Paragraphs are separate compositions; installation downloads only your selection.
 
-- [Features and installation choices](docs/FEATURES.md)
-- [Platform requirements](docs/PLATFORM.md)
-- [Build tools and theme commands](docs/BUILD_TOOLS.md)
-- [Local settings and Config Split](docs/SETUP.md#local-and-host-settings)
-- [Site updates and configuration](docs/MAINTENANCE.md)
-- [Site contribution workflow](docs/CONTRIBUTING.md)
-- [Deployment and site CI](docs/DEPLOYMENT.md)
+## Quickstart
 
-After setup, build or watch theme assets with:
+Install PHP 8.4, Composer 2, Docker and DDEV on your computer, then run:
 
 ```sh
-ddev npm run theme-build
-ddev npm run theme-watch
+composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
+cd my-site
 ```
 
-## Work on Sous itself
+Composer prompts for the options above, installs Drupal and prints a login link.
 
-Use a source checkout to change the starter or recipes. Keep it separate from
-client sites. Commit candidate changes, then run a smoke install with host PHP,
-Composer, Docker and DDEV available:
+- [Set up, restore or add recipes](docs/SETUP.md)
+- [Develop, build and check the theme](docs/DEVELOPMENT.md)
+- [Deploy the site](docs/DEPLOYMENT.md)
 
-```sh
-bash devops/integration/run.sh --option default
-bash devops/integration/run.sh --option paragraphs --config-split \
-  --packages /path/to/sous-drupal-packages
-```
+To change Sous itself, use the [maintainer guide](docs/maintainers/MAINTAINING.md).
 
-- [Source changes and package responsibilities](docs/maintainers/MAINTENANCE.md)
-- [Source checks and installation smoke tests](docs/maintainers/INTEGRATION.md)
-- [GitHub Actions configuration](docs/maintainers/CI.md)
-- [Package and starter releases](docs/maintainers/RELEASES.md)
-- [Dependency reviews and support](docs/maintainers/OPERATIONS.md)
-
-`.gitattributes` export-ignore rules omit maintainer guides, product workflows,
-integration scripts and upstream tests from release archives.
-
-## License
-
-The scaffold uses [GPL-2.0-or-later](LICENSE). Dependencies retain their own notices.
+[GPL-2.0-or-later](LICENSE); dependencies retain their own notices.
