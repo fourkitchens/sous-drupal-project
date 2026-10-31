@@ -36,6 +36,14 @@ vendor/bin/drush deploy -y --uri=https://YOUR_SITE
 vendor/bin/drush @mysite.prod deploy -y
 ```
 
+The shared configuration script supports the same deployment from CI, hosting or a laptop:
+
+```sh
+npm run confim -- --uri=https://YOUR_SITE
+npm run confim -- @mysite.prod
+```
+
+It uses DDEV in a local DDEV checkout and installed Drush on hosts and CI runners without DDEV.
 Add deployment steps in `hook_deploy_NAME()`; verify pages, editing, assets, queues and logs afterward.
 Acquia aliases come from `acli remote:aliases:download`; Pantheon aliases come from `terminus aliases`.
 Configure SSH keys and alias discovery for Drush, or define other hosts in `drush/sites/*.site.yml`.

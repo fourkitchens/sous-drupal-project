@@ -60,8 +60,9 @@ Edit its source and run `npm run theme-watch`; see [Build Tools](docs/BUILD_TOOL
 
 ## Helper scripts
 
-Run `npm run <command>` from your computer. Local scripts in `devops/scripts/`
-call DDEV for PHP, Drush and database operations; Node tools run directly.
+Run `npm run <command>` through the shell scripts in `devops/scripts/`.
+Shared Drupal commands use DDEV locally and installed tools in CI or on hosts; Node tools run directly.
+Setup, rebuild, database import and backup remain local DDEV commands.
 
 | Command | Purpose |
 | --- | --- |

@@ -38,6 +38,7 @@ npm run confex
 ```
 
 Recipes apply once and unpack; review and commit their dependencies and complete configuration export.
+The recipe and configuration scripts also use installed Drush directly in CI and on hosts without DDEV.
 
 ## Local settings and Config Split
 

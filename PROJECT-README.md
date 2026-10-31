@@ -25,7 +25,7 @@ npm run setup -- reference/site-db.sql.gz
 ```
 
 Use `npm run rebuild` after switching branches and `npm run theme-watch` for theme development.
-Run npm scripts on your computer; scripts use DDEV for PHP, Drush and the database.
+Local setup and database resets use DDEV; shared Drupal commands also run in CI and on hosts.
 
 ## Documentation
 

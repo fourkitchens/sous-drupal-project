@@ -38,6 +38,7 @@ It copies `PATH/packages/*` at version `2.0.0` and mounts that path read-only in
 Omit the override to verify published ZIPs before release.
 The runner checks settings, bootstrap, HTTP, recipes, generated files, deployment and config status.
 Default also runs host `composer ci`, backup, `npm run setup` and `npm run rebuild`.
+Check shared Drupal scripts both through local DDEV and with native tools; keep database resets local.
 Logs and `result.json` stay in the artifacts directory; `--help` covers retention and cleanup.
 
 ## Installer choices

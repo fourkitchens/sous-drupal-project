@@ -1,6 +1,8 @@
 # Build Tools
 
-Use Node.js from `.nvmrc` on your computer. Run npm scripts from the project root.
+Use Node.js from `.nvmrc`. Run npm scripts from the project root.
+Shared Drupal commands use DDEV in a local DDEV checkout and installed tools in CI, on hosts or inside its container.
+Setup, rebuild, import-data and local-data-bak remain local DDEV operations.
 
 ## Theme
 
@@ -35,6 +37,7 @@ npm run confim
 
 Commit the complete `config/default` export, including UUIDs; use [settings overrides](SETUP.md#local-settings-and-config-split) for environment values.
 `confim` runs Drush deploy, including `hook_deploy_NAME()` steps.
+Both configuration commands accept a leading Drush alias, such as `npm run confim -- @mysite.prod`.
 
 ### Linting
 

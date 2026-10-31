@@ -35,7 +35,8 @@ Checks, in order:
      only the selected provider's
      CI files remain, with no product ci.yml or unselected provider files.
      The generated release configuration loads in Node.
-  6. Drush deploy succeeds and config:status reports no changes.
+  6. Configuration scripts work through DDEV and with native tools;
+     Drush deploy succeeds and config:status reports no changes.
   7. For the default option, run Composer CI, back up, restore with npm run setup,
      and reset with npm run rebuild; check bootstrap after each reset.
 
@@ -330,7 +331,16 @@ check_generated_files() {
 
 # Deploy the site and require no remaining configuration changes.
 check_clean_deploy() {
-  step deploy ddev drush deploy --yes
+  step config-export npm run confex -- @self
+  step deploy npm run confim -- @self
+  step native-config-export ddev exec --raw sh devops/scripts/confex.sh @self
+  step native-deploy ddev exec --raw sh devops/scripts/confim.sh @self
+  # The container has native PHP but no ddev command, as on CI and hosts.
+  # shellcheck disable=SC2016
+  step native-php ddev exec --raw env -u IS_DDEV_PROJECT \
+    sh devops/scripts/run-php.sh php -r \
+    'if ($argv[1] !== "argument with spaces") { exit(1); } echo "Native PHP works.\n";' \
+    'argument with spaces'
   # Keep Drush notices in their own stderr file so config-status.log parses as JSON.
   # shellcheck disable=SC2016
   step config-status bash -c \

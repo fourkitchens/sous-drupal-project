@@ -5,6 +5,8 @@ set -eu
 
 sous_version='^2.0'
 
+printf '%s\n\n' "Welcome to Sous! Let's get cooking."
+
 # Collect choices before Composer, npm or Drush can consume the input stream.
 if [ "${SOUS_CONTENT+x}" != x ]; then
   printf 'Content: [0] Default [1] Layout Builder [2] Paragraphs [3] Admin only: '
@@ -74,6 +76,8 @@ case "$SOUS_CI" in
   *) echo 'SOUS_CI must be circleci, github, gitlab, or none.' >&2; exit 2 ;;
 esac
 
+printf '\nOrder received. Aprons on!\n\n'
+
 # DDEV and the theme derive their names from the target project directory.
 # Store the theme name once so routine npm commands use the same directory.
 project_name=$(basename "$PWD" | tr '[:upper:] _' '[:lower:]--' | tr -cd 'a-z0-9-')
@@ -101,6 +105,7 @@ rm -rf assets/ci
 # Renaming Composer's root package invalidates its lock hash.
 if [ -f composer.lock ]; then ddev composer update --lock --no-install --no-interaction; fi
 # Install project tools before Drush starts applying the recipes.
+printf '\nStocking the pantry: installing project tools.\n\n'
 ddev composer install
 npm ci --include=dev
 # Minimal leaves the selected recipes in charge of the site's configuration.
@@ -111,6 +116,7 @@ mkdir -p web/modules/custom
 touch web/modules/custom/.gitkeep
 
 # Build the new theme before enabling it so Drupal can serve its assets.
+printf '\nPlating the theme: this course takes a few minutes.\n\n'
 ddev drush -y emulsify "$theme"
 sh devops/scripts/theme-setup.sh "web/themes/custom/$theme"
 ddev drush -y theme:install "$theme"
@@ -122,6 +128,7 @@ ddev drush -y user:role:add superuser superuser_1
 ddev drush -y user:role:add superuser admin
 
 # Apply optional recipes before exporting the site's complete configuration.
+printf '\nAdding your chosen recipes to the pot.\n\n'
 set --
 if [ -n "$content" ]; then
   set -- "fourkitchens/$content:$sous_version"
@@ -139,6 +146,7 @@ for recipe in $recipes; do
   sh devops/scripts/install-recipe.sh "fourkitchens/$recipe"
 done
 # Validate the finished site and its login before retiring this installer.
+printf '\nFinal taste test: exporting configuration and checking the project.\n\n'
 ddev drush -y config:export
 # Recipes have unpacked their dependencies; the setup-only repository can go.
 node -e '
@@ -162,4 +170,26 @@ rm -rf web/recipes/sous-*
 rm devops/scripts/sous-build.sh \
   devops/scripts/theme-setup.sh \
   devops/scripts/theme-initialize.mjs
-printf '\nOrders up! Your Drupal site is ready.\n'
+# Celebrate only after installation and one-time cleanup have succeeded.
+cat <<'EOF'
+
+       .--,--.
+       `.  ,.'
+        |___|
+        :o o:   O
+       _`~^~'_  |
+     /'   ^   `\=)
+   .'  _______ '~|
+   `(<=|     |= /'
+       |     |
+       |_____|
+~~~~~~~ ===== ~~~~~~~~
+
+//////////////
+ ORDERS UP!
+ Your Drupal site is ready.
+//////////////
+
+Next course: npm run theme-watch
+
+EOF
