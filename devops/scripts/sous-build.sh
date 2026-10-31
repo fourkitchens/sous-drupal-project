@@ -143,5 +143,7 @@ ddev composer validate --no-check-publish
 ddev drush uli --name=sous_chef
 # Retire the creation hook only after installation succeeds.
 ddev composer config --unset scripts.post-create-project-cmd
-rm devops/scripts/sous-build.sh
+rm devops/scripts/sous-build.sh \
+  devops/scripts/theme-setup.sh \
+  devops/scripts/theme-initialize.mjs
 printf '\nOrders up! Your Drupal site is ready.\n'

@@ -31,7 +31,8 @@ Checks, in order:
   2. Drupal bootstraps successfully.
   3. The front page returns HTTP 200.
   4. Page, Paragraphs, Layout Builder and Config Split match the chosen options.
-  5. Maintainer tooling and assets/ci are absent; only the selected provider's
+  5. Maintainer tooling, one-time theme setup files and assets/ci are absent;
+     only the selected provider's
      CI files remain, with no product ci.yml or unselected provider files.
      The generated release configuration loads in Node.
   6. Drush deploy succeeds and config:status reports no changes.
@@ -285,10 +286,11 @@ PHP
     SOUS_SMOKE_RECIPES="$recipes" vendor/bin/drush php:eval "$composition_checks"
 }
 
-# Check that archive exclusions kept maintainer tooling out of the generated site.
+# Check that sites omit maintainer tooling and one-time theme setup files.
 check_product_files_absent() {
   local path
-  for path in devops/integration docs/maintainers; do
+  for path in devops/integration docs/maintainers \
+    devops/scripts/theme-setup.sh devops/scripts/theme-initialize.mjs; do
     step "absent-${path//\//-}" test ! -e "$path"
   done
 }

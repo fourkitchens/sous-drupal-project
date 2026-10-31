@@ -18,7 +18,6 @@ npm run theme-build
 Keep development dependencies installed for builds. Commit both npm manifests
 and lockfiles. First setup normalizes the pinned UI Kit 1.9.0 for the current
 Emulsify Core 4.5.0 tools and keeps its compatibility overrides in the theme.
-Use routine build tasks after setup; `theme-setup.sh` initializes a theme once.
 
 | Command | Result |
 | --- | --- |

@@ -10,8 +10,8 @@ node devops/scripts/theme-initialize.mjs --check "$theme_directory"
 (cd "$theme_directory" && npx emulsify system install \
   --repository https://github.com/emulsify-ds/emulsify-ui-kit.git \
   --checkout 1.9.0 --variant drupal --all --yes)
-# The published CLI and Core still need these dependency fixes.
-# Storybook addons must match their published host version.
+# Upstream: https://github.com/emulsify-ds/emulsify-core/pull/322 https://github.com/emulsify-ds/emulsify-cli/pull/377
+# Remove when UI Kit and Core releases pass lint and build without this.
 npm --prefix "$theme_directory" pkg set \
   'overrides.@emulsify/cli.simple-git=^4.0.2' \
   'overrides.@emulsify/core.pa11y=^10.0.0' \
@@ -33,5 +33,3 @@ fi
 # Normalize the pinned starter before its first build can consume that source.
 node devops/scripts/theme-initialize.mjs "$theme_directory"
 npm --prefix "$theme_directory" run build
-# Mark success only after normalization and the first build have both passed.
-touch "$theme_directory/.sous-initialized"

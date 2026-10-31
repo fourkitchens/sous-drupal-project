@@ -1,17 +1,15 @@
 #!/usr/bin/env node
 
-// The pinned upstream starter does not yet pass Core's lint and asset checks.
-// Keep these temporary changes limited to the generated theme's first setup.
+// Upstream: https://github.com/emulsify-ds/emulsify-ui-kit/pull/189 https://github.com/emulsify-ds/emulsify-core/pull/322 https://github.com/emulsify-ds/emulsify-drupal/pull/385
+// Remove when UI Kit and Core releases pass lint and build without this.
 import { createRequire } from 'node:module';
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 // The check-only pass runs before system installation can touch theme source.
 const checkOnly = process.argv[2] === '--check';
 const directory = resolve(process.argv[checkOnly ? 3 : 2]);
-const marker = join(directory, '.sous-initialized');
-if (existsSync(marker)) throw new Error('Theme is already initialized. Use theme-ci/theme-build for existing source.');
 const metadata = JSON.parse(readFileSync(join(directory, 'project.emulsify.json'), 'utf8'));
 if (metadata.project?.generatedFrom !== 'emulsify-drupal' || !metadata.project.generatedFromVersion?.startsWith('7.')) {
   throw new Error('Theme initialization requires an Emulsify Drupal 7 starter.');
