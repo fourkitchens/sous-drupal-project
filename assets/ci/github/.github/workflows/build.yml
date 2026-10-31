@@ -67,4 +67,4 @@ jobs:
   #         node-version-file: .nvmrc
   #     - run: composer build-assets
   #     - run: your-host-delivery-command
-  #     - run: sh devops/scripts/confim.sh @your-site.env
+  #     - run: vendor/bin/drush @your-site.env deploy -y

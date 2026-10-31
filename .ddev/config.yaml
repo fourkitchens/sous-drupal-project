@@ -15,17 +15,6 @@ ddev_version_constraint: ">=1.25.2 <2"
 web_environment: []
 corepack_enable: false
 nodejs_version: "24"
-# Native browser libraries for the selected Emulsify accessibility tooling.
-webimage_extra_packages:
-    - libnss3
-    - libatk-bridge2.0-0t64
-    - libxkbcommon0
-    - libasound2t64
-    - libgbm1
-    - libxcomposite1
-    - libxdamage1
-    - libxfixes3
-    - libxrandr2
 
 # Key features of DDEV's config.yaml:
 

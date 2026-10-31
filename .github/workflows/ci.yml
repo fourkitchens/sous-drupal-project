@@ -46,7 +46,7 @@ jobs:
       - name: Install ShellCheck
         run: pipx install shellcheck-py==0.11.0.1
       - name: Check shell scripts
-        run: find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
+        run: find devops -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
       - run: composer validate --no-check-publish
       - name: Parse site CI templates
         run: |
@@ -78,6 +78,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
         with:
           php-version: '8.4'

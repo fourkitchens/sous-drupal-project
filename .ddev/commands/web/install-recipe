@@ -1,8 +1,0 @@
-#!/bin/sh
-
-## Description: Install a Drupal recipe
-## Usage: install-recipe [full package name]
-## Example: ddev install-recipe fourkitchens/sous-admin
-
-set -eu
-exec "$DDEV_APPROOT/devops/scripts/install-recipe.sh" "$@"

@@ -40,7 +40,7 @@ jobs:
   #     - node/install
   #     - run: timeout 30m composer build-assets
   #     # Deliver the build to your host here.
-  #     - run: sh devops/scripts/confim.sh @your-site.env
+  #     - run: vendor/bin/drush @your-site.env deploy -y
 
 workflows:
   # Project triggers select pull requests/main pushes; manual runs use this too.

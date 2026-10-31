@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Check a generated site and remove its temporary DDEV project on exit.
+# Run: bash devops/integration/run.sh [OPTIONS].
 set -euo pipefail
 
 # Describe the smoke test and its options without creating a site.
@@ -32,7 +34,8 @@ Checks, in order:
   5. Maintainer tooling and assets/ci are absent; only the selected provider's
      CI files remain, with no product ci.yml or unselected provider files.
   6. Drush deploy succeeds and config:status reports no changes.
-  7. For the default option, run Composer CI, back up and restore, then bootstrap.
+  7. For the default option, run Composer CI, back up, restore with npm run setup,
+     and reset with npm run rebuild; check bootstrap after each reset.
 
 The artifacts directory keeps each step's log, config-status.stderr,
 cleanup.log (unless --keep), and result.json with status, site, option,
@@ -42,7 +45,8 @@ With --keep, use the site path in result.json to find PROJECT and WORKSPACE:
   chmod -R u+w WORKSPACE
   rm -rf WORKSPACE
 
-Requirements: git, Composer, DDEV with Docker running, jq and curl.
+Requirements: git, Composer and Node from .nvmrc on your computer;
+DDEV with Docker running, jq and curl.
 EOF
 }
 
@@ -328,13 +332,16 @@ check_clean_deploy() {
   jq -e 'length == 0' "$artifacts/config-status.log"
 }
 
-# Back up and restore the database, then confirm Drupal still bootstraps.
+# Exercise backup, fresh-clone setup and quick branch rebuild, checking each reset.
 check_backup_restore() {
-  step backup ddev npm run local-data-bak
+  step backup npm run local-data-bak
   local database_dumps=(reference/db-*.sql.gz)
-  step restore sh devops/scripts/setup.sh "${database_dumps[0]}"
+  step restore npm run setup -- "${database_dumps[0]}"
   step restored-bootstrap ddev drush status --field=bootstrap
   expect_line restored-bootstrap Successful
+  step rebuild npm run rebuild -- "${database_dumps[0]}"
+  step rebuilt-bootstrap ddev drush status --field=bootstrap
+  expect_line rebuilt-bootstrap Successful
 }
 
 # Run each stage as a plain command so set -e stops at the first failure.
@@ -357,9 +364,9 @@ main() {
   check_product_files_absent
   check_generated_files
   check_clean_deploy
-  # CI and restore are the same for every composition, so exercise them for default.
+  # CI and resets are the same for every composition, so exercise them for default.
   if [ "$option" = default ]; then
-    step ci ddev composer ci
+    step ci composer ci
     check_backup_restore
   fi
 }

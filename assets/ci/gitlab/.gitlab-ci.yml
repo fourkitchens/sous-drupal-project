@@ -52,4 +52,4 @@ build:
 #   script:
 #     - composer build-assets
 #     # Deliver the build to your host here.
-#     - sh devops/scripts/confim.sh @your-site.env
+#     - vendor/bin/drush @your-site.env deploy -y
