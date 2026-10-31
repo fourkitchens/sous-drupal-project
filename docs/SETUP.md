@@ -1,7 +1,8 @@
 # Set up a site
 
-Install PHP 8.4, Composer 2, Docker and DDEV on your computer.
-DDEV supplies Node.js, npm, Git and the site's PHP/database tools.
+Install PHP 8.4, Composer 2, Git, Docker, DDEV and Node.js from `.nvmrc`
+on your computer. Run npm scripts there; they call DDEV for PHP, Drush and
+database operations and run Node tools directly.
 
 ## Create a site
 
@@ -52,8 +53,8 @@ with `SOUS_RECIPES=sous-config-split` or from the recipe menu.
 
 Commit manifests, lockfiles, `patches.lock.json`, custom code/theme and the complete
 `config/default` export, including `core.extension.yml`, `system.site.yml` and UUIDs.
-Setup removes the exact `settings.php` entry from `.gitignore`; commit
-`web/sites/default/settings.php` too. Keep credentials in local or host settings.
+Commit `web/sites/default/settings.php` too. Keep credentials in local or host
+settings.
 Recipes are applied once during setup and then unpacked, so the site owns its
 dependencies and configuration. Package updates do not reapply configuration;
 adopt intended changes explicitly, export them and review the diff.
@@ -61,30 +62,38 @@ adopt intended changes explicitly, export them and review the diff.
 ## Restore or refresh locally
 
 Clone the site's repository and obtain its database backup and uploaded files.
-Run from the project root whenever the local site needs restoring:
+For a fresh clone, run from the project root:
 
 ```sh
-sh devops/scripts/setup.sh "reference/site-db.sql.gz"
+npm run setup -- "reference/site-db.sql.gz"
 ```
 
-This starts DDEV, installs dependencies, builds the theme, replaces and sanitizes
-the database, deploys configuration and prints a login link after success.
-It accepts `.sql` or `.sql.gz`; omit the argument to use `reference/site-db.sql.gz`.
-If that default is missing, `devops/hooks/download-db.sh` must write a backup to `$1`.
+Setup installs root and theme npm dependencies, builds the theme, then runs
+`rebuild`. After switching branches, use the quicker reset:
+
+```sh
+npm run rebuild -- "reference/site-db.sql.gz"
+```
+
+Rebuild starts DDEV, installs PHP dependencies, replaces and sanitizes the
+database, deploys configuration and prints a login link. It leaves Node
+dependencies and theme assets alone; run `npm run theme-ci` or
+`npm run theme-build` when those change.
+Both commands accept `.sql` or `.sql.gz`; omit the argument to use
+`reference/site-db.sql.gz`. If the backup is missing, `get-db.sh` runs. Edit
+`devops/scripts/get-db.sh` with the site's download command; `ddev pull` also works.
 
 To import and sanitize only, or save a timestamped backup under `reference/`:
 
 ```sh
-sh devops/scripts/import-data.sh "reference/site-db.sql.gz"
-sh devops/scripts/local-data-bak.sh
+npm run import-data -- "reference/site-db.sql.gz"
+npm run local-data-bak
 ```
 
 Sanitization sets user passwords to `admin` and emails to `user-%uid@example.com`.
-The optional `devops/hooks/post-import.sh` runs after local database imports.
-`devops/hooks/post-config-import.sh` runs after every `confim`, locally, in CI or
-on a host, and receives the Drush alias as `$1` when one was given.
-Use `runtime_drush` for project commands there; put local-only values in
-`settings.local.php`.
+Add site-specific post-import steps directly in `devops/scripts/import-data.sh`.
+Deployment steps belong in `hook_deploy_NAME()`, which Drush deploy runs.
+Put local-only values in `settings.local.php`.
 
 ## Add a recipe
 
@@ -93,8 +102,8 @@ then download, apply and export:
 
 ```sh
 ddev composer require fourkitchens/sous-content-types:^2.0
-ddev npm run install-recipe -- fourkitchens/sous-content-types
-ddev npm run confex
+npm run install-recipe -- fourkitchens/sous-content-types
+npm run confex
 ```
 
 The helper applies an installed recipe under `web/recipes/`; it does not download

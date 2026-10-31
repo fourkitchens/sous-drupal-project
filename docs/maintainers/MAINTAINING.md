@@ -21,8 +21,8 @@ separately. Test upgrades against a database copy and complete export.
 
 ## Verify changes
 
-Use Node from `.nvmrc`, PHP 8.4, Composer, Docker, DDEV, Git, Bash, jq, curl,
-ShellCheck 0.11.0 (`pipx install shellcheck-py==0.11.0.1`) and actionlint.
+Install Node from `.nvmrc` on your computer, plus PHP 8.4, Composer, Docker,
+DDEV, Git, Bash, jq, curl, ShellCheck 0.11.0 (`pipx install shellcheck-py==0.11.0.1`) and actionlint.
 Run from the repository root:
 
 ```sh
@@ -54,10 +54,12 @@ omit it to test the published Composer index. A package checkout uses absolute
 `PATH/packages/*`, version `2.0.0`, copied packages and
 a read-only DDEV mount at the same path. Test published ZIPs before releasing.
 
-Each smoke checks bootstrap, HTTP 200, composition, selected CI files, deployment
-and empty config status. CI template sources must be absent from generated sites.
-The default also runs `composer ci`, backs up and restores its database. Logs and
-`result.json` default to `.integration-results`; `--artifacts DIR` changes that.
+Each smoke checks that local settings stay disabled outside DDEV, bootstrap,
+HTTP 200, composition, selected CI files, deployment and empty config status.
+CI template sources must be absent from generated sites.
+The default runs `composer ci` directly on the computer or CI runner, backs up
+with `npm run local-data-bak`, restores with `npm run setup`, then exercises
+`npm run rebuild`. Logs and `result.json` default to `.integration-results`; `--artifacts DIR` changes that.
 `--keep` retains the site; afterward run `ddev delete -Oy PROJECT_NAME` and remove
 its temporary workspace. Otherwise cleanup runs on exit, including failures.
 

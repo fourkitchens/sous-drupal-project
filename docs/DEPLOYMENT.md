@@ -7,23 +7,24 @@ Use [Setup](SETUP.md) locally and [Development](DEVELOPMENT.md) for daily comman
 ## Platform versions
 
 The manifests set requirements; lockfiles record installed versions.
-DDEV supplies the local runtime. Project creation also needs host PHP and Composer.
+DDEV supplies local PHP and the database. Engineers install Node.js from
+`.nvmrc` on their computer; project creation also needs host PHP and Composer.
 
 | Component | Version / source |
 | --- | --- |
 | Drupal / PHP | `^11.4.11` / `^8.4` in `composer.json`; DDEV PHP 8.4 |
 | Composer / Drush | 2.x / `^13.8.0` |
 | DDEV / MariaDB | `>=1.25.2 <2` / 10.11 in `.ddev/config.yaml` |
-| Node.js / npm | 24.x in `.nvmrc` and DDEV / bundled npm |
+| Node.js / npm | 24.x from `.nvmrc` on the computer, CI or host / bundled npm |
 | Sous recipes | `^2.0` in `composer.json` |
 | Emulsify / Tools | `^7.3.0` / `^2.2.2` in the Sous Emulsify recipe |
 | Emulsify Core / CLI / UI Kit | 4.5.0 / `^2.4.1` / 1.9.0 Drupal variant |
 
 ## Build and deploy
 
-Run the shared build commands with PHP 8.4 and Node.js 24, locally, in CI or on
-the host. Tools run directly where DDEV is absent; local scripts use DDEV when
-it is installed. Run `composer ci` before preparing the production build:
+CI and hosting use PHP 8.4 and Node.js from `.nvmrc` directly; they never run
+the local setup or database scripts. CI runs `composer ci`. Prepare a production
+build with:
 
 ```sh
 composer build-assets
@@ -47,13 +48,13 @@ Test against a database copy. Back up the destination database and files,
 deliver the build, then apply configuration from the destination project root:
 
 ```sh
-sh devops/scripts/confim.sh --uri=https://YOUR_SITE
+vendor/bin/drush deploy -y --uri=https://YOUR_SITE
 ```
 
-From CI or a laptop, pass a leading Drush alias instead:
+From CI, pass a leading Drush alias instead:
 
 ```sh
-sh devops/scripts/confim.sh @mysite.prod
+vendor/bin/drush @mysite.prod deploy -y
 ```
 
 For Acquia, authenticate Acquia CLI and download aliases with
@@ -61,13 +62,13 @@ For Acquia, authenticate Acquia CLI and download aliases with
 For Pantheon, authenticate Terminus, run
 [`terminus aliases`](https://docs.pantheon.io/guides/drush/drush-aliases), and
 [add an SSH key](https://docs.pantheon.io/ssh-keys) for remote access.
-Make downloaded aliases available to the Drush process running the script;
-Drush requires global alias paths to be configured explicitly. For other hosts,
+Make downloaded aliases available to Drush; global alias paths must be
+configured explicitly. For other hosts,
 define [`drush/sites/*.site.yml`](https://www.drush.org/13.x/site-aliases/)
 with the remote host, SSH user, Drupal root and URI.
 
-`confim` runs Drush deploy for database updates, configuration, caches and
-deployment hooks, then the project's post-config-import hook with the alias.
+Drush deploy runs database updates, configuration, caches and deployment hooks.
+Add site-specific deployment steps in `hook_deploy_NAME()`.
 Check pages, editing, assets, logs, cron, queues and integrations.
 Follow the site's rollback procedure if deployment fails.
 
@@ -83,9 +84,9 @@ ddev composer check-platform-reqs
 ddev composer audit
 ddev drush updatedb --yes
 ddev drush cache:rebuild
-ddev npm run confex
+npm run confex
 git diff -- config
-ddev npm run confim
+npm run confim
 ```
 
 Commit lockfiles and the complete `config/default` export. Confirm the sync path
@@ -140,10 +141,10 @@ the default branch. Manual pipeline runs use the same workflow.
 Each template includes a commented deployment job or stage after its checks;
 nothing deploys by default. To enable it, restrict deployment to `main`, run
 `composer build-assets`, deliver the build to your host, then apply configuration
-with `sh devops/scripts/confim.sh @your-site.env`. Configure credentials and the
+with `vendor/bin/drush @your-site.env deploy -y`. Configure credentials and the
 Drush alias as described in [Build and deploy](#build-and-deploy).
 
 CircleCI sites deploying to Pantheon or Acquia can adopt
 [Four Kitchens' POTS](https://github.com/fourkitchens/pots) instead for its
 hosting-specific deployment workflows.
-Keep local `setup.sh` database restores in DDEV.
+Engineers use `npm run setup` and `npm run rebuild` for local database restores.

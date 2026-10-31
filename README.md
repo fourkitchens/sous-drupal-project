@@ -23,7 +23,8 @@ CI is a separate choice: CircleCI, GitHub Actions, GitLab CI/CD or None.
 
 ## Quickstart
 
-Install PHP 8.4, Composer 2, Docker and DDEV on your computer, then run:
+Install PHP 8.4, Composer 2, Git, Docker, DDEV and Node.js from `.nvmrc`
+on your computer, then run:
 
 ```sh
 composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
@@ -31,6 +32,8 @@ cd my-site
 ```
 
 Composer prompts for the options above, installs Drupal and prints a login link.
+For an existing site clone, use `npm run setup`; after switching branches, use
+`npm run rebuild`. Run `npm run theme-watch` while developing the theme.
 
 - [Set up, restore or add recipes](docs/SETUP.md)
 - [Develop, build and check the theme](docs/DEVELOPMENT.md)

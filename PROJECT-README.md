@@ -20,11 +20,16 @@ GitLab uses `.gitlab/merge_request_templates/Default.md` for merge requests.
 
 ## Work locally
 
-Clone this repository, obtain a database backup, then restore it:
+Install Node.js from `.nvmrc`, Git, Docker and DDEV on your computer.
+Clone this repository, obtain a database backup, then set it up:
 
 ```sh
-sh devops/scripts/setup.sh "reference/site-db.sql.gz"
+npm run setup -- "reference/site-db.sql.gz"
 ```
+
+Use `npm run rebuild` for a quick database reset after switching branches,
+and `npm run theme-watch` while working on the theme. Run npm commands on your
+computer; scripts call DDEV for PHP, Drush and database operations.
 
 [Setup](docs/SETUP.md) covers restoration, recipes and local settings.
 [Development](docs/DEVELOPMENT.md) covers theme commands and checks.
