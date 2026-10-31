@@ -1,8 +1,7 @@
 # Set up a site
 
-Install PHP 8.4, Composer 2, Git, Docker, DDEV and Node.js from `.nvmrc`
-on your computer. Run npm scripts there; they call DDEV for PHP, Drush and
-database operations and run Node tools directly.
+Install PHP 8.4, Composer 2, Git, Docker, DDEV and Node.js from `.nvmrc`.
+Run npm scripts on your computer; they call DDEV for PHP, Drush and the database.
 
 ## Create a site
 
@@ -11,25 +10,12 @@ composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
 cd my-site
 ```
 
-Composer's post-create hook runs `sous-build.sh` once: it names the project from
-its directory, stores the theme name in `package.json`'s `config.theme`, asks for
-content, optional recipes and CI, then installs in DDEV.
+Choose a content composition, optional recipes and CI before installation starts.
+The recipe menu offers package-defined extras; enter numbers or names separated
+by spaces or commas, or Enter for none. CI choices are CircleCI, GitHub Actions,
+GitLab CI/CD or None.
 
-The recipe menu offers packages marked as optional extras in the matching Sous
-release. Choose numbers or short names separated by spaces or commas; Enter or
-end of input skips extras. If the index is unavailable, add optional recipes later.
-
-```text
-Add recipes (numbers or names, separated by spaces; Enter for none):
-```
-
-The CI question follows:
-
-```text
-CI: [0] CircleCI [1] GitHub Actions [2] GitLab CI/CD [3] None:
-```
-
-For unattended installation, set all three answers:
+Set all answers for an unattended installation:
 
 ```sh
 SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-config-split SOUS_CI=gitlab \
@@ -37,81 +23,45 @@ SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-config-split SOUS_CI=gitlab \
 ```
 
 `SOUS_CONTENT` accepts `default`, `layout-builder`, `paragraphs` or `admin-only`
-(and menu numbers `0`–`3`). `SOUS_CI` accepts `circleci` (`0`), `github` (`1`),
-`gitlab` (`2`) or `none` (`3`). Noninteractive installation requires explicit
-content and CI choices. Set `SOUS_RECIPES` to short names separated by spaces or
-commas, or `SOUS_RECIPES=''` for none; setting it skips both the menu and index
-fetch. These names are not checked against the index, so unpublished path
-packages work and Composer rejects unknown names. Use `SOUS_CONTENT` for the
-content compositions; the base recipes are already included.
-
-The installer creates `sous_chef` with the `superuser` role, blocks `superuser_1`,
-builds the theme, applies the composition and optional recipes in the chosen
-order, exports configuration and prints a login link. Config Split is selected
-with `SOUS_RECIPES=sous-config-split` or from the recipe menu.
-
-Commit manifests, lockfiles, `patches.lock.json`, custom code/theme and the complete
-`config/default` export, including `core.extension.yml`, `system.site.yml` and UUIDs.
-Commit `web/sites/default/settings.php` too. Keep credentials in local or host
-settings.
-Recipes are applied once during setup and then unpacked, so the site owns its
-dependencies and configuration. Package updates do not reapply configuration;
-adopt intended changes explicitly, export them and review the diff.
+(numbers 0–3); use it for compositions. `SOUS_CI` accepts `circleci`, `github`,
+`gitlab` or `none` (numbers 0–3). Set `SOUS_RECIPES=''` to skip extras and the index.
+Commit manifests, lockfiles, custom source, `config/default` and
+`web/sites/default/settings.php`; keep credentials in local or host settings.
 
 ## Restore or refresh locally
 
-Clone the site's repository and obtain its database backup and uploaded files.
-For a fresh clone, run from the project root:
+Run from the project root with a database backup and uploaded files:
 
-```sh
-npm run setup -- "reference/site-db.sql.gz"
-```
+| Command | Purpose |
+| --- | --- |
+| `npm run setup -- reference/site-db.sql.gz` | Fresh clone: install Node dependencies, build assets, then rebuild |
+| `npm run rebuild -- reference/site-db.sql.gz` | Branch reset: start DDEV, install PHP dependencies, import, deploy and print a login |
+| `npm run import-data -- reference/site-db.sql.gz` | Import and sanitize the database only |
+| `npm run local-data-bak` | Save a timestamped backup under `reference/` |
 
-Setup installs root and theme npm dependencies, builds the theme, then runs
-`rebuild`. After switching branches, use the quicker reset:
-
-```sh
-npm run rebuild -- "reference/site-db.sql.gz"
-```
-
-Rebuild starts DDEV, installs PHP dependencies, replaces and sanitizes the
-database, deploys configuration and prints a login link. It leaves Node
-dependencies and theme assets alone; run `npm run theme-ci` or
-`npm run theme-build` when those change.
-Both commands accept `.sql` or `.sql.gz`; omit the argument to use
-`reference/site-db.sql.gz`. If the backup is missing, `get-db.sh` runs. Edit
-`devops/scripts/get-db.sh` with the site's download command; `ddev pull` also works.
-
-To import and sanitize only, or save a timestamped backup under `reference/`:
-
-```sh
-npm run import-data -- "reference/site-db.sql.gz"
-npm run local-data-bak
-```
-
-Sanitization sets user passwords to `admin` and emails to `user-%uid@example.com`.
-Add site-specific post-import steps directly in `devops/scripts/import-data.sh`.
-Deployment steps belong in `hook_deploy_NAME()`, which Drush deploy runs.
-Put local-only values in `settings.local.php`.
+Omit the backup argument to use `reference/site-db.sql.gz`; `.sql` also works.
+Edit `devops/scripts/get-db.sh` to fetch missing backups, or use `ddev pull`.
+Sanitization sets passwords to `admin` and emails to `user-%uid@example.com`.
+Add post-import steps in `devops/scripts/import-data.sh`; deployment steps belong
+in `hook_deploy_NAME()`. Rebuild leaves Node dependencies and theme assets alone.
 
 ## Add a recipe
 
-Review the [package guide](https://github.com/fourkitchens/sous-drupal-packages),
-then download, apply and export:
+Recipes apply once and then unpack; package updates do not replay configuration.
+Download, apply and export later additions:
 
 ```sh
-ddev composer require fourkitchens/sous-content-types:^2.0
-npm run install-recipe -- fourkitchens/sous-content-types
+ddev composer require fourkitchens/sous-config-split:^2.0
+npm run install-recipe -- fourkitchens/sous-config-split
 npm run confex
 ```
 
-The helper applies an installed recipe under `web/recipes/`; it does not download
-packages. Review and commit the changed manifest, lockfile and complete export.
 See [Development](DEVELOPMENT.md) for checks and [Deployment](DEPLOYMENT.md) for updates.
 
 ## Local settings and Config Split
 
-`settings.php` loads DDEV settings before local overrides:
+Local overrides load only in DDEV. Keep `settings.local.php` untracked;
+production settings should enable aggregation and hide errors.
 
 ```php
 if (getenv('IS_DDEV_PROJECT') === 'true') {
@@ -124,23 +74,7 @@ if (getenv('IS_DDEV_PROJECT') === 'true') {
 }
 ```
 
-DDEV supplies database credentials through `settings.ddev.php`.
-Local overrides load only in DDEV; a stray `settings.local.php` cannot apply
-development settings on a host. Keep it untracked. Export production defaults
-with aggregation on and errors hidden; supply credentials and services through
-the host.
-
-The optional Config Split recipe adds inactive `local` and `staging` definitions.
-Enable local in `settings.local.php`:
-
-```php
-$config['config_split.config_split.local']['status'] = TRUE;
-```
-
-Enable staging in that host's settings:
-
-```php
-$config['config_split.config_split.staging']['status'] = TRUE;
-```
-
+Config Split supplies inactive `local` and `staging` definitions. Enable local in
+`settings.local.php` with `$config['config_split.config_split.local']['status'] = TRUE;`
+and staging in host settings with `$config['config_split.config_split.staging']['status'] = TRUE;`.
 Keep both splits inactive in exported configuration.
