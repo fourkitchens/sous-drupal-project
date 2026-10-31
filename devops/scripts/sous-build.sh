@@ -154,6 +154,10 @@ ddev composer validate --no-check-publish
 ddev drush uli --name=admin
 # Retire the creation hook only after installation succeeds.
 ddev composer config --unset scripts.post-create-project-cmd
+# Preserve attribution before retiring the applied recipe sources.
+for notice in web/recipes/sous-*/NOTICE; do
+  if [ -f "$notice" ]; then cat "$notice" >> NOTICE; fi
+done
 rm -rf web/recipes/sous-*
 rm devops/scripts/sous-build.sh \
   devops/scripts/theme-setup.sh \

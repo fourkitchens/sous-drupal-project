@@ -298,6 +298,9 @@ check_product_files_absent() {
 # Check that only the chosen CI files remain after the installer removes its templates.
 check_generated_files() {
   step release-config node -e "require('./release.config.js')"
+  if [ "$option" = paragraphs ]; then
+    step recipe-notice test -f NOTICE
+  fi
   step absent-assets-ci test ! -e assets/ci
   step scaffold-assets test -d assets/scaffold
 
