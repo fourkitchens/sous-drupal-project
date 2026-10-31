@@ -131,6 +131,8 @@ template to `.gitlab/merge_request_templates/Default.md` and remove `.github`.
 GitHub sites keep `.github/dependabot.yml` so Dependabot updates action pins;
 restore it and the pull request template from the same release when leaving GitLab.
 Remove the old `.gitlab/merge_request_templates` directory after restoring it.
+Also restore that release's root `release.config.js` when leaving GitLab so
+releases publish to GitHub again.
 
 For CircleCI, make `main` the default branch and configure pull-request events
 and default-branch pushes in
@@ -138,11 +140,22 @@ and default-branch pushes in
 GitHub OAuth projects can enable **Only build pull requests**, which also builds
 the default branch. Manual pipeline runs use the same workflow.
 
+**Releases.** Conventional Commits merged to `main` publish a versioned tag such
+as `v1.2.3` and release notes on the repository's GitHub or GitLab Releases page.
+GitHub needs no setup. For GitLab, save a project access token with `api` and
+`write_repository` scopes as a protected, masked CI/CD variable named `GL_TOKEN`.
+CircleCI needs `GITHUB_TOKEN` in its project settings. Preview a release locally:
+
+```sh
+npm run release:dry-run
+```
+
 Each template includes a commented deployment job or stage after its checks;
 nothing deploys by default. To enable it, restrict deployment to `main`, run
 `composer build-assets`, deliver the build to your host, then apply configuration
 with `vendor/bin/drush @your-site.env deploy -y`. Configure credentials and the
 Drush alias as described in [Build and deploy](#build-and-deploy).
+Make the release job depend on deployment so its tags mark what is live.
 
 CircleCI sites deploying to Pantheon or Acquia can adopt
 [Four Kitchens' POTS](https://github.com/fourkitchens/pots) instead for its

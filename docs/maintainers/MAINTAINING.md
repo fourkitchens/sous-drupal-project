@@ -102,14 +102,16 @@ Use Conventional Commits: `fix:`/`perf:` produce patches, `feat:` produces a
 minor, and `!` or `BREAKING CHANGE:` produces a major. Preserve that meaning in
 squash commits. Nonbreaking documentation, CI and refactor commits do not release.
 Git tags determine versions and have no `v` prefix; npm's version is tooling
-metadata. `release.config.js` defines channels, but CI publishes only canonical
+metadata. Generated sites use `release.config.js` to release from `main` with
+`v`-prefixed tags. Sous's workflow runs `npm run release -- --tag-format '${version}'`
+to retain its unprefixed tags, from `7.0.1` to `8.0.0`. CI publishes only canonical
 `main` pushes after all checks pass and without a package override.
-`npm run release` publishes the Git tag and GitHub release.
 
-Preview committed history on a configured release branch with remote credentials:
+Preview Sous's committed release-branch history with a GitHub token:
 
 ```sh
-npm run release -- --dry-run
+GITHUB_TOKEN='<token>' npm run release:dry-run -- \
+  --tag-format '${version}' --branches codex/release-starter-8.x
 ```
 
 Before releases, review Drupal advisories, root/theme audits, dependency majors,

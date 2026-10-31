@@ -24,7 +24,8 @@
     "theme-watch": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run develop",
     "theme-ci": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" ci --include=dev",
     "theme-storybook": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run storybook-build -- --output-dir ../../../storybook",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "release:dry-run": "semantic-release --dry-run --no-ci"
   },
   "keywords": [
     "sous"
@@ -38,11 +39,11 @@
     "@eslint/js": "^10.0.1",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/github": "^12.0.10",
+    "@semantic-release/gitlab": "^13.3.3",
     "@semantic-release/release-notes-generator": "^14.1.1",
     "eslint": "^10.13.0",
     "globals": "^17.13.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.6.0",
     "semantic-release": "^25.0.9",
     "conventional-changelog-conventionalcommits": "^10.4.1"
   },

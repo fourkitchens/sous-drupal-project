@@ -24,11 +24,11 @@ module.exports = [
   },
   js.configs.recommended,
   {
-    files: ['*.{js,cjs,mjs}', 'devops/**/*.{js,cjs,mjs}'],
+    files: ['*.{js,cjs,mjs}', 'devops/**/*.{js,cjs,mjs}', 'assets/ci/**/release.config.js'],
     languageOptions: { globals: globals.node },
   },
   {
-    files: ['*.js', '*.cjs'],
+    files: ['*.js', '*.cjs', 'assets/ci/**/release.config.js'],
     languageOptions: { sourceType: 'commonjs' },
   },
   {

@@ -1,13 +1,8 @@
+// Generated sites publish releases with this file.
+// Sous overrides the tag format in its own workflow.
 module.exports = {
-  tagFormat: '${version}',
-  branches: [
-    '+([0-9])?(.{+([0-9]),x}).x',
-    'main',
-    'next',
-    'next-major',
-    {name: 'beta', prerelease: true},
-    {name: 'alpha', prerelease: true}
-  ],
+  branches: ['main'],
+  tagFormat: 'v${version}',
   plugins: [
     ['@semantic-release/commit-analyzer', {preset: 'conventionalcommits'}],
     ['@semantic-release/release-notes-generator', {preset: 'conventionalcommits'}],

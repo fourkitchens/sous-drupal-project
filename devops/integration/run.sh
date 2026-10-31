@@ -33,6 +33,7 @@ Checks, in order:
   4. Page, Paragraphs, Layout Builder and Config Split match the chosen options.
   5. Maintainer tooling and assets/ci are absent; only the selected provider's
      CI files remain, with no product ci.yml or unselected provider files.
+     The generated release configuration loads in Node.
   6. Drush deploy succeeds and config:status reports no changes.
   7. For the default option, run Composer CI, back up, restore with npm run setup,
      and reset with npm run rebuild; check bootstrap after each reset.
@@ -294,6 +295,7 @@ check_product_files_absent() {
 
 # Check that only the chosen CI files remain after the installer removes its templates.
 check_generated_files() {
+  step release-config node -e "require('./release.config.js')"
   step absent-assets-ci test ! -e assets/ci
   step scaffold-assets test -d assets/scaffold
 

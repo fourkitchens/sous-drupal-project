@@ -2,6 +2,8 @@
 # The steps live in composer.json; change them there.
 image: node:24-trixie # Keep the major equal to .nvmrc.
 
+stages: [build, deploy, release]
+
 workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -42,6 +44,20 @@ build:
   timeout: 30m
   script:
     - composer ci
+
+# When you enable deploy, make release depend on it so tags mark what is live.
+release:
+  stage: release
+  needs: [build]
+  timeout: 10m
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $GL_TOKEN'
+  variables:
+    GIT_DEPTH: "0"
+  before_script: []
+  script:
+    - npm ci
+    - npm run release
 
 # Supply host delivery and alias credentials; see docs/DEPLOYMENT.md.
 # deploy:

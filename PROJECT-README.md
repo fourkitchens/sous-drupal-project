@@ -17,6 +17,7 @@ Optional recipes, including Config Split, are chosen at setup with the menu or
 Setup installs the selected CI configuration at `.circleci/config.yml`,
 `.github/workflows/build.yml` or `.gitlab-ci.yml`; None installs no CI file.
 GitLab uses `.gitlab/merge_request_templates/Default.md` for merge requests.
+Release notes live on this repository's Releases page.
 
 ## Work locally
 
