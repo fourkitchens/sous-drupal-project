@@ -1,39 +1,45 @@
-# Drupal application
+# PROJECT_NAME
 
-This site uses Sous: Drupal with Gin administration and an Emulsify theme.
-Record the project's URLs, contacts and access requirements here.
+Content management system built on Drupal. Record project URLs, contacts and access requirements here.
 
-## Sous installation options
+## At A Glance
 
-| Choice | Content setup |
+| Item | Details |
 | --- | --- |
-| Default | Page and Frontpage with Body, metadata, SEO and aliases |
-| Layout Builder | Page and Frontpage with native layouts and Basic inline blocks |
-| Paragraphs | Page and Frontpage with Body and reusable components |
-| Admin only | Administration and theme without Page or Frontpage |
+| Local Environment | [DDEV](https://ddev.com/) |
+| Drupal / PHP | Drupal 11.4 / PHP 8.4 |
+| Node.js | Version in `.nvmrc`, installed on your computer |
+| Theme | Emulsify; directory recorded in `package.json` → `config.theme` |
+| Deployment | `composer build-assets`, then Drush deploy |
+| CI | Repository configuration; see [Deployment](docs/DEPLOYMENT.md#set-up-site-ci) |
+| Hosting | Record the platform and environment URLs here |
 
-Optional recipes, including Config Split, are chosen at setup with the menu or
-`SOUS_RECIPES`. The site's configuration records its choices.
-Setup installs the selected CI configuration at `.circleci/config.yml`,
-`.github/workflows/build.yml` or `.gitlab-ci.yml`; None installs no CI file.
-GitLab uses `.gitlab/merge_request_templates/Default.md` for merge requests.
-Release notes live on this repository's Releases page.
+## Dependencies and Requirements
 
-## Work locally
-
-Install Node.js from `.nvmrc`, Git, Docker and DDEV on your computer.
-Clone this repository, obtain a database backup, then set it up:
+- [DDEV](https://ddev.com/), Docker and Git
+- [Node.js from `.nvmrc`](https://github.com/nvm-sh/nvm)
+- [PHP 8.4](https://www.php.net/) and [Composer 2](https://getcomposer.org/)
 
 ```sh
-npm run setup -- "reference/site-db.sql.gz"
+npm run setup -- reference/site-db.sql.gz
 ```
 
-Use `npm run rebuild` for a quick database reset after switching branches,
-and `npm run theme-watch` while working on the theme. Run npm commands on your
-computer; scripts call DDEV for PHP, Drush and database operations.
+Use `npm run rebuild` after switching branches and `npm run theme-watch` for theme development.
+Run npm scripts on your computer; scripts use DDEV for PHP, Drush and the database.
 
-[Setup](docs/SETUP.md) covers restoration, recipes and local settings.
-[Development](docs/DEVELOPMENT.md) covers theme commands and checks.
-[Deployment](docs/DEPLOYMENT.md) covers builds, releases and configuration updates.
+## Documentation
 
-[GPL-2.0-or-later](LICENSE); dependencies retain their own notices.
+- [Local Setup](docs/SETUP.md)
+- [Contribution Guidelines](docs/CONTRIBUTING.md)
+- [Build Tools](docs/BUILD_TOOLS.md)
+- [Deployment and Releases](docs/DEPLOYMENT.md)
+- [Features and Configurations](docs/features.md)
+- [Emulsify](https://www.emulsify.info/docs)
+
+Release notes live on this repository's Releases page.
+
+## Known Issues
+
+Record project-specific limitations and their issue links here.
+
+[GPL-2.0-or-later](LICENSE); upstream packages retain their own licenses and notices.
