@@ -1,12 +1,14 @@
 $settings['config_sync_directory'] = '../config/default';
 
 // Load DDEV first so it does not append its connection settings after local overrides.
-if (getenv('IS_DDEV_PROJECT') === 'true' && file_exists($app_root . '/' . $site_path . '/settings.ddev.php')) {
-  include $app_root . '/' . $site_path . '/settings.ddev.php';
-}
-
-if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
-  include $app_root . '/' . $site_path . '/settings.local.php';
+if (getenv('IS_DDEV_PROJECT') === 'true') {
+  if (file_exists($app_root . '/' . $site_path . '/settings.ddev.php')) {
+    include $app_root . '/' . $site_path . '/settings.ddev.php';
+  }
+  // Local overrides load only in DDEV, so a stray settings.local.php cannot affect a host.
+  if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+    include $app_root . '/' . $site_path . '/settings.local.php';
+  }
 }
 
 // Add the hosting include for Pantheon or Acquia here, for example:

@@ -25,13 +25,14 @@ Options:
   -h, --help            Print this help and exit.
 
 Checks, in order:
-  1. Drupal bootstraps successfully.
-  2. The front page returns HTTP 200.
-  3. Page, Paragraphs, Layout Builder and Config Split match the chosen options.
-  4. Maintainer tooling and assets/ci are absent; only the selected provider's
+  1. Local development settings stay disabled outside DDEV.
+  2. Drupal bootstraps successfully.
+  3. The front page returns HTTP 200.
+  4. Page, Paragraphs, Layout Builder and Config Split match the chosen options.
+  5. Maintainer tooling and assets/ci are absent; only the selected provider's
      CI files remain, with no product ci.yml or unselected provider files.
-  5. Drush deploy succeeds and config:status reports no changes.
-  6. For the default option, run Composer CI, back up and restore, then bootstrap.
+  6. Drush deploy succeeds and config:status reports no changes.
+  7. For the default option, run Composer CI, back up and restore, then bootstrap.
 
 The artifacts directory keeps each step's log, config-status.stderr,
 cleanup.log (unless --keep), and result.json with status, site, option,
@@ -219,6 +220,23 @@ create_site() {
   cd "$site_dir"
 }
 
+# Check that a stray local settings file cannot enable development settings on a host.
+check_host_settings() {
+  local settings_check
+  settings_check=$(cat <<'PHP'
+$app_root = getcwd() . "/web";
+$site_path = "sites/default";
+define("DRUPAL_ROOT", $app_root);
+include $app_root . "/" . $site_path . "/settings.php";
+if (($settings["rebuild_access"] ?? FALSE) === TRUE) {
+  throw new \RuntimeException("Local development settings loaded outside DDEV.");
+}
+echo "Local development settings stay in DDEV.\n";
+PHP
+  )
+  step host-settings ddev exec --raw env -u IS_DDEV_PROJECT php -r "$settings_check"
+}
+
 # Check Drupal bootstrap before requesting the site's front page.
 check_site_responds() {
   step bootstrap ddev drush status --field=bootstrap
@@ -333,6 +351,7 @@ main() {
     use_local_packages
   fi
   create_site
+  check_host_settings
   check_site_responds
   check_composition
   check_product_files_absent

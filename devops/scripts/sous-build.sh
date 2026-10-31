@@ -187,8 +187,6 @@ runtime_drush -y config:export
 runtime_composer validate --no-check-publish
 runtime_drush uli --name=sous_chef
 # Retire the creation hook only after installation succeeds.
-# Track shared settings.php while keeping local settings out of Git.
 runtime_composer config --unset scripts.post-create-project-cmd
-runtime_exec sed -i '/^settings\.php$/d' .gitignore
 rm devops/scripts/sous-build.sh
 printf '\nOrders up! Your Drupal site is ready.\n'

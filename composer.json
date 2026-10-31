@@ -178,7 +178,7 @@
         "code-sniff": "phpcs",
         "code-fix": "phpcbf",
         "post-drupal-scaffold-cmd": [
-            "test -e web/sites/default/settings.local.php || cp web/sites/example.settings.local.php web/sites/default/settings.local.php",
+            "if [ \"${IS_DDEV_PROJECT:-}\" = \"true\" ]; then test -e web/sites/default/settings.local.php || cp web/sites/example.settings.local.php web/sites/default/settings.local.php; fi",
             "test -e web/sites/default/settings.php || cp web/sites/default/default.settings.php web/sites/default/settings.php"
         ]
     },

@@ -103,17 +103,24 @@ See [Development](DEVELOPMENT.md) for checks and [Deployment](DEPLOYMENT.md) for
 
 ## Local settings and Config Split
 
-`settings.php` uses Drupal's standard local include:
+`settings.php` loads DDEV settings before local overrides:
 
 ```php
-if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
-  include $app_root . '/' . $site_path . '/settings.local.php';
+if (getenv('IS_DDEV_PROJECT') === 'true') {
+  if (file_exists($app_root . '/' . $site_path . '/settings.ddev.php')) {
+    include $app_root . '/' . $site_path . '/settings.ddev.php';
+  }
+  if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+    include $app_root . '/' . $site_path . '/settings.local.php';
+  }
 }
 ```
 
 DDEV supplies database credentials through `settings.ddev.php`.
-Keep `settings.local.php` untracked. Export production defaults with aggregation
-on and errors hidden; supply production credentials and services through the host.
+Local overrides load only in DDEV; a stray `settings.local.php` cannot apply
+development settings on a host. Keep it untracked. Export production defaults
+with aggregation on and errors hidden; supply credentials and services through
+the host.
 
 The optional Config Split recipe adds inactive `local` and `staging` definitions.
 Enable local in `settings.local.php`:
