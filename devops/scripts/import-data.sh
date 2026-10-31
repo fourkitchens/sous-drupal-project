@@ -9,7 +9,10 @@ runtime_require_ddev
 [ "$#" -le 1 ] || { echo 'Usage: import-data.sh [BACKUP.sql|BACKUP.sql.gz]' >&2; exit 2; }
 backup=${1-reference/site-db.sql.gz}
 if [ "$#" -eq 0 ] && [ ! -f "$backup" ]; then sh devops/scripts/get-db.sh; fi
-[ -f "$backup" ] && [ -s "$backup" ] || { echo "Missing or empty database backup: $backup" >&2; exit 1; }
+if [ ! -s "$backup" ]; then
+  echo "Missing or empty database backup: $backup" >&2
+  exit 1
+fi
 # Check the archive before running commands that replace the current database.
 case "$backup" in
   *.sql.gz) gzip -t -- "$backup" ;;

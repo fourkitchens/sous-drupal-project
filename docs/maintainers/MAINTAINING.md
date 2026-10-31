@@ -22,7 +22,8 @@ separately. Test upgrades against a database copy and complete export.
 ## Verify changes
 
 Use Node from `.nvmrc`, PHP 8.4, Composer, Docker, DDEV, Git, Bash, jq, curl,
-ShellCheck and actionlint. Run from the repository root:
+ShellCheck 0.11.0 (`pipx install shellcheck-py==0.11.0.1`) and actionlint.
+Run from the repository root:
 
 ```sh
 npm ci

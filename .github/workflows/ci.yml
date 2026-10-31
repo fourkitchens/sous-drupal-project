@@ -43,6 +43,8 @@ jobs:
           coverage: none
       - run: npm ci
       - run: npm run lint
+      - name: Install ShellCheck
+        run: pipx install shellcheck-py==0.11.0.1
       - name: Check shell scripts
         run: find devops/scripts devops/hooks devops/integration -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
       - run: composer validate --no-check-publish

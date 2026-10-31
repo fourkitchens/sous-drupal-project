@@ -39,7 +39,8 @@ Use `!` for breaking changes.
 ## Verify
 
 Run from the repo root. Commit candidate changes before smoke tests; they
-export `HEAD`.
+export `HEAD`. Use ShellCheck 0.11.0 (`pipx install shellcheck-py==0.11.0.1`)
+to match CI.
 
 ```sh
 npm ci
