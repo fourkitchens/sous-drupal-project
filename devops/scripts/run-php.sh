@@ -5,7 +5,8 @@ set -eu
 
 if [ "${IS_DDEV_PROJECT:-}" != true ] && [ -f .ddev/config.yaml ] &&
   command -v ddev >/dev/null 2>&1; then
-  exec ddev exec "$@"
+  # Explicit raw mode preserves PHP source and arguments without shell expansion.
+  exec ddev exec --raw -- "$@"
 fi
 
 exec "$@"
