@@ -3,6 +3,8 @@
 # Composer runs this once during composer create-project on your computer.
 set -eu
 
+sous_version='^2.0'
+
 # Collect choices before Composer, npm or Drush can consume the input stream.
 if [ "${SOUS_CONTENT+x}" != x ]; then
   printf 'Content: [0] Default [1] Layout Builder [2] Paragraphs [3] Admin only: '
@@ -15,56 +17,26 @@ case "$SOUS_CONTENT" in
   admin-only|3) content='' ;;
   *) echo 'SOUS_CONTENT must be default, layout-builder, paragraphs, or admin-only.' >&2; exit 2 ;;
 esac
+
+# Let each package decide whether it belongs in the optional recipe menu.
 recipe_menu=''
 if [ "${SOUS_RECIPES+x}" != x ]; then
-  recipe_menu=$(php -- "$content" <<'PHP'
-<?php
-$indexLocation = 'https://fourkitchens.github.io/sous-drupal-packages/packages.json';
-$index = json_decode(file_get_contents($indexLocation), true, 512, JSON_THROW_ON_ERROR);
-
-// Use the newest 2.x metadata for menu descriptions and recipe dependencies.
-$catalog = [];
-foreach ($index['packages'] as $name => $versions) {
-  if (!preg_match('~^fourkitchens/sous-[a-z0-9-]+$~', $name)) {
-    continue;
-  }
-  $releases = array_filter(array_keys($versions), static fn($version) => preg_match('/^2\.\d/', $version));
-  usort($releases, 'version_compare');
-  if ($releases) {
-    $catalog[$name] = $versions[end($releases)];
-  }
-}
-
-// Hide this setup and its dependencies without traversing other compositions.
-$excluded = [];
-$pending = ['fourkitchens/sous-admin', 'fourkitchens/sous-emulsify'];
-if ($argv[1] !== '') {
-  $pending[] = 'fourkitchens/' . $argv[1];
-}
-while ($pending) {
-  $name = array_pop($pending);
-  if (isset($excluded[$name])) {
-    continue;
-  }
-  $excluded[$name] = true;
-  foreach (array_keys($catalog[$name]['require'] ?? []) as $dependency) {
-    if (str_starts_with($dependency, 'fourkitchens/sous-')) {
-      $pending[] = $dependency;
+  # shellcheck disable=SC2016
+  recipe_menu=$(php -r '
+    $major = (int) ltrim($argv[1], "^");
+    $index = json_decode(@file_get_contents($argv[2]) ?: "", TRUE);
+    if (!$index) { exit(1); }
+    ksort($index["packages"]);
+    foreach ($index["packages"] as $name => $versions) {
+      $versions = array_filter($versions, fn($version) => (int) $version === $major, ARRAY_FILTER_USE_KEY);
+      uksort($versions, "version_compare");
+      $metadata = end($versions);
+      if (($metadata["extra"]["sous"]["menu"] ?? FALSE) === TRUE) {
+        echo substr($name, strlen("fourkitchens/")), "\t", $metadata["description"], "\n";
+      }
     }
-  }
-}
-foreach (['sous-content-types', 'sous-core-layout-builder', 'sous-paragraphs'] as $composition) {
-  $excluded['fourkitchens/' . $composition] = true;
-}
-
-ksort($catalog);
-foreach ($catalog as $name => $metadata) {
-  if (!isset($excluded[$name])) {
-    echo substr($name, strlen('fourkitchens/')), "\t", $metadata['description'], "\n";
-  }
-}
-PHP
-  )
+  ' "$sous_version" "${SOUS_INDEX:-https://fourkitchens.github.io/sous-drupal-packages/packages.json}") ||
+    echo "Couldn't reach the Sous package index; add optional recipes later with ddev composer require." >&2
   SOUS_RECIPES=''
   if [ -n "$recipe_menu" ]; then
     printf '%s\n' "$recipe_menu" | awk -F '\t' '{printf "%d. %s: %s\n", NR, $1, $2}'
@@ -73,38 +45,22 @@ PHP
   fi
 fi
 
-# Split selections as words without expanding them as filesystem patterns.
 recipe_choices=$(printf '%s' "$SOUS_RECIPES" | tr ',' ' ')
+recipes=''
 set -f
 # shellcheck disable=SC2086
-set -- $recipe_choices
-set +f
-recipes=''
-for recipe do
+for recipe in $recipe_choices; do
   case "$recipe" in
     *[!0-9]*) ;;
-    *)
-      recipe=$(printf '%s\n' "$recipe_menu" | awk -F '\t' -v number="$recipe" 'NR == number {print $1}')
-      if [ -z "$recipe" ]; then
-        echo 'Recipe number is not listed in the menu.' >&2
-        exit 2
-      fi
-      ;;
+    *) recipe=$(printf '%s\n' "$recipe_menu" | awk -F '\t' -v number="$recipe" 'NR == number {print $1}') ;;
   esac
-  case "$recipe" in
-    sous-admin|sous-emulsify|sous-content-types|sous-core-layout-builder|sous-paragraphs)
-      echo "$recipe belongs to the setup selected by SOUS_CONTENT." >&2
-      exit 2
-      ;;
-    sous-?*)
-      case "$recipe" in
-        *[!a-z0-9-]*) echo "Invalid recipe name: $recipe" >&2; exit 2 ;;
-      esac
-      ;;
-    *) echo "Invalid recipe choice: $recipe" >&2; exit 2 ;;
-  esac
+  if ! printf '%s\n' "$recipe" | grep -Eq '^sous-[a-z0-9-]+$'; then
+    echo "Invalid recipe choice: $recipe" >&2
+    exit 2
+  fi
   recipes="${recipes:+$recipes }$recipe"
 done
+set +f
 
 if [ "${SOUS_CI+x}" != x ]; then
   printf 'CI: [0] CircleCI [1] GitHub Actions [2] GitLab CI/CD [3] None: '
@@ -167,10 +123,10 @@ ddev drush -y user:role:add superuser sous_chef
 # Apply optional recipes before exporting the site's complete configuration.
 set --
 if [ -n "$content" ]; then
-  set -- "fourkitchens/$content:^2.0"
+  set -- "fourkitchens/$content:$sous_version"
 fi
 for recipe in $recipes; do
-  set -- "$@" "fourkitchens/$recipe:^2.0"
+  set -- "$@" "fourkitchens/$recipe:$sous_version"
 done
 if [ "$#" -gt 0 ]; then
   ddev composer require "$@"

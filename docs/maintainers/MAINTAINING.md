@@ -54,6 +54,20 @@ omit it to test the published Composer index. A package checkout uses absolute
 `PATH/packages/*`, version `2.0.0`, copied packages and
 a read-only DDEV mount at the same path. Test published ZIPs before releasing.
 
+The optional-recipe menu reads each package's newest version in the installer's
+Sous major and offers those with `extra.sous.menu: true`, including recipes the
+composition already contains. `SOUS_INDEX` defaults to
+`https://fourkitchens.github.io/sous-drupal-packages/packages.json`; point it at
+an index from the packages repository's local build to check unpublished metadata:
+
+```sh
+SOUS_INDEX=/path/to/sous-drupal-packages/build/site/packages.json \
+  composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
+```
+
+Leave `SOUS_RECIPES` unset for this interactive check; setting it skips the menu
+and index fetch. An unreadable index skips optional recipes without blocking setup.
+
 Each smoke checks that local settings stay disabled outside DDEV, bootstrap,
 HTTP 200, composition, selected CI files, deployment and empty config status.
 CI template sources must be absent from generated sites.

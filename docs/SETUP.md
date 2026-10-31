@@ -11,20 +11,19 @@ composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
 cd my-site
 ```
 
-Composer's post-create hook runs `sous-build.sh` once. It names the project from
+Composer's post-create hook runs `sous-build.sh` once: it names the project from
 its directory, stores the theme name in `package.json`'s `config.theme`, asks for
-a content composition, optional recipes and a CI provider, then starts DDEV
-and installs. After the content choice, it reads the published Sous 2.x index
-and lists recipes not already included by the base setup or chosen composition.
-The menu updates as recipes are published; no question appears if none remain.
-Choose numbered entries or short names such as `sous-config-split`, separated by
-spaces or commas:
+content, optional recipes and CI, then installs in DDEV.
+
+The recipe menu offers packages marked as optional extras in the matching Sous
+release. Choose numbers or short names separated by spaces or commas; Enter or
+end of input skips extras. If the index is unavailable, add optional recipes later.
 
 ```text
 Add recipes (numbers or names, separated by spaces; Enter for none):
 ```
 
-Enter or end of input skips additional recipes. The CI question follows:
+The CI question follows:
 
 ```text
 CI: [0] CircleCI [1] GitHub Actions [2] GitLab CI/CD [3] None:
