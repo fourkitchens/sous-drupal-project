@@ -7,4 +7,4 @@ ddev start
 ddev composer install
 sh devops/scripts/import-data.sh "$@"
 ddev drush deploy -y
-ddev drush uli --name=sous_chef
+ddev drush uli --name=admin

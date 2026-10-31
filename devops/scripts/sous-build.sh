@@ -85,6 +85,7 @@ npm install --package-lock-only --ignore-scripts --offline
 ddev composer config name "project/$project_name"
 # Begin the generated site with its own instructions and Git history.
 [ ! -f PROJECT-README.md ] || mv PROJECT-README.md README.md
+node -e 'const fs = require("node:fs"); fs.writeFileSync("README.md", fs.readFileSync("README.md", "utf8").replaceAll("PROJECT_NAME", process.argv[1]));' "$project_name"
 if [ "$ci" != none ]; then
   cp -R "assets/ci/$ci/." .
 fi
@@ -116,9 +117,9 @@ ddev drush -y theme:install "$theme"
 ddev drush -y config:set system.theme default "$theme"
 # Keep UID 1 blocked and use a separate local administrator account.
 ddev drush -y user:block superuser_1
-ddev drush -y user:create sous_chef --mail=sous_chef@fourkitchens.com
+ddev drush -y user:create admin --mail=local-admin@example.com
 ddev drush -y user:role:add superuser superuser_1
-ddev drush -y user:role:add superuser sous_chef
+ddev drush -y user:role:add superuser admin
 
 # Apply optional recipes before exporting the site's complete configuration.
 set --
@@ -139,10 +140,21 @@ for recipe in $recipes; do
 done
 # Validate the finished site and its login before retiring this installer.
 ddev drush -y config:export
+# Recipes have unpacked their dependencies; the setup-only repository can go.
+node -e '
+  const fs = require("node:fs");
+  const composer = JSON.parse(fs.readFileSync("composer.json", "utf8"));
+  composer.repositories = composer.repositories.filter((repo) =>
+    !repo.only?.includes("fourkitchens/sous-*") &&
+    !Object.keys(repo.options?.versions ?? {}).some((name) => name.startsWith("fourkitchens/sous-")));
+  fs.writeFileSync("composer.json", JSON.stringify(composer, null, 4) + "\n");
+'
+ddev composer update --lock --no-install --no-interaction
 ddev composer validate --no-check-publish
-ddev drush uli --name=sous_chef
+ddev drush uli --name=admin
 # Retire the creation hook only after installation succeeds.
 ddev composer config --unset scripts.post-create-project-cmd
+rm -rf web/recipes/sous-*
 rm devops/scripts/sous-build.sh \
   devops/scripts/theme-setup.sh \
   devops/scripts/theme-initialize.mjs

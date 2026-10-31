@@ -1,5 +1,5 @@
 // Generated sites publish releases with this file.
-// Sous overrides the tag format in its own workflow.
+// The starter overrides the tag format in its own workflow.
 module.exports = {
   branches: ['main'],
   tagFormat: 'v${version}',

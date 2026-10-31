@@ -1,6 +1,6 @@
 {
     "name": "fourkitchens/sous-drupal-project",
-    "description": "Starter project for Sous a Drupal distribution featuring a theme based on Emulsify Design System.",
+    "description": "Drupal project with Gin administration and an Emulsify theme.",
     "type": "project",
     "license": "GPL-2.0-or-later",
     "repositories": [
@@ -80,7 +80,6 @@
         "process-timeout": 0
     },
     "extra": {
-        "installer-name": "sous",
         "installer-types": [
             "npm-asset",
             "bower-asset",

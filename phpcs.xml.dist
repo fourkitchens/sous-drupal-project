@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="Sous">
+<ruleset name="Drupal">
   <description>Drupal coding standards for custom modules and themes.</description>
   <file>web/modules/custom</file>
   <file>web/themes/custom</file>

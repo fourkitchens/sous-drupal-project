@@ -129,10 +129,10 @@ prepare_workspace() {
   source_root="$(CDPATH='' cd "$(dirname "$0")/../.." && pwd -P)"
   mkdir -p "$artifacts"
   artifacts=$(cd "$artifacts" && pwd -P)
-  work_dir=$(mktemp -d "${TMPDIR:-/tmp}/sous-smoke.XXXXXX")
+  work_dir=$(mktemp -d "${TMPDIR:-/tmp}/site-smoke.XXXXXX")
   # DDEV mounts must match the real path rather than a symlink to it.
   work_dir=$(cd "$work_dir" && pwd -P)
-  project_name=$(printf 'sous-smoke-%s' "${work_dir##*.}" | tr '[:upper:]' '[:lower:]')
+  project_name=$(printf 'site-smoke-%s' "${work_dir##*.}" | tr '[:upper:]' '[:lower:]')
   site_dir="$work_dir/$project_name"
   result_file="$artifacts/result.json"
 
@@ -289,7 +289,7 @@ PHP
 # Check that sites omit maintainer tooling and one-time theme setup files.
 check_product_files_absent() {
   local path
-  for path in devops/integration docs/maintainers \
+  for path in AGENTS.md devops/integration docs/maintainers devops/scripts/sous-build.sh \
     devops/scripts/theme-setup.sh devops/scripts/theme-initialize.mjs; do
     step "absent-${path//\//-}" test ! -e "$path"
   done
@@ -362,6 +362,10 @@ main() {
     use_local_packages
   fi
   create_site
+  if [ -n "$packages" ]; then
+    # This mount belongs to the test fixture, not the generated application.
+    step remove-package-mount rm .ddev/docker-compose.recipes.yaml
+  fi
   check_host_settings
   check_site_responds
   check_composition

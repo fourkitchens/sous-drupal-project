@@ -121,7 +121,7 @@ web.config
 /reference/**/*
 !/reference/.gitkeep
 
-# Remove me after sous install
+# Scaffolded defaults and local development files.
 README.txt
 /web/sites/development.services.yml
 example.settings.local.php

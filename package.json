@@ -8,8 +8,8 @@
   "scripts": {
     "setup": "sh devops/scripts/setup.sh",
     "rebuild": "sh devops/scripts/rebuild.sh",
-    "confim": "ddev drush deploy -y",
-    "confex": "ddev drush config:export -y",
+    "confim": "sh devops/scripts/confim.sh",
+    "confex": "sh devops/scripts/confex.sh",
     "get-db": "sh devops/scripts/get-db.sh",
     "install-recipe": "sh devops/scripts/install-recipe.sh",
     "import-data": "sh devops/scripts/import-data.sh",
@@ -18,7 +18,7 @@
     "lint:php": "node devops/scripts/lint-php.mjs",
     "lint:styles": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run lint-styles",
     "prettier": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run prettier -- --check",
-    "local-data-bak": "ddev export-db --file=reference/db-$(date +%Y-%m-%d-%H%M).sql.gz",
+    "local-data-bak": "sh devops/scripts/local-data-bak.sh",
     "prepare": "husky",
     "theme-build": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run build",
     "theme-watch": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run develop",
@@ -28,7 +28,7 @@
     "release:dry-run": "semantic-release --dry-run --no-ci"
   },
   "keywords": [
-    "sous"
+    "drupal"
   ],
   "author": "Four Kitchens",
   "license": "GPL-2.0-or-later",
