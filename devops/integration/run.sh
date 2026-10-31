@@ -335,12 +335,13 @@ check_clean_deploy() {
   step deploy npm run confim -- @self
   step native-config-export ddev exec --raw sh devops/scripts/confex.sh @self
   step native-deploy ddev exec --raw sh devops/scripts/confim.sh @self
-  # The container has native PHP but no ddev command, as on CI and hosts.
+  # Exclude DDEV's container placeholder to exercise a host without DDEV.
   # shellcheck disable=SC2016
-  step native-php ddev exec --raw env -u IS_DDEV_PROJECT \
+  step native-php ddev exec --raw env -u IS_DDEV_PROJECT PATH=/usr/bin:/bin \
     sh devops/scripts/run-php.sh php -r \
     'if ($argv[1] !== "argument with spaces") { exit(1); } echo "Native PHP works.\n";' \
     'argument with spaces'
+  expect_line native-php 'Native PHP works.'
   # Keep Drush notices in their own stderr file so config-status.log parses as JSON.
   # shellcheck disable=SC2016
   step config-status bash -c \
