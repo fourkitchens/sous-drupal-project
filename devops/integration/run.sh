@@ -1,0 +1,396 @@
+#!/usr/bin/env bash
+# Check a generated site and remove its temporary DDEV project on exit.
+# Run: bash devops/integration/run.sh [OPTIONS].
+set -euo pipefail
+
+# Describe the smoke test and its options without creating a site.
+usage() {
+  cat <<'EOF'
+Usage: run.sh [OPTIONS]
+
+Export committed HEAD with git archive, run the real Composer create-project
+with that template (version 8.0.0) in a temporary DDEV site, check the site,
+and delete it on exit. Commit first: uncommitted changes are not tested.
+
+Options:
+  --option default|layout-builder|paragraphs|admin-only
+                        Content composition (default: default).
+  --recipes LIST        Add comma-separated Sous recipe names (default: empty).
+  --ci circleci|github|gitlab|none
+                        Site CI provider (default: github).
+  --packages PATH       Use PATH/packages/* at version 2.0.0, copied by Composer
+                        and mounted read-only in DDEV at the same absolute path
+                        (default: use the published Composer package index).
+  --artifacts DIR       Write logs and result.json here
+                        (default: .integration-results in the current directory).
+  --keep                Keep the DDEV site and workspace (default: delete both).
+  -h, --help            Print this help and exit.
+
+Checks, in order:
+  1. Local development settings stay disabled outside DDEV.
+  2. Drupal bootstraps successfully.
+  3. The front page returns HTTP 200.
+  4. Page, Paragraphs, Layout Builder and Config Split match the chosen options.
+  5. Maintainer tooling, one-time theme setup files and assets/ci are absent;
+     only the selected provider's
+     CI files remain, with no product ci.yml or unselected provider files.
+     The generated release configuration loads in Node.
+  6. Configuration scripts work through DDEV and with native tools;
+     Drush deploy succeeds and config:status reports no changes.
+  7. For the default option, run Composer CI, back up, restore with npm run setup,
+     and reset with npm run rebuild; check bootstrap after each reset.
+
+The artifacts directory keeps each step's log, config-status.stderr,
+cleanup.log (unless --keep), and result.json with status, site, option,
+exit_code and kept. A failing step's log is printed before cleanup.
+With --keep, use the site path in result.json to find PROJECT and WORKSPACE:
+  ddev delete -Oy PROJECT
+  chmod -R u+w WORKSPACE
+  rm -rf WORKSPACE
+
+Requirements: git, Composer and Node from .nvmrc on your computer;
+DDEV with Docker running, jq and curl.
+EOF
+}
+
+# Read options before creating a workspace or registering cleanup traps.
+parse_options() {
+  option=default
+  recipes=''
+  ci=github
+  packages=''
+  keep=0
+  artifacts="$PWD/.integration-results"
+
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --option|--recipes|--ci|--packages|--artifacts)
+        if [ "$#" -lt 2 ]; then
+          usage >&2
+          exit 2
+        fi
+        ;;
+    esac
+
+    case "$1" in
+      --option)
+        option=$2
+        shift 2
+        ;;
+      --recipes)
+        recipes=$2
+        shift 2
+        ;;
+      --ci)
+        ci=$2
+        shift 2
+        ;;
+      --packages)
+        packages=$(cd "$2" && pwd -P)
+        shift 2
+        ;;
+      --artifacts)
+        artifacts=$2
+        shift 2
+        ;;
+      --keep)
+        keep=1
+        shift
+        ;;
+      --help|-h)
+        usage
+        exit 0
+        ;;
+      *)
+        usage >&2
+        exit 2
+        ;;
+    esac
+  done
+
+  case "$option" in
+    default|layout-builder|paragraphs|admin-only) ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
+
+  case "$ci" in
+    circleci|github|gitlab|none) ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
+}
+
+# Create the temporary site workspace and record the running result.
+prepare_workspace() {
+  source_root="$(CDPATH='' cd "$(dirname "$0")/../.." && pwd -P)"
+  mkdir -p "$artifacts"
+  artifacts=$(cd "$artifacts" && pwd -P)
+  work_dir=$(mktemp -d "${TMPDIR:-/tmp}/site-smoke.XXXXXX")
+  # DDEV mounts must match the real path rather than a symlink to it.
+  work_dir=$(cd "$work_dir" && pwd -P)
+  project_name=$(printf 'site-smoke-%s' "${work_dir##*.}" | tr '[:upper:]' '[:lower:]')
+  site_dir="$work_dir/$project_name"
+  result_file="$artifacts/result.json"
+
+  export HUSKY=0 COMPOSER_NO_INTERACTION=1 SOUS_CONTENT="$option"
+  export SOUS_RECIPES="$recipes" SOUS_CI="$ci"
+  jq -n --arg site "$site_dir" --arg option "$option" \
+    '{status: "running", site: $site, option: $option}' > "$result_file"
+}
+
+# Record the exit status and remove the site unless --keep retains it for inspection.
+finish() {
+  local exit_code=$?
+  trap - EXIT
+  set +e
+
+  if [ "$exit_code" -ne 0 ] && [ -n "${current_log:-}" ]; then
+    cat "$current_log"
+  fi
+  if [ "$keep" -eq 0 ]; then
+    ddev delete -Oy "$project_name" > "$artifacts/cleanup.log" 2>&1 || exit_code=1
+    # Drupal makes sites/default read-only, so allow removal before deleting it.
+    chmod -R u+w "$work_dir"
+    rm -rf "$work_dir" || exit_code=1
+  else
+    echo "Keeping $site_dir"
+  fi
+
+  jq --argjson code "$exit_code" --argjson keep "$keep" '
+    .status = (if $code == 0 then "pass" else "fail" end)
+    | .exit_code = $code
+    | .kept = ($keep == 1)
+  ' "$result_file" > "$result_file.tmp"
+  mv "$result_file.tmp" "$result_file"
+  echo "Smoke test: $(jq -r .status "$result_file") ($artifacts)"
+  exit "$exit_code"
+}
+
+# Log one command and remember its log so the EXIT trap can show a failure.
+step() {
+  local name=$1
+  shift
+  current_log="$artifacts/$name.log"
+  echo "Smoke test: $name"
+  "$@" > "$current_log" 2>&1
+}
+
+# Require an exact output line from the named step without changing the failing log.
+expect_line() {
+  local name=$1
+  local expected_text=$2
+  grep -Fx "$expected_text" "$artifacts/$name.log"
+}
+
+# Export committed source with the same exclusions as a downloaded project.
+export_template() {
+  mkdir -p "$work_dir/template"
+  # The child Bash expands the positional arguments and checks both pipeline commands.
+  # shellcheck disable=SC2016
+  step export bash -o pipefail -c \
+    'git -C "$1" archive HEAD | tar -x -C "$2"' \
+    bash "$source_root" "$work_dir/template"
+}
+
+# Replace the published index with copied local packages visible to Composer and DDEV.
+use_local_packages() {
+  local package_versions
+  package_versions=$(jq -s '
+    map({key: .name, value: "2.0.0"}) | from_entries
+  ' "$packages"/packages/*/composer.json)
+  jq --arg url "$packages/packages/*" --argjson versions "$package_versions" '
+    .repositories = [
+      {type: "path", url: $url, options: {symlink: false, versions: $versions}}
+    ] + [
+      .repositories[]
+      | select(.url != "https://fourkitchens.github.io/sous-drupal-packages/")
+    ]
+  ' "$work_dir/template/composer.json" > "$work_dir/composer.json"
+  mv "$work_dir/composer.json" "$work_dir/template/composer.json"
+  jq -n --arg path "$packages" '
+    {services: {web: {volumes: [
+      {type: "bind", source: $path, target: $path, read_only: true}
+    ]}}}
+  ' > "$work_dir/template/.ddev/docker-compose.recipes.yaml"
+}
+
+# Run the real project installer against the exported template, then enter the site.
+create_site() {
+  step create-project composer create-project fourkitchens/sous-drupal-project \
+    "$site_dir" \
+    --repository='{"type":"path","url":"'"$work_dir/template"'","options":{"symlink":false,"versions":{"fourkitchens/sous-drupal-project":"8.0.0"}}}'
+  cd "$site_dir"
+}
+
+# Check that a stray local settings file cannot enable development settings on a host.
+check_host_settings() {
+  local settings_check
+  settings_check=$(cat <<'PHP'
+$app_root = getcwd() . "/web";
+$site_path = "sites/default";
+define("DRUPAL_ROOT", $app_root);
+include $app_root . "/" . $site_path . "/settings.php";
+if (($settings["rebuild_access"] ?? FALSE) === TRUE) {
+  throw new \RuntimeException("Local development settings loaded outside DDEV.");
+}
+echo "Local development settings stay in DDEV.\n";
+PHP
+  )
+  step host-settings ddev exec --raw env -u IS_DDEV_PROJECT php -r "$settings_check"
+}
+
+# Check Drupal bootstrap before requesting the site's front page.
+check_site_responds() {
+  step bootstrap ddev drush status --field=bootstrap
+  expect_line bootstrap Successful
+  step front-page curl --silent --show-error --output /dev/null \
+    --write-out '%{http_code}\n' "http://$project_name.ddev.site/"
+  expect_line front-page 200
+}
+
+# Check the selected content composition and optional Config Split recipe in Drupal.
+check_composition() {
+  local composition_checks
+  composition_checks=$(cat <<'PHP'
+$option = getenv("SOUS_SMOKE_OPTION");
+$recipes = preg_split('/[\s,]+/', getenv("SOUS_SMOKE_RECIPES"), -1, PREG_SPLIT_NO_EMPTY);
+$page = \Drupal::entityTypeManager()->getStorage("node_type")->load("page");
+$display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.page.default");
+$checks = [
+  // Page is included in every composition except admin-only.
+  "Page" => (bool) $page === ($option !== "admin-only"),
+  // Paragraphs is enabled only for its content composition.
+  "Paragraphs" => \Drupal::moduleHandler()->moduleExists("paragraphs") === ($option === "paragraphs"),
+  // Layout Builder is enabled on the Page display only when selected.
+  "Layout Builder" => (bool) $display?->getThirdPartySetting("layout_builder", "enabled", FALSE) === ($option === "layout-builder"),
+  // Config Split is enabled only when its optional recipe was selected.
+  "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split") === in_array("sous-config-split", $recipes, TRUE),
+];
+if (in_array("sous-media", $recipes, TRUE)) {
+  // Media bundles prove the building-block recipe was applied on its own.
+  $checks["Media types"] = count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video"])) === 3;
+}
+foreach ($checks as $name => $passed) {
+  if (!$passed) {
+    throw new \RuntimeException("Unexpected composition: $name");
+  }
+}
+echo "Selected composition matches.\n";
+PHP
+  )
+  step composition ddev exec --raw env SOUS_SMOKE_OPTION="$option" \
+    SOUS_SMOKE_RECIPES="$recipes" vendor/bin/drush php:eval "$composition_checks"
+}
+
+# Check that sites omit maintainer tooling and one-time theme setup files.
+check_product_files_absent() {
+  local path
+  for path in AGENTS.md devops/integration docs/maintainers devops/scripts/sous-build.sh \
+    devops/scripts/theme-setup.sh devops/scripts/theme-initialize.mjs; do
+    step "absent-${path//\//-}" test ! -e "$path"
+  done
+}
+
+# Check that only the chosen CI files remain after the installer removes its templates.
+check_generated_files() {
+  step release-config node -e "require('./release.config.js')"
+  if [ "$option" = paragraphs ]; then
+    step recipe-notice test -f NOTICE
+  fi
+  step absent-assets-ci test ! -e assets/ci
+  step scaffold-assets test -d assets/scaffold
+
+  if [ "$ci" = github ]; then
+    step ci-github-workflow test -f .github/workflows/build.yml
+    step ci-github-files ls -A1 .github/workflows
+    test "$(cat "$artifacts/ci-github-files.log")" = build.yml
+  else
+    step absent-github-workflows test ! -e .github/workflows
+  fi
+
+  if [ "$ci" = gitlab ]; then
+    step ci-gitlab test -f .gitlab-ci.yml
+    step ci-gitlab-template test -f .gitlab/merge_request_templates/Default.md
+    step absent-github test ! -e .github
+  else
+    step absent-gitlab-ci test ! -e .gitlab-ci.yml
+    step absent-gitlab-metadata test ! -e .gitlab
+  fi
+
+  if [ "$ci" = circleci ]; then
+    step ci-circleci test -f .circleci/config.yml
+  else
+    step absent-circleci test ! -e .circleci
+  fi
+}
+
+# Deploy the site and require no remaining configuration changes.
+check_clean_deploy() {
+  step config-export npm run confex -- @self
+  step deploy npm run confim -- @self
+  step native-config-export ddev exec --raw sh devops/scripts/confex.sh @self
+  step native-deploy ddev exec --raw sh devops/scripts/confim.sh @self
+  # Exclude DDEV's container placeholder to exercise a host without DDEV.
+  # shellcheck disable=SC2016
+  step native-php ddev exec --raw env -u IS_DDEV_PROJECT PATH=/usr/bin:/bin \
+    sh devops/scripts/run-php.sh php -r \
+    'if ($argv[1] !== "argument with spaces") { exit(1); } echo "Native PHP works.\n";' \
+    'argument with spaces'
+  expect_line native-php 'Native PHP works.'
+  # Keep Drush notices in their own stderr file so config-status.log parses as JSON.
+  # shellcheck disable=SC2016
+  step config-status bash -c \
+    'ddev drush config:status --format=json 2> "$1"' \
+    bash "$artifacts/config-status.stderr"
+  jq -e 'length == 0' "$artifacts/config-status.log"
+}
+
+# Exercise backup, fresh-clone setup and quick branch rebuild, checking each reset.
+check_backup_restore() {
+  step backup npm run local-data-bak
+  local database_dumps=(reference/db-*.sql.gz)
+  step restore npm run setup -- "${database_dumps[0]}"
+  step restored-bootstrap ddev drush status --field=bootstrap
+  expect_line restored-bootstrap Successful
+  step rebuild npm run rebuild -- "${database_dumps[0]}"
+  step rebuilt-bootstrap ddev drush status --field=bootstrap
+  expect_line rebuilt-bootstrap Successful
+}
+
+# Run each stage as a plain command so set -e stops at the first failure.
+main() {
+  parse_options "$@"
+  prepare_workspace
+  trap finish EXIT
+  # Exit on signals so the EXIT trap records their status and cleans up.
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+
+  export_template
+  if [ -n "$packages" ]; then
+    use_local_packages
+  fi
+  create_site
+  if [ -n "$packages" ]; then
+    # This mount belongs to the test fixture, not the generated application.
+    step remove-package-mount rm .ddev/docker-compose.recipes.yaml
+  fi
+  check_host_settings
+  check_site_responds
+  check_composition
+  check_product_files_absent
+  check_generated_files
+  check_clean_deploy
+  # CI and resets are the same for every composition, so exercise them for default.
+  if [ "$option" = default ]; then
+    step ci composer ci
+    check_backup_restore
+  fi
+}
+
+main "$@"

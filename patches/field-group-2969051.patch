@@ -1,0 +1,277 @@
+diff --git a/field_group.libraries.yml b/field_group.libraries.yml
+index 8f25fd6173333359b6a35f32aff88024c05458b0..d5990b0ffee5f709375e557a14d5f5b7c32bd396 100644
+--- a/field_group.libraries.yml
++++ b/field_group.libraries.yml
+@@ -44,6 +44,7 @@ formatter.tabs:
+   dependencies:
+     - core/jquery
+     - core/once
++    - field_group/core
+ 
+ element.horizontal_tabs:
+   js:
+diff --git a/formatters/tabs/tabs.js b/formatters/tabs/tabs.js
+index ff6afa8592aa73b6845b66d47cdbc32cb1337bd2..77053279d453e590e5802332e2047d2a7f113850 100644
+--- a/formatters/tabs/tabs.js
++++ b/formatters/tabs/tabs.js
+@@ -3,10 +3,79 @@
+  * Provides the processing logic for tabs.
+  */
+ 
+-(($) => {
++(function ($, Drupal, once) {
+   Drupal.FieldGroup = Drupal.FieldGroup || {};
+   Drupal.FieldGroup.Effects = Drupal.FieldGroup.Effects || {};
+ 
++  /**
++   * Switches to the tab of the first invalid field after HTML 5 validation.
++   */
++  function handleHtml5Validation(context) {
++    // Check if browser supports HTML5 validation.
++    if (typeof $('<input>')[0].checkValidity !== 'function') {
++      return;
++    }
++
++    // Can't use .submit() because HTML validation prevents it from running.
++    $(
++      once(
++        'showTabWithError',
++        '.form-submit:not([formnovalidate]):not(.field-add-more-submit)',
++      ),
++    ).on('click', function () {
++      const $this = $(this);
++      let $form = $this.closest('form');
++
++      // Support themes where the submit button is separated from the form
++      // like the Gin theme.
++      if (!$form.length) {
++        const $formId = $this.attr('form');
++        $form = $(`#${$formId}`);
++      }
++
++      // Exit early if we can't find a form or the form has no tabs.
++      if ($form.length === 0 || $form.find('.field-group-tab').length === 0) {
++        return;
++      }
++
++      // Check validity of each form element.
++      $($form[0].elements).each(function () {
++        if (this.checkValidity && !this.checkValidity()) {
++          // Set focus to the first invalid tab.
++          const $tab = $(this).closest('.field-group-tab');
++          if ($tab.length === 0) {
++            return false;
++          }
++
++          // Fetching all parents in case of nested tabs and focusing on them.
++          const $allParents = $tab.parents('.field-group-tab');
++          Object.keys($allParents).forEach(function (key) {
++            if (key !== 'length' && key !== 'prevObject') {
++              // jQuery .parents() returns parent elements from innermost to
++              // outermost matches. We need to focus in reverse order to
++              // bring the element in view.
++              const element =
++                $allParents[$allParents.length - 1 - parseInt(key, 10)];
++              Drupal.FieldGroup.setGroupWithFocus($(element));
++              const parentDirection = $(element).hasClass('vertical-tabs__pane')
++                ? 'vertical'
++                : 'horizontal';
++              $(element).data(`${parentDirection}Tab`).focus();
++            }
++          });
++
++          // Finally, putting focus on error field.
++          const direction = $tab.hasClass('vertical-tabs__pane')
++            ? 'vertical'
++            : 'horizontal';
++          Drupal.FieldGroup.setGroupWithFocus($tab);
++          $tab.data(`${direction}Tab`).focus();
++          return false;
++        }
++      });
++    });
++  }
++
+   /**
+    * Implements Drupal.FieldGroup.processHook().
+    */
+@@ -51,7 +120,10 @@
+               },
+             );
+           });
++
++        // Handle tab changes on HTML 5 validation.
++        handleHtml5Validation(context);
+       }
+     },
+   };
+-})(jQuery);
++})(jQuery, Drupal, once);
+diff --git a/tests/src/FunctionalJavascript/TabsValidationTest.php b/tests/src/FunctionalJavascript/TabsValidationTest.php
+new file mode 100644
+index 0000000000000000000000000000000000000000..b1f91bcb17c70629cc19ad4950fdd851d8e44868
+--- /dev/null
++++ b/tests/src/FunctionalJavascript/TabsValidationTest.php
+@@ -0,0 +1,162 @@
++<?php
++
++namespace Drupal\Tests\field_group\FunctionalJavascript;
++
++use Drupal\Core\Url;
++use Drupal\field\FieldStorageConfigInterface;
++use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
++use Drupal\Tests\field_group\Functional\FieldGroupTestTrait;
++
++/**
++ * Tests HTML5 validation on fields in tabs.
++ *
++ * @group field_group
++ */
++class TabsValidationTest extends WebDriverTestBase {
++
++  use FieldGroupTestTrait;
++
++  /**
++   * {@inheritdoc}
++   */
++  protected $defaultTheme = 'stark';
++
++  /**
++   * Modules to enable.
++   *
++   * @var array
++   */
++  protected static $modules = [
++    'field_group',
++    'node',
++    'user',
++  ];
++
++  /**
++   * The node type used for testing.
++   *
++   * @var \Drupal\node\NodeTypeInterface
++   */
++  protected $testNodeType;
++
++  /**
++   * {@inheritdoc}
++   */
++  public function setUp(): void {
++    parent::setUp();
++
++    $this->testNodeType = $this->drupalCreateContentType([
++      'type' => 'test_node_bundle',
++      'name' => 'Test Node Type',
++    ]);
++
++    // Add an extra field to the test content type.
++    $entity_type_manager = $this->container->get('entity_type.manager');
++    $field_storage = $entity_type_manager
++      ->getStorage('field_storage_config')
++      ->create([
++        'type' => 'string',
++        'field_name' => 'test_label',
++        'entity_type' => 'node',
++      ]);
++    assert($field_storage instanceof FieldStorageConfigInterface);
++    $field_storage->save();
++
++    $entity_type_manager->getStorage('field_config')
++      ->create([
++        'label' => 'Test label',
++        'field_storage' => $field_storage,
++        'bundle' => $this->testNodeType->id(),
++        'required' => TRUE,
++      ])
++      ->save();
++
++    $tab1 = [
++      'label' => 'Tab1',
++      'group_name' => 'group_tab1',
++      'weight' => '1',
++      'children' => [
++        0 => 'body',
++      ],
++      'format_type' => 'tab',
++      'format_settings' => [
++        'label' => 'Tab1',
++        'formatter' => 'open',
++      ],
++    ];
++    $this->createGroup('node', $this->testNodeType->id(), 'form', 'default', $tab1);
++
++    $tab2 = [
++      'label' => 'Tab2',
++      'group_name' => 'group_tab2',
++      'weight' => '2',
++      'children' => [
++        0 => 'test_label',
++      ],
++      'format_type' => 'tab',
++      'format_settings' => [
++        'label' => 'Tab2',
++        'formatter' => 'closed',
++      ],
++    ];
++    $this->createGroup('node', $this->testNodeType->id(), 'form', 'default', $tab2);
++
++    $horizontal_tabs = [
++      'label' => 'Horizontal tabs',
++      'group_name' => 'group_horizontal_tabs',
++      'weight' => '-5',
++      'children' => [
++        'group_tab1',
++        'group_tab2',
++      ],
++      'format_type' => 'tabs',
++      'format_settings' => [
++        'direction' => 'horizontal',
++        'label' => 'Horizontal tabs',
++      ],
++    ];
++    $this->createGroup('node', $this->testNodeType->id(), 'form', 'default', $horizontal_tabs);
++
++    $entity_type_manager->getStorage('entity_form_display')
++      ->load(implode('.', [
++        'node',
++        $this->testNodeType->id(),
++        'default',
++      ]))
++      ->setComponent('test_label', ['weight' => '1'])
++      ->save();
++  }
++
++  /**
++   * Tests tabs validation.
++   */
++  public function testTabsValidation() {
++    $page = $this->getSession()->getPage();
++    $this->drupalLogin($this->rootUser);
++
++    $this->drupalGet(Url::fromRoute('node.add', [
++      'node_type' => $this->testNodeType->id(),
++    ]));
++
++    $titleField = $page->findField('title[0][value]');
++    $labelField = $page->findField('test_label[0][value]');
++    $submitButton = $page->findButton('edit-submit');
++    $title = $this->randomMachineName();
++
++    // Submit the form, the browser should try to validate the Title field.
++    $submitButton->click();
++    $this->assertTrue($titleField->isVisible(), 'Title is visible');
++    $this->assertFalse($labelField->isVisible(), 'Label is not visible');
++
++    // Populate the title and submit again. The label field should be displayed.
++    $titleField->setValue($title);
++    $submitButton->click();
++    $this->assertTrue($labelField->isVisible(), 'Label is visible');
++
++    // Populate the label field. We should be able to submit now.
++    $labelField->setValue($this->randomMachineName());
++    $submitButton->click();
++    $this->assertTrue($this->assertSession()->waitForText(sprintf('Test Node Type %s has been created', $title)));
++  }
++
++}

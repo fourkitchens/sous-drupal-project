@@ -1,82 +1,64 @@
-# Build tools
+# Build Tools
 
-Welcome to the world of build tools! In this section, we will explore various tools and scripts that can help streamline your development workflow and ensure consistency in your codebase.
-
-1. [Theme](#theme)
-2. [Fire](#fire)
-3. [NPM Scripts](#npm-scripts)
+Use Node.js from `.nvmrc`. Run npm scripts from the project root.
+Shared Drupal commands use DDEV in a local DDEV checkout and installed tools in CI, on hosts or inside its container.
+Setup, rebuild, import-data and local-data-bak remain local DDEV operations.
 
 ## Theme
 
-This project uses an [Emulsify](https://github.com/emulsify-ds/emulsify-drupal) theme named ` (`web/themes/custom/[theme_name]/`). For details on Emulsify usage, see that [project wiki](https://docs.emulsify.info/).
+The Emulsify theme is at `web/themes/custom/<theme>`; `package.json` records its name in `config.theme`.
+Edit `src/`; builds generate `dist/` and a `components/` mirror, both required in deployments.
+Run the [Emulsify CLI](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage) from the theme directory:
 
-## Fire
-
-This project uses the [FIRE](https://github.com/fourkitchens/fire) toolkit for local development.
-
-### Install (or reinstall) your project locally
-
-```bash
-fire build
+```sh
+cd "web/themes/custom/<theme>"
+npx emulsify component list
 ```
-
-This will call many other FIRE commands in the ideal order to get you up and running (`build-php`, `build-js`, `build-theme`, `get-db`, `import-db`, etc.).  If any one of these commands fails, you can try to re-run it with more verbose output to get more details `fire <command> -v`.
-
-### To see a list of all available commands
-
-Just run `fire`
-
-### Get more info about a specific command
-
-`fire help <command>`
-
-### Most common commands
-
-Here we show the short-form alias.  Each of these also has a long-form full name.  Some of these commands accept additional arguments.
-
-* `fire start`
-* `fire stop`
-* `fire build`
-* `fire build-php`
-* `fire build-theme`
-* `fire watch-theme`
-* `fire get-db`
-* `fire import-db`
-* `fire drush`
-* `fire cex`
-* `fire cim`
-* `fire xdebug:enable`
 
 ## NPM Scripts
 
-NPM Scripts are a powerful feature of Node.js that allow you to define and run custom scripts for your project. These scripts can be used to automate various tasks, such as building your project, running tests, or deploying to production.
-
-In this section, we will explore some of the commonly used NPM Scripts for local development and Drupal-specific tasks. These scripts will help you streamline your development workflow and ensure consistency in your codebase.
-
-Let's dive in and discover the different NPM Scripts available for your project!
-
 ### Local Build Commands
 
-`npm run setup` - Run all required script for spinning up the local site.
-`npm run rebuild` - Rebuild a fresh local instance of your site. Imports the canonical database backup and imports configuration into it.
-`npm run get-db` - Download a copy of the canonical database backup into your local `./reference` directory.
-`npm run import-data` - Import a copy of the canonical database backup into your local instance. This assumes the database backup is located in `./reference/db.sql.gz`.
-`npm run local-data-bak` - Create a local database backup. Saves the backup to the `./reference` directory.
+| Command | Purpose |
+| --- | --- |
+| `npm run setup` | Install root/theme dependencies, build assets, then rebuild a fresh clone |
+| `npm run rebuild` | Start DDEV, install PHP dependencies, import a backup, deploy and print a login |
+| `npm run get-db` | Run the project's database download command |
+| `npm run import-data` | Import and sanitize a local database |
+| `npm run local-data-bak` | Save a timestamped backup under `reference/` |
 
 ### Drupal specific build commands
 
-`npm run confex` - Export active configuration to the config directory.
-`npm run confim` - Import the configuration to the database.
+```sh
+npm run confex
+git diff -- config
+npm run confim
+```
+
+Commit the complete `config/default` export, including UUIDs; use [settings overrides](SETUP.md#local-settings-and-config-split) for environment values.
+`confim` runs Drush deploy, including `hook_deploy_NAME()` steps.
+Both configuration commands accept a leading Drush alias, such as `npm run confim -- @mysite.prod`.
 
 ### Linting
 
-Check on coding standards for all custom code.
+```sh
+npm run lint
+ddev composer code-sniff
+ddev composer code-fix
+npm run prettier
+```
 
-`npm run lint:js` - Lint javascript code for syntax errors.
-`npm run lint:php` - Lint php code for syntax errors.
-`npm run lint:styles` - Lint css code for syntax errors.
+PHP coding standards use `phpcs.xml.dist`; review autofixes and follow [contribution guidelines](CONTRIBUTING.md).
 
 ### Theme Tasks
 
-`npm run theme-build` - Builds the emulsify based theme.
-`npm run theme-watch` - Used for theme development.
+| Command | Purpose |
+| --- | --- |
+| `npm run theme-ci` | Install locked theme dependencies |
+| `npm run theme-build` | Build production assets |
+| `npm run theme-watch` | Develop the theme |
+| `npm run theme-storybook` | Build static Storybook at `web/storybook` |
+
+Commit both npm manifests and lockfiles. Compare source, libraries and npm changes when updating the theme.
+For Emulsify Tools 2 favicon migration, run `ddev drush emulsify_tools:repair-favicon-config "<theme>"` and export configuration.
+CI runs `composer ci` directly with PHP and Node; see [Deployment](DEPLOYMENT.md).

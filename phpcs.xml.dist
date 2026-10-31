@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<ruleset name="Drupal">
+  <description>Drupal coding standards for custom modules and themes.</description>
+  <file>web/modules/custom</file>
+  <file>web/themes/custom</file>
+  <arg name="extensions" value="php,module,inc,install,test,profile,theme"/>
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+  <exclude-pattern>*/bower_components/*</exclude-pattern>
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>web/themes/custom/*/dist/*</exclude-pattern>
+  <exclude-pattern>web/themes/custom/*/components/*</exclude-pattern>
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice"/>
+</ruleset>

@@ -2,88 +2,60 @@
 
 ## Requirements
 
-### Terminus
-
-Pantheon's Terminus is an almost-essential command-line tool for managing sites. The CLI is required to run many of the scripts for building, updating, and deploying changes between the local development environment and the Pantheon platform.
-
-1. [Install Terminus](https://pantheon.io/docs/terminus/install/)
-2. [Setup a valid machine token](https://pantheon.io/docs/machine-tokens)
-3. Log in to terminus using the machine token\
-   `terminus auth:login --email=<email@example.com> --machine-token=<machine_token>`
-4. [Review documentation](https://pantheon.io/docs/terminus/) to get started with the CLI
-
-### Local Development Environment
-
-This project supports development with **Ddev**. Choose your own adventure!
-
-#### Ddev
-
-[Download and install the latest release](https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/)
-
-Increase Docker resources: Locate the 'Resources' section in your Docker preferences. For most architectures, this project requires at least 3GB of memory and 3 CPUs. Additional CPUs and memory may be helpful but should stay under the halfway mark of your total available resources. Also disable the _'Start Docker when you log in'_ setting under the 'General' tab.
-
-#### Fire
-
-This project is using the FIRE tool, this will provide you with all the required commands to easily setup and work with this site, to see available commands just run: fire list of visit the [fire projects page](https://github.com/fourkitchens/fire)
-
-### Additional tools
-
-- [Fire launcher](https://github.com/fourkitchens/fire-launcher/releases/tag/v0.0.1)
-- [Composer](https://getcomposer.org/download/): PHP package manager. Version 2.x.
-- [NVM](https://github.com/nvm-sh/nvm#install--update-script): Recommended for installing and switching between Node versions.
-- Node.js (>=20). We recommend installing via NVM.
+Install DDEV, Docker, Git, PHP 8.4, Composer 2 and Node.js from `.nvmrc` on your computer.
+Run npm scripts from the project root; PHP, Drush and database steps use DDEV.
 
 ## Project setup script
 
-This project has a streamline setup script that builds a local instance of the site that is ready for active development. Below is the setup command that will only need to be ran once on your local machine.
+Clone the repository, obtain its database backup and uploaded files, then run:
 
-```bash
-# Executing the setup script will prepare the local development environment.
-npm run setup
+```sh
+npm run setup -- reference/site-db.sql.gz
 ```
 
-## Alternative manual setup instructions
+Setup installs Node dependencies, builds the theme, then restores and deploys the local site.
 
-A detailed explanation of the setup script appears below.
+## Restore or refresh locally
 
-### Step 1: Clone this repository and enter the project directory
-
-```bash
-git clone git@github.com:fourkitchens/sous-project.git && cd sous-project
+```sh
+npm run rebuild -- reference/site-db.sql.gz
+npm run import-data -- reference/site-db.sql.gz
+npm run local-data-bak
 ```
 
-### Step 2: Start Ddev and build your dependencies
+Rebuild leaves Node dependencies and assets alone; import-data only imports and sanitizes.
+The default backup is `reference/site-db.sql.gz`; `.sql` also works.
+Edit `devops/scripts/get-db.sh` to download missing backups, or configure `ddev pull`.
+Sanitization sets passwords to `admin` and emails to `user-%uid@example.com`.
+Add local adjustments in `import-data.sh`; deployment steps belong in `hook_deploy_NAME()`.
 
-For ddev...
+## Add a recipe
 
-```bash
-ddev start
-ddev composer install
-ddev npm install
-ddev npm --prefix ./web/themes/custom/sous-project install
+```sh
+ddev composer require vendor/recipe
+npm run install-recipe -- vendor/recipe
+npm run confex
 ```
 
-### Step 3: Import the remote database and sync config
+Recipes apply once and unpack; review and commit their dependencies and complete configuration export.
+The recipe and configuration scripts also use installed Drush directly in CI and on hosts without DDEV.
 
-For ddev...
+## Local settings and Config Split
 
-```bash
-terminus backup:get sous-project.live --element=db --to=reference/site-db.sql.gz
-ddev import-db --file=reference/site-db.sql.gz
-ddev drush cache-rebuild
-ddev drush updatedb -y
-ddev drush cache-rebuild
-ddev drush config-import --source="../config/_splits" --partial -y
-ddev drush cache-rebuild
-ddev drush config-import -y
+Local overrides load only in DDEV; keep `settings.local.php` untracked.
+
+```php
+if (getenv('IS_DDEV_PROJECT') === 'true') {
+  if (file_exists($app_root . '/' . $site_path . '/settings.ddev.php')) {
+    include $app_root . '/' . $site_path . '/settings.ddev.php';
+  }
+  if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+    include $app_root . '/' . $site_path . '/settings.local.php';
+  }
+}
 ```
 
-### Step 4: Log in as our sous_chef superuser
-
-For ddev...
-
-```bash
-ddev drush user:login --name=sous_chef
-```
-
-Visit the local ddev site [https://sous-project.ddev.site](https://sous-project.ddev.site) or run `fire drush user:login --name=sous_chef` to obtain a login link.
+When Config Split is installed, enable local in local settings with
+`$config['config_split.config_split.local']['status'] = TRUE;` and staging in host settings with
+`$config['config_split.config_split.staging']['status'] = TRUE;`. Keep both inactive in exports.
+Use `ddev drush uli --name=admin` for a local login after setup.

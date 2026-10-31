@@ -1,7 +1,10 @@
 #!/bin/sh
+# Reset this branch with Composer dependencies, a database and configuration.
+# Run npm run rebuild [-- backup] from the project root.
+set -eu
 
-echo "Verify project dependencies are installed..."
+ddev start
 ddev composer install
-npm run import-data
-npm run confim
-ddev drush uli --name=sous_chef
+sh devops/scripts/import-data.sh "$@"
+ddev drush deploy -y
+ddev drush uli --name=admin

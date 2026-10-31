@@ -1,7 +1,10 @@
-#!/bin/bash
+#!/bin/sh
+# Customize this script to download the site's database backup.
+# Run npm run get-db from the project root.
+set -eu
 
-# Once your site is on Pantheon, replace the project name and uncomment.
+echo "Edit devops/scripts/get-db.sh to download this site's database."
+exit 1
 
-#if [ -f ./reference/site-db.sql.gz ];
-#  then rm ./reference/site-db.sql.gz; fi
-#terminus backup:get sous-drupal-project.live --element=db --to=reference/site-db.sql.gz
+# terminus backup:get SITE.live --element=db --to=reference/site-db.sql.gz
+# ddev pull also works when the site's provider is configured.

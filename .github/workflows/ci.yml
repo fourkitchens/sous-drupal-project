@@ -1,0 +1,142 @@
+name: Sous CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, next, next-major, alpha, beta, '*.x']
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+    inputs:
+      packages_ref:
+        description: Optional full reviewed packages commit (validation only)
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          tools: composer:2.10.3
+          coverage: none
+      - run: npm ci
+      - run: npm run lint
+      - name: Install ShellCheck
+        run: pipx install shellcheck-py==0.11.0.1
+      - name: Check shell scripts
+        run: find devops -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
+      - run: composer validate --no-check-publish
+      - name: Parse site CI templates
+        run: |
+          yq '.' assets/ci/github/.github/workflows/build.yml > /dev/null
+          yq '.' assets/ci/gitlab/.gitlab-ci.yml > /dev/null
+          yq '.' assets/ci/circleci/.circleci/config.yml > /dev/null
+
+  integration:
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include: >-
+          ${{ fromJSON(github.event_name == 'pull_request' &&
+          '[{"option":"default","ci":"github"}]' ||
+          '[{"option":"default","ci":"github"},
+          {"option":"layout-builder","ci":"gitlab"},
+          {"option":"paragraphs","ci":"circleci","recipes":"sous-config-split"},
+          {"option":"admin-only","ci":"none","recipes":"sous-media"}]') }}
+    steps:
+      - name: Initialize diagnostic artifacts
+        run: |
+          mkdir -p "$RUNNER_TEMP/sous-integration-results"
+          printf 'Artifact collection initialized before checkout and DDEV setup.\n' > "$RUNNER_TEMP/sous-integration-results/workflow-setup.txt"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          tools: composer:2.10.3
+          coverage: none
+      - name: Install reviewed DDEV
+        uses: ddev/github-action-setup-ddev@fdf2f5c97943bae638f31df6df86f1defa6210c0 # v1.12.1
+        with:
+          version: '1.25.4'
+          autostart: false
+          installScriptUrl: https://raw.githubusercontent.com/ddev/ddev/5da91aeb9ebab0b0e66171c450b72099308d332c/scripts/install_ddev.sh
+      - name: Smoke-test the installation
+        env:
+          PACKAGES_REF: ${{ inputs.packages_ref || '' }}
+          OPTION: ${{ matrix.option }}
+          CI_PROVIDER: ${{ matrix.ci }}
+          RECIPES: ${{ matrix.recipes || '' }}
+        run: |
+          args=(--option "$OPTION" --recipes "$RECIPES" --ci "$CI_PROVIDER" --artifacts "$RUNNER_TEMP/sous-integration-results")
+          if [[ -n "$PACKAGES_REF" ]]; then
+            git clone --quiet --no-checkout https://github.com/fourkitchens/sous-drupal-packages.git "$RUNNER_TEMP/sous-packages"
+            git -C "$RUNNER_TEMP/sous-packages" checkout --quiet --detach "$PACKAGES_REF"
+            args+=(--packages "$RUNNER_TEMP/sous-packages")
+          fi
+          bash devops/integration/run.sh "${args[@]}"
+      - name: Upload integration diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sous-smoke-${{ matrix.option }}-${{ matrix.ci }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sous-integration-results
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    needs: [checks, integration]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'fourkitchens/sous-drupal-project' && !inputs.packages_ref
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Sous keeps its existing unprefixed release tags.
+      - run: |
+          # shellcheck disable=SC2016
+          npm run release -- --tag-format '${version}'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

@@ -1,9 +1,17 @@
 {
-    "name": "project/sous-drupal-project",
-    "description": "Starter project for Sous a Drupal distribution featuring a theme based on Emulsify Design System.",
+    "name": "fourkitchens/sous-drupal-project",
+    "description": "Drupal project with Gin administration and an Emulsify theme.",
     "type": "project",
     "license": "GPL-2.0-or-later",
     "repositories": [
+        {
+            "type": "composer",
+            "url": "https://fourkitchens.github.io/sous-drupal-packages/",
+            "canonical": true,
+            "only": [
+                "fourkitchens/sous-*"
+            ]
+        },
         {
             "type": "composer",
             "url": "https://packages.drupal.org/8"
@@ -16,38 +24,39 @@
             "type": "package",
             "package": {
                 "name": "dropzone/dropzone",
-                "version": "5.9.3",
+                "version": "6.3.5",
                 "type": "drupal-library",
                 "extra": {
-                    "installer-name": "dropzone/dist"
+                    "installer-name": "dropzone"
                 },
                 "dist": {
-                    "url": "https://github.com/dropzone/dropzone/releases/download/v5.9.3/dist.zip",
+                    "url": "https://github.com/enyo/dropzone/releases/download/dropzone%406.3.5/dist.zip",
                     "type": "zip"
                 }
             }
         }
     ],
     "require": {
-        "php": ">=8.4",
-        "composer/installers": "^2.3",
-        "cweagans/composer-patches": "^1.7",
-        "drupal/core-recipe-unpack": "^11.3",
-        "drupal/core-project-message": "~11.3.5",
-        "drupal/core-composer-scaffold": "~11.3.5",
-        "drupal/core-recommended": "~11.3.5",
-        "drupal/core-vendor-hardening": "^11.3",
-        "drush/drush": "^13.3",
-        "fourkitchens/sous-admin": "dev-main",
-        "fourkitchens/sous-emulsify": "dev-main",
-        "oomphinc/composer-installers-extender": "^2.0",
-        "webflo/drupal-finder": "^1.2",
-        "zaporylie/composer-drupal-optimizations": "^1.0"
+        "composer/installers": "^2.3.0",
+        "cweagans/composer-patches": "^2.0.0",
+        "drupal/core-composer-scaffold": "^11.4.11",
+        "drupal/core-project-message": "^11.4.11",
+        "drupal/core-recipe-unpack": "^11.4.11",
+        "drupal/core-recommended": "^11.4.11",
+        "drupal/core-vendor-hardening": "^11.4.11",
+        "drupal/login_destination": "^2.0.0-beta10@beta",
+        "drush/drush": "^13.8.0",
+        "fourkitchens/sous-admin": "^2.0",
+        "fourkitchens/sous-emulsify": "^2.0",
+        "oomphinc/composer-installers-extender": "^2.0.1",
+        "php": "^8.4",
+        "webflo/drupal-finder": "^1.3.1",
+        "zaporylie/composer-drupal-optimizations": "^1.2.0"
     },
     "conflict": {
         "drupal/drupal": "*"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
@@ -62,7 +71,8 @@
             "drupal/core-vendor-hardening": true,
             "php-http/discovery": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "phpstan/extension-installer": true
+            "phpstan/extension-installer": true,
+            "symfony/runtime": true
         },
         "platform": {
             "php": "8.4.0"
@@ -70,14 +80,10 @@
         "process-timeout": 0
     },
     "extra": {
-        "installer-name": "sous",
-        "composer-exit-on-patch-failure": true,
-        "patchLevel": {
-            "drupal/core": "-p2"
-        },
         "installer-types": [
             "npm-asset",
             "bower-asset",
+            "drupal-library",
             "drupal-recipe"
         ],
         "installer-paths": {
@@ -134,37 +140,54 @@
         "drupal-core-vendor-hardening": {
             "composer/composer": false
         },
-        "enable-patching": true,
-        "patches-file": "patches/composer.patches.json"
+        "composer-patches": {
+            "patches-file": "patches/patches.json",
+            "package-depths": {
+                "drupal/core": 2
+            }
+        }
     },
     "scripts": {
         "post-update-cmd": [
             "@php -r \"@unlink('vendor/bin/composer');\""
         ],
         "post-create-project-cmd": [
-            "./devops/scripts/sous-setup.sh",
-            "./devops/scripts/setup.sh"
+            "./devops/scripts/sous-build.sh"
         ],
         "build-assets": [
             "composer install --optimize-autoloader --no-dev",
-            "@build-theme",
-            "@build-storybook"
+            "@build-theme"
         ],
         "build-theme": [
-            "npm ci --prefix web/themes/custom/sous-project",
-            "npm run build --prefix web/themes/custom/sous-project"
+            "npm ci --include=dev",
+            "npm run theme-ci",
+            "npm run theme-build"
+        ],
+        "ci": [
+            "@composer validate --no-check-publish",
+            "@composer install",
+            "@build-theme",
+            "@lint",
+            "@code-sniff"
         ],
         "build-storybook": [
-            "npm run storybook-build --prefix web/themes/custom/sous-project",
-            "mv ./web/themes/custom/sous-project/.out ./web/storybook"
+            "npm run theme-storybook"
         ],
         "lint": "npm run lint",
-        "code-sniff": [
-            "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,info,txt,md --ignore=node_modules,bower_components,vendor ./web/modules/custom",
-            "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,info --ignore=node_modules,dist,bower_components,vendor ./web/themes/custom"
-        ],
+        "code-sniff": "phpcs",
+        "code-fix": "phpcbf",
         "post-drupal-scaffold-cmd": [
-            "cp web/sites/example.settings.local.php web/sites/default/settings.local.php"
+            "if [ \"${IS_DDEV_PROJECT:-}\" = \"true\" ]; then test -e web/sites/default/settings.local.php || cp web/sites/example.settings.local.php web/sites/default/settings.local.php; fi",
+            "test -e web/sites/default/settings.php || cp web/sites/default/default.settings.php web/sites/default/settings.php"
         ]
+    },
+    "require-dev": {
+        "drupal/coder": "^9.0"
+    },
+    "scripts-descriptions": {
+        "ci": "Install development dependencies, build the theme, lint and check coding standards.",
+        "build-assets": "Install production PHP dependencies and build the theme for deployment.",
+        "code-sniff": "Check custom modules and themes against Drupal and DrupalPractice standards.",
+        "code-fix": "Fix custom module and theme coding standards using phpcs.xml.dist."
     }
 }

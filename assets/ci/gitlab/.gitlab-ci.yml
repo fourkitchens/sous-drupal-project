@@ -1,0 +1,71 @@
+# Run composer ci to validate and build this site.
+# The steps live in composer.json; change them there.
+image: node:24-trixie # Keep the major equal to .nvmrc.
+
+stages: [build, deploy, release]
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
+variables:
+  HUSKY: '0'
+  COMPOSER_CACHE_DIR: '$CI_PROJECT_DIR/.cache/composer'
+  npm_config_cache: '$CI_PROJECT_DIR/.cache/npm'
+
+cache:
+  - key:
+      prefix: composer
+      files:
+        - composer.lock
+        - package-lock.json
+    paths:
+      - .cache/composer/
+  - key:
+      prefix: npm
+      files:
+        - package-lock.json
+        - web/themes/custom/*/package-lock.json
+    paths:
+      - .cache/npm/
+
+before_script:
+  - apt-get update
+  # Same PHP as .ddev/config.yaml; Debian 13 supplies PHP 8.4 and Composer 2.
+  - >-
+    apt-get install -y --no-install-recommends composer unzip
+    php8.4-cli php8.4-curl php8.4-gd php8.4-intl php8.4-mbstring php8.4-xml php8.4-zip
+
+build:
+  stage: build
+  timeout: 30m
+  script:
+    - composer ci
+
+# When you enable deploy, make release depend on it so tags mark what is live.
+release:
+  stage: release
+  needs: [build]
+  timeout: 10m
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $GL_TOKEN'
+  variables:
+    GIT_DEPTH: "0"
+  before_script: []
+  script:
+    - npm ci
+    - npm run release
+
+# Supply host delivery and alias credentials; see docs/DEPLOYMENT.md.
+# deploy:
+#   stage: deploy
+#   timeout: 30m
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == "main"'
+#   script:
+#     - composer build-assets
+#     # Deliver the build to your host here.
+#     - vendor/bin/drush @your-site.env deploy -y

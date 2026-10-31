@@ -1,0 +1,18 @@
+{
+    "_hash": "5b955232b2206f812008e2b5ca7422b5388d44f13fa8018d87d3169c2a8a08ba",
+    "patches": {
+        "drupal/field_group": [
+            {
+                "package": "drupal/field_group",
+                "description": "Focus invalid required fields inside Field Group tabs",
+                "url": "patches/field-group-2969051.patch",
+                "sha256": "eb3492900b6f1b8376cb290ddb43a0a0acdc278c3bd93db82078e1a1ff228a2b",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/field_group/issues/2969051",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            }
+        ]
+    }
+}
