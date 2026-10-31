@@ -38,7 +38,7 @@ npm --prefix "web/themes/custom/<theme>" audit
 build the theme. Build optional Storybook with `npm run theme-storybook`.
 Audits are release checks; resolve findings before release.
 
-Ship `vendor/`, Drupal core, contributed extensions, libraries, recipes, custom
+Ship `vendor/`, Drupal core, contributed extensions, libraries, custom
 source, configuration, settings and deployment scripts. Include the theme's
 `dist/` and generated `components/` despite their source Git ignores.
 Exclude `node_modules`, local settings, caches and database backups.
