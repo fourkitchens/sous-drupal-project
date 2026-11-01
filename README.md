@@ -12,7 +12,7 @@ Choose the content model during installation; administration and the theme are a
 | Choice | Content setup |
 | --- | --- |
 | `0` Default | Page and Frontpage with Body, metadata, SEO, teasers and aliases |
-| `1` Layout Builder | Page and Frontpage with Text, Text with Media, Image and Video blocks |
+| `1` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed and Table blocks |
 | `2` Paragraphs | Page and Frontpage with Layout Paragraphs components |
 | `3` Admin only | Administration and theme without Page or Frontpage |
 

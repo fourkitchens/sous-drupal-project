@@ -1,5 +1,5 @@
 {
-    "_hash": "d141ed610562be6572d0fb057f498c7123ca1794fea6db40f1105753dc30f7b0",
+    "_hash": "6f9b1698f0f03bdd102900786b1c95f5444fbd30a2abc874e28a7e4d4edb89c2",
     "patches": {
         "drupal/field_group": [
             {
@@ -37,6 +37,52 @@
                 "extra": {
                     "issue-tracker-url": "https://www.drupal.org/project/style_selector/issues/3589133",
                     "note": "The issue covers library discovery; field-default schema fixes are custom pending upstream tracking.",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            }
+        ],
+        "drupal/tablefield": [
+            {
+                "package": "drupal/tablefield",
+                "description": "Check the output buffer before cleaning it (#3568619)",
+                "url": "patches/tablefield-ob-clean-3568619.patch",
+                "sha256": "6103b0602e5ba1d4a270fd81f8d4fe1bd5c1ed80c45821f10e66659232a9c2ff",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/tablefield/issues/3568619",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            },
+            {
+                "package": "drupal/tablefield",
+                "description": "Support formatted cells with allowed text formats (#3076448)",
+                "url": "patches/tablefield-wysiwyg-3076448.patch",
+                "sha256": "6c79d0557eff26a7e24fb348d6a5153053b419c394481430231250a651255073",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/tablefield/issues/3076448",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            },
+            {
+                "package": "drupal/tablefield",
+                "description": "Add a quick Add Column button (#3169198)",
+                "url": "patches/tablefield-add-column-3169198.patch",
+                "sha256": "4a2ea1608cb660096042d2fcbd99a0a9a2272d8ca5c6089ec83f9c81d6911676",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/tablefield/issues/3169198",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            },
+            {
+                "package": "drupal/tablefield",
+                "description": "Describe formatted table defaults for recipe validation (#3593703)",
+                "url": "patches/tablefield-default-value-schema-3593703.patch",
+                "sha256": "040390409de18fafb39fa0c5880363f6bc8e927659133a18fdf8fd68a341aaea",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/tablefield/issues/3593703",
                     "provenance": "patches-file:patches/patches.json"
                 }
             }

@@ -1,0 +1,11 @@
+diff --git a/src/Controller/TablefieldController.php b/src/Controller/TablefieldController.php
+index 64f1f91..24b24ea 100644
+--- a/src/Controller/TablefieldController.php
++++ b/src/Controller/TablefieldController.php
+@@ -65,3 +65,5 @@ class TablefieldController {
+     $response->setCallback(function () use ($table, $separator) {
+-      ob_clean();
++      if (ob_get_level() > 0) {
++        ob_clean();
++      }
+       $handle = fopen('php://output', 'w+');

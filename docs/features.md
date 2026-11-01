@@ -12,7 +12,10 @@ See [Build Tools](BUILD_TOOLS.md#theme) for development commands.
 Review available types under Drupal's Structure → Content types screen.
 Page and Frontpage share titles, metadata, teaser fields, URL aliases and tags.
 The default model adds Body; Layout Paragraphs uses components without Body.
-Layout Builder offers Text, Text with Media, Image and Video custom blocks.
+Both component setups offer text/media, Accordion, Tabs, Quote, Embed and Table.
+Layout Paragraphs adds a field-free one–four column Layout and a library picker.
+Tabs Item accepts all components except Layout. Layout Builder uses equivalent
+custom blocks, Inline Entity Form for nesting, and native column sections.
 Navigation requires the Layout Builder module; content layouts are enabled only for that option.
 
 ## Media
