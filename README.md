@@ -7,7 +7,7 @@ Sous prepares the project; your site owns its code, dependencies and configurati
 
 ## Features and Configurations
 
-Choose the content model during installation; administration, the theme, Media and Config Split are always included.
+Choose the content model during installation; administration, the theme, Media, Config Split and a publishing workflow are always included.
 
 | Choice | Content setup |
 | --- | --- |

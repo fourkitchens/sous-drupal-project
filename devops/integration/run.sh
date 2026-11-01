@@ -286,6 +286,27 @@ $checks = [
   "Split definitions" => \Drupal::service("config.storage")->exists("config_split.config_split.local") && \Drupal::service("config.storage")->exists("config_split.config_split.staging"),
   "Media types" => count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video"])) === 3,
 ];
+// Every installed content type shares the publishing workflow and scheduling sidebar.
+$workflow = \Drupal\workflows\Entity\Workflow::load("editorial");
+$workflow_type = $workflow->getTypePlugin();
+$checks["Editorial states"] = array_map(static fn($state) => $state->label(), $workflow_type->getStates()) === ["draft" => "Draft", "published" => "Published", "archived" => "Archived"];
+$checks["Editorial default"] = $workflow->get("type_settings")["default_moderation_state"] === "draft";
+foreach (["workflows", "content_moderation", "scheduler", "scheduler_content_moderation_integration"] as $module) {
+  $checks["Publishing module: $module"] = \Drupal::moduleHandler()->moduleExists($module);
+}
+$node_types = \Drupal::entityTypeManager()->getStorage("node_type")->loadMultiple();
+$moderated_types = $workflow_type->getBundlesForEntityType("node");
+$installed_types = array_keys($node_types);
+sort($moderated_types);
+sort($installed_types);
+$checks["Moderated content types"] = $moderated_types === $installed_types;
+foreach ($node_types as $type => $node_type) {
+  $checks["Scheduling settings: $type"] = $node_type->getThirdPartySetting("scheduler", "publish_enable") && $node_type->getThirdPartySetting("scheduler", "unpublish_enable") && $node_type->getThirdPartySetting("scheduler", "fields_display_mode") === "vertical_tab";
+  $form = \Drupal::entityTypeManager()->getStorage("entity_form_display")->load("node.$type.default");
+  foreach (["moderation_state" => "moderation_state_default", "publish_on" => "datetime_timestamp_no_default", "unpublish_on" => "datetime_timestamp_no_default", "publish_state" => "scheduler_moderation", "unpublish_state" => "scheduler_moderation"] as $field => $widget) {
+    $checks["Scheduling widget: $type.$field"] = $form->getRenderer($field)->getPluginId() === $widget;
+  }
+}
 $events = in_array("sous-events", $recipes, TRUE);
 $checks["Optional Events"] = (bool) \Drupal::entityTypeManager()->getStorage("node_type")->load("event") === $events;
 if ($events) {

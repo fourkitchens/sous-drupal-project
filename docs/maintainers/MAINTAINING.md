@@ -36,7 +36,7 @@ bash devops/integration/run.sh --ci github --artifacts /tmp/sous-admin
 Append `--packages /path/to/sous-drupal-packages` for unpublished recipes.
 It copies `PATH/packages/*` at version `2.0.0` and mounts that path read-only in DDEV.
 Omit the override to verify published ZIPs before release.
-The runner checks settings, bootstrap, HTTP, recipes, generated files, deployment and config status.
+The runner checks settings, bootstrap, HTTP, recipes, publishing workflows, scheduling widgets, generated files and deployment.
 Admin-only also runs host `composer ci`, backup, `npm run setup` and `npm run rebuild`.
 Logs and `result.json` stay in the artifacts directory; `--help` covers retention and cleanup.
 
@@ -44,7 +44,7 @@ Logs and `result.json` stay in the artifacts directory; `--help` covers retentio
 
 The product [README](../../README.md#installation) documents content, recipe and CI choices.
 Preset `SOUS_CONTENT`, `SOUS_RECIPES` and `SOUS_CI` for unattended installs.
-Media and Config Split apply to every course; Paragraph Types belongs only to Paragraphs.
+Media, Config Split and the publishing workflow apply to every course; Paragraph Types belongs only to Paragraphs.
 The runner sets `SOUS_RECIPES`, so smoke tests never fetch the menu.
 To inspect it interactively, leave that variable unset; the newest matching-major
 metadata offers packages with `extra.sous.menu: true`; currently Events and News Post.

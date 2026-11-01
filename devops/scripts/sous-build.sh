@@ -85,7 +85,7 @@ for recipe in $recipe_choices; do
     exit 2
   fi
   case "$recipe" in
-    sous-media|sous-config-split) continue ;;
+    sous-media|sous-config-split|sous-workflow) continue ;;
     sous-paragraphs|sous-paragraph-types)
       if [ "$content" != sous-paragraphs ]; then
         echo 'Choose Paragraphs with SOUS_CONTENT before adding Paragraphs recipes.' >&2
@@ -154,7 +154,7 @@ TICKET
     printf '      None\n'
   fi
   printf '\n  03  SERVICE\n      %s\n\n' "$ci_label"
-  printf '  PANTRY STAPLES (INCLUDED)\n      Media and Config Split\n\n'
+  printf '  PANTRY STAPLES (INCLUDED)\n      Media, Config Split and publishing workflow\n\n'
   cat <<'TICKET'
   --------------------------------------------------------
        [x] RECEIVED       [ ] COOKING       [ ] READY
@@ -319,7 +319,7 @@ TICKET
     'Project' "$project_name" \
     'Main course' "$content_label" \
     'Service' "$ci_label" \
-    'Included' 'Media and Config Split'
+    'Included' 'Media, Config Split and publishing workflow'
   printf '\n  ON THE SIDE\n'
   if [ -n "$recipes" ]; then
     for recipe in $recipes; do

@@ -10,7 +10,7 @@ Content management system built on Drupal. Record project URLs, contacts and acc
 | Drupal / PHP | Drupal 11.4 / PHP 8.4 |
 | Node.js | Version in `.nvmrc`, installed on your computer |
 | Theme | Emulsify scaffold; directory recorded in `package.json` → `config.theme` |
-| Included | File, image and video media; local and staging Config Split definitions |
+| Included | Media, Config Split and a publishing workflow with scheduling |
 | Deployment | `composer build-assets`, then Drush deploy |
 | CI | Repository configuration; see [Deployment](docs/DEPLOYMENT.md#set-up-site-ci) |
 | Hosting | Record the platform and environment URLs here |
