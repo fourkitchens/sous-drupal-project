@@ -18,6 +18,8 @@ Site docs explain setup, development and maintenance.
   The smoke test covers end-to-end behaviour.
 - Don't work around upstream bugs (Emulsify, contrib modules) with scripts
   here. Use a Composer patch with an issue link, or fix the upstream project.
+- Keep the custom Style Selector compatibility patch; upstream schema issue
+  tracking is deferred to the maintainer.
 - No defensive checks for situations the scripts can't reach.
 - npm commands call scripts in devops/scripts. Shared PHP tasks use run-php.sh:
   DDEV on a configured laptop, native tools in CI, on hosts or inside DDEV.

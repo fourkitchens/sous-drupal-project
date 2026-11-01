@@ -10,8 +10,10 @@ See [Build Tools](BUILD_TOOLS.md#theme) for development commands.
 ## Content types
 
 Review available types under Drupal's Structure → Content types screen.
-Page and Frontpage models can use Body, metadata, teaser fields, URL aliases and tags.
-Where enabled, Layout Builder supplies per-page layouts or Paragraphs supplies reusable components.
+Page and Frontpage share titles, metadata, teaser fields, URL aliases and tags.
+The default model adds Body; Layout Paragraphs uses components without Body.
+Layout Builder offers Text, Text with Media, Image and Video custom blocks.
+Navigation requires the Layout Builder module; content layouts are enabled only for that option.
 
 ## Media
 
