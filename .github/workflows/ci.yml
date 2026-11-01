@@ -65,9 +65,9 @@ jobs:
           ${{ fromJSON(github.event_name == 'pull_request' &&
           '[{"option":"admin-only","ci":"github"}]' ||
           '[{"option":"admin-only","ci":"github"},
-          {"option":"layout-builder","ci":"gitlab","recipes":"sous-events"},
-          {"option":"paragraphs","ci":"circleci","recipes":"sous-events"},
-          {"option":"admin-only","ci":"none","recipes":"sous-events"}]') }}
+          {"option":"layout-builder","ci":"gitlab","recipes":"sous-events,sous-news-post"},
+          {"option":"paragraphs","ci":"circleci","recipes":"sous-events,sous-news-post"},
+          {"option":"admin-only","ci":"none","recipes":"sous-events,sous-news-post"}]') }}
     steps:
       - name: Initialize diagnostic artifacts
         run: |

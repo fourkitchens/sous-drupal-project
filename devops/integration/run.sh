@@ -298,6 +298,17 @@ if ($events) {
   $event_view = \Drupal\views\Entity\View::load("events");
   $checks["Event embeds"] = isset($event_view->get("display")["embed_upcoming"], $event_view->get("display")["embed_past"]);
 }
+$news = in_array("sous-news-post", $recipes, TRUE);
+$checks["Optional News"] = (bool) \Drupal::entityTypeManager()->getStorage("node_type")->load("news_post") === $news;
+if ($news) {
+  // News follows the same editor choice while keeping its own fields and listing.
+  $news_display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.news_post.default");
+  $checks["News layouts"] = (bool) $news_display->getThirdPartySetting("layout_builder", "enabled", FALSE) === ($option === "layout-builder");
+  $news_content = \Drupal\field\Entity\FieldConfig::loadByName("node", "news_post", "field_content");
+  $checks["News paragraphs"] = (bool) $news_content === ($option === "paragraphs");
+  $news_view = \Drupal\views\Entity\View::load("news");
+  $checks["Recent News embed"] = isset($news_view->get("display")["embed_recent"]);
+}
 foreach ($checks as $name => $passed) {
   if (!$passed) {
     throw new \RuntimeException("Unexpected composition: $name");

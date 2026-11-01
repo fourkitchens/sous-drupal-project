@@ -47,7 +47,7 @@ Preset `SOUS_CONTENT`, `SOUS_RECIPES` and `SOUS_CI` for unattended installs.
 Media and Config Split apply to every course; Paragraph Types belongs only to Paragraphs.
 The runner sets `SOUS_RECIPES`, so smoke tests never fetch the menu.
 To inspect it interactively, leave that variable unset; the newest matching-major
-metadata offers packages with `extra.sous.menu: true`; currently Events.
+metadata offers packages with `extra.sous.menu: true`; currently Events and News Post.
 `SOUS_INDEX` defaults to `https://fourkitchens.github.io/sous-drupal-packages/packages.json`;
 point it at a local build to inspect unpublished metadata:
 
@@ -63,7 +63,7 @@ Keep product CI, maintainer docs and agent rules out of generated sites.
 ## CI and releases
 
 PRs run admin-only with GitHub CI. Main pushes, nightly runs at 06:17 UTC
-and manual runs add Events to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI.
+and manual runs add Events and News Post to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI.
 Manual `packages_ref` selects a full reviewed packages commit.
 Keep action SHAs pinned; checks read only, publishing writes after checks pass.
 

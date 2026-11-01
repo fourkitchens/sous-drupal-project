@@ -15,7 +15,7 @@ Choose the content model during installation; administration, the theme, Media a
 | `1` Paragraphs | Page and Frontpage with Layout Paragraphs components |
 | `2` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed and Table blocks |
 
-Events is the optional recipe; Paragraph Types belongs only to the Paragraphs main course.
+Events and News Post are optional recipes; Paragraph Types belongs only to the Paragraphs main course.
 See [features and configurations](docs/features.md) for the site's building blocks.
 
 # Installation
@@ -36,7 +36,7 @@ CI choices are CircleCI, GitHub Actions, GitLab CI/CD and None.
 For an unattended install, set every answer:
 
 ```sh
-SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-events SOUS_CI=gitlab \
+SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-events,sous-news-post SOUS_CI=gitlab \
   composer create-project fourkitchens/sous-drupal-project:^8.0 PROJECT_NAME
 ```
 

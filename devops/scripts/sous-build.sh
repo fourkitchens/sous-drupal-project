@@ -249,9 +249,13 @@ if [ -n "$content" ]; then
 fi
 for recipe in $recipes; do
   sh devops/scripts/install-recipe.sh "fourkitchens/$recipe"
-  if [ "$recipe" = sous-events ] && [ -n "$content" ]; then
-    ddev drush -y recipe "/var/www/html/web/recipes/sous-events/recipes/${content#sous-}"
-  fi
+  case "$recipe" in
+    sous-events|sous-news-post)
+      if [ -n "$content" ]; then
+        ddev drush -y recipe "/var/www/html/web/recipes/$recipe/recipes/${content#sous-}"
+      fi
+      ;;
+  esac
 done
 # Validate the finished site and its login before retiring this installer.
 printf '\nFinal taste test: exporting configuration and checking the project.\n\n'
