@@ -38,7 +38,6 @@ npm run confex
 ```
 
 Recipes apply once and unpack; review and commit their dependencies and complete configuration export.
-The recipe and configuration scripts also use installed Drush directly in CI and on hosts without DDEV.
 
 ## Local settings and Config Split
 
@@ -55,7 +54,7 @@ if (getenv('IS_DDEV_PROJECT') === 'true') {
 }
 ```
 
-When Config Split is installed, enable local in local settings with
-`$config['config_split.config_split.local']['status'] = TRUE;` and staging in host settings with
-`$config['config_split.config_split.staging']['status'] = TRUE;`. Keep both inactive in exports.
+Config Split is included; `config/local` and `config/staging` stay inactive in exports.
+Local settings enable the local split in DDEV. Enable staging in host settings with
+`$config['config_split.config_split.staging']['status'] = TRUE;`.
 Use `ddev drush uli --name=sous_chef` for a local login after setup.

@@ -67,7 +67,6 @@ Migrate stored content before changing fields, and uninstall modules before remo
 Keep patch definitions in `patches/patches.json` and commit `patches.lock.json`.
 Run `ddev composer patches-relock` and `ddev composer patches-doctor` after patch changes.
 Use `ddev composer patches-repatch` to reinstall and verify them locally.
-For Entity Usage 2 → 5, run `ddev drush entity-usage:recreate` and verify references.
 
 ## Set up site CI
 

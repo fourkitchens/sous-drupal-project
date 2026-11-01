@@ -84,6 +84,16 @@ for recipe in $recipe_choices; do
     echo "Invalid recipe choice: $recipe" >&2
     exit 2
   fi
+  case "$recipe" in
+    sous-media|sous-config-split) continue ;;
+    sous-paragraphs|sous-paragraph-types)
+      if [ "$content" != sous-paragraphs ]; then
+        echo 'Choose Paragraphs with SOUS_CONTENT before adding Paragraphs recipes.' >&2
+        exit 2
+      fi
+      continue
+      ;;
+  esac
   recipes="${recipes:+$recipes }$recipe"
 done
 set +f
@@ -144,6 +154,7 @@ TICKET
     printf '      None\n'
   fi
   printf '\n  03  SERVICE\n      %s\n\n' "$ci_label"
+  printf '  PANTRY STAPLES (INCLUDED)\n      Media and Config Split\n\n'
   cat <<'TICKET'
   --------------------------------------------------------
        [x] RECEIVED       [ ] COOKING       [ ] READY
@@ -197,11 +208,23 @@ if [ -f composer.lock ]; then ddev composer update --lock --no-install --no-inte
 # Install project tools before Drush starts applying the recipes.
 printf '\nStocking the pantry: installing project tools.\n\n'
 ddev composer install
+# Fetch the baseline and selected recipes together before applying any of them.
+set -- "fourkitchens/sous-media:$sous_version" \
+  "fourkitchens/sous-config-split:$sous_version"
+if [ -n "$content" ]; then
+  set -- "$@" "fourkitchens/$content:$sous_version"
+fi
+for recipe in $recipes; do
+  set -- "$@" "fourkitchens/$recipe:$sous_version"
+done
+ddev composer require "$@"
 npm ci --include=dev
 # Minimal leaves the selected recipes in charge of the site's configuration.
 ddev drush -y site:install minimal --account-name=superuser_1
 sh devops/scripts/install-recipe.sh fourkitchens/sous-emulsify
 sh devops/scripts/install-recipe.sh fourkitchens/sous-admin
+sh devops/scripts/install-recipe.sh fourkitchens/sous-media
+sh devops/scripts/install-recipe.sh fourkitchens/sous-config-split
 mkdir -p web/modules/custom
 touch web/modules/custom/.gitkeep
 
@@ -221,21 +244,14 @@ ddev drush -y user:role:add superuser sous_chef
 
 # Apply optional recipes before exporting the site's complete configuration.
 printf '\nAdding your chosen recipes to the pot.\n\n'
-set --
-if [ -n "$content" ]; then
-  set -- "fourkitchens/$content:$sous_version"
-fi
-for recipe in $recipes; do
-  set -- "$@" "fourkitchens/$recipe:$sous_version"
-done
-if [ "$#" -gt 0 ]; then
-  ddev composer require "$@"
-fi
 if [ -n "$content" ]; then
   sh devops/scripts/install-recipe.sh "fourkitchens/$content"
 fi
 for recipe in $recipes; do
   sh devops/scripts/install-recipe.sh "fourkitchens/$recipe"
+  if [ "$recipe" = sous-events ] && [ -n "$content" ]; then
+    ddev drush -y recipe "/var/www/html/web/recipes/sous-events/recipes/${content#sous-}"
+  fi
 done
 # Validate the finished site and its login before retiring this installer.
 printf '\nFinal taste test: exporting configuration and checking the project.\n\n'
@@ -298,7 +314,8 @@ TICKET
   printf '  %-12s %s\n' \
     'Project' "$project_name" \
     'Main course' "$content_label" \
-    'Service' "$ci_label"
+    'Service' "$ci_label" \
+    'Included' 'Media and Config Split'
   printf '\n  ON THE SIDE\n'
   if [ -n "$recipes" ]; then
     for recipe in $recipes; do

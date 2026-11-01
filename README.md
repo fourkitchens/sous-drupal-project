@@ -7,7 +7,7 @@ Sous prepares the project; your site owns its code, dependencies and configurati
 
 ## Features and Configurations
 
-Choose the content model during installation; administration and the theme are always included.
+Choose the content model during installation; administration, the theme, Media and Config Split are always included.
 
 | Choice | Content setup |
 | --- | --- |
@@ -15,7 +15,7 @@ Choose the content model during installation; administration and the theme are a
 | `1` Paragraphs | Page and Frontpage with Layout Paragraphs components |
 | `2` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed and Table blocks |
 
-Package metadata supplies optional extras, including Config Split, Media and Paragraph Types.
+Events is the optional recipe; Paragraph Types belongs only to the Paragraphs main course.
 See [features and configurations](docs/features.md) for the site's building blocks.
 
 # Installation
@@ -36,7 +36,7 @@ CI choices are CircleCI, GitHub Actions, GitLab CI/CD and None.
 For an unattended install, set every answer:
 
 ```sh
-SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-config-split SOUS_CI=gitlab \
+SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-events SOUS_CI=gitlab \
   composer create-project fourkitchens/sous-drupal-project:^8.0 PROJECT_NAME
 ```
 

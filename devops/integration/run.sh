@@ -278,14 +278,25 @@ $checks = [
   "Page" => (bool) $page === ($option !== "admin-only"),
   // Paragraphs is enabled only for its content composition.
   "Paragraphs" => \Drupal::moduleHandler()->moduleExists("paragraphs") === ($option === "paragraphs"),
+  "Paragraph types" => \Drupal::service("config.storage")->exists("paragraphs.paragraphs_type.text") === ($option === "paragraphs"),
   // Layout Builder is enabled on the Page display only when selected.
   "Layout Builder" => (bool) $display?->getThirdPartySetting("layout_builder", "enabled", FALSE) === ($option === "layout-builder"),
-  // Config Split is enabled only when its optional recipe was selected.
-  "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split") === in_array("sous-config-split", $recipes, TRUE),
+  // Media and Config Split are applied to every main course.
+  "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split"),
+  "Split definitions" => \Drupal::service("config.storage")->exists("config_split.config_split.local") && \Drupal::service("config.storage")->exists("config_split.config_split.staging"),
+  "Media types" => count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video"])) === 3,
 ];
-if (in_array("sous-media", $recipes, TRUE)) {
-  // Media bundles prove the building-block recipe was applied on its own.
-  $checks["Media types"] = count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video"])) === 3;
+$events = in_array("sous-events", $recipes, TRUE);
+$checks["Optional Events"] = (bool) \Drupal::entityTypeManager()->getStorage("node_type")->load("event") === $events;
+if ($events) {
+  // Events uses the selected composition without bringing in another one.
+  $event_display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.event.default");
+  $checks["Event layouts"] = (bool) $event_display->getThirdPartySetting("layout_builder", "enabled", FALSE) === ($option === "layout-builder");
+  $event_content = \Drupal\field\Entity\FieldConfig::loadByName("node", "event", "field_content");
+  $checks["Event paragraphs"] = (bool) $event_content === ($option === "paragraphs");
+  $checks["Event dates"] = \Drupal::moduleHandler()->moduleExists("smart_date_recur");
+  $event_view = \Drupal\views\Entity\View::load("events");
+  $checks["Event embeds"] = isset($event_view->get("display")["embed_upcoming"], $event_view->get("display")["embed_past"]);
 }
 foreach ($checks as $name => $passed) {
   if (!$passed) {

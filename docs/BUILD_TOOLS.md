@@ -69,5 +69,4 @@ PHP coding standards use `phpcs.xml.dist`; review autofixes and follow [contribu
 | `npm run theme-storybook` | Build static Storybook at `web/storybook` |
 
 Commit both npm manifests and lockfiles. Compare source, libraries and npm changes when updating the theme.
-For Emulsify Tools 2 favicon migration, run `ddev drush emulsify_tools:repair-favicon-config "<theme>"` and export configuration.
 CI runs `composer ci` directly with PHP and Node; see [Deployment](DEPLOYMENT.md).

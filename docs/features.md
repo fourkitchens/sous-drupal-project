@@ -20,8 +20,16 @@ Navigation requires the Layout Builder module; content layouts are enabled only 
 
 ## Media
 
-Media Library manages the site's configured file, image and video types.
+Every setup includes file, image and video types managed through Media Library.
 Available fields, focal-point cropping and upload widgets are recorded in configuration.
+
+## Events
+
+When selected, Event adds Smart Date with all-day and recurring schedules and an Event Type selector using Tagify.
+Events share Page-style teasers and use month–year, event type and title in URL aliases.
+Upcoming and Past Views provide embeddable listings; ongoing events stay Upcoming until their end.
+A recurring series appears once per listing when different occurrences qualify for each.
+Event uses components with Paragraphs and layouts with Layout Builder.
 
 ## User Roles and Permissions
 

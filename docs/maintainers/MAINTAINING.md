@@ -38,16 +38,16 @@ It copies `PATH/packages/*` at version `2.0.0` and mounts that path read-only in
 Omit the override to verify published ZIPs before release.
 The runner checks settings, bootstrap, HTTP, recipes, generated files, deployment and config status.
 Admin-only also runs host `composer ci`, backup, `npm run setup` and `npm run rebuild`.
-Check shared Drupal scripts both through local DDEV and with native tools; keep database resets local.
 Logs and `result.json` stay in the artifacts directory; `--help` covers retention and cleanup.
 
 ## Installer choices
 
 The product [README](../../README.md#installation) documents content, recipe and CI choices.
 Preset `SOUS_CONTENT`, `SOUS_RECIPES` and `SOUS_CI` for unattended installs.
+Media and Config Split apply to every course; Paragraph Types belongs only to Paragraphs.
 The runner sets `SOUS_RECIPES`, so smoke tests never fetch the menu.
 To inspect it interactively, leave that variable unset; the newest matching-major
-metadata offers packages with `extra.sous.menu: true`, even when already included.
+metadata offers packages with `extra.sous.menu: true`; currently Events.
 `SOUS_INDEX` defaults to `https://fourkitchens.github.io/sous-drupal-packages/packages.json`;
 point it at a local build to inspect unpublished metadata:
 
@@ -59,13 +59,12 @@ SOUS_INDEX=/path/to/sous-drupal-packages/build/site/packages.json \
 Successful installation retires starter-only code and metadata; shared site guides contain no starter branding.
 The frontend theme is enabled with npm dependencies only; library installation and its first asset build are manual.
 Keep product CI, maintainer docs and agent rules out of generated sites.
-Upstream names and license identities stay unchanged.
 
 ## CI and releases
 
 PRs run admin-only with GitHub CI. Main pushes, nightly runs at 06:17 UTC
-and manual runs add Layout Builder/GitLab, Paragraphs/CircleCI with `sous-config-split`,
-and admin-only/no CI with `sous-media`. Manual `packages_ref` selects a full reviewed packages commit.
+and manual runs add Events to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI.
+Manual `packages_ref` selects a full reviewed packages commit.
 Keep action SHAs pinned; checks read only, publishing writes after checks pass.
 
 Publish packages first, then verify all starter options against the published index.
