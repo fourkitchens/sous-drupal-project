@@ -1,5 +1,5 @@
 {
-    "_hash": "5b955232b2206f812008e2b5ca7422b5388d44f13fa8018d87d3169c2a8a08ba",
+    "_hash": "d141ed610562be6572d0fb057f498c7123ca1794fea6db40f1105753dc30f7b0",
     "patches": {
         "drupal/field_group": [
             {
@@ -10,6 +10,33 @@
                 "depth": 1,
                 "extra": {
                     "issue-tracker-url": "https://www.drupal.org/project/field_group/issues/2969051",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            }
+        ],
+        "drupal/layout_paragraphs": [
+            {
+                "package": "drupal/layout_paragraphs",
+                "description": "Improve Layout Paragraphs component selection",
+                "url": "patches/layout-paragraphs-component-list-3487314.patch",
+                "sha256": "1f41f7ef7024f9c4c88b98f8250539581357c62f2306b5b89b3368ac19d7ffaa",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/layout_paragraphs/issues/3487314",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            }
+        ],
+        "drupal/style_selector": [
+            {
+                "package": "drupal/style_selector",
+                "description": "Custom Drupal 11 field-default schema and library discovery compatibility",
+                "url": "patches/style-selector-drupal11-compatibility.patch",
+                "sha256": "39c6d214990c04690c5dd425e080a7410be8a248dedb81da9d63b3bd66d1809c",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/style_selector/issues/3589133",
+                    "note": "The issue covers library discovery; field-default schema fixes are custom pending upstream tracking.",
                     "provenance": "patches-file:patches/patches.json"
                 }
             }
