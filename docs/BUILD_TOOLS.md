@@ -7,13 +7,22 @@ Setup, rebuild, import-data and local-data-bak remain local DDEV operations.
 ## Theme
 
 The Emulsify theme is at `web/themes/custom/<theme>`; `package.json` records its name in `config.theme`.
-Edit `src/`; builds generate `dist/` and a `components/` mirror, both required in deployments.
-Run the [Emulsify CLI](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage) from the theme directory:
+Initial installation enables the theme and installs its npm dependencies, without a component library or asset build.
+When ready, choose a library through the [Emulsify CLI](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage); this example installs UI Kit manually:
 
 ```sh
-cd "web/themes/custom/<theme>"
-npx emulsify component list
+(
+  cd "web/themes/custom/<theme>"
+  npx emulsify system install --repository https://github.com/emulsify-ds/emulsify-ui-kit.git \
+    --checkout 1.9.0 --variant drupal --all
+  npm install
+)
+npm run theme-build
+npm run theme-watch
 ```
+
+Edit `src/`; builds generate `dist/` and a `components/` mirror for deployment.
+An empty scaffold reports no build inputs; once sources exist, build failures stop the command.
 
 ## NPM Scripts
 
@@ -21,7 +30,7 @@ npx emulsify component list
 
 | Command | Purpose |
 | --- | --- |
-| `npm run setup` | Install root/theme dependencies, build assets, then rebuild a fresh clone |
+| `npm run setup` | Install root/theme dependencies, build available sources, then rebuild a fresh clone |
 | `npm run rebuild` | Start DDEV, install PHP dependencies, import a backup, deploy and print a login |
 | `npm run get-db` | Run the project's database download command |
 | `npm run import-data` | Import and sanitize a local database |
@@ -55,8 +64,8 @@ PHP coding standards use `phpcs.xml.dist`; review autofixes and follow [contribu
 | Command | Purpose |
 | --- | --- |
 | `npm run theme-ci` | Install locked theme dependencies |
-| `npm run theme-build` | Build production assets |
-| `npm run theme-watch` | Develop the theme |
+| `npm run theme-build` | Build production assets when source inputs exist |
+| `npm run theme-watch` | Develop the theme after adding a component library |
 | `npm run theme-storybook` | Build static Storybook at `web/storybook` |
 
 Commit both npm manifests and lockfiles. Compare source, libraries and npm changes when updating the theme.

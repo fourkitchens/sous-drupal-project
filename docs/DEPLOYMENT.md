@@ -26,7 +26,7 @@ npm --prefix "web/themes/custom/<theme>" audit
 ```
 
 Ship `vendor/`, Drupal core, extensions, libraries, custom source, configuration and shared settings.
-Include the theme's `dist/` and generated `components/`; omit `node_modules`, local settings, caches and backups.
+Include the theme's `dist/` and generated `components/` when present; omit `node_modules`, local settings, caches and backups.
 Keep secrets and uploaded/private files on the host; serve the `web/` document root.
 Back up the destination, deliver the build, then apply database updates and configuration:
 
@@ -71,7 +71,7 @@ For Entity Usage 2 → 5, run `ddev drush entity-usage:recreate` and verify refe
 
 ## Set up site CI
 
-The repository's CI configuration runs `composer ci`: install dependencies, build the theme, lint and check PHP standards.
+The repository's CI configuration runs `composer ci`: install dependencies, build available theme sources, lint and check PHP standards.
 Change these steps in `composer.json`; CI runs without DDEV.
 
 | Provider | Configuration |

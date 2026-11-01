@@ -57,6 +57,7 @@ SOUS_INDEX=/path/to/sous-drupal-packages/build/site/packages.json \
 ```
 
 Successful installation retires starter-only code and metadata; shared site guides contain no starter branding.
+The frontend theme is enabled with npm dependencies only; library installation and its first asset build are manual.
 Keep product CI, maintainer docs and agent rules out of generated sites.
 Upstream names and license identities stay unchanged.
 

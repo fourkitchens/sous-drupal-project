@@ -1,22 +1,50 @@
 #!/bin/sh
-# Install Sous, apply the selected recipes and build its theme.
+# Install Sous, apply the selected recipes and prepare its theme.
 # Composer runs this once during composer create-project on your computer.
 set -eu
 
 sous_version='^2.0'
 
-printf '%s\n\n' "Welcome to Sous! Let's get cooking."
+cat <<'MENU'
+
+┌────────────────────────────────────────────────────────────┐
+│  SOUS                                                      │
+│  Welcome to the kitchen. Let's take your order.            │
+└────────────────────────────────────────────────────────────┘
+MENU
 
 # Collect choices before Composer, npm or Drush can consume the input stream.
 if [ "${SOUS_CONTENT+x}" != x ]; then
-  printf 'Content: [0] Default [1] Layout Builder [2] Paragraphs [3] Admin only: '
+  cat <<'MENU'
+
+  MAIN COURSE · Content setup
+
+    [0] default         Page and Frontpage with a Body field
+    [1] layout-builder  Page and Frontpage with flexible layouts
+    [2] paragraphs      Page and Frontpage with reusable components
+    [3] admin-only      Administration and theme, without content types
+
+MENU
+  printf '  Your main course (number or name): '
   read -r SOUS_CONTENT
 fi
 case "$SOUS_CONTENT" in
-  default|0) content=sous-content-types ;;
-  layout-builder|1) content=sous-core-layout-builder ;;
-  paragraphs|2) content=sous-paragraphs ;;
-  admin-only|3) content='' ;;
+  default|0)
+    content=sous-content-types
+    content_label=Default
+    ;;
+  layout-builder|1)
+    content=sous-core-layout-builder
+    content_label='Layout Builder'
+    ;;
+  paragraphs|2)
+    content=sous-paragraphs
+    content_label=Paragraphs
+    ;;
+  admin-only|3)
+    content=''
+    content_label='Admin only'
+    ;;
   *) echo 'SOUS_CONTENT must be default, layout-builder, paragraphs, or admin-only.' >&2; exit 2 ;;
 esac
 
@@ -41,8 +69,9 @@ if [ "${SOUS_RECIPES+x}" != x ]; then
     echo "Couldn't reach the Sous package index; add optional recipes later with ddev composer require." >&2
   SOUS_RECIPES=''
   if [ -n "$recipe_menu" ]; then
-    printf '%s\n' "$recipe_menu" | awk -F '\t' '{printf "%d. %s: %s\n", NR, $1, $2}'
-    printf 'Add recipes (numbers or names, separated by spaces; Enter for none): '
+    printf '\n  ON THE SIDE · Optional recipes\n\n'
+    printf '%s\n' "$recipe_menu" | awk -F '\t' '{printf "    [%d] %s\n        %s\n\n", NR, $1, $2}'
+    printf '  Add sides (numbers or names; spaces or commas; Enter for none): '
     read -r SOUS_RECIPES || SOUS_RECIPES=''
   fi
 fi
@@ -65,18 +94,43 @@ done
 set +f
 
 if [ "${SOUS_CI+x}" != x ]; then
-  printf 'CI: [0] CircleCI [1] GitHub Actions [2] GitLab CI/CD [3] None: '
+  cat <<'MENU'
+
+  SERVICE · Continuous integration
+
+    [0] circleci  CircleCI
+    [1] github    GitHub Actions
+    [2] gitlab    GitLab CI/CD
+    [3] none      No CI
+
+MENU
+  printf '  Your service (number or name): '
   read -r SOUS_CI
 fi
 case "$SOUS_CI" in
-  circleci|0) ci=circleci ;;
-  github|1) ci=github ;;
-  gitlab|2) ci=gitlab ;;
-  none|3) ci=none ;;
+  circleci|0)
+    ci=circleci
+    ci_label=CircleCI
+    ;;
+  github|1)
+    ci=github
+    ci_label='GitHub Actions'
+    ;;
+  gitlab|2)
+    ci=gitlab
+    ci_label='GitLab CI/CD'
+    ;;
+  none|3)
+    ci=none
+    ci_label=None
+    ;;
   *) echo 'SOUS_CI must be circleci, github, gitlab, or none.' >&2; exit 2 ;;
 esac
 
-printf '\nOrder received. Aprons on!\n\n'
+printf '\n  Order received: %s, with %s. Aprons on!\n\n' "$content_label" "$ci_label"
+
+# Prevent nested tools from querying the terminal and leaking its replies.
+export TERM=dumb
 
 # DDEV and the theme derive their names from the target project directory.
 # Store the theme name once so routine npm commands use the same directory.
@@ -115,17 +169,19 @@ sh devops/scripts/install-recipe.sh fourkitchens/sous-admin
 mkdir -p web/modules/custom
 touch web/modules/custom/.gitkeep
 
-# Build the new theme before enabling it so Drupal can serve its assets.
-printf '\nPlating the theme: this course takes a few minutes.\n\n'
+# Generate the theme and install its tools; the project chooses its library later.
+printf '\nSetting the table: preparing your custom theme and its tools.\n\n'
 ddev drush -y emulsify "$theme"
-sh devops/scripts/theme-setup.sh "web/themes/custom/$theme"
+npm --prefix "web/themes/custom/$theme" install --include=dev
 ddev drush -y theme:install "$theme"
 ddev drush -y config:set system.theme default "$theme"
 # Keep UID 1 blocked and use a separate local administrator account.
+sous_chef_password=$(php -r 'echo bin2hex(random_bytes(12));')
 ddev drush -y user:block superuser_1
-ddev drush -y user:create admin --mail=local-admin@example.com
+ddev drush -y user:create sous_chef --mail=local-admin@example.com \
+  --password="$sous_chef_password"
 ddev drush -y user:role:add superuser superuser_1
-ddev drush -y user:role:add superuser admin
+ddev drush -y user:role:add superuser sous_chef
 
 # Apply optional recipes before exporting the site's complete configuration.
 printf '\nAdding your chosen recipes to the pot.\n\n'
@@ -159,7 +215,11 @@ node -e '
 '
 ddev composer update --lock --no-install --no-interaction
 ddev composer validate --no-check-publish
-ddev drush uli --name=admin
+# Read the running site's versions and URL for the finished order.
+drupal_version=$(ddev drush status --field=drupal-version)
+php_version=$(ddev drush status --field=php-version)
+node_version=$(node --version)
+local_url=$(ddev drush status --field=uri)
 # Retire the creation hook only after installation succeeds.
 ddev composer config --unset scripts.post-create-project-cmd
 # Preserve attribution before retiring the applied recipe sources.
@@ -167,9 +227,7 @@ for notice in web/recipes/sous-*/NOTICE; do
   if [ -f "$notice" ]; then cat "$notice" >> NOTICE; fi
 done
 rm -rf web/recipes/sous-*
-rm devops/scripts/sous-build.sh \
-  devops/scripts/theme-setup.sh \
-  devops/scripts/theme-initialize.mjs
+rm devops/scripts/sous-build.sh
 # Celebrate only after installation and one-time cleanup have succeeded.
 cat <<'EOF'
 
@@ -190,6 +248,24 @@ cat <<'EOF'
  Your Drupal site is ready.
 //////////////
 
-Next course: npm run theme-watch
-
 EOF
+
+printf '┌─ YOUR ORDER ────────────────────────────────────────────────\n'
+printf '│  %-12s %s\n' \
+  'Project' "$project_name" \
+  'Drupal' "$drupal_version" \
+  'PHP' "$php_version" \
+  'Node.js' "$node_version" \
+  'Content' "$content_label" \
+  'Extras' "${recipes:-None}" \
+  'CI' "$ci_label" \
+  'Theme' "$theme (scaffold; dependencies installed)" \
+  'Local URL' "$local_url"
+printf '│\n│  LOCAL SIGN-IN\n│\n'
+printf '│  %-12s %s\n' \
+  'Login' "${local_url%/}/user/login" \
+  'Username' sous_chef \
+  'Password' "$sous_chef_password" \
+  'UID 1' 'superuser_1 is blocked'
+printf '└────────────────────────────────────────────────────────────\n\n'
+printf 'Your kitchen is ready. Add a component library when you are ready to cook.\n\n'

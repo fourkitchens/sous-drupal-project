@@ -44,6 +44,7 @@ SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-config-split SOUS_CI=gitlab \
 `SOUS_CONTENT` accepts `default`, `layout-builder`, `paragraphs` or `admin-only` (0–3).
 `SOUS_CI` accepts `circleci`, `github`, `gitlab` or `none` (0–3).
 Set `SOUS_RECIPES=''` for no extras, or supply names separated by spaces or commas.
+The final order summary shows the local URL and a generated password for `sous_chef`; UID 1 stays blocked.
 
 # Recipe Dependency Management
 
@@ -53,8 +54,8 @@ See [adding a recipe](docs/SETUP.md#add-a-recipe) for later additions.
 
 # Working with Emulsify
 
-Installation generates and builds a project-named [Emulsify](https://www.emulsify.info/) theme.
-Edit its source and run `npm run theme-watch`; see [Build Tools](docs/BUILD_TOOLS.md#theme).
+Installation generates a project-named [Emulsify](https://www.emulsify.info/) theme, sets it as the frontend default and installs its npm dependencies.
+Add a component library manually before building or watching theme assets; see [Build Tools](docs/BUILD_TOOLS.md#theme).
 
 # Additional Tooling
 
@@ -66,7 +67,7 @@ Setup, rebuild, database import and backup remain local DDEV commands.
 
 | Command | Purpose |
 | --- | --- |
-| `npm run setup` | Prepare a fresh clone, build assets and restore its database |
+| `npm run setup` | Prepare a fresh clone, build available theme sources and restore its database |
 | `npm run rebuild` | Reset a branch's database and deploy configuration |
 | `npm run confex` / `npm run confim` | Export configuration / run Drush deploy |
 | `npm run import-data` / `npm run local-data-bak` | Import or back up the local database |

@@ -20,7 +20,7 @@
     "prettier": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run prettier -- --check",
     "local-data-bak": "sh devops/scripts/local-data-bak.sh",
     "prepare": "husky",
-    "theme-build": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run build",
+    "theme-build": "node devops/scripts/theme-build.mjs",
     "theme-watch": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run develop",
     "theme-ci": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" ci --include=dev",
     "theme-storybook": "npm --prefix \"web/themes/custom/$npm_package_config_theme\" run storybook-build -- --output-dir ../../../storybook",

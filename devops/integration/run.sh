@@ -30,7 +30,8 @@ Checks, in order:
   1. Local development settings stay disabled outside DDEV.
   2. Drupal bootstraps successfully.
   3. The front page returns HTTP 200.
-  4. Page, Paragraphs, Layout Builder and Config Split match the chosen options.
+  4. Content and recipes match the choices; UID 1 stays blocked, sous_chef can
+     sign in, and the default custom theme has tools but no component library/build.
   5. Maintainer tooling, one-time theme setup files and assets/ci are absent;
      only the selected provider's
      CI files remain, with no product ci.yml or unselected provider files.
@@ -253,15 +254,26 @@ check_site_responds() {
   expect_line front-page 200
 }
 
-# Check the selected content composition and optional Config Split recipe in Drupal.
+# Check content, administrator accounts and the unpopulated default theme in Drupal.
 check_composition() {
   local composition_checks
+  local chef_password
+  local theme
+  chef_password=$(awk '$2 == "Password" {print $3}' "$artifacts/create-project.log")
+  theme=$(printf '%s' "$project_name" | tr -d '-')
   composition_checks=$(cat <<'PHP'
 $option = getenv("SOUS_SMOKE_OPTION");
 $recipes = preg_split('/[\s,]+/', getenv("SOUS_SMOKE_RECIPES"), -1, PREG_SPLIT_NO_EMPTY);
 $page = \Drupal::entityTypeManager()->getStorage("node_type")->load("page");
 $display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.page.default");
+$uid1 = \Drupal\user\Entity\User::load(1);
+$chef = user_load_by_name("sous_chef");
 $checks = [
+  // UID 1 stays blocked while the separate chef account can sign in as Superuser.
+  "Blocked UID 1" => $uid1->isBlocked() && $uid1->getAccountName() === "superuser_1",
+  "Chef login" => $chef && $chef->isActive() && $chef->hasRole("superuser") && \Drupal::service("password")->check(getenv("SOUS_SMOKE_PASSWORD"), $chef->getPassword()),
+  // The generated custom theme is the frontend default before assets are added.
+  "Custom theme" => \Drupal::config("system.theme")->get("default") === getenv("SOUS_SMOKE_THEME"),
   // Page is included in every composition except admin-only.
   "Page" => (bool) $page === ($option !== "admin-only"),
   // Paragraphs is enabled only for its content composition.
@@ -284,7 +296,11 @@ echo "Selected composition matches.\n";
 PHP
   )
   step composition ddev exec --raw env SOUS_SMOKE_OPTION="$option" \
-    SOUS_SMOKE_RECIPES="$recipes" vendor/bin/drush php:eval "$composition_checks"
+    SOUS_SMOKE_RECIPES="$recipes" SOUS_SMOKE_THEME="$theme" \
+    SOUS_SMOKE_PASSWORD="$chef_password" vendor/bin/drush php:eval "$composition_checks"
+  step theme-tools test -d "web/themes/custom/$theme/node_modules/@emulsify/core"
+  step absent-component-library test ! -d "web/themes/custom/$theme/src/components"
+  step absent-initial-theme-build test ! -d "web/themes/custom/$theme/dist"
 }
 
 # Check that sites omit maintainer tooling and one-time theme setup files.

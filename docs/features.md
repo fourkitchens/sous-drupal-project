@@ -4,7 +4,7 @@ The complete export in `config/default` records this site's enabled content mode
 
 ## Themes
 
-Emulsify supplies the project theme and component workflow; Gin supplies the administrative interface.
+Emulsify supplies the project theme scaffold; add a component library when ready. Gin supplies the administrative interface.
 See [Build Tools](BUILD_TOOLS.md#theme) for development commands.
 
 ## Content types
@@ -20,6 +20,7 @@ Available fields, focal-point cropping and upload widgets are recorded in config
 
 ## User Roles and Permissions
 
-The local `admin` account uses the Superuser role; UID 1 is blocked during initial installation.
+The local `sous_chef` account uses the Superuser role; its random password appears in the initial order summary.
+UID 1 (`superuser_1`) remains blocked.
 Review role permissions and account assignments when adding integrations or content workflows.
 Record site-specific extensions, content types and feature decisions here.

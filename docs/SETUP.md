@@ -13,7 +13,7 @@ Clone the repository, obtain its database backup and uploaded files, then run:
 npm run setup -- reference/site-db.sql.gz
 ```
 
-Setup installs Node dependencies, builds the theme, then restores and deploys the local site.
+Setup installs Node dependencies, builds available theme sources, then restores and deploys the local site.
 
 ## Restore or refresh locally
 
@@ -58,4 +58,4 @@ if (getenv('IS_DDEV_PROJECT') === 'true') {
 When Config Split is installed, enable local in local settings with
 `$config['config_split.config_split.local']['status'] = TRUE;` and staging in host settings with
 `$config['config_split.config_split.staging']['status'] = TRUE;`. Keep both inactive in exports.
-Use `ddev drush uli --name=admin` for a local login after setup.
+Use `ddev drush uli --name=sous_chef` for a local login after setup.
