@@ -124,33 +124,46 @@ esac
 
 # Print matching prep and pickup tickets without terminal controls or clipped values.
 order_number=$(date '+%H%M%S')
-cat <<'TICKET'
+printf '\n'
+{
+  cat <<'TICKET'
 
-  /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
                   S O U S   K I T C H E N
                        PREP TICKET
   --------------------------------------------------------
 TICKET
-printf '  TICKET #%-8s                       ORDER RECEIVED\n' "$order_number"
-printf '  --------------------------------------------------------\n\n'
-printf '  01  MAIN COURSE\n      %s\n\n' "$content_label"
-printf '  02  ON THE SIDE\n'
-if [ -n "$recipes" ]; then
-  for recipe in $recipes; do
-    printf '      + %s\n' "$recipe"
-  done
-else
-  printf '      None\n'
-fi
-printf '\n  03  SERVICE\n      %s\n\n' "$ci_label"
-cat <<'TICKET'
+  printf '  TICKET #%-8s                       ORDER RECEIVED\n' "$order_number"
+  printf '  --------------------------------------------------------\n\n'
+  printf '  01  MAIN COURSE\n      %s\n\n' "$content_label"
+  printf '  02  ON THE SIDE\n'
+  if [ -n "$recipes" ]; then
+    for recipe in $recipes; do
+      printf '      + %s\n' "$recipe"
+    done
+  else
+    printf '      None\n'
+  fi
+  printf '\n  03  SERVICE\n      %s\n\n' "$ci_label"
+  cat <<'TICKET'
   --------------------------------------------------------
        [x] RECEIVED       [ ] COOKING       [ ] READY
 
                 Aprons on. Let's get cooking!
-  \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 TICKET
+} | awk '
+  {
+    lines[NR] = $0
+    if (length($0) > width) width = length($0)
+  }
+  END {
+    border = sprintf("%*s", width + 2, "")
+    gsub(/ /, "-", border)
+    print "  +" border "+"
+    for (row = 1; row <= NR; row++) printf "  | %-*s |\n", width, lines[row]
+    print "  +" border "+\n"
+  }
+'
 
 # Prevent nested tools from querying the terminal and leaking its replies.
 export TERM=dumb
@@ -273,46 +286,58 @@ cat <<'EOF'
 
 EOF
 
-cat <<'TICKET'
-  /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+{
+  cat <<'TICKET'
+
                   S O U S   K I T C H E N
                         YOUR ORDER
   --------------------------------------------------------
 TICKET
-printf '  TICKET #%-8s                     READY FOR PICKUP\n' "$order_number"
-printf '  --------------------------------------------------------\n\n'
-printf '  %-12s %s\n' \
-  'Project' "$project_name" \
-  'Main course' "$content_label" \
-  'Service' "$ci_label"
-printf '\n  ON THE SIDE\n'
-if [ -n "$recipes" ]; then
-  for recipe in $recipes; do
-    printf '    + %s\n' "$recipe"
-  done
-else
-  printf '    None\n'
-fi
-printf '\n  THE PREP SHEET\n\n'
-printf '  %-12s %s\n' \
-  'Drupal' "$drupal_version" \
-  'PHP' "$php_version" \
-  'Node.js' "$node_version" \
-  'Theme' "$theme"
-printf '               Scaffold and npm tools ready\n'
-printf '\n  LOCAL COUNTER\n\n  %s\n' "$local_url"
-printf '\n  LOCAL SIGN-IN\n\n  %s\n\n' "${local_url%/}/user/login"
-printf '  %-12s %s\n' \
-  'Username' sous_chef \
-  'Password' "$sous_chef_password"
-cat <<'TICKET'
+  printf '  TICKET #%-8s                     READY FOR PICKUP\n' "$order_number"
+  printf '  --------------------------------------------------------\n\n'
+  printf '  %-12s %s\n' \
+    'Project' "$project_name" \
+    'Main course' "$content_label" \
+    'Service' "$ci_label"
+  printf '\n  ON THE SIDE\n'
+  if [ -n "$recipes" ]; then
+    for recipe in $recipes; do
+      printf '    + %s\n' "$recipe"
+    done
+  else
+    printf '    None\n'
+  fi
+  printf '\n  THE PREP SHEET\n\n'
+  printf '  %-12s %s\n' \
+    'Drupal' "$drupal_version" \
+    'PHP' "$php_version" \
+    'Node.js' "$node_version" \
+    'Theme' "$theme"
+  printf '               Scaffold and npm tools ready\n'
+  printf '\n  LOCAL COUNTER\n\n  %s\n' "$local_url"
+  printf '\n  LOCAL SIGN-IN\n\n  %s\n\n' "${local_url%/}/user/login"
+  printf '  %-12s %s\n' \
+    'Username' sous_chef \
+    'Password' "$sous_chef_password"
+  cat <<'TICKET'
 
   --------------------------------------------------------
        [x] RECEIVED       [x] COOKING       [x] READY
 
                 Freshly prepared. Happy building!
-  \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-Add a component library when you are ready to cook.
 
 TICKET
+} | awk '
+  {
+    lines[NR] = $0
+    if (length($0) > width) width = length($0)
+  }
+  END {
+    border = sprintf("%*s", width + 2, "")
+    gsub(/ /, "-", border)
+    print "  +" border "+"
+    for (row = 1; row <= NR; row++) printf "  | %-*s |\n", width, lines[row]
+    print "  +" border "+\n"
+  }
+'
+printf 'Add a component library when you are ready to cook.\n\n'

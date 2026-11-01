@@ -259,7 +259,7 @@ check_composition() {
   local composition_checks
   local chef_password
   local theme
-  chef_password=$(awk '$1 == "Password" {print $2}' "$artifacts/create-project.log")
+  chef_password=$(awk '$1 == "|" && $2 == "Password" {print $3}' "$artifacts/create-project.log")
   theme=$(printf '%s' "$project_name" | tr -d '-')
   composition_checks=$(cat <<'PHP'
 $option = getenv("SOUS_SMOKE_OPTION");
