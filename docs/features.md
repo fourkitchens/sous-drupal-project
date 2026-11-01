@@ -11,7 +11,7 @@ See [Build Tools](BUILD_TOOLS.md#theme) for development commands.
 
 Review available types under Drupal's Structure → Content types screen.
 Page and Frontpage share titles, metadata, teaser fields, URL aliases and tags.
-The default model adds Body; Layout Paragraphs uses components without Body.
+Layout Paragraphs uses components without a Body field.
 Both component setups offer text/media, Accordion, Tabs, Quote, Embed and Table.
 Layout Paragraphs adds a field-free one–four column Layout and a library picker.
 Tabs Item accepts all components except Layout. Layout Builder uses equivalent

@@ -19,33 +19,28 @@ if [ "${SOUS_CONTENT+x}" != x ]; then
 
   MAIN COURSE · Content setup
 
-    [0] default         Page and Frontpage with a Body field
-    [1] layout-builder  Page and Frontpage with flexible layouts
-    [2] paragraphs      Page and Frontpage with reusable components
-    [3] admin-only      Administration and theme, without content types
+    [0] Admin only      Administration and theme, without content types
+    [1] Paragraphs      Page and Frontpage with reusable components
+    [2] Layout Builder  Page and Frontpage with flexible layouts
 
 MENU
   printf '  Your main course (number or name): '
   read -r SOUS_CONTENT
 fi
 case "$SOUS_CONTENT" in
-  default|0)
-    content=sous-content-types
-    content_label=Default
-    ;;
-  layout-builder|1)
-    content=sous-core-layout-builder
-    content_label='Layout Builder'
-    ;;
-  paragraphs|2)
-    content=sous-paragraphs
-    content_label=Paragraphs
-    ;;
-  admin-only|3)
+  admin-only|'Admin only'|0)
     content=''
     content_label='Admin only'
     ;;
-  *) echo 'SOUS_CONTENT must be default, layout-builder, paragraphs, or admin-only.' >&2; exit 2 ;;
+  paragraphs|Paragraphs|1)
+    content=sous-paragraphs
+    content_label=Paragraphs
+    ;;
+  layout-builder|'Layout Builder'|2)
+    content=sous-core-layout-builder
+    content_label='Layout Builder'
+    ;;
+  *) echo 'SOUS_CONTENT must be admin-only, paragraphs, or layout-builder.' >&2; exit 2 ;;
 esac
 
 # Let each package decide whether it belongs in the optional recipe menu.
@@ -127,7 +122,35 @@ case "$SOUS_CI" in
   *) echo 'SOUS_CI must be circleci, github, gitlab, or none.' >&2; exit 2 ;;
 esac
 
-printf '\n  Order received: %s, with %s. Aprons on!\n\n' "$content_label" "$ci_label"
+# Print matching prep and pickup tickets without terminal controls or clipped values.
+order_number=$(date '+%H%M%S')
+cat <<'TICKET'
+
+  /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+                  S O U S   K I T C H E N
+                       PREP TICKET
+  --------------------------------------------------------
+TICKET
+printf '  TICKET #%-8s                       ORDER RECEIVED\n' "$order_number"
+printf '  --------------------------------------------------------\n\n'
+printf '  01  MAIN COURSE\n      %s\n\n' "$content_label"
+printf '  02  ON THE SIDE\n'
+if [ -n "$recipes" ]; then
+  for recipe in $recipes; do
+    printf '      + %s\n' "$recipe"
+  done
+else
+  printf '      None\n'
+fi
+printf '\n  03  SERVICE\n      %s\n\n' "$ci_label"
+cat <<'TICKET'
+  --------------------------------------------------------
+       [x] RECEIVED       [ ] COOKING       [ ] READY
+
+                Aprons on. Let's get cooking!
+  \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
+TICKET
 
 # Prevent nested tools from querying the terminal and leaking its replies.
 export TERM=dumb
@@ -250,22 +273,46 @@ cat <<'EOF'
 
 EOF
 
-printf '┌─ YOUR ORDER ────────────────────────────────────────────────\n'
-printf '│  %-12s %s\n' \
+cat <<'TICKET'
+  /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+                  S O U S   K I T C H E N
+                        YOUR ORDER
+  --------------------------------------------------------
+TICKET
+printf '  TICKET #%-8s                     READY FOR PICKUP\n' "$order_number"
+printf '  --------------------------------------------------------\n\n'
+printf '  %-12s %s\n' \
   'Project' "$project_name" \
+  'Main course' "$content_label" \
+  'Service' "$ci_label"
+printf '\n  ON THE SIDE\n'
+if [ -n "$recipes" ]; then
+  for recipe in $recipes; do
+    printf '    + %s\n' "$recipe"
+  done
+else
+  printf '    None\n'
+fi
+printf '\n  THE PREP SHEET\n\n'
+printf '  %-12s %s\n' \
   'Drupal' "$drupal_version" \
   'PHP' "$php_version" \
   'Node.js' "$node_version" \
-  'Content' "$content_label" \
-  'Extras' "${recipes:-None}" \
-  'CI' "$ci_label" \
-  'Theme' "$theme (scaffold; dependencies installed)" \
-  'Local URL' "$local_url"
-printf '│\n│  LOCAL SIGN-IN\n│\n'
-printf '│  %-12s %s\n' \
-  'Login' "${local_url%/}/user/login" \
+  'Theme' "$theme"
+printf '               Scaffold and npm tools ready\n'
+printf '\n  LOCAL COUNTER\n\n  %s\n' "$local_url"
+printf '\n  LOCAL SIGN-IN\n\n  %s\n\n' "${local_url%/}/user/login"
+printf '  %-12s %s\n' \
   'Username' sous_chef \
-  'Password' "$sous_chef_password" \
-  'UID 1' 'superuser_1 is blocked'
-printf '└────────────────────────────────────────────────────────────\n\n'
-printf 'Your kitchen is ready. Add a component library when you are ready to cook.\n\n'
+  'Password' "$sous_chef_password"
+cat <<'TICKET'
+
+  --------------------------------------------------------
+       [x] RECEIVED       [x] COOKING       [x] READY
+
+                Freshly prepared. Happy building!
+  \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
+Add a component library when you are ready to cook.
+
+TICKET

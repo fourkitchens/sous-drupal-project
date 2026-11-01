@@ -63,8 +63,8 @@ jobs:
       matrix:
         include: >-
           ${{ fromJSON(github.event_name == 'pull_request' &&
-          '[{"option":"default","ci":"github"}]' ||
-          '[{"option":"default","ci":"github"},
+          '[{"option":"admin-only","ci":"github"}]' ||
+          '[{"option":"admin-only","ci":"github"},
           {"option":"layout-builder","ci":"gitlab"},
           {"option":"paragraphs","ci":"circleci","recipes":"sous-config-split"},
           {"option":"admin-only","ci":"none","recipes":"sous-media"}]') }}

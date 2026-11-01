@@ -13,8 +13,8 @@ with that template (version 8.0.0) in a temporary DDEV site, check the site,
 and delete it on exit. Commit first: uncommitted changes are not tested.
 
 Options:
-  --option default|layout-builder|paragraphs|admin-only
-                        Content composition (default: default).
+  --option admin-only|paragraphs|layout-builder
+                        Content composition (default: admin-only).
   --recipes LIST        Add comma-separated Sous recipe names (default: empty).
   --ci circleci|github|gitlab|none
                         Site CI provider (default: github).
@@ -38,7 +38,7 @@ Checks, in order:
      The generated release configuration loads in Node.
   6. Configuration scripts work through DDEV and with native tools;
      Drush deploy succeeds and config:status reports no changes.
-  7. For the default option, run Composer CI, back up, restore with npm run setup,
+  7. For admin-only, run Composer CI, back up, restore with npm run setup,
      and reset with npm run rebuild; check bootstrap after each reset.
 
 The artifacts directory keeps each step's log, config-status.stderr,
@@ -56,7 +56,7 @@ EOF
 
 # Read options before creating a workspace or registering cleanup traps.
 parse_options() {
-  option=default
+  option=admin-only
   recipes=''
   ci=github
   packages=''
@@ -110,7 +110,7 @@ parse_options() {
   done
 
   case "$option" in
-    default|layout-builder|paragraphs|admin-only) ;;
+    admin-only|paragraphs|layout-builder) ;;
     *)
       usage >&2
       exit 2
@@ -259,7 +259,7 @@ check_composition() {
   local composition_checks
   local chef_password
   local theme
-  chef_password=$(awk '$2 == "Password" {print $3}' "$artifacts/create-project.log")
+  chef_password=$(awk '$1 == "Password" {print $2}' "$artifacts/create-project.log")
   theme=$(printf '%s' "$project_name" | tr -d '-')
   composition_checks=$(cat <<'PHP'
 $option = getenv("SOUS_SMOKE_OPTION");
@@ -402,8 +402,8 @@ main() {
   check_product_files_absent
   check_generated_files
   check_clean_deploy
-  # CI and resets are the same for every composition, so exercise them for default.
-  if [ "$option" = default ]; then
+  # CI and resets are the same for every composition, so exercise them for admin-only.
+  if [ "$option" = admin-only ]; then
     step ci composer ci
     check_backup_restore
   fi

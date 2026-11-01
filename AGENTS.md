@@ -55,6 +55,6 @@ actionlint assets/ci/github/.github/workflows/build.yml
 bash devops/integration/run.sh --ci github
 ```
 
-Run the default smoke locally; CI adds the other three options on main,
-nightly and on demand.
+Run the admin-only/GitHub smoke locally; CI runs all four provider/composition
+combinations on main, nightly and on demand.
 For unpublished package changes, append `--packages /path/to/sous-drupal-packages`.

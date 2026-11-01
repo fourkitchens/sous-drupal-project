@@ -27,17 +27,17 @@ actionlint .github/workflows/ci.yml
 actionlint assets/ci/github/.github/workflows/build.yml
 ```
 
-Commit before the local default smoke; it exports `HEAD` and runs the real Composer installer:
+Commit before the local admin-only smoke; it exports `HEAD` and runs the real Composer installer:
 
 ```sh
-bash devops/integration/run.sh --ci github --artifacts /tmp/sous-default
+bash devops/integration/run.sh --ci github --artifacts /tmp/sous-admin
 ```
 
 Append `--packages /path/to/sous-drupal-packages` for unpublished recipes.
 It copies `PATH/packages/*` at version `2.0.0` and mounts that path read-only in DDEV.
 Omit the override to verify published ZIPs before release.
 The runner checks settings, bootstrap, HTTP, recipes, generated files, deployment and config status.
-Default also runs host `composer ci`, backup, `npm run setup` and `npm run rebuild`.
+Admin-only also runs host `composer ci`, backup, `npm run setup` and `npm run rebuild`.
 Check shared Drupal scripts both through local DDEV and with native tools; keep database resets local.
 Logs and `result.json` stay in the artifacts directory; `--help` covers retention and cleanup.
 
@@ -63,7 +63,7 @@ Upstream names and license identities stay unchanged.
 
 ## CI and releases
 
-PRs run default content with GitHub CI. Main pushes, nightly runs at 06:17 UTC
+PRs run admin-only with GitHub CI. Main pushes, nightly runs at 06:17 UTC
 and manual runs add Layout Builder/GitLab, Paragraphs/CircleCI with `sous-config-split`,
 and admin-only/no CI with `sous-media`. Manual `packages_ref` selects a full reviewed packages commit.
 Keep action SHAs pinned; checks read only, publishing writes after checks pass.

@@ -11,10 +11,9 @@ Choose the content model during installation; administration and the theme are a
 
 | Choice | Content setup |
 | --- | --- |
-| `0` Default | Page and Frontpage with Body, metadata, SEO, teasers and aliases |
-| `1` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed and Table blocks |
-| `2` Paragraphs | Page and Frontpage with Layout Paragraphs components |
-| `3` Admin only | Administration and theme without Page or Frontpage |
+| `0` Admin only | Administration and theme without Page or Frontpage |
+| `1` Paragraphs | Page and Frontpage with Layout Paragraphs components |
+| `2` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed and Table blocks |
 
 Package metadata supplies optional extras, including Config Split, Media and Paragraph Types.
 See [features and configurations](docs/features.md) for the site's building blocks.
@@ -41,7 +40,7 @@ SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-config-split SOUS_CI=gitlab \
   composer create-project fourkitchens/sous-drupal-project:^8.0 PROJECT_NAME
 ```
 
-`SOUS_CONTENT` accepts `default`, `layout-builder`, `paragraphs` or `admin-only` (0–3).
+`SOUS_CONTENT` accepts `admin-only` (0), `paragraphs` (1) or `layout-builder` (2).
 `SOUS_CI` accepts `circleci`, `github`, `gitlab` or `none` (0–3).
 Set `SOUS_RECIPES=''` for no extras, or supply names separated by spaces or commas.
 The final order summary shows the local URL and a generated password for `sous_chef`; UID 1 stays blocked.
