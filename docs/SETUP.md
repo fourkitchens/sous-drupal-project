@@ -54,7 +54,7 @@ if (getenv('IS_DDEV_PROJECT') === 'true') {
 }
 ```
 
-Config Split is included; `config/local` and `config/staging` stay inactive in exports.
-Local settings enable the local split in DDEV. Enable staging in host settings with
-`$config['config_split.config_split.staging']['status'] = TRUE;`.
+Config Split keeps Devel, Field UI, Stage File Proxy, Syslog and Views UI out of production.
+Local settings enable these tools in DDEV; `config/local` and `config/staging` stay inactive in exports.
+Enable staging before importing configuration with `$config['config_split.config_split.staging']['status'] = TRUE;` in host settings.
 Use `ddev drush uli --name=sous_chef` for a local login after setup.

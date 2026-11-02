@@ -34,7 +34,8 @@ Checks, in order:
   1. Local development settings stay disabled outside DDEV.
   2. Drupal bootstraps successfully.
   3. The front page returns HTTP 200.
-  4. Content and recipes match the choices; UID 1 stays blocked, sous_chef can
+  4. Content and recipes match the choices; local tools stay in their split;
+     UID 1 stays blocked, sous_chef can
      sign in, and the default custom theme has tools. A chosen component library
      loads through Emulsify and has compiled assets; none leaves an empty scaffold.
   5. Maintainer tooling, one-time theme setup files and assets/ci are absent;
@@ -310,6 +311,13 @@ $checks = [
   "Split definitions" => \Drupal::service("config.storage")->exists("config_split.config_split.local") && \Drupal::service("config.storage")->exists("config_split.config_split.staging"),
   "Media types" => count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video"])) === 3,
 ];
+// Local tools come from the active split while the production export excludes them.
+$export = \Drupal::service("config.storage.export")->read("core.extension");
+foreach (["devel", "field_ui", "stage_file_proxy", "syslog", "views_ui"] as $module) {
+  $checks["Local tools: $module"] = \Drupal::moduleHandler()->moduleExists($module) && !isset($export["module"][$module]);
+}
+$checks["Masquerade"] = \Drupal::moduleHandler()->moduleExists("masquerade");
+$checks["Nonbreaking-space filter"] = \Drupal::moduleHandler()->moduleExists("no_nbsp");
 // Every installed content type shares the publishing workflow and scheduling sidebar.
 $workflow = \Drupal\workflows\Entity\Workflow::load("editorial");
 $workflow_type = $workflow->getTypePlugin();
@@ -329,8 +337,12 @@ foreach ($node_types as $type => $node_type) {
   $form = \Drupal::entityTypeManager()->getStorage("entity_form_display")->load("node.$type.default");
   $checks["New content draft: $type"] = \Drupal\node\Entity\Node::create(["type" => $type])->moderation_state->value === "draft";
   $checks["Published on hidden: $type"] = $form->getComponent("published_at") === NULL;
+  $checks["Metadata sidebar: $type"] = $form->getRenderer("field_metadata")->getPluginId() === "metatag_firehose" && $form->getRenderer("field_metadata")->getSetting("sidebar");
   if (in_array($type, ["event", "news_post"], TRUE)) {
     $checks["Menu settings: $type"] = $node_type->getThirdPartySetting("menu_ui", "available_menus") === [];
+    $taxonomy_field = $type === "event" ? "field_event_type" : "field_news_categories";
+    $groups = $form->getThirdPartySettings("field_group");
+    $checks["Organization tab: $type"] = $groups["group_organization"]["children"] === [$taxonomy_field] && !in_array($taxonomy_field, $groups["group_content"]["children"], TRUE);
   }
   foreach (["moderation_state" => "moderation_state_default", "publish_on" => "datetime_timestamp_no_default", "unpublish_on" => "datetime_timestamp_no_default", "publish_state" => "scheduler_moderation", "unpublish_state" => "scheduler_moderation"] as $field => $widget) {
     $checks["Scheduling widget: $type.$field"] = $form->getRenderer($field)->getPluginId() === $widget;

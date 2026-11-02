@@ -333,6 +333,10 @@ for recipe in $recipes; do
       ;;
   esac
 done
+
+# Import local-only tools from the split without adding them to production config.
+ddev drush -y config-split:import local
+
 # Validate the finished site and its login before retiring this installer.
 printf '\nFinal taste test: exporting configuration and checking the project.\n\n'
 ddev drush -y config:export

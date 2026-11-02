@@ -27,7 +27,7 @@ npm --prefix "web/themes/custom/<theme>" audit
 
 Ship `vendor/`, Drupal core, extensions, libraries, custom source, configuration and shared settings.
 Include the theme's `dist/` and generated `components/` when present; omit `node_modules`, local settings, caches and backups.
-Keep secrets and uploaded/private files on the host; serve the `web/` document root.
+Keep secrets and uploaded/private files on the host; serve `web/` and leave local/staging Config Split overrides off in production.
 Back up the destination, deliver the build, then apply database updates and configuration:
 
 ```sh
