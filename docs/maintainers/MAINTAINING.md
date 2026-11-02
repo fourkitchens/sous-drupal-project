@@ -9,6 +9,7 @@ Shared guides and the generated README must remain project-generic.
 
 Edit the template, installer, settings scaffold, CI templates and site guides here.
 Reusable recipes live in [sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages).
+The starter's `patches/` mirrors `sous-drupal-packages/patches`; update both in the same release.
 Generated sites own custom source, dependencies, complete configuration and deployment.
 Keep `config/default` empty except `.gitkeep`; recipe config omits site UUIDs.
 Admin owns roles and Formats owns Linkit defaults; preserve existing project customization.
