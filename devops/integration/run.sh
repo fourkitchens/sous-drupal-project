@@ -18,6 +18,10 @@ Options:
   --recipes LIST        Add comma-separated Sous recipe names (default: empty).
   --ci circleci|github|gitlab|none
                         Site CI provider (default: github).
+  --library none|ui-kit|URL
+                        Component library dessert (default: none).
+  --library-ref REF     Library branch or tag (default: the installer's
+                        UI Kit ref or the custom repository's default branch).
   --packages PATH       Use PATH/packages/* at version 2.0.0, copied by Composer
                         and mounted read-only in DDEV at the same absolute path
                         (default: use the published Composer package index).
@@ -31,15 +35,16 @@ Checks, in order:
   2. Drupal bootstraps successfully.
   3. The front page returns HTTP 200.
   4. Content and recipes match the choices; UID 1 stays blocked, sous_chef can
-     sign in, and the default custom theme has tools but no component library/build.
+     sign in, and the default custom theme has tools. A chosen component library
+     loads through Emulsify and has compiled assets; none leaves an empty scaffold.
   5. Maintainer tooling, one-time theme setup files and assets/ci are absent;
      only the selected provider's
      CI files remain, with no product ci.yml or unselected provider files.
      The generated release configuration loads in Node.
   6. Configuration scripts work through DDEV and with native tools;
      Drush deploy succeeds and config:status reports no changes.
-  7. For admin-only, run Composer CI, back up, restore with npm run setup,
-     and reset with npm run rebuild; check bootstrap after each reset.
+  7. Run Composer CI for admin-only or a chosen library; for admin-only, back up,
+     restore with npm run setup and reset with npm run rebuild, checking bootstrap.
 
 The artifacts directory keeps each step's log, config-status.stderr,
 cleanup.log (unless --keep), and result.json with status, site, option,
@@ -59,13 +64,15 @@ parse_options() {
   option=admin-only
   recipes=''
   ci=github
+  library=none
+  library_ref=''
   packages=''
   keep=0
   artifacts="$PWD/.integration-results"
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
-      --option|--recipes|--ci|--packages|--artifacts)
+      --option|--recipes|--ci|--library|--library-ref|--packages|--artifacts)
         if [ "$#" -lt 2 ]; then
           usage >&2
           exit 2
@@ -84,6 +91,14 @@ parse_options() {
         ;;
       --ci)
         ci=$2
+        shift 2
+        ;;
+      --library)
+        library=$2
+        shift 2
+        ;;
+      --library-ref)
+        library_ref=$2
         shift 2
         ;;
       --packages)
@@ -124,6 +139,14 @@ parse_options() {
       exit 2
       ;;
   esac
+
+  case "$library" in
+    none|ui-kit|https://*.git|http://*.git|ssh://*.git|git://*.git|file://*.git|*@*:*.git) ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
 }
 
 # Create the temporary site workspace and record the running result.
@@ -140,6 +163,7 @@ prepare_workspace() {
 
   export HUSKY=0 COMPOSER_NO_INTERACTION=1 SOUS_CONTENT="$option"
   export SOUS_RECIPES="$recipes" SOUS_CI="$ci"
+  export SOUS_LIBRARY="$library" SOUS_LIBRARY_REF="$library_ref"
   jq -n --arg site "$site_dir" --arg option "$option" \
     '{status: "running", site: $site, option: $option}' > "$result_file"
 }
@@ -254,7 +278,7 @@ check_site_responds() {
   expect_line front-page 200
 }
 
-# Check content, administrator accounts and the unpopulated default theme in Drupal.
+# Check content, administrator accounts and the default custom theme in Drupal.
 check_composition() {
   local composition_checks
   local chef_password
@@ -272,7 +296,7 @@ $checks = [
   // UID 1 stays blocked while the separate chef account can sign in as Superuser.
   "Blocked UID 1" => $uid1->isBlocked() && $uid1->getAccountName() === "superuser_1",
   "Chef login" => $chef && $chef->isActive() && $chef->hasRole("superuser") && \Drupal::service("password")->check(getenv("SOUS_SMOKE_PASSWORD"), $chef->getPassword()),
-  // The generated custom theme is the frontend default before assets are added.
+  // The generated project-named theme is the frontend default.
   "Custom theme" => \Drupal::config("system.theme")->get("default") === getenv("SOUS_SMOKE_THEME"),
   // Page is included in every composition except admin-only.
   "Page" => (bool) $page === ($option !== "admin-only"),
@@ -346,9 +370,51 @@ PHP
   step composition ddev exec --raw env SOUS_SMOKE_OPTION="$option" \
     SOUS_SMOKE_RECIPES="$recipes" SOUS_SMOKE_THEME="$theme" \
     SOUS_SMOKE_PASSWORD="$chef_password" vendor/bin/drush php:eval "$composition_checks"
-  step theme-tools test -d "web/themes/custom/$theme/node_modules/@emulsify/core"
-  step absent-component-library test ! -d "web/themes/custom/$theme/src/components"
-  step absent-initial-theme-build test ! -d "web/themes/custom/$theme/dist"
+}
+
+# Load chosen libraries through the real CLI and require actual compiled output.
+check_component_library() {
+  local theme_path
+  local library_label
+  theme_path="web/themes/custom/$(printf '%s' "$project_name" | tr -d '-')"
+  case "$library" in
+    none) library_label=None ;;
+    ui-kit) library_label='Emulsify UI Kit' ;;
+    *) library_label="Custom: $library" ;;
+  esac
+  step theme-tools test -d "$theme_path/node_modules/@emulsify/core"
+  if [ "$library" = none ]; then
+    step absent-component-library test ! -d "$theme_path/src/components"
+    step absent-initial-theme-build test ! -d "$theme_path/dist"
+  else
+    # The CLI validates the installed repository, checkout and platform variant.
+    # shellcheck disable=SC2016
+    step component-library bash -e -c 'cd "$1"
+      "$2" component list' \
+      bash "$theme_path" "$PWD/node_modules/.bin/emulsify"
+    step theme-assets find "$theme_path/dist" -type f -size +0c
+    test -s "$artifacts/theme-assets.log"
+  fi
+  # Compare only boxed receipt rows so tool output cannot count as an order.
+  # shellcheck disable=SC2016
+  step dessert-order env SOUS_SMOKE_LIBRARY_LABEL="$library_label" awk '
+    BEGIN { expected = ENVIRON["SOUS_SMOKE_LIBRARY_LABEL"] }
+    $1 == "|" {
+      line = $0
+      sub(/^ *[|] */, "", line)
+      sub(/ *[|] *$/, "", line)
+      if (line ~ /^[0-9]+ +DESSERT$/) { dessert = 1; next }
+      if (dessert) { prep += line == expected; dessert = 0 }
+      if (line ~ /^Dessert +/) {
+        sub(/^Dessert +/, "", line)
+        pickup += line == expected
+      }
+    }
+    END {
+      printf "Prep ticket: %d matching dessert\nPickup ticket: %d matching dessert\n", prep, pickup
+      exit(prep != 1 || pickup != 1)
+    }
+  ' "$artifacts/create-project.log"
 }
 
 # Check that sites omit maintainer tooling and one-time theme setup files.
@@ -447,12 +513,16 @@ main() {
   check_host_settings
   check_site_responds
   check_composition
+  check_component_library
   check_product_files_absent
   check_generated_files
   check_clean_deploy
-  # CI and resets are the same for every composition, so exercise them for admin-only.
-  if [ "$option" = admin-only ]; then
+  # Chosen libraries must pass the same lint/build command as a site's own CI.
+  if [ "$option" = admin-only ] || [ "$library" != none ]; then
     step ci composer ci
+  fi
+  # Resets are the same for every composition, so exercise them for admin-only.
+  if [ "$option" = admin-only ]; then
     check_backup_restore
   fi
 }

@@ -4,8 +4,7 @@ The complete export in `config/default` records this site's enabled content mode
 
 ## Themes
 
-Emulsify supplies the project theme scaffold; add a component library when ready. Gin supplies the administrative interface.
-See [Build Tools](BUILD_TOOLS.md#theme) for development commands.
+Emulsify supplies the project theme; optionally install and compile a component library during creation, or add one later. Gin supplies the administrative interface. See [Build Tools](BUILD_TOOLS.md#theme) for development commands.
 
 ## Content types
 

@@ -132,6 +132,57 @@ case "$SOUS_CI" in
   *) echo 'SOUS_CI must be circleci, github, gitlab, or none.' >&2; exit 2 ;;
 esac
 
+# Take the library order now so its installer never consumes later answers.
+if [ "${SOUS_LIBRARY+x}" != x ]; then
+  cat <<'MENU'
+
+  DESSERT · Component library
+
+    [0] None             Keep the theme ready for your own components
+    [1] Emulsify UI Kit  A full helping of Drupal components
+    [2] Custom library   Bring an Emulsify system from a Git repository
+
+MENU
+  printf '  Your dessert (number, name or Git URL; Enter for none): '
+  read -r SOUS_LIBRARY || SOUS_LIBRARY=''
+  case "$SOUS_LIBRARY" in
+    custom|2)
+      printf '  Component library Git URL (ending in .git): '
+      read -r SOUS_LIBRARY || SOUS_LIBRARY=''
+      if [ -z "$SOUS_LIBRARY" ]; then
+        echo 'A custom component library requires a Git repository URL.' >&2
+        exit 2
+      fi
+      if [ "${SOUS_LIBRARY_REF+x}" != x ]; then
+        printf '  Branch or tag (Enter for the repository default branch): '
+        read -r SOUS_LIBRARY_REF || SOUS_LIBRARY_REF=''
+      fi
+      ;;
+  esac
+fi
+
+library_ref=${SOUS_LIBRARY_REF:-}
+case "$SOUS_LIBRARY" in
+  none|None|0|'')
+    library_repository=''
+    library_label=None
+    ;;
+  ui-kit|'Emulsify UI Kit'|1)
+    library_repository=https://github.com/emulsify-ds/emulsify-ui-kit.git
+    library_label='Emulsify UI Kit'
+    # Use upstream's lint fix until a release includes it: https://github.com/emulsify-ds/emulsify-ui-kit/pull/189.
+    library_ref=${library_ref:-codex/fix-drupal-theme-lint}
+    ;;
+  https://*.git|http://*.git|ssh://*.git|git://*.git|file://*.git|*@*:*.git)
+    library_repository=$SOUS_LIBRARY
+    library_label="Custom: $library_repository"
+    ;;
+  *)
+    echo 'SOUS_LIBRARY must be none, ui-kit, or a Git repository URL ending in .git.' >&2
+    exit 2
+    ;;
+esac
+
 # Print matching prep and pickup tickets without terminal controls or clipped values.
 order_number=$(date '+%H%M%S')
 printf '\n'
@@ -154,6 +205,11 @@ TICKET
     printf '      None\n'
   fi
   printf '\n  03  SERVICE\n      %s\n\n' "$ci_label"
+  printf '  04  DESSERT\n      %s\n' "$library_label"
+  if [ -n "$library_repository" ]; then
+    printf '      Ref: %s\n' "${library_ref:-repository default branch}"
+  fi
+  printf '\n'
   printf '  PANTRY STAPLES (INCLUDED)\n      Media, Config Split and publishing workflow\n\n'
   cat <<'TICKET'
   --------------------------------------------------------
@@ -228,10 +284,30 @@ sh devops/scripts/install-recipe.sh fourkitchens/sous-config-split
 mkdir -p web/modules/custom
 touch web/modules/custom/.gitkeep
 
-# Generate the theme and install its tools; the project chooses its library later.
+# Generate the theme and install its tools before adding the chosen library.
 printf '\nSetting the table: preparing your custom theme and its tools.\n\n'
 ddev drush -y emulsify "$theme"
 npm --prefix "web/themes/custom/$theme" install --include=dev
+theme_status='Scaffold and npm tools ready'
+if [ -n "$library_repository" ]; then
+  printf '\nBaking dessert: adding your component library and compiling the theme.\n\n'
+  if [ -z "$library_ref" ]; then
+    library_head=$(GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh -o BatchMode=yes}" \
+      git ls-remote --symref "$library_repository" HEAD </dev/null)
+    library_ref=$(printf '%s\n' "$library_head" | awk '$1 == "ref:" {sub(/^refs\/heads\//, "", $2); print $2; exit}')
+  fi
+  emulsify_cli="$PWD/node_modules/.bin/emulsify"
+  (
+    cd "web/themes/custom/$theme"
+    GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh -o BatchMode=yes}" \
+      "$emulsify_cli" system install \
+      --repository "$library_repository" --checkout "$library_ref" \
+      --all --yes </dev/null
+    npm install --include=dev
+  )
+  npm run theme-build
+  theme_status='Component library installed; theme build completed'
+fi
 ddev drush -y theme:install "$theme"
 ddev drush -y config:set system.theme default "$theme"
 # Keep UID 1 blocked and use a separate local administrator account.
@@ -319,7 +395,11 @@ TICKET
     'Project' "$project_name" \
     'Main course' "$content_label" \
     'Service' "$ci_label" \
+    'Dessert' "$library_label" \
     'Included' 'Media, Config Split and publishing workflow'
+  if [ -n "$library_repository" ]; then
+    printf '  %-12s %s\n' 'Library ref' "$library_ref"
+  fi
   printf '\n  ON THE SIDE\n'
   if [ -n "$recipes" ]; then
     for recipe in $recipes; do
@@ -334,7 +414,7 @@ TICKET
     'PHP' "$php_version" \
     'Node.js' "$node_version" \
     'Theme' "$theme"
-  printf '               Scaffold and npm tools ready\n'
+  printf '               %s\n' "$theme_status"
   printf '\n  LOCAL COUNTER\n\n  %s\n' "$local_url"
   printf '\n  LOCAL SIGN-IN\n\n  %s\n\n' "${local_url%/}/user/login"
   printf '  %-12s %s\n' \
@@ -361,4 +441,8 @@ TICKET
     print "  +" border "+\n"
   }
 '
-printf 'Add a component library when you are ready to cook.\n\n'
+if [ -n "$library_repository" ]; then
+  printf 'Dessert is served. Your component library is ready.\n\n'
+else
+  printf 'Add a component library when you are ready to cook.\n\n'
+fi

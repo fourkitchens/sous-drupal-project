@@ -7,22 +7,22 @@ Setup, rebuild, import-data and local-data-bak remain local DDEV operations.
 ## Theme
 
 The Emulsify theme is at `web/themes/custom/<theme>`; `package.json` records its name in `config.theme`.
-Initial installation enables the theme and installs its npm dependencies, without a component library or asset build.
-When ready, choose a library through the [Emulsify CLI](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage); this example installs UI Kit manually:
+Initial installation enables the theme and installs its npm dependencies; choosing a component library also installs it and compiles assets.
+If skipped at creation, add a library through the [Emulsify CLI](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage). UI Kit currently uses its [upstream lint-fix branch](https://github.com/emulsify-ds/emulsify-ui-kit/pull/189) until a released version passes lint and build:
 
 ```sh
 (
   cd "web/themes/custom/<theme>"
-  npx emulsify system install --repository https://github.com/emulsify-ds/emulsify-ui-kit.git \
-    --checkout 1.9.0 --variant drupal --all
-  npm install
+  npx --no-install emulsify system install --repository https://github.com/emulsify-ds/emulsify-ui-kit.git \
+    --checkout codex/fix-drupal-theme-lint --all --yes
+  # Custom: use your .git URL and branch/tag; the repository name must match its Emulsify system name.
+  npm install --include=dev
 )
 npm run theme-build
 npm run theme-watch
 ```
 
-Edit `src/`; builds generate `dist/` and a `components/` mirror for deployment.
-An empty scaffold reports no build inputs; once sources exist, build failures stop the command.
+Edit `src/`; builds generate `dist/` and a `components/` mirror for deployment. An empty scaffold reports no build inputs; once sources exist, build failures stop the command.
 
 ## NPM Scripts
 

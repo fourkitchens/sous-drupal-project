@@ -31,30 +31,30 @@ composer create-project fourkitchens/sous-drupal-project:^8.0 PROJECT_NAME
 cd PROJECT_NAME
 ```
 
-Answer the content, optional recipe and CI questions before installation starts.
-CI choices are CircleCI, GitHub Actions, GitLab CI/CD and None.
+Answer the content, optional recipe, CI and dessert questions before installation starts. Dessert offers Emulsify UI Kit, a custom component library or None.
 For an unattended install, set every answer:
 
 ```sh
-SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-events,sous-news-post SOUS_CI=gitlab \
+SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-events,sous-news-post \
+  SOUS_CI=gitlab SOUS_LIBRARY=none \
   composer create-project fourkitchens/sous-drupal-project:^8.0 PROJECT_NAME
 ```
 
 `SOUS_CONTENT` accepts `admin-only` (0), `paragraphs` (1) or `layout-builder` (2).
 `SOUS_CI` accepts `circleci`, `github`, `gitlab` or `none` (0–3).
 Set `SOUS_RECIPES=''` for no extras, or supply names separated by spaces or commas.
+`SOUS_LIBRARY` accepts `none` (default), `ui-kit` or an Emulsify-compatible Git URL ending in `.git`.
+`SOUS_LIBRARY_REF` optionally selects a branch or tag; custom repositories otherwise use their default branch.
 The final order summary shows the local URL and a generated password for `sous_chef`; UID 1 stays blocked.
 
 # Recipe Dependency Management
 
 [Sous packages](https://github.com/fourkitchens/sous-drupal-packages) publish independent Composer recipes.
-Recipes apply once and then unpack; updates do not replay a site's configuration.
-See [adding a recipe](docs/SETUP.md#add-a-recipe) for later additions.
+Recipes apply once and then unpack; updates do not replay a site's configuration. See [adding a recipe](docs/SETUP.md#add-a-recipe) for later additions.
 
 # Working with Emulsify
 
-Installation generates a project-named [Emulsify](https://www.emulsify.info/) theme, sets it as the frontend default and installs its npm dependencies.
-Add a component library manually before building or watching theme assets; see [Build Tools](docs/BUILD_TOOLS.md#theme).
+Installation generates a project-named [Emulsify](https://www.emulsify.info/) theme, sets it as the frontend default and installs its npm dependencies. Selecting a component library also installs it and compiles the theme; None leaves the scaffold ready for later. See [Build Tools](docs/BUILD_TOOLS.md#theme).
 
 # Additional Tooling
 

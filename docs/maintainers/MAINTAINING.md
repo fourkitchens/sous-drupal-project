@@ -36,14 +36,14 @@ bash devops/integration/run.sh --ci github --artifacts /tmp/sous-admin
 Append `--packages /path/to/sous-drupal-packages` for unpublished recipes.
 It copies `PATH/packages/*` at version `2.0.0` and mounts that path read-only in DDEV.
 Omit the override to verify published ZIPs before release.
+Use `--library ui-kit` or `--library URL`, optionally with `--library-ref REF`, to verify library installation and compilation.
 The runner checks settings, bootstrap, HTTP, recipes, publishing workflows, scheduling widgets, generated files and deployment.
 Admin-only also runs host `composer ci`, backup, `npm run setup` and `npm run rebuild`.
 Logs and `result.json` stay in the artifacts directory; `--help` covers retention and cleanup.
 
 ## Installer choices
 
-The product [README](../../README.md#installation) documents content, recipe and CI choices.
-Preset `SOUS_CONTENT`, `SOUS_RECIPES` and `SOUS_CI` for unattended installs.
+The product [README](../../README.md#installation) documents content, recipe, CI and dessert choices. Preset `SOUS_CONTENT`, `SOUS_RECIPES`, `SOUS_CI` and `SOUS_LIBRARY` for unattended installs.
 Media, Config Split and the publishing workflow apply to every course; Paragraph Types belongs only to Paragraphs.
 The runner sets `SOUS_RECIPES`, so smoke tests never fetch the menu.
 To inspect it interactively, leave that variable unset; the newest matching-major
@@ -57,13 +57,13 @@ SOUS_INDEX=/path/to/sous-drupal-packages/build/site/packages.json \
 ```
 
 Successful installation retires starter-only code and metadata; shared site guides contain no starter branding.
-The frontend theme is enabled with npm dependencies only; library installation and its first asset build are manual.
+The theme builds when a library is selected; `SOUS_LIBRARY=none` keeps the scaffold only. `SOUS_LIBRARY_REF` selects a branch/tag; UI Kit temporarily uses the [upstream lint-fix branch](https://github.com/emulsify-ds/emulsify-ui-kit/pull/189) until a released version passes lint and build.
 Keep product CI, maintainer docs and agent rules out of generated sites.
 
 ## CI and releases
 
 PRs run admin-only with GitHub CI. Main pushes, nightly runs at 06:17 UTC
-and manual runs add Events and News Post to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI.
+and manual runs add Events and News Post to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. Layout Builder selects UI Kit; Paragraphs tests a custom Git URL.
 Manual `packages_ref` selects a full reviewed packages commit.
 Keep action SHAs pinned; checks read only, publishing writes after checks pass.
 

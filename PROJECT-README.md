@@ -9,7 +9,7 @@ Content management system built on Drupal. Record project URLs, contacts and acc
 | Local Environment | [DDEV](https://ddev.com/) |
 | Drupal / PHP | Drupal 11.4 / PHP 8.4 |
 | Node.js | Version in `.nvmrc`, installed on your computer |
-| Theme | Emulsify scaffold; directory recorded in `package.json` → `config.theme` |
+| Theme | Emulsify theme; directory recorded in `package.json` → `config.theme` |
 | Included | Media, Config Split and a publishing workflow with scheduling |
 | Deployment | `composer build-assets`, then Drush deploy |
 | CI | Repository configuration; see [Deployment](docs/DEPLOYMENT.md#set-up-site-ci) |
@@ -25,7 +25,7 @@ Content management system built on Drupal. Record project URLs, contacts and acc
 npm run setup -- reference/site-db.sql.gz
 ```
 
-Use `npm run rebuild` after switching branches; [add a component library](docs/BUILD_TOOLS.md#theme) before `npm run theme-watch`.
+Use `npm run rebuild` after switching branches; if no library was selected during creation, [add a component library](docs/BUILD_TOOLS.md#theme) before `npm run theme-watch`.
 Local setup and database resets use DDEV; shared Drupal commands also run in CI and on hosts.
 
 ## Documentation
