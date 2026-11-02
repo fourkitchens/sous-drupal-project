@@ -303,6 +303,11 @@ $checks["Moderated content types"] = $moderated_types === $installed_types;
 foreach ($node_types as $type => $node_type) {
   $checks["Scheduling settings: $type"] = $node_type->getThirdPartySetting("scheduler", "publish_enable") && $node_type->getThirdPartySetting("scheduler", "unpublish_enable") && $node_type->getThirdPartySetting("scheduler", "fields_display_mode") === "vertical_tab";
   $form = \Drupal::entityTypeManager()->getStorage("entity_form_display")->load("node.$type.default");
+  $checks["New content draft: $type"] = \Drupal\node\Entity\Node::create(["type" => $type])->moderation_state->value === "draft";
+  $checks["Published on hidden: $type"] = $form->getComponent("published_at") === NULL;
+  if (in_array($type, ["event", "news_post"], TRUE)) {
+    $checks["Menu settings: $type"] = $node_type->getThirdPartySetting("menu_ui", "available_menus") === [];
+  }
   foreach (["moderation_state" => "moderation_state_default", "publish_on" => "datetime_timestamp_no_default", "unpublish_on" => "datetime_timestamp_no_default", "publish_state" => "scheduler_moderation", "unpublish_state" => "scheduler_moderation"] as $field => $widget) {
     $checks["Scheduling widget: $type.$field"] = $form->getRenderer($field)->getPluginId() === $widget;
   }

@@ -71,6 +71,18 @@
           "issue-tracker-url": "https://www.drupal.org/project/tablefield/issues/3593703"
         }
       }
+    ],
+    "drupal/scheduler_content_moderation_integration": [
+      {
+        "description": "Automatically select and hide the single scheduling state (#3270462)",
+        "url": "patches/scheduler-moderation-single-state-3270462.patch",
+        "sha256": "8a8306af2af31e76c6c638934140655ca1ccf61609894d3e2bc0a6f60bbad32c",
+        "depth": 1,
+        "extra": {
+          "issue-tracker-url": "https://www.drupal.org/project/scheduler_content_moderation_integration/issues/3270462",
+          "note": "Narrow stable-3.0.5 adaptation; fixed hidden inputs keep selectors out of keyboard navigation."
+        }
+      }
     ]
   }
 }
