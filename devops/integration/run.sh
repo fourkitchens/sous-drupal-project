@@ -372,6 +372,32 @@ if ($news) {
   $news_view = \Drupal\views\Entity\View::load("news");
   $checks["Recent News embed"] = isset($news_view->get("display")["embed_recent"]);
 }
+$profile = in_array("sous-profile", $recipes, TRUE);
+$checks["Optional Profile"] = (bool) \Drupal::entityTypeManager()->getStorage("node_type")->load("profile") === $profile;
+if ($profile) {
+  // Use the real form and save hooks to verify the generated name and hidden title.
+  $account_switcher = \Drupal::service("account_switcher");
+  $account_switcher->switchTo($chef);
+  $person = \Drupal\node\Entity\Node::create(["type" => "profile", "field_first_name" => "Ada", "field_last_name" => "Lovelace"]);
+  try {
+    $profile_form = \Drupal::service("entity.form_builder")->getForm($person);
+    $checks["Profile hidden title"] = $profile_form["title"]["widget"][0]["value"]["#type"] === "hidden" && $profile_form["title"]["widget"][0]["value"]["#required"] === FALSE;
+    $checks["Profile names required"] = $person->getFieldDefinition("field_first_name")->isRequired() && $person->getFieldDefinition("field_last_name")->isRequired();
+    $person->save();
+    $checks["Profile automatic title"] = $person->label() === "Ada Lovelace";
+    $person->set("field_last_name", "Byron")->save();
+    $checks["Profile title updates"] = $person->label() === "Ada Byron";
+    $profile_form_display = \Drupal::entityTypeManager()->getStorage("entity_form_display")->load("node.profile.default");
+    $checks["Profile image"] = $person->getFieldDefinition("field_image")->getFieldStorageDefinition()->getCardinality() === 1 && $profile_form_display->getRenderer("field_image")->getPluginId() === "media_library_widget";
+    $checks["Profile Bio"] = $person->getFieldDefinition("field_description")->getType() === "text_long" && $person->getFieldDefinition("field_description")->getSetting("allowed_formats") === ["basic_html"];
+  }
+  finally {
+    if (!$person->isNew()) {
+      $person->delete();
+    }
+    $account_switcher->switchBack();
+  }
+}
 foreach ($checks as $name => $passed) {
   if (!$passed) {
     throw new \RuntimeException("Unexpected composition: $name");

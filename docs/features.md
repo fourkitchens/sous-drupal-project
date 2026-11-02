@@ -20,16 +20,16 @@ Navigation requires the Layout Builder module; content layouts are enabled only 
 
 Every setup includes file, image and video Media Library types, focal-point cropping and upload widgets.
 
-## Events and News
+## Optional content types
 
 When selected, Event adds Smart Date with all-day and recurring schedules and an Event Type selector using Tagify.
-Events share Page-style teasers and use month–year, event type and title in URL aliases.
-Upcoming and Past Views provide embeddable listings; ongoing events stay Upcoming until their end.
+Events share Page-style teasers and month–year/type/title aliases; Upcoming and Past embeds keep ongoing events Upcoming until their end.
 A recurring series appears once per listing when different occurrences qualify for each.
 News Post adds a plain-text byline, multi-value News Categories and Page-style teasers.
 News aliases use `news/first-category/title`.
 Both use rendered teasers with exposed taxonomy and title/teaser-text search filters.
 Both use components with Paragraphs and layouts with Layout Builder.
+Profile adds required first/last names, an automatic hidden title, one Profile Image, a Basic HTML Bio and shared teaser fields.
 
 ## User Roles and Permissions
 
