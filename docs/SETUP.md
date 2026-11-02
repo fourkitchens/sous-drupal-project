@@ -54,7 +54,7 @@ if (getenv('IS_DDEV_PROJECT') === 'true') {
 }
 ```
 
-Config Split keeps Devel, Field UI, Stage File Proxy, Syslog and Views UI out of production.
-Local settings enable these tools in DDEV; `config/local` and `config/staging` stay inactive in exports.
-Enable staging before importing configuration with `$config['config_split.config_split.staging']['status'] = TRUE;` in host settings.
+Config Split keeps local tools out of production; `config/local` and `config/staging` stay inactive in exports.
+Local settings enable the local split in DDEV; activate staging before importing configuration with `$config['config_split.config_split.staging']['status'] = TRUE;` in host settings.
+With optional Dev Tools selected, Stage File Proxy fetches missing production files locally. Set its origin only in `settings.local.php`: `$config['stage_file_proxy.settings']['origin'] = 'https://production.example.com';`.
 Use `ddev drush uli --name=sous_chef` for a local login after setup.
