@@ -230,12 +230,8 @@ use_local_packages() {
     map({key: .name, value: "2.0.0"}) | from_entries
   ' "$packages"/packages/*/composer.json)
   jq --arg url "$packages/packages/*" --argjson versions "$package_versions" '
-    .repositories = [
+    .repositories.sous =
       {type: "path", url: $url, options: {symlink: false, versions: $versions}}
-    ] + [
-      .repositories[]
-      | select(.url != "https://fourkitchens.github.io/sous-drupal-packages/")
-    ]
   ' "$work_dir/template/composer.json" > "$work_dir/composer.json"
   mv "$work_dir/composer.json" "$work_dir/template/composer.json"
   jq -n --arg path "$packages" '
@@ -467,7 +463,7 @@ check_component_library() {
 # Check that sites omit maintainer tooling and one-time theme setup files.
 check_product_files_absent() {
   local path
-  for path in AGENTS.md devops/integration docs/maintainers devops/scripts/sous-build.sh \
+  for path in AGENTS.md devops/integration docs/maintainers assets/installer devops/scripts/sous-build.sh \
     devops/scripts/theme-setup.sh devops/scripts/theme-initialize.mjs; do
     step "absent-${path//\//-}" test ! -e "$path"
   done

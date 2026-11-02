@@ -3,8 +3,8 @@
     "description": "Drupal project with Gin administration and an Emulsify theme.",
     "type": "project",
     "license": "GPL-2.0-or-later",
-    "repositories": [
-        {
+    "repositories": {
+        "sous": {
             "type": "composer",
             "url": "https://fourkitchens.github.io/sous-drupal-packages/",
             "canonical": true,
@@ -12,15 +12,15 @@
                 "fourkitchens/sous-*"
             ]
         },
-        {
+        "drupal": {
             "type": "composer",
             "url": "https://packages.drupal.org/8"
         },
-        {
+        "asset-packagist": {
             "type": "composer",
             "url": "https://asset-packagist.org"
         },
-        {
+        "dropzone": {
             "type": "package",
             "package": {
                 "name": "dropzone/dropzone",
@@ -35,7 +35,7 @@
                 }
             }
         }
-    ],
+    },
     "require": {
         "composer/installers": "^2.3.0",
         "cweagans/composer-patches": "^2.0.0",
@@ -46,8 +46,6 @@
         "drupal/core-vendor-hardening": "^11.4.11",
         "drupal/login_destination": "^2.0.0-beta10@beta",
         "drush/drush": "^13.8.0",
-        "fourkitchens/sous-admin": "^2.0",
-        "fourkitchens/sous-emulsify": "^2.0",
         "oomphinc/composer-installers-extender": "^2.0.1",
         "php": "^8.4",
         "webflo/drupal-finder": "^1.3.1",

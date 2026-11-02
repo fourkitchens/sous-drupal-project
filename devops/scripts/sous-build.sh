@@ -183,60 +183,42 @@ case "$SOUS_LIBRARY" in
     ;;
 esac
 
-# Print matching prep and pickup tickets without terminal controls or clipped values.
+# Box both kitchen tickets at their widest line so long values stay intact.
+box() {
+  awk '
+    { lines[NR] = $0; if (length($0) > width) width = length($0) }
+    END {
+      border = sprintf("%*s", width + 2, ""); gsub(/ /, "-", border)
+      print "  +" border "+"
+      for (row = 1; row <= NR; row++) printf "  | %-*s |\n", width, lines[row]
+      print "  +" border "+\n"
+    }'
+}
+
+kitchen_title='                  S O U S   K I T C H E N'
+ticket_rule='  --------------------------------------------------------'
+sides='    None'
+if [ -n "$recipes" ]; then
+  sides=$(for recipe in $recipes; do printf '    + %s\n' "$recipe"; done)
+fi
+prep_sides=$(printf '%s\n' "$sides" | sed 's/^/  /')
 order_number=$(date '+%H%M%S')
+
+# Confirm the order before tools start cooking.
 printf '\n'
 {
-  cat <<'TICKET'
-
-                  S O U S   K I T C H E N
-                       PREP TICKET
-  --------------------------------------------------------
-TICKET
+  printf '\n%s\n%s\n%s\n' "$kitchen_title" '                       PREP TICKET' "$ticket_rule"
   printf '  TICKET #%-8s                       ORDER RECEIVED\n' "$order_number"
-  printf '  --------------------------------------------------------\n\n'
-  printf '  01  MAIN COURSE\n      %s\n\n' "$content_label"
-  printf '  02  ON THE SIDE\n'
-  if [ -n "$recipes" ]; then
-    for recipe in $recipes; do
-      printf '      + %s\n' "$recipe"
-    done
-  else
-    printf '      None\n'
-  fi
-  printf '\n  03  SERVICE\n      %s\n\n' "$ci_label"
-  printf '  04  DESSERT\n      %s\n' "$library_label"
-  if [ -n "$library_repository" ]; then
-    printf '      Ref: %s\n' "${library_ref:-repository default branch}"
-  fi
-  printf '\n'
-  printf '  PANTRY STAPLES (INCLUDED)\n      Media, Config Split and publishing workflow\n\n'
-  cat <<'TICKET'
-  --------------------------------------------------------
-       [x] RECEIVED       [ ] COOKING       [ ] READY
-
-                Aprons on. Let's get cooking!
-
-TICKET
-} | awk '
-  {
-    lines[NR] = $0
-    if (length($0) > width) width = length($0)
-  }
-  END {
-    border = sprintf("%*s", width + 2, "")
-    gsub(/ /, "-", border)
-    print "  +" border "+"
-    for (row = 1; row <= NR; row++) printf "  | %-*s |\n", width, lines[row]
-    print "  +" border "+\n"
-  }
-'
+  printf '%s\n\n  01  MAIN COURSE\n      %s\n\n  02  ON THE SIDE\n%s\n\n  03  SERVICE\n      %s\n\n  04  DESSERT\n      %s\n' \
+    "$ticket_rule" "$content_label" "$prep_sides" "$ci_label" "$library_label"
+  if [ -n "$library_repository" ]; then printf '      Ref: %s\n' "${library_ref:-repository default branch}"; fi
+  printf "\n  PANTRY STAPLES (INCLUDED)\n      Media, Config Split and publishing workflow\n\n%s\n       [x] RECEIVED       [ ] COOKING       [ ] READY\n\n                Aprons on. Let's get cooking!\n\n" "$ticket_rule"
+} | box
 
 # Prevent nested tools from querying the terminal and leaking its replies.
 export TERM=dumb
 
-# DDEV and the theme derive their names from the target project directory.
-# Store the theme name once so routine npm commands use the same directory.
+# Share the project name between DDEV and the theme’s npm commands.
 project_name=$(basename "$PWD" | tr '[:upper:] _' '[:lower:]--' | tr -cd 'a-z0-9-')
 theme=$(printf '%s' "$project_name" | tr -d '-')
 ddev config --project-name="$project_name"
@@ -261,26 +243,21 @@ rm -rf assets/ci
 
 # Renaming Composer's root package invalidates its lock hash.
 if [ -f composer.lock ]; then ddev composer update --lock --no-install --no-interaction; fi
-# Install project tools before Drush starts applying the recipes.
 printf '\nStocking the pantry: installing project tools.\n\n'
 ddev composer install
-# Fetch the baseline and selected recipes together before applying any of them.
-set -- "fourkitchens/sous-media:$sous_version" \
-  "fourkitchens/sous-config-split:$sous_version"
-if [ -n "$content" ]; then
-  set -- "$@" "fourkitchens/$content:$sous_version"
-fi
-for recipe in $recipes; do
+# Keep one baseline list so Composer and Drupal install the same recipes.
+baseline_recipes='sous-emulsify sous-admin sous-media sous-config-split'
+set --
+for recipe in $baseline_recipes $content $recipes; do
   set -- "$@" "fourkitchens/$recipe:$sous_version"
 done
 ddev composer require "$@"
 npm ci --include=dev
 # Minimal leaves the selected recipes in charge of the site's configuration.
 ddev drush -y site:install minimal --account-name=superuser_1
-sh devops/scripts/install-recipe.sh fourkitchens/sous-emulsify
-sh devops/scripts/install-recipe.sh fourkitchens/sous-admin
-sh devops/scripts/install-recipe.sh fourkitchens/sous-media
-sh devops/scripts/install-recipe.sh fourkitchens/sous-config-split
+for recipe in $baseline_recipes; do
+  sh devops/scripts/install-recipe.sh "fourkitchens/$recipe"
+done
 mkdir -p web/modules/custom
 touch web/modules/custom/.gitkeep
 
@@ -325,13 +302,10 @@ if [ -n "$content" ]; then
 fi
 for recipe in $recipes; do
   sh devops/scripts/install-recipe.sh "fourkitchens/$recipe"
-  case "$recipe" in
-    sous-events|sous-news-post)
-      if [ -n "$content" ]; then
-        ddev drush -y recipe "/var/www/html/web/recipes/$recipe/recipes/${content#sous-}"
-      fi
-      ;;
-  esac
+  integration="web/recipes/$recipe/recipes/${content#sous-}"
+  if [ -n "$content" ] && [ -d "$integration" ]; then
+    ddev drush -y recipe "/var/www/html/$integration"
+  fi
 done
 
 # Create module defaults and export them into both environment splits.
@@ -342,22 +316,15 @@ ddev drush config-split:status-override staging active
 printf '\nFinal taste test: exporting configuration and checking the project.\n\n'
 ddev drush -y config:export
 ddev drush config-split:status-override staging default
-# Recipes have unpacked their dependencies; the setup-only repository can go.
-node -e '
-  const fs = require("node:fs");
-  const composer = JSON.parse(fs.readFileSync("composer.json", "utf8"));
-  composer.repositories = composer.repositories.filter((repo) =>
-    !repo.only?.includes("fourkitchens/sous-*") &&
-    !Object.keys(repo.options?.versions ?? {}).some((name) => name.startsWith("fourkitchens/sous-")));
-  fs.writeFileSync("composer.json", JSON.stringify(composer, null, 4) + "\n");
-'
+# The named recipe repository is only needed during setup.
+ddev composer config --unset repositories.sous
 ddev composer update --lock --no-install --no-interaction
 ddev composer validate --no-check-publish
-# Read the running site's versions and URL for the finished order.
 drupal_version=$(ddev drush status --field=drupal-version)
 php_version=$(ddev drush status --field=php-version)
 node_version=$(node --version)
 local_url=$(ddev drush status --field=uri)
+orders_up=$(cat assets/installer/orders-up.txt)
 # Retire the creation hook only after installation succeeds.
 ddev composer config --unset scripts.post-create-project-cmd
 # Preserve attribution before retiring the applied recipe sources.
@@ -365,88 +332,30 @@ for notice in web/recipes/sous-*/NOTICE; do
   if [ -f "$notice" ]; then cat "$notice" >> NOTICE; fi
 done
 rm -rf web/recipes/sous-*
-rm devops/scripts/sous-build.sh
+rm -r devops/scripts/sous-build.sh assets/installer
 # Celebrate only after installation and one-time cleanup have succeeded.
-cat <<'EOF'
+printf '%s\n\n' "$orders_up"
 
-       .--,--.
-       `.  ,.'
-        |___|
-        :o o:   O
-       _`~^~'_  |
-     /'   ^   `\=)
-   .'  _______ '~|
-   `(<=|     |= /'
-       |     |
-       |_____|
-~~~~~~~ ===== ~~~~~~~~
-
-//////////////
- ORDERS UP!
- Your Drupal site is ready.
-//////////////
-
-EOF
-
+# Print the finished project and local credentials after successful setup.
 {
-  cat <<'TICKET'
-
-                  S O U S   K I T C H E N
-                        YOUR ORDER
-  --------------------------------------------------------
-TICKET
+  printf '\n%s\n%s\n%s\n' "$kitchen_title" '                        YOUR ORDER' "$ticket_rule"
   printf '  TICKET #%-8s                     READY FOR PICKUP\n' "$order_number"
-  printf '  --------------------------------------------------------\n\n'
+  printf '%s\n\n' "$ticket_rule"
   printf '  %-12s %s\n' \
-    'Project' "$project_name" \
-    'Main course' "$content_label" \
-    'Service' "$ci_label" \
-    'Dessert' "$library_label" \
+    'Project' "$project_name" 'Main course' "$content_label" \
+    'Service' "$ci_label" 'Dessert' "$library_label" \
     'Included' 'Media, Config Split and publishing workflow'
-  if [ -n "$library_repository" ]; then
-    printf '  %-12s %s\n' 'Library ref' "$library_ref"
-  fi
-  printf '\n  ON THE SIDE\n'
-  if [ -n "$recipes" ]; then
-    for recipe in $recipes; do
-      printf '    + %s\n' "$recipe"
-    done
-  else
-    printf '    None\n'
-  fi
-  printf '\n  THE PREP SHEET\n\n'
+  if [ -n "$library_repository" ]; then printf '  %-12s %s\n' 'Library ref' "$library_ref"; fi
+  printf '\n  ON THE SIDE\n%s\n\n  THE PREP SHEET\n\n' "$sides"
   printf '  %-12s %s\n' \
-    'Drupal' "$drupal_version" \
-    'PHP' "$php_version" \
-    'Node.js' "$node_version" \
-    'Theme' "$theme"
+    'Drupal' "$drupal_version" 'PHP' "$php_version" \
+    'Node.js' "$node_version" 'Theme' "$theme"
   printf '               %s\n' "$theme_status"
-  printf '\n  LOCAL COUNTER\n\n  %s\n' "$local_url"
-  printf '\n  LOCAL SIGN-IN\n\n  %s\n\n' "${local_url%/}/user/login"
-  printf '  %-12s %s\n' \
-    'Username' sous_chef \
-    'Password' "$sous_chef_password"
-  cat <<'TICKET'
-
-  --------------------------------------------------------
-       [x] RECEIVED       [x] COOKING       [x] READY
-
-                Freshly prepared. Happy building!
-
-TICKET
-} | awk '
-  {
-    lines[NR] = $0
-    if (length($0) > width) width = length($0)
-  }
-  END {
-    border = sprintf("%*s", width + 2, "")
-    gsub(/ /, "-", border)
-    print "  +" border "+"
-    for (row = 1; row <= NR; row++) printf "  | %-*s |\n", width, lines[row]
-    print "  +" border "+\n"
-  }
-'
+  printf '\n  LOCAL COUNTER\n\n  %s\n\n  LOCAL SIGN-IN\n\n  %s\n\n' \
+    "$local_url" "${local_url%/}/user/login"
+  printf '  %-12s %s\n' 'Username' sous_chef 'Password' "$sous_chef_password"
+  printf '\n%s\n       [x] RECEIVED       [x] COOKING       [x] READY\n\n                Freshly prepared. Happy building!\n\n' "$ticket_rule"
+} | box
 if [ -n "$library_repository" ]; then
   printf 'Dessert is served. Your component library is ready.\n\n'
 else
