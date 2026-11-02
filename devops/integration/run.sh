@@ -316,6 +316,7 @@ $export = \Drupal::service("config.storage.export")->read("core.extension");
 foreach (["devel", "field_ui", "stage_file_proxy", "syslog", "views_ui"] as $module) {
   $checks["Local tools: $module"] = \Drupal::moduleHandler()->moduleExists($module) && !isset($export["module"][$module]);
 }
+$checks["Development module defaults"] = \Drupal::config("devel.settings")->get("devel_dumper") !== NULL && \Drupal::config("syslog.settings")->get("identity") !== NULL;
 $checks["Masquerade"] = \Drupal::moduleHandler()->moduleExists("masquerade");
 $checks["Nonbreaking-space filter"] = \Drupal::moduleHandler()->moduleExists("no_nbsp");
 // Every installed content type shares the publishing workflow and scheduling sidebar.

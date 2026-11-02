@@ -334,12 +334,14 @@ for recipe in $recipes; do
   esac
 done
 
-# Import local-only tools from the split without adding them to production config.
-ddev drush -y config-split:import local
+# Create module defaults and export them into both environment splits.
+ddev drush -y pm:enable devel field_ui stage_file_proxy syslog views_ui
+ddev drush config-split:status-override staging active
 
 # Validate the finished site and its login before retiring this installer.
 printf '\nFinal taste test: exporting configuration and checking the project.\n\n'
 ddev drush -y config:export
+ddev drush config-split:status-override staging default
 # Recipes have unpacked their dependencies; the setup-only repository can go.
 node -e '
   const fs = require("node:fs");
