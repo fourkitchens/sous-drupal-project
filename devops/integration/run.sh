@@ -390,6 +390,14 @@ if ($profile) {
     $profile_form_display = \Drupal::entityTypeManager()->getStorage("entity_form_display")->load("node.profile.default");
     $checks["Profile image"] = $person->getFieldDefinition("field_image")->getFieldStorageDefinition()->getCardinality() === 1 && $profile_form_display->getRenderer("field_image")->getPluginId() === "media_library_widget";
     $checks["Profile Bio"] = $person->getFieldDefinition("field_description")->getType() === "text_long" && $person->getFieldDefinition("field_description")->getSetting("allowed_formats") === ["basic_html"];
+    $person->set("field_teaser_text", "Profile smoke teaser")->set("moderation_state", "published")->save();
+    $profile_view = \Drupal\views\Views::getView("profiles");
+    $checks["Profiles embed display"] = $profile_view->setDisplay("embed_profiles") && $profile_view->display_handler->getPluginId() === "embed";
+    $profile_view->setExposedInput(["profile_search" => "Byron"]);
+    $profile_view->execute();
+    $checks["Profiles searchable embed"] = count($profile_view->result) === 1 && (int) $profile_view->result[0]->_entity->id() === (int) $person->id();
+    $profile_output = $profile_view->render();
+    $checks["Profiles teaser rendering"] = str_contains((string) \Drupal::service("renderer")->renderInIsolation($profile_output), "Profile smoke teaser");
   }
   finally {
     if (!$person->isNew()) {

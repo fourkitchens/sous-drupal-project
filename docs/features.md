@@ -29,7 +29,7 @@ News Post adds a plain-text byline, multi-value News Categories and Page-style t
 News aliases use `news/first-category/title`.
 Both use rendered teasers with exposed taxonomy and title/teaser-text search filters.
 Both use components with Paragraphs and layouts with Layout Builder.
-Profile adds required first/last names, an automatic hidden title, one Profile Image, a Basic HTML Bio and shared teaser fields.
+Profile adds required first/last names, a hidden automatic title, one Profile Image, a Basic HTML Bio and teasers; its Profiles embed sorts by last name and searches names and Bio.
 
 ## User Roles and Permissions
 
