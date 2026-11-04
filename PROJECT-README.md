@@ -21,12 +21,11 @@ Content management system built on Drupal. Record project URLs, contacts and acc
 - [Node.js from `.nvmrc`](https://github.com/nvm-sh/nvm)
 - [PHP 8.4](https://www.php.net/) and [Composer 2](https://getcomposer.org/)
 
-```sh
-npm run setup -- reference/site-db.sql.gz
-```
+## Local development
 
-Use `npm run rebuild` after switching branches; if no library was selected during creation, [add a component library](docs/BUILD_TOOLS.md#theme) before `npm run theme-watch`.
-Local setup and database resets use DDEV; shared Drupal commands also run in CI and on hosts.
+After `composer create-project` completes, open the local URL shown in the installer summary. Run `ddev start` from the project root if the site is stopped.
+
+For a clone of an existing site or a database refresh, see [Local Setup](docs/SETUP.md). For theme development, see [the theme build commands](docs/BUILD_TOOLS.md#theme).
 
 ## Documentation
 

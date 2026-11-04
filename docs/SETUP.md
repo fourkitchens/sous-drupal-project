@@ -5,15 +5,19 @@
 Install DDEV, Docker, Git, PHP 8.4, Composer 2 and Node.js from `.nvmrc` on your computer.
 Run project commands from the checkout root.
 
+## Fresh Composer installation
+
+`composer create-project` starts DDEV, installs dependencies and creates the local Drupal site. Open the local URL from the installer summary. Run `ddev start` from the project root if the site is stopped.
+
 ## Project setup script
 
-Clone the repository, obtain its database backup and uploaded files, then run:
+For a clone of an existing site, obtain its database backup and uploaded files, then run:
 
 ```sh
 npm run setup -- reference/site-db.sql.gz
 ```
 
-Setup installs Node dependencies, builds available theme sources, then restores and deploys the local site.
+Setup installs Node dependencies, builds available theme sources, replaces the local database with the backup, sanitizes copied accounts and deploys configuration.
 
 ## Restore or refresh locally
 
@@ -23,7 +27,7 @@ npm run import-data -- reference/site-db.sql.gz
 npm run local-data-bak
 ```
 
-Rebuild leaves Node dependencies and assets alone; import-data only imports and sanitizes.
+`rebuild` and `import-data` both replace the local database from the backup and sanitize copied accounts. `rebuild` also installs Composer dependencies and deploys configuration.
 The default backup is `reference/site-db.sql.gz`; `.sql` also works.
 The restore runs `devops/scripts/get-db.sh` only when you omit the backup path and the default file is missing. Edit that script to download the default backup, or configure `ddev pull`.
 The backup must be readable and nonempty. Gzip files are checked before the local database is replaced.
@@ -71,7 +75,12 @@ if (getenv('IS_DDEV_PROJECT') === 'true') {
 
 Config Split keeps local tools out of production; `config/local` and `config/staging` stay inactive in exports.
 Local settings enable the local split in DDEV; activate staging before importing configuration with `$config['config_split.config_split.staging']['status'] = TRUE;` in host settings.
-With optional Dev Tools selected, Stage File Proxy fetches missing production files locally. Set its origin only in `settings.local.php`: `$config['stage_file_proxy.settings']['origin'] = 'https://production.example.com';`.
+Every generated site includes Stage File Proxy in the local and staging Config Splits. To fetch missing files locally, set the site's source URL as the origin in `settings.local.php`.
+
+```php
+$config['stage_file_proxy.settings']['origin'] = 'https://production.example.com';
+```
+
 Use `ddev drush uli --name=sous_chef` for a local login after setup.
 
 ## Adapt an existing site to Lando

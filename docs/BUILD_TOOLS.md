@@ -6,23 +6,33 @@ Setup, rebuild, import-data and local-data-bak remain local DDEV operations.
 
 ## Theme
 
-The Emulsify theme is at `web/themes/custom/<theme>`; `package.json` records its name in `config.theme`.
-Initial installation enables the theme and installs its npm dependencies; choosing a component library also installs it and compiles assets.
-If skipped at creation, add a library through the [Emulsify CLI](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage). UI Kit currently uses its [upstream lint-fix branch](https://github.com/emulsify-ds/emulsify-ui-kit/pull/189) until a released version passes lint and build:
+Run `ddev drush config:get system.theme default` to find the active theme. The root `package.json` selects the build target through `config.theme`. In `web/themes/custom/<theme>`, read the theme's `AGENTS.md` for scoped guidance and its `package.json` for frontend commands.
+
+The installer enables the generated Emulsify theme and installs its npm dependencies. You can start with project assets or install a component library later.
+
+### Author project assets
+
+Add a Sass or JavaScript entrypoint under the theme's `src/` directory and run `npm run theme-build` from the project root. For example, in the generated theme, `src/base/site.scss` builds to `dist/global/base/site.css`.
+
+To load the stylesheet in Drupal, list the compiled path in the theme's `.libraries.yml` and attach that library in the theme's `.info.yml` for all pages or in the relevant Twig template. Keep maintained source under `src/`. Builds write compiled assets to `dist/` and mirror Drupal components to `components/` when present.
+
+### Install a component library later
+
+Use the Emulsify CLI to install UI Kit or an external library. For UI Kit, use the upstream lint-fix branch until a released version passes lint and build. [Emulsify CLI usage](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage) · [UI Kit lint fix](https://github.com/emulsify-ds/emulsify-ui-kit/pull/189)
 
 ```sh
 (
   cd "web/themes/custom/<theme>"
   npx --no-install emulsify system install --repository https://github.com/emulsify-ds/emulsify-ui-kit.git \
     --checkout codex/fix-drupal-theme-lint --all --yes
-  # Custom: use your .git URL and branch/tag; the repository name must match its Emulsify system name.
   npm install --include=dev
 )
 npm run theme-build
-npm run theme-watch
 ```
 
-Edit `src/`; builds generate `dist/` and a `components/` mirror for deployment. An empty scaffold reports no build inputs; once sources exist, build failures stop the command.
+For an external library, use its Git URL and branch or tag in the command. The repository name must match its Emulsify system name. Follow the installed library's guidance for its source and asset integration.
+
+An empty scaffold reports that it has no asset entrypoints. Once the theme has build inputs, build failures stop the command.
 
 ## NPM Scripts
 
@@ -65,7 +75,7 @@ PHP coding standards use `phpcs.xml.dist`; review autofixes and follow [contribu
 | --- | --- |
 | `npm run theme-ci` | Install locked theme dependencies |
 | `npm run theme-build` | Build production assets when source inputs exist |
-| `npm run theme-watch` | Develop the theme after adding a component library |
+| `npm run theme-watch` | Watch theme assets with Vite and run Storybook |
 | `npm run theme-storybook` | Build static Storybook at `web/storybook` |
 
 Commit both npm manifests and lockfiles. Compare source, libraries and npm changes when updating the theme.

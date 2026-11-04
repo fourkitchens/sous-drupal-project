@@ -12,7 +12,7 @@ const { default: configure } = await import(pathToFileURL(
 const config = await configure({ command: 'build', mode: 'production' });
 
 if (Object.keys(config.build.rollupOptions.input).length === 0) {
-  console.log('Theme build: no asset entrypoints yet; add a component library when ready.');
+  console.log('Theme build: no asset entrypoints yet. Add a Sass or JavaScript entrypoint under src/ or install a component library.');
 } else {
   const result = spawnSync('npm', ['run', 'build'], { stdio: 'inherit' });
   if (result.error) throw result.error;

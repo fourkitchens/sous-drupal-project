@@ -39,13 +39,15 @@ Checks, in order:
      sign in, and the default custom theme has tools. A chosen component library
      loads through Emulsify and has compiled assets; none leaves an empty scaffold.
   5. Maintainer tooling, one-time theme setup files and assets/ci are absent;
-     only the selected provider's
-     CI files remain, with no product ci.yml or unselected provider files.
+     site agent guidance has working links and survives a site archive.
+     Only the selected provider's CI files remain.
      The generated release configuration loads in Node.
   6. Configuration scripts work through DDEV and with native tools;
      Drush deploy succeeds and config:status reports no changes.
-  7. Run Composer CI for admin-only or a chosen library; for admin-only, back up,
-     restore with npm run setup and reset with npm run rebuild, checking bootstrap.
+  7. Run Composer CI for admin-only or a chosen library. For admin-only without
+     a library, build a project-owned Sass entrypoint after the empty build.
+  8. For admin-only, back up, restore with npm run setup and reset with npm run
+     rebuild, checking bootstrap.
 
 The artifacts directory keeps each step's log, config-status.stderr,
 cleanup.log (unless --keep), and result.json with status, site, option,
@@ -268,10 +270,12 @@ PHP
 
 # Check Drupal bootstrap before requesting the site's front page.
 check_site_responds() {
+  local http_url
   step bootstrap ddev drush status --field=bootstrap
   expect_line bootstrap Successful
+  http_url=$(ddev describe -j | jq -er '.raw.httpurl')
   step front-page curl --silent --show-error --output /dev/null \
-    --write-out '%{http_code}\n' "http://$project_name.ddev.site/"
+    --write-out '%{http_code}\n' "${http_url%/}/"
   expect_line front-page 200
 }
 
@@ -463,10 +467,67 @@ check_component_library() {
 # Check that sites omit maintainer tooling and one-time theme setup files.
 check_product_files_absent() {
   local path
-  for path in AGENTS.md devops/integration docs/maintainers assets/installer devops/scripts/sous-build.sh \
+  for path in devops/integration docs/maintainers assets/installer devops/scripts/sous-build.sh \
     devops/scripts/theme-setup.sh devops/scripts/theme-initialize.mjs; do
     step "absent-${path//\//-}" test ! -e "$path"
   done
+}
+
+# Check the installed site's guidance, navigation and archive contents.
+check_agent_guidance() {
+  local facts=docs/agents/workflow-facts.md
+  local theme heading
+  theme=$(printf '%s' "$project_name" | tr -d '-')
+  step agent-heading grep -Fx "# $project_name agent instructions" AGENTS.md
+  step facts-heading grep -Fx '# Workflow facts' "$facts"
+  step facts-sections grep '^## ' "$facts"
+  for heading in Sites 'Database refresh' 'Test roles' 'Public files' 'Git workflow' 'Review and deploy'; do
+    expect_line facts-sections "## $heading"
+  done
+  step agent-theme-link grep -F "(web/themes/custom/$theme/AGENTS.md)" AGENTS.md
+  step agent-package-link grep -F '(package.json)' AGENTS.md
+  step agent-workflow-pointer grep -Fx -- \
+    '- Workflow facts: Read [the workflow facts](docs/agents/workflow-facts.md) before debugging, implementing, reviewing, or deploying a change.' AGENTS.md
+  step agent-project-discovery grep -F 'ddev describe' "$facts"
+  step agent-site-facts grep -F 'ddev drush status --fields=uri,db-name' "$facts"
+
+  # Resolve the relative file links and Markdown heading anchors used here.
+  # shellcheck disable=SC2016
+  step agent-links node -e '
+    const fs = require("node:fs");
+    const { pathToFileURL } = require("node:url");
+    for (const document of process.argv.slice(1)) {
+      const contents = fs.readFileSync(document, "utf8");
+      if (/\b(?:PROJECT_NAME|PROJECT_THEME|LOCAL_URL|LOCAL_DATABASE)\b|^# Sous coding agent brief$/m.test(contents)) {
+        throw new Error(`Unrendered starter guidance in ${document}`);
+      }
+      const base = pathToFileURL(document);
+      for (const [, link] of contents.matchAll(/\]\(([^)\s]+)\)/g)) {
+        if (link.startsWith("//")) continue;
+        const target = new URL(link, base);
+        if (target.protocol !== "file:") continue;
+        fs.accessSync(target);
+        if (target.hash) {
+          const anchor = decodeURIComponent(target.hash.slice(1));
+          const headings = fs.readFileSync(target, "utf8").matchAll(/^#{1,6} +(.+)$/gm);
+          const found = [...headings].some(([, title]) =>
+            title.trim().toLowerCase().replace(/[^\w -]/g, "").replace(/ /g, "-") === anchor);
+          if (!found) {
+            throw new Error(`${document}: missing heading for ${link}`);
+          }
+        }
+      }
+    }
+  ' AGENTS.md "$facts"
+
+  # Archive a staged tree to check export rules without committing to the site.
+  # shellcheck disable=SC2016
+  step agent-archive env GIT_INDEX_FILE="$work_dir/agent-archive.index" bash -e -o pipefail -c '
+    git add -- .gitattributes "$@"
+    git archive "$(git write-tree)" | tar -tf -
+  ' bash AGENTS.md "$facts"
+  expect_line agent-archive AGENTS.md
+  expect_line agent-archive "$facts"
 }
 
 # Check that only the chosen CI files remain after the installer removes its templates.
@@ -539,6 +600,23 @@ check_backup_restore() {
   expect_line rebuilt-bootstrap Successful
 }
 
+# Build a site-owned entrypoint on the scaffold without installing a library.
+check_project_owned_asset() {
+  local theme_path source
+  theme_path="web/themes/custom/$(printf '%s' "$project_name" | tr -d '-')"
+  source="$theme_path/src/base/site-smoke.scss"
+  step empty-theme-ci test ! -d "$theme_path/dist"
+  mkdir -p "$theme_path/src/base"
+  cat > "$source" <<'SCSS'
+$smoke-color: red;
+.sous-smoke { color: $smoke-color; }
+SCSS
+  step project-theme-build npm run theme-build
+  step project-theme-asset grep -F '.sous-smoke' "$theme_path/dist/global/base/site-smoke.css"
+  rm "$source"
+  rm -r "$theme_path/dist"
+}
+
 # Run each stage as a plain command so set -e stops at the first failure.
 main() {
   parse_options "$@"
@@ -549,6 +627,7 @@ main() {
   trap 'exit 143' TERM
 
   export_template
+  step absent-starter-agent-brief test ! -e "$work_dir/template/AGENTS.md"
   if [ -n "$packages" ]; then
     use_local_packages
   fi
@@ -562,11 +641,15 @@ main() {
   check_composition
   check_component_library
   check_product_files_absent
+  check_agent_guidance
   check_generated_files
   check_clean_deploy
   # Chosen libraries must pass the same lint/build command as a site's own CI.
   if [ "$option" = admin-only ] || [ "$library" != none ]; then
     step ci composer ci
+  fi
+  if [ "$option" = admin-only ] && [ "$library" = none ]; then
+    check_project_owned_asset
   fi
   # Resets are the same for every composition, so exercise them for admin-only.
   if [ "$option" = admin-only ]; then

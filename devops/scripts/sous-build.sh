@@ -319,6 +319,23 @@ drupal_version=$(ddev drush status --field=drupal-version)
 php_version=$(ddev drush status --field=php-version)
 node_version=$(node --version)
 local_url=$(ddev drush status --field=uri)
+
+# Write the site's agent instructions before removing the installer templates.
+mkdir -p docs/agents
+node - "$project_name" "$theme" <<'JS'
+const fs = require('node:fs');
+const [name, theme] = process.argv.slice(2);
+
+fs.writeFileSync('AGENTS.md', fs.readFileSync('assets/installer/site-agents.md', 'utf8')
+  .replaceAll('PROJECT_NAME', name)
+  .replaceAll('PROJECT_THEME', theme));
+fs.copyFileSync('assets/installer/workflow-facts.md', 'docs/agents/workflow-facts.md');
+
+// The archive exclusion applies to the starter's agent brief.
+const attributes = fs.readFileSync('.gitattributes', 'utf8');
+fs.writeFileSync('.gitattributes', attributes.replace('/AGENTS.md export-ignore\n', ''));
+JS
+
 orders_up=$(cat assets/installer/orders-up.txt)
 # Install CI files after site validation so a failed setup leaves the templates intact.
 if [ "$ci" != none ]; then
@@ -365,5 +382,5 @@ printf '%s\n\n' "$orders_up"
 if [ -n "$library_repository" ]; then
   printf 'Dessert is served. Your component library is ready.\n\n'
 else
-  printf 'Add a component library when you are ready to cook.\n\n'
+  printf 'Add your own theme assets or install a component library when you are ready to cook.\n\n'
 fi
