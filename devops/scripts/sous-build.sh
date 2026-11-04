@@ -63,7 +63,7 @@ if [ "${SOUS_RECIPES+x}" != x ]; then
       }
     }
   ' "$sous_version" "${SOUS_INDEX:-https://fourkitchens.github.io/sous-drupal-packages/packages.json}") ||
-    echo "Couldn't reach the Sous package index; add optional recipes later with ddev composer require." >&2
+    echo "Couldn't reach the Sous package index; see docs/SETUP.md to add optional recipes later." >&2
   SOUS_RECIPES=''
   if [ -n "$recipe_menu" ]; then
     printf '\n  ON THE SIDE · Optional recipes\n\n'
@@ -246,6 +246,7 @@ set --
 for recipe in $baseline_recipes $content $recipes; do
   set -- "$@" "fourkitchens/$recipe:$sous_version"
 done
+# Drupal's Composer plugin unpacks dependencies and leaves recipe sources to apply.
 ddev composer require "$@"
 npm ci --include=dev
 # Minimal leaves the selected recipes in charge of the site's configuration.
@@ -303,8 +304,8 @@ for recipe in $recipes; do
   fi
 done
 
-# Create module defaults and export them into both environment splits.
-ddev drush -y pm:enable devel field_ui stage_file_proxy syslog views_ui
+# Export core module defaults to both splits. Optional recipes enable their own tools.
+ddev drush -y pm:enable field_ui syslog views_ui
 ddev drush config-split:status-override staging active
 
 # Validate the finished site and its login before retiring this installer.

@@ -50,13 +50,19 @@ The `npm run confex` and `npm run confim` shortcuts call the same scripts. See [
 
 ## Add a recipe
 
+The starter removes the temporary Sous Composer repository when installation completes. Add the scoped index again before requiring another Sous recipe. This example adds the optional Dev Tools recipe to a local DDEV site.
+
 ```sh
-ddev composer require vendor/recipe
-sh devops/scripts/install-recipe.sh vendor/recipe
+ddev composer config --json repositories.sous \
+  '{"type":"composer","url":"https://fourkitchens.github.io/sous-drupal-packages/","only":["fourkitchens/sous-*"]}'
+ddev composer require 'fourkitchens/sous-dev-tools:^2.0'
+sh devops/scripts/install-recipe.sh fourkitchens/sous-dev-tools
 sh devops/scripts/confex.sh
 ```
 
-Recipes apply once and unpack; review and commit their dependencies and complete configuration export.
+Drupal's Composer plugin unpacks dependencies during `composer require` and leaves the recipe source available for Drupal to apply. Keep the source through application and any composition integrations. Review and commit the Composer files and complete configuration export.
+
+To remove the setup index again, run `ddev composer config --unset repositories.sous` and `ddev composer update --lock --no-install` after applying the recipe.
 
 ## Local settings and Config Split
 
@@ -73,9 +79,11 @@ if (getenv('IS_DDEV_PROJECT') === 'true') {
 }
 ```
 
-Config Split keeps local tools out of production; `config/local` and `config/staging` stay inactive in exports.
-Local settings enable the local split in DDEV; activate staging before importing configuration with `$config['config_split.config_split.staging']['status'] = TRUE;` in host settings.
-Every generated site includes Stage File Proxy in the local and staging Config Splits. To fetch missing files locally, set the site's source URL as the origin in `settings.local.php`.
+The local and staging splits include core Field UI, Syslog and Views UI. Their saved statuses are inactive. Local settings activate the local split in DDEV. On staging, set `$config['config_split.config_split.staging']['status'] = TRUE;` in host settings before importing configuration. Leave both overrides unset in production.
+
+The optional Dev Tools recipe adds Devel, Stage File Proxy and Masquerade to the local split. These modules stay disabled in staging and production. On a fresh site, Masquerade access comes from the Superuser role.
+
+With Dev Tools installed, set Stage File Proxy's source URL in `settings.local.php` to fetch missing files locally.
 
 ```php
 $config['stage_file_proxy.settings']['origin'] = 'https://production.example.com';

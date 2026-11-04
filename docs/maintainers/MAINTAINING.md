@@ -48,7 +48,7 @@ The product [README](../../README.md#installation) documents content, recipe, CI
 Media, Config Split and the publishing workflow apply to every course; Paragraph Types belongs only to Paragraphs.
 The runner sets `SOUS_RECIPES`, so smoke tests never fetch the menu.
 To inspect it interactively, leave that variable unset; the newest matching-major
-metadata offers packages with `extra.sous.menu: true`; currently Events, News Post and Profile.
+metadata offers packages with `extra.sous.menu: true`, including Dev Tools.
 `SOUS_INDEX` defaults to `https://fourkitchens.github.io/sous-drupal-packages/packages.json`;
 point it at a local build to inspect unpublished metadata:
 
@@ -58,6 +58,7 @@ SOUS_INDEX=/path/to/sous-drupal-packages/build/site/packages.json \
 ```
 
 Successful installation retires starter-only code and metadata; shared site guides contain no starter branding.
+Composer unpacks recipe dependencies during `require`. Keep recipe sources through application and integrations, then retire the applied sources, the setup repository and the creation hook. The generated lockfile must install without the setup repository.
 The theme builds when a library is selected; `SOUS_LIBRARY=none` keeps the scaffold only. `SOUS_LIBRARY_REF` selects a branch/tag; UI Kit temporarily uses the [upstream lint-fix branch](https://github.com/emulsify-ds/emulsify-ui-kit/pull/189) until a released version passes lint and build.
 Keep product CI, maintainer docs and the starter's agent brief scoped to the starter.
 The installer creates `AGENTS.md` and `docs/agents/workflow-facts.md` from `assets/installer/`, then retires the inputs.
@@ -65,7 +66,7 @@ The installer creates `AGENTS.md` and `docs/agents/workflow-facts.md` from `asse
 ## CI and releases
 
 PRs run admin-only with GitHub CI. Main pushes, nightly runs at 06:17 UTC
-and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. Layout Builder selects UI Kit; Paragraphs tests a custom Git URL.
+and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. The admin-only/no CI case also selects Dev Tools. Layout Builder selects UI Kit; Paragraphs tests a custom Git URL.
 Manual `packages_ref` selects a full reviewed packages commit.
 Keep action SHAs pinned; checks read only, publishing writes after checks pass.
 

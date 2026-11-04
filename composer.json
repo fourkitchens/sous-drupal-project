@@ -19,21 +19,6 @@
         "asset-packagist": {
             "type": "composer",
             "url": "https://asset-packagist.org"
-        },
-        "dropzone": {
-            "type": "package",
-            "package": {
-                "name": "dropzone/dropzone",
-                "version": "6.3.5",
-                "type": "drupal-library",
-                "extra": {
-                    "installer-name": "dropzone"
-                },
-                "dist": {
-                    "url": "https://github.com/enyo/dropzone/releases/download/dropzone%406.3.5/dist.zip",
-                    "type": "zip"
-                }
-            }
         }
     },
     "require": {

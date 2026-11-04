@@ -41,8 +41,10 @@ Checks, in order:
   5. Maintainer tooling, one-time theme setup files and assets/ci are absent;
      site agent guidance has working links and survives a site archive.
      Only the selected provider's CI files remain.
-     The generated release configuration loads in Node.
-  6. Configuration scripts work through DDEV and with native tools;
+     The generated release configuration loads in Node. Applied Sous recipes,
+     their setup repository and the creation hook are retired.
+  6. Composer reinstalls from the unchanged lock without the Sous repository;
+     configuration and notices survive. Configuration scripts work through DDEV and native tools;
      Drush deploy succeeds and config:status reports no changes.
   7. Run Composer CI for admin-only or a chosen library. For admin-only without
      a library, build a project-owned Sass entrypoint after the empty build.
@@ -311,13 +313,35 @@ $checks = [
   "Split definitions" => \Drupal::service("config.storage")->exists("config_split.config_split.local") && \Drupal::service("config.storage")->exists("config_split.config_split.staging"),
   "Media types" => count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video"])) === 3,
 ];
-// Local tools come from the active split while the production export excludes them.
-$export = \Drupal::service("config.storage.export")->read("core.extension");
-foreach (["devel", "field_ui", "stage_file_proxy", "syslog", "views_ui"] as $module) {
-  $checks["Local tools: $module"] = \Drupal::moduleHandler()->moduleExists($module) && !isset($export["module"][$module]);
+// DDEV activates Local without persisting either split as enabled.
+$baseline = ["field_ui", "syslog", "views_ui"];
+$optional = ["devel", "masquerade", "stage_file_proxy"];
+$devTools = in_array("sous-dev-tools", $recipes, TRUE);
+$sync = \Drupal::service("config.storage.sync");
+$export = $sync->read("core.extension");
+foreach (["local", "staging"] as $split) {
+  $name = "config_split.config_split.$split";
+  $raw = \Drupal::service("config.storage")->read($name);
+  $exported = $sync->read($name);
+  $local = $split === "local";
+  $expected = $local && $devTools ? array_merge($baseline, $optional) : $baseline;
+  $expected = array_fill_keys($expected, 0);
+  ksort($expected);
+  ksort($raw["module"]);
+  ksort($exported["module"]);
+  $checks["Split module lists: $split"] = $raw["module"] === $expected && $exported["module"] === $expected;
+  $checks["Split activation: $split"] = $raw["status"] === FALSE && $exported["status"] === FALSE && \Drupal::config($name)->get("status") === $local;
+  $splitStorage = new \Drupal\Core\Config\FileStorage(DRUPAL_ROOT . "/../config/$split");
+  $checks["Syslog defaults: $split"] = $splitStorage->exists("syslog.settings");
+  foreach ($optional as $module) {
+    $checks["Split defaults: $split/$module"] = $splitStorage->exists("$module.settings") === ($local && $devTools);
+  }
 }
-$checks["Development module defaults"] = \Drupal::config("devel.settings")->get("devel_dumper") !== NULL && \Drupal::config("syslog.settings")->get("identity") !== NULL;
-$checks["Masquerade"] = \Drupal::moduleHandler()->moduleExists("masquerade");
+foreach (array_merge($baseline, $optional) as $module) {
+  $enabled = in_array($module, $baseline, TRUE) || $devTools;
+  $checks["Local tools: $module"] = \Drupal::moduleHandler()->moduleExists($module) === $enabled && !isset($export["module"][$module]);
+}
+$checks["DropzoneJS module absent"] = !\Drupal::moduleHandler()->moduleExists("dropzonejs");
 $checks["Nonbreaking-space filter"] = \Drupal::moduleHandler()->moduleExists("no_nbsp");
 // Every installed content type shares the publishing workflow and scheduling sidebar.
 $workflow = \Drupal\workflows\Entity\Workflow::load("editorial");
@@ -534,10 +558,13 @@ check_agent_guidance() {
 check_generated_files() {
   step release-config node -e "require('./release.config.js')"
   if [ "$option" = paragraphs ]; then
-    step recipe-notice test -f NOTICE
+    step recipe-notice cat NOTICE
+    expect_line recipe-notice 'MIT License'
+    expect_line recipe-notice 'Copyright (c) 2023 Four Kitchens'
   fi
   step absent-assets-ci test ! -e assets/ci
   step scaffold-assets test -d assets/scaffold
+  step reusable-recipe-command test -f devops/scripts/install-recipe.sh
 
   if [ "$ci" = github ]; then
     step ci-github-workflow test -f .github/workflows/build.yml
@@ -563,12 +590,58 @@ check_generated_files() {
   fi
 }
 
+# Reinstall only Composer-managed dependencies and keep project files in place.
+check_lock_reinstall() {
+  step composer-repositories ddev composer repo list --no-ansi
+  if grep -E '^\[(sous|dropzone)\]' "$artifacts/composer-repositories.log"; then return 1; fi
+  step composer-scripts ddev composer run-script --list --no-ansi
+  if grep -E '^[[:space:]]*post-create-project-cmd([[:space:]]|$)' "$artifacts/composer-scripts.log"; then return 1; fi
+
+  # The fixture is mounted during setup only, so it cannot satisfy this install.
+  if [ -n "$packages" ]; then
+    step remove-package-mount rm .ddev/docker-compose.recipes.yaml
+    step restart-without-packages ddev restart
+    step absent-package-mount ddev exec --raw -- test ! -e "$packages/packages"
+  fi
+  step save-lock cp composer.lock "$work_dir/reinstall.lock"
+  step save-config cp -R config "$work_dir/reinstall-config"
+  if [ -f NOTICE ]; then step save-notice cp NOTICE "$work_dir/reinstall-notice"; fi
+  step remove-dependencies rm -rf vendor web/core web/modules/contrib web/themes/contrib \
+    web/profiles/contrib web/libraries drush/contrib
+  step reinstall ddev composer install --no-interaction
+  step lock-preserved cmp "$work_dir/reinstall.lock" composer.lock
+  step config-preserved diff -r "$work_dir/reinstall-config" config
+  if [ -f "$work_dir/reinstall-notice" ]; then
+    step notice-preserved cmp "$work_dir/reinstall-notice" NOTICE
+  fi
+
+  # Let the child shell expand the recipe paths in the generated checkout.
+  # shellcheck disable=SC2016
+  step absent-recipe-dirs bash -ec 'for recipe in web/recipes/sous-*; do test ! -e "$recipe"; done'
+  step absent-dropzone-library test ! -e web/libraries/dropzone
+  step locked-packages ddev composer show --locked --format=json --no-ansi
+  # shellcheck disable=SC2016
+  step locked-selection jq -e --arg recipes "$recipes" '
+    (.locked | map(.name)) as $names
+    | ($recipes | test("(^|[[:space:],])sous-dev-tools($|[[:space:],])")) as $dev_tools
+    | all($names[]; test("^(fourkitchens/sous-|drupal/dropzonejs$|dropzone/dropzone$)") | not)
+      and all(["drupal/devel", "drupal/masquerade", "drupal/stage_file_proxy"][];
+        . as $name | ($names | index($name) != null) == $dev_tools)
+  ' "$artifacts/locked-packages.log"
+}
+
 # Deploy the site and require no remaining configuration changes.
 check_clean_deploy() {
-  step config-export npm run confex -- @self
   step deploy npm run confim -- @self
-  step native-config-export ddev exec --raw sh devops/scripts/confex.sh @self
   step native-deploy ddev exec --raw sh devops/scripts/confim.sh @self
+  # Check the preserved export before exercising either export entry point.
+  # shellcheck disable=SC2016
+  step config-status bash -c \
+    'ddev drush config:status --format=json 2> "$1"' \
+    bash "$artifacts/config-status.stderr"
+  jq -e 'length == 0' "$artifacts/config-status.log"
+  step config-export npm run confex -- @self
+  step native-config-export ddev exec --raw sh devops/scripts/confex.sh @self
   # CI can select its own PHP even in a configured DDEV checkout.
   step explicit-native-php env -u IS_DDEV_PROJECT SOUS_PHP_RUNTIME=native \
     sh devops/scripts/run-php.sh php -r 'echo getcwd(), PHP_EOL;'
@@ -580,12 +653,6 @@ check_clean_deploy() {
     'if ($argv[1] !== "argument with spaces") { exit(1); } echo "Native PHP works.\n";' \
     'argument with spaces'
   expect_line native-php 'Native PHP works.'
-  # Keep Drush notices in their own stderr file so config-status.log parses as JSON.
-  # shellcheck disable=SC2016
-  step config-status bash -c \
-    'ddev drush config:status --format=json 2> "$1"' \
-    bash "$artifacts/config-status.stderr"
-  jq -e 'length == 0' "$artifacts/config-status.log"
 }
 
 # Exercise backup, fresh-clone setup and quick branch rebuild, checking each reset.
@@ -632,10 +699,6 @@ main() {
     use_local_packages
   fi
   create_site
-  if [ -n "$packages" ]; then
-    # This mount belongs to the test fixture, not the generated application.
-    step remove-package-mount rm .ddev/docker-compose.recipes.yaml
-  fi
   check_host_settings
   check_site_responds
   check_composition
@@ -643,6 +706,7 @@ main() {
   check_product_files_absent
   check_agent_guidance
   check_generated_files
+  check_lock_reinstall
   check_clean_deploy
   # Chosen libraries must pass the same lint/build command as a site's own CI.
   if [ "$option" = admin-only ] || [ "$library" != none ]; then

@@ -18,7 +18,7 @@ Navigation requires the Layout Builder module; content layouts are enabled only 
 
 ## Media
 
-Every setup includes file, image and video Media Library types, focal-point cropping and upload widgets.
+Every setup includes File, Image and Video media types. Upload files and images through Drupal's Media Library form. Image editing includes Focal Point.
 
 ## Optional content types
 

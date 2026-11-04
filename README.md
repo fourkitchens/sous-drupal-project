@@ -15,7 +15,7 @@ Choose the content model during installation; administration, the theme, Media, 
 | `1` Paragraphs | Page and Frontpage with Layout Paragraphs components |
 | `2` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed and Table blocks |
 
-Events, News Post and Profile are optional recipes; Paragraph Types belongs only to the Paragraphs main course.
+The package index advertises optional recipes such as Events, News Post, Profile, SEO and Dev Tools. Dev Tools adds Devel, Stage File Proxy and Masquerade locally. Paragraph Types belongs to the Paragraphs main course.
 See [features and configurations](docs/features.md) for the site's building blocks.
 
 # Installation
@@ -52,7 +52,7 @@ If a fresh install fails partway through, keep the partial directory for trouble
 # Recipe Dependency Management
 
 [Sous packages](https://github.com/fourkitchens/sous-drupal-packages) publish independent Composer recipes.
-Recipes apply once and then unpack; updates do not replay a site's configuration. See [adding a recipe](docs/SETUP.md#add-a-recipe) for later additions.
+Drupal's Composer plugin unpacks recipe dependencies when Composer requires a recipe. The installer applies the recipes once, then removes their source directories and the setup repository. The site owns the resulting dependencies and configuration. See [adding a recipe](docs/SETUP.md#add-a-recipe) for later additions.
 
 # Working with Emulsify
 
