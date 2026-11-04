@@ -15,7 +15,7 @@ Choose the content model during installation; administration, the theme, Media, 
 | `1` Paragraphs | Page and Frontpage with Layout Paragraphs components |
 | `2` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed and Table blocks |
 
-The package index advertises optional recipes such as Events, News Post, Profile, SEO and Dev Tools. Dev Tools adds Devel, Stage File Proxy and Masquerade locally. Paragraph Types belongs to the Paragraphs main course.
+The package index advertises optional recipes such as Events, News Post, Profile, SEO, Alerts, Search and Dev Tools. Dev Tools adds Devel, Stage File Proxy and Masquerade locally. Paragraph Types belongs to the Paragraphs main course.
 See [features and configurations](docs/features.md) for the site's building blocks.
 
 # Installation

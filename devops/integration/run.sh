@@ -33,7 +33,7 @@ Options:
 Checks, in order:
   1. Local development settings stay disabled outside DDEV.
   2. Drupal bootstraps successfully.
-  3. The front page returns HTTP 200.
+  3. The front page and selected recipe routes return HTTP 200.
   4. Content and recipes match the choices; local tools stay in their split;
      UID 1 stays blocked, sous_chef can
      sign in, and the default custom theme has tools. A chosen component library
@@ -270,15 +270,26 @@ PHP
   step host-settings ddev exec --raw env -u IS_DDEV_PROJECT php -r "$settings_check"
 }
 
-# Check Drupal bootstrap before requesting the site's front page.
+# Check Drupal bootstrap and the public routes for the selected recipes.
 check_site_responds() {
-  local http_url
+  local http_url selected
   step bootstrap ddev drush status --field=bootstrap
   expect_line bootstrap Successful
   http_url=$(ddev describe -j | jq -er '.raw.httpurl')
   step front-page curl --silent --show-error --output /dev/null \
     --write-out '%{http_code}\n' "${http_url%/}/"
   expect_line front-page 200
+  selected=",${recipes//[[:space:]]/,},"
+  if [[ "$selected" == *,sous-alerts,* ]]; then
+    step alerts-load curl --silent --show-error --output /dev/null \
+      --write-out '%{http_code}\n' "${http_url%/}/sitewide_alert/load"
+    expect_line alerts-load 200
+  fi
+  if [[ "$selected" == *,sous-search,* ]]; then
+    step search-page curl --silent --show-error --output /dev/null \
+      --write-out '%{http_code}\n' "${http_url%/}/search"
+    expect_line search-page 200
+  fi
 }
 
 # Check content, administrator accounts and the default custom theme in Drupal.
@@ -428,6 +439,19 @@ if ($profile) {
       $person->delete();
     }
     $account_switcher->switchBack();
+  }
+}
+foreach ([
+  "Alerts" => ["sous-alerts", "sous_sitewide_alert", "content_top", ["sitewide_alert", "sitewide_alert_block"]],
+  "Search" => ["sous-search", "sous_search_form", "header", ["search_api", "search_api_db", "facets", "facets_exposed_filters", "better_exposed_filters"]],
+] as $name => [$recipe, $block_id, $region, $modules]) {
+  $selected = in_array($recipe, $recipes, TRUE);
+  $block = \Drupal\block\Entity\Block::load($block_id);
+  $checks["Optional $name block"] = $selected
+    ? $block && $block->status() && $block->getTheme() === getenv("SOUS_SMOKE_THEME") && $block->getRegion() === $region
+    : !$block;
+  foreach ($modules as $module) {
+    $checks["Optional $name module: $module"] = \Drupal::moduleHandler()->moduleExists($module) === $selected;
   }
 }
 foreach ($checks as $name => $passed) {

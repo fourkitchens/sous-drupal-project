@@ -65,9 +65,9 @@ jobs:
           ${{ fromJSON(github.event_name == 'pull_request' &&
           '[{"option":"admin-only","ci":"github"}]' ||
           '[{"option":"admin-only","ci":"github"},
-          {"option":"layout-builder","ci":"gitlab","recipes":"sous-events,sous-news-post,sous-profile","library":"ui-kit"},
+          {"option":"layout-builder","ci":"gitlab","recipes":"sous-events,sous-news-post,sous-profile,sous-alerts,sous-search","library":"ui-kit"},
           {"option":"paragraphs","ci":"circleci","recipes":"sous-events,sous-news-post,sous-profile","library":"https://github.com/emulsify-ds/emulsify-ui-kit.git","library_ref":"codex/fix-drupal-theme-lint"},
-          {"option":"admin-only","ci":"none","recipes":"sous-events,sous-news-post,sous-profile,sous-dev-tools"}]') }}
+          {"option":"admin-only","ci":"none","recipes":"sous-events,sous-news-post,sous-profile,sous-alerts,sous-search,sous-dev-tools"}]') }}
     steps:
       - name: Initialize diagnostic artifacts
         run: |

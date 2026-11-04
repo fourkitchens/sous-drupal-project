@@ -31,6 +31,12 @@ Both use rendered teasers with exposed taxonomy and title/teaser-text search fil
 Both use components with Paragraphs and layouts with Layout Builder.
 Profile adds required first/last names, a hidden automatic title, one Profile Image, a Basic HTML Bio and teasers; its Profiles embed sorts by last name and searches names and Bio.
 
+## Optional site features
+
+Alerts displays site-wide banners at the top of every public page. Editors can schedule alerts and make them dismissible.
+
+Search adds a search box in the header and a `/search` results page with a Content type filter.
+
 ## User Roles and Permissions
 
 The local `sous_chef` uses the Superuser role and a random password shown in the order summary; UID 1 (`superuser_1`) stays blocked.
