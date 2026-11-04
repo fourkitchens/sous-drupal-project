@@ -120,14 +120,40 @@ The Admin-only baseline runs `composer ci` with an empty scaffold and then build
 
 | Check | Evidence and release gate |
 | --- | --- |
-| Provider templates | Parse all three YAML templates and verify each generated checkout contains the selected provider's files. GitHub-hosted starter matrix [run 41533082588](https://github.com/fourkitchens/sous-drupal-project/actions/runs/41533082588) covered all four selections on an earlier candidate. |
+| Provider templates | Parse all three YAML templates and verify each generated checkout contains the selected provider's files. GitHub-hosted starter matrix [run 41533082588](https://github.com/fourkitchens/sous-drupal-project/actions/runs/41533082588) covered all four selections at `4406687`. |
 | Shared build | The local runner exercises `composer ci` for Admin-only and selected-library rows. This verifies the shared command with the generated dependencies and assets. |
-| Starter GitHub Actions | PR #132 [run 41899742070](https://github.com/fourkitchens/sous-drupal-project/actions/runs/41899742070) passed source checks. Its admin-only installation job hit the public index HTTP 404. Rerun the public matrix after packages publish. |
-| Generated GitHub Actions, GitLab CI/CD, CircleCI | Capture an actual build job in a configured generated project for each provider. The starter's GitHub-hosted matrix verifies generated files and commands. Generated provider runner provisioning, caches, and provider-specific release jobs need their own evidence. |
+| Starter GitHub Actions | PR #132 [run 41899742070](https://github.com/fourkitchens/sous-drupal-project/actions/runs/41899742070) passed source checks at `1778f31`. Its admin-only installation job hit the public index HTTP 404. Rerun the public matrix after packages publish. |
+| Generated GitHub Actions | Run `Site build` in a configured generated repository and record the job URL and revision. Available GitHub evidence is from the starter's workflow. |
+| Generated GitLab CI/CD | Run the generated `build` job in a configured GitLab project and record the pipeline URL and revision. Project access was unavailable during this check. |
+| Generated CircleCI | Run the generated `build` job in a configured CircleCI project and record the pipeline URL and revision. Project access was unavailable during this check. |
+
+Use a test branch or pull request for provider build checks. Provider runner provisioning, caches, and release jobs require evidence from the actual provider.
 
 ### Generated dependency review
 
 Run `npm audit --json` from each generated site root and from its custom theme directory. Keep the audit JSON and the matching lockfiles in the verification artifacts. Use `npm explain <package>` to trace each high and critical result through the lockfile. For each path, record where it executes in release CI, developer tooling, or generated assets. Review the actual build output or bundle inputs before classifying an advisory as shipped. Recheck the locks from the published matrix and resolve or record acceptance of remaining high and critical paths before release.
+
+All four November 4, 2026 fixture rows reported the same high and critical paths, including the two UI Kit installations. npm counts affected packages, including parents that inherit a dependency's severity.
+
+| Lockfile | High / critical | Affected path and exposure |
+| --- | --- | --- |
+| Generated project root | 1 / 0 | `semantic-release@25.0.9 → @semantic-release/npm@13.2.0 → npm@11.21.1 → node-gyp@12.4.0 → undici@6.29.0` (`node_modules/npm/node_modules/undici`). The bundled HTTP client is part of Node release and build tooling. Review the TLS validation and denial-of-service findings in the CI release environment. [TLS advisory](https://github.com/advisories/GHSA-2m5v-pch6-74hx) · [Content-encoding advisory](https://github.com/advisories/GHSA-xjj6-f33q-929c) · [Renegotiation advisory](https://github.com/advisories/GHSA-qrxm-fqhp-jwvm) |
+| Generated custom theme | 2 / 2 | `@emulsify/core@4.5.2 → @emulsify/cli@2.4.1 → simple-git@3.36.0 → @simple-git/argv-parser@1.1.1`. The high Core and CLI entries include the Git dependency path. The underlying advisories affect theme-local CLI commands that invoke Git. [Trailer configuration](https://github.com/advisories/GHSA-x6jw-m9v5-85vh) · [Editor detection](https://github.com/advisories/GHSA-v5rq-49vh-5v5c) · [Git configuration includes](https://github.com/advisories/GHSA-g4wm-2vf7-vfgr) · [Git option abbreviations](https://github.com/advisories/GHSA-858h-whjf-mvg5) |
+
+These paths run in Node tooling. The site deployment ships compiled theme assets and omits `node_modules`. The installer runs the root CLI with its `simple-git@4.0.2` override. `composer ci` installs the separate theme dependency tree, which also serves later developer tooling. The upstream CLI fix has merged and `@emulsify/cli@2.4.2` was unavailable from npm at review time. Recheck the generated theme after publication. [Emulsify CLI fix](https://github.com/emulsify-ds/emulsify-cli/pull/377)
+
+### Recorded fixture verification
+
+On November 4, 2026, the runner exported starter commit `513495a43d59c0b562132defa592e4f26a63d71a` and used packages commit `432da88e8feb76b1604ae2a73889a2da2fc01733`. All four installations passed their clean lockfile reinstall and configuration deploy after the fixture mount was removed. The lockfiles stayed byte-identical, and Drush reported an empty configuration diff.
+
+| Matrix row | Verified evidence |
+| --- | --- |
+| Admin only with GitHub template | Baseline dependencies and splits, empty scaffold `composer ci`, project-owned Sass output, backup, restore, and rebuild. |
+| Layout Builder with GitLab template | Named UI Kit installed and compiled, optional recipe integrations, and shared `composer ci`. |
+| Paragraphs with CircleCI template | UI Kit installed and compiled through its custom Git URL and ref, optional recipe integrations, shared `composer ci`, and retained MIT attribution. |
+| Admin only with Dev Tools and no CI template | Opt-in dependencies, local-only module activation and split exports, shared `composer ci`, and project-owned Sass output. |
+
+Source checks passed with Node from `.nvmrc`, Composer validation, ShellCheck 0.11.0, and YAML parsing of all three provider templates. `actionlint` was unavailable locally. The macOS fixture runs used disposable DDEV mount settings and stopped the test site before rebuild. The public Composer index still returned HTTP 404, which blocks the published installation matrix.
 
 ### Adopting 8.0 from 7.0.1
 
