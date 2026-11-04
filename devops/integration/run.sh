@@ -508,6 +508,10 @@ check_clean_deploy() {
   step deploy npm run confim -- @self
   step native-config-export ddev exec --raw sh devops/scripts/confex.sh @self
   step native-deploy ddev exec --raw sh devops/scripts/confim.sh @self
+  # CI can select its own PHP even in a configured DDEV checkout.
+  step explicit-native-php env -u IS_DDEV_PROJECT SOUS_PHP_RUNTIME=native \
+    sh devops/scripts/run-php.sh php -r 'echo getcwd(), PHP_EOL;'
+  expect_line explicit-native-php "$(pwd -P)"
   # Exclude DDEV's container placeholder to exercise a host without DDEV.
   # shellcheck disable=SC2016
   step native-php ddev exec --raw env -u IS_DDEV_PROJECT PATH=/usr/bin:/bin \

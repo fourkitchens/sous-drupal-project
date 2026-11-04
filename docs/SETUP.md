@@ -3,7 +3,7 @@
 ## Requirements
 
 Install DDEV, Docker, Git, PHP 8.4, Composer 2 and Node.js from `.nvmrc` on your computer.
-Run npm scripts from the project root; PHP, Drush and database steps use DDEV.
+Run project commands from the checkout root.
 
 ## Project setup script
 
@@ -30,19 +30,33 @@ The backup must be readable and nonempty. Gzip files are checked before the loca
 Sanitization sets passwords to `admin` and emails to `user-%uid@example.com`.
 Add local adjustments in `import-data.sh`; deployment steps belong in `hook_deploy_NAME()`.
 
+## Shared Drupal commands
+
+From a laptop with DDEV installed and `.ddev/config.yaml` present, the shared PHP launcher uses that checkout's DDEV web container. Inside the container, it runs the installed tools directly.
+
+```sh
+ddev start
+sh devops/scripts/confex.sh
+sh devops/scripts/confim.sh --uri=https://mysite.ddev.site
+# Run the export from inside the web container.
+ddev exec --raw -- sh devops/scripts/confex.sh
+```
+
+The `npm run confex` and `npm run confim` shortcuts call the same scripts. See [Deployment](DEPLOYMENT.md#build-and-deploy) for native execution in CI and on hosts.
+
 ## Add a recipe
 
 ```sh
 ddev composer require vendor/recipe
-npm run install-recipe -- vendor/recipe
-npm run confex
+sh devops/scripts/install-recipe.sh vendor/recipe
+sh devops/scripts/confex.sh
 ```
 
 Recipes apply once and unpack; review and commit their dependencies and complete configuration export.
 
 ## Local settings and Config Split
 
-Local overrides load only in DDEV; keep `settings.local.php` untracked.
+The starter loads local overrides in DDEV. Keep `settings.local.php` untracked.
 
 ```php
 if (getenv('IS_DDEV_PROJECT') === 'true') {
@@ -59,3 +73,18 @@ Config Split keeps local tools out of production; `config/local` and `config/sta
 Local settings enable the local split in DDEV; activate staging before importing configuration with `$config['config_split.config_split.staging']['status'] = TRUE;` in host settings.
 With optional Dev Tools selected, Stage File Proxy fetches missing production files locally. Set its origin only in `settings.local.php`: `$config['stage_file_proxy.settings']['origin'] = 'https://production.example.com';`.
 Use `ddev drush uli --name=sous_chef` for a local login after setup.
+
+## Adapt an existing site to Lando
+
+Add a project-owned `.lando.yml` with the `drupal11` recipe, PHP 8.4, `web` as the webroot and a compatible database such as `mariadb:10.11`. Run `lando start` and `lando composer install`. [Lando Drupal configuration](https://docs.lando.dev/plugins/drupal/config.html)
+
+Keep the DDEV settings includes scoped to DDEV. In `settings.php`, include the untracked `settings.local.php` for the Lando service as well, using a Lando-only guard such as `getenv('LANDO_INFO')`. In that local file, use the internal database connection details from `lando info` and set `$config['config_split.config_split.local']['status'] = TRUE;`. [Lando service environment](https://docs.lando.dev/config/env.html)
+
+Use `lando db-import reference/site-db.sql.gz` and `lando db-export` for Lando databases. After importing a copy, sanitize accounts with `lando drush sql:sanitize -y`. The starter installer and bundled local database scripts use DDEV. [Lando Drupal tooling](https://docs.lando.dev/plugins/drupal/tooling.html)
+
+For Lando 3, open a shell in the PHP service and run the shared command from the mounted project root. [Lando shell command](https://docs.lando.dev/cli/ssh.html)
+
+```sh
+lando ssh --service appserver
+SOUS_PHP_RUNTIME=native sh devops/scripts/confim.sh --uri=https://mysite.lndo.site
+```

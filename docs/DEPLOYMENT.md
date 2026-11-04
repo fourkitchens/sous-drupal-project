@@ -10,12 +10,12 @@ Use [Local Setup](SETUP.md) and [Build Tools](BUILD_TOOLS.md) for development.
 | Drupal / PHP | `composer.json`; DDEV PHP 8.4 |
 | Composer / Drush | Composer 2; Drush 13 |
 | DDEV / database | `.ddev/config.yaml` |
-| Node.js / npm | `.nvmrc` on the computer, CI or host; bundled npm |
+| Node.js / npm | `.nvmrc` in the asset build environment; bundled npm |
 | Emulsify dependencies | Theme manifests and lockfile |
 
 ## Build and deploy
 
-CI and hosting use PHP and Node directly. Prepare the production build and review release audits:
+Use Composer and Node in CI or a build environment to assemble the production artifact and review release audits.
 
 ```sh
 composer build-assets
@@ -28,22 +28,16 @@ npm --prefix "web/themes/custom/<theme>" audit
 Ship `vendor/`, Drupal core, extensions, libraries, custom source, configuration and shared settings.
 Include the theme's `dist/` and generated `components/` when present; omit `node_modules`, local settings, caches and backups.
 Keep secrets and uploaded/private files on the host; serve `web/` and leave local/staging Config Split overrides off in production.
-Back up the destination, deliver the build, then apply database updates and configuration:
+Back up the destination and deliver the build. Run the shared deploy script with `sh` from the project root on the Drush-enabled host or from CI with a configured remote alias.
 
 ```sh
-vendor/bin/drush deploy -y --uri=https://YOUR_SITE
-# From CI with a configured remote alias:
-vendor/bin/drush @mysite.prod deploy -y
+# On the host
+SOUS_PHP_RUNTIME=native sh devops/scripts/confim.sh --uri=https://www.example.com
+# In CI
+SOUS_PHP_RUNTIME=native sh devops/scripts/confim.sh @mysite.prod
 ```
 
-The shared configuration script supports the same deployment from CI, hosting or a laptop:
-
-```sh
-npm run confim -- --uri=https://YOUR_SITE
-npm run confim -- @mysite.prod
-```
-
-It uses DDEV in a local DDEV checkout and installed Drush on hosts and CI runners without DDEV.
+`SOUS_PHP_RUNTIME=native` uses the current environment's PHP and `vendor/bin/drush`, even when DDEV and `.ddev/config.yaml` are present. The launcher also runs tools directly when DDEV is unavailable or the command runs inside DDEV. The same override works with `sh devops/scripts/confex.sh` and `sh devops/scripts/install-recipe.sh vendor/recipe`. These PHP operations only require the installed PHP tools and `sh`.
 Add deployment steps in `hook_deploy_NAME()`; verify pages, editing, assets, queues and logs afterward. Run Drupal cron to apply scheduled workflow changes.
 Acquia aliases come from `acli remote:aliases:download`; Pantheon aliases come from `terminus aliases`.
 Configure SSH keys and alias discovery for Drush, or define other hosts in `drush/sites/*.site.yml`.

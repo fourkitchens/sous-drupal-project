@@ -3,7 +3,9 @@
 # Run sh devops/scripts/run-php.sh COMMAND [ARGS] from the project root.
 set -eu
 
-if [ "${IS_DDEV_PROJECT:-}" != true ] && [ -f .ddev/config.yaml ] &&
+# CI and hosts can choose their installed tools even in a DDEV checkout.
+if [ "${SOUS_PHP_RUNTIME:-}" != native ] && [ "${IS_DDEV_PROJECT:-}" != true ] &&
+  [ -f .ddev/config.yaml ] &&
   command -v ddev >/dev/null 2>&1; then
   # Explicit raw mode preserves PHP source and arguments without shell expansion.
   exec ddev exec --raw -- "$@"
