@@ -4,6 +4,8 @@
 set -eu
 
 sous_version='^2.0'
+# Keep one baseline list for selection, Composer and Drupal.
+baseline_recipes='sous-emulsify sous-admin sous-media sous-config-split'
 
 cat <<'MENU'
 
@@ -73,6 +75,7 @@ fi
 
 recipe_choices=$(printf '%s' "$SOUS_RECIPES" | tr ',' ' ')
 recipes=''
+# Resolve side choices in order so each recipe and its integration run once.
 set -f
 # shellcheck disable=SC2086
 for recipe in $recipe_choices; do
@@ -84,14 +87,18 @@ for recipe in $recipe_choices; do
     echo "Invalid recipe choice: $recipe" >&2
     exit 2
   fi
+  # Admin brings Workflow, and replaying Emulsify would reset the project theme.
+  case " $baseline_recipes sous-workflow $content $recipes " in
+    *" $recipe "*) continue ;;
+  esac
+  # Content recipes belong to the main course and its bundled dependencies.
+  case "$content:$recipe" in
+    sous-paragraphs:sous-paragraph-types|sous-core-layout-builder:sous-content-types|sous-*:sous-content-base) continue ;;
+  esac
   case "$recipe" in
-    sous-media|sous-config-split|sous-workflow) continue ;;
-    sous-paragraphs|sous-paragraph-types)
-      if [ "$content" != sous-paragraphs ]; then
-        echo 'Choose Paragraphs with SOUS_CONTENT before adding Paragraphs recipes.' >&2
-        exit 2
-      fi
-      continue
+    sous-paragraphs|sous-paragraph-types|sous-core-layout-builder|sous-content-types|sous-content-base)
+      printf 'Recipe %s requires a compatible main course selected with SOUS_CONTENT.\n' "$recipe" >&2
+      exit 2
       ;;
   esac
   recipes="${recipes:+$recipes }$recipe"
@@ -229,24 +236,12 @@ ddev composer config name "project/$project_name"
 # Begin the generated site with its own instructions and Git history.
 [ ! -f PROJECT-README.md ] || mv PROJECT-README.md README.md
 node -e 'const fs = require("node:fs"); fs.writeFileSync("README.md", fs.readFileSync("README.md", "utf8").replaceAll("PROJECT_NAME", process.argv[1]));' "$project_name"
-if [ "$ci" != none ]; then
-  cp -R "assets/ci/$ci/." .
-fi
-# GitLab uses its merge request template instead of GitHub's review tooling.
-if [ "$ci" = gitlab ]; then
-  mkdir -p .gitlab/merge_request_templates
-  mv .github/PULL_REQUEST_TEMPLATE.md .gitlab/merge_request_templates/Default.md
-  rm -rf .github
-fi
-rm -rf assets/ci
 [ -e .git ] || git init -b main
 
 # Renaming Composer's root package invalidates its lock hash.
 if [ -f composer.lock ]; then ddev composer update --lock --no-install --no-interaction; fi
 printf '\nStocking the pantry: installing project tools.\n\n'
 ddev composer install
-# Keep one baseline list so Composer and Drupal install the same recipes.
-baseline_recipes='sous-emulsify sous-admin sous-media sous-config-split'
 set --
 for recipe in $baseline_recipes $content $recipes; do
   set -- "$@" "fourkitchens/$recipe:$sous_version"
@@ -325,14 +320,25 @@ php_version=$(ddev drush status --field=php-version)
 node_version=$(node --version)
 local_url=$(ddev drush status --field=uri)
 orders_up=$(cat assets/installer/orders-up.txt)
+# Install CI files after site validation so a failed setup leaves the templates intact.
+if [ "$ci" != none ]; then
+  cp -R "assets/ci/$ci/." .
+fi
+# GitLab uses its merge request template instead of GitHub's review tooling.
+if [ "$ci" = gitlab ]; then
+  mkdir -p .gitlab/merge_request_templates
+  mv .github/PULL_REQUEST_TEMPLATE.md .gitlab/merge_request_templates/Default.md
+  rm -rf .github
+fi
+
 # Retire the creation hook only after installation succeeds.
 ddev composer config --unset scripts.post-create-project-cmd
-# Preserve attribution before retiring the applied recipe sources.
+# Preserve attribution after the recipes and their integrations have run.
 for notice in web/recipes/sous-*/NOTICE; do
   if [ -f "$notice" ]; then cat "$notice" >> NOTICE; fi
 done
 rm -rf web/recipes/sous-*
-rm -r devops/scripts/sous-build.sh assets/installer
+rm -r devops/scripts/sous-build.sh assets/installer assets/ci
 # Celebrate only after installation and one-time cleanup have succeeded.
 printf '%s\n\n' "$orders_up"
 

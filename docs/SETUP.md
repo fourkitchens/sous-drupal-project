@@ -25,7 +25,8 @@ npm run local-data-bak
 
 Rebuild leaves Node dependencies and assets alone; import-data only imports and sanitizes.
 The default backup is `reference/site-db.sql.gz`; `.sql` also works.
-Edit `devops/scripts/get-db.sh` to download missing backups, or configure `ddev pull`.
+The restore runs `devops/scripts/get-db.sh` only when you omit the backup path and the default file is missing. Edit that script to download the default backup, or configure `ddev pull`.
+The backup must be readable and nonempty. Gzip files are checked before the local database is replaced.
 Sanitization sets passwords to `admin` and emails to `user-%uid@example.com`.
 Add local adjustments in `import-data.sh`; deployment steps belong in `hook_deploy_NAME()`.
 

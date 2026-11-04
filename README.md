@@ -47,6 +47,8 @@ Set `SOUS_RECIPES=''` for no extras, or supply names separated by spaces or comm
 `SOUS_LIBRARY_REF` optionally selects a branch or tag; custom repositories otherwise use their default branch.
 The final order summary shows the local URL and a generated password for `sous_chef`; UID 1 stays blocked.
 
+If a fresh install fails partway through, keep the partial directory for troubleshooting and fix the reported error. Run `composer create-project` again in a fresh directory with a different name so DDEV creates a separate database. To reuse the original name, remove the failed DDEV project and move the partial directory aside first. The installer starts from a fresh database and theme scaffold on each run.
+
 # Recipe Dependency Management
 
 [Sous packages](https://github.com/fourkitchens/sous-drupal-packages) publish independent Composer recipes.
