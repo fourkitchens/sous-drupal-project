@@ -66,13 +66,10 @@ The installer creates `AGENTS.md` and `docs/agents/workflow-facts.md` from `asse
 ## CI and releases
 
 PRs run admin-only with GitHub CI. Main pushes, nightly runs at 06:17 UTC
-and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. The admin-only/no CI case also selects Dev Tools. Layout Builder selects UI Kit; Paragraphs tests a custom Git URL.
+and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. The admin-only/no CI case also selects Dev Tools. Layout Builder selects UI Kit by name. Paragraphs selects the same library by Git URL and ref.
 Manual `packages_ref` selects a full reviewed packages commit.
 Keep action SHAs pinned; checks read only, publishing writes after checks pass.
 
-Publish packages first, then verify all starter options against the published index.
-Keep tags, ZIPs and index metadata immutable; resolve production locks without local path repositories.
-Recipe updates do not replay configuration; describe fresh installs and existing-site adoption separately.
 Release notes live on [GitHub Releases](https://github.com/fourkitchens/sous-drupal-project/releases).
 
 Conventional Commits select versions: `fix:`/`perf:` patch, `feat:` minor, `!` or
@@ -85,5 +82,69 @@ GITHUB_TOKEN='<token>' npm run release:dry-run -- \
 ```
 
 Only canonical `main` publishes after checks and without a packages override.
-Review advisories, dependency audits, compatibility and upstream fixes before release.
-Remove workarounds once published fixes pass fresh lint and builds; track adoption work in issues and PRs.
+
+## Sous 8.0.0 release checklist
+
+Use [starter PR #132](https://github.com/fourkitchens/sous-drupal-project/pull/132) and [packages PR #2](https://github.com/fourkitchens/sous-drupal-packages/pull/2) to record the starter and companion commit IDs. Treat the PR description as historical where it lists Devel, Stage File Proxy or Masquerade as baseline. The final packages put all three in the optional local Dev Tools split.
+
+- [ ] Run the [source checks](#verify-changes) on the final starter candidate. Parse all three generated provider YAML templates. Record any validator that was unavailable.
+- [ ] Publish the companion `2.0.0` release, recipe ZIPs, and [public Composer index](https://fourkitchens.github.io/sous-drupal-packages/packages.json) first. Verify the index responds successfully and lists the `2.0.0` metadata and downloadable ZIPs for the baseline, composition, and optional recipes. Keep the published tags, archives, and index entries immutable.
+- [ ] Run the final starter commit against the public index with the matrix below. Leave `--packages` off and omit the workflow's `packages_ref`. For a 404, run the same matrix with `--packages` pointing to the reviewed companion checkout. Keep the public matrix open as a release blocker until it passes.
+- [ ] Check the empty scaffold, its project-owned asset build, and the installed library builds. Retain the runner results for retirement of recipe sources and setup metadata, the lockfile reinstall, and the clean deploy. Review the generated npm lockfiles as described below.
+- [ ] Record a build job URL and tested revision for each generated provider pipeline. Record local template checks and shared build commands separately.
+- [ ] Prepare the 7.x adoption notes below. After the release gates pass, merge PR #132 with its breaking `feat!:` title. Verify canonical `main` publishes `8.0.0`. Merging, tagging, and publishing are separate release actions.
+
+### Final installation matrix
+
+Run these from the starter root with the final candidate checked out. For local fixture coverage, append `--packages "$packages"` to each command, with `packages` set to the absolute path of the reviewed companion checkout. Keep each row's artifacts separate.
+
+```sh
+sides=sous-events,sous-news-post,sous-profile
+ui_kit=https://github.com/emulsify-ds/emulsify-ui-kit.git
+ui_kit_ref=codex/fix-drupal-theme-lint
+
+bash devops/integration/run.sh --option admin-only --ci github \
+  --library none --artifacts /tmp/sous-8-admin
+bash devops/integration/run.sh --option layout-builder --ci gitlab \
+  --recipes "$sides" --library ui-kit --artifacts /tmp/sous-8-layout
+bash devops/integration/run.sh --option paragraphs --ci circleci \
+  --recipes "$sides" --library "$ui_kit" --library-ref "$ui_kit_ref" \
+  --artifacts /tmp/sous-8-paragraphs
+bash devops/integration/run.sh --option admin-only --ci none \
+  --recipes "$sides,sous-dev-tools" --library none --artifacts /tmp/sous-8-dev-tools
+```
+
+The Admin-only baseline runs `composer ci` with an empty scaffold and then builds a disposable project-owned Sass entrypoint. The Dev Tools row verifies the opt-in packages and local split. Layout Builder tests named UI Kit. Paragraphs tests the custom Git URL and ref route with the same UI Kit repository. Keep the named and URL cases until a distinct, compatible fixture is reviewed.
+
+### Provider evidence
+
+| Check | Evidence and release gate |
+| --- | --- |
+| Provider templates | Parse all three YAML templates and verify each generated checkout contains the selected provider's files. GitHub-hosted starter matrix [run 41533082588](https://github.com/fourkitchens/sous-drupal-project/actions/runs/41533082588) covered all four selections on an earlier candidate. |
+| Shared build | The local runner exercises `composer ci` for Admin-only and selected-library rows. This verifies the shared command with the generated dependencies and assets. |
+| Starter GitHub Actions | PR #132 [run 41899742070](https://github.com/fourkitchens/sous-drupal-project/actions/runs/41899742070) passed source checks. Its admin-only installation job hit the public index HTTP 404. Rerun the public matrix after packages publish. |
+| Generated GitHub Actions, GitLab CI/CD, CircleCI | Capture an actual build job in a configured generated project for each provider. The starter's GitHub-hosted matrix verifies generated files and commands. Generated provider runner provisioning, caches, and provider-specific release jobs need their own evidence. |
+
+### Generated dependency review
+
+Run `npm audit --json` from each generated site root and from its custom theme directory. Keep the audit JSON and the matching lockfiles in the verification artifacts. Use `npm explain <package>` to trace each high and critical result through the lockfile. For each path, record where it executes in release CI, developer tooling, or generated assets. Review the actual build output or bundle inputs before classifying an advisory as shipped. Recheck the locks from the published matrix and resolve or record acceptance of remaining high and critical paths before release.
+
+### Adopting 8.0 from 7.0.1
+
+| 7.0.1 main course | 8.0 equivalent |
+| --- | --- |
+| `0` Default Sous with Media and basic content types | Choose the content composition explicitly. `0` now selects Admin only. |
+| `1` Layout Builder | `layout-builder` (`2`) |
+| `2` Paragraphs | `paragraphs` (`1`) |
+| `3` Just the admin | `admin-only` (`0`) |
+
+Use named choices for automation. Optional menu numbers follow package metadata and can change as packages are added.
+
+```sh
+SOUS_CONTENT=paragraphs SOUS_RECIPES=sous-events SOUS_CI=github SOUS_LIBRARY=none \
+  composer create-project fourkitchens/sous-drupal-project:^8.0 my-site
+```
+
+- Fresh installs use `composer create-project`. Use `npm run setup -- 'reference/site-db.sql.gz'` for an existing clone with a backup. Setup builds available theme assets before restoring the database. `npm run rebuild -- 'reference/site-db.sql.gz'` restores and deploys without rebuilding Node assets. `npm run import-data` imports and sanitizes the local database.
+- Replace the old DDEV recipe command with the [recipe workflow](../SETUP.md#add-a-recipe). Composer unpacks dependencies when requiring the package, then the shared recipe script applies its source once. Keep the existing site's UUID, export, content, and accounts. Treat content model changes as site migrations.
+- Configuration import now runs `drush deploy -y`, including update and deploy hooks, in place of the old manual update and partial/full import sequence. See [Deployment](../DEPLOYMENT.md#build-and-deploy) for host and CI aliases, URI selection, and native tools.
