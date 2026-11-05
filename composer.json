@@ -98,13 +98,6 @@
             "locations": {
                 "web-root": "web/"
             },
-            "source": "https://git.drupalcode.org/project/drupal/raw/{version}/{path}",
-            "excludes": [
-                ".eslintrc"
-            ],
-            "includes": [
-                "sites/default/example.settings.my.php"
-            ],
             "file-mapping": {
                 "[web-root]/sites/example.settings.local.php": {
                     "append": "assets/scaffold/files/additions-example.settings.local.txt"
