@@ -2,6 +2,7 @@
 
 $option = getenv("SOUS_SMOKE_OPTION");
 $recipes = preg_split('/[\s,]+/', getenv("SOUS_SMOKE_RECIPES"), -1, PREG_SPLIT_NO_EMPTY);
+$theme = getenv("SOUS_SMOKE_THEME");
 $page = \Drupal::entityTypeManager()->getStorage("node_type")->load("page");
 $display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.page.default");
 $uid1 = \Drupal\user\Entity\User::load(1);
@@ -12,7 +13,7 @@ $checks = [
   "Blocked UID 1" => $uid1->isBlocked() && $uid1->getAccountName() === "superuser_1",
   "Chef login" => $chef && $chef->isActive() && $chef->hasRole("superuser") && \Drupal::service("password")->check(getenv("SOUS_SMOKE_PASSWORD"), $chef->getPassword()),
   // The generated project-named theme is the frontend default.
-  "Custom theme" => \Drupal::config("system.theme")->get("default") === getenv("SOUS_SMOKE_THEME"),
+  "Custom theme" => \Drupal::config("system.theme")->get("default") === $theme,
   // Page is included in every composition except admin-only.
   "Page" => (bool) $page === ($option !== "admin-only"),
   // Paragraphs is enabled only for its content composition.
@@ -23,9 +24,17 @@ $checks = [
   // Media and Config Split are applied to every main course.
   "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split"),
   "Split definitions" => \Drupal::service("config.storage")->exists("config_split.config_split.local") && \Drupal::service("config.storage")->exists("config_split.config_split.staging"),
-  "Media types" => count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video"])) === 3,
+  "Media types" => count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video", "uploaded_video"])) === 4,
   "Site Editor" => $editor?->label() === "Site Editor" && !$editor->isAdmin() && !$editor->hasPermission("administer site configuration"),
 ];
+$breakpoint_manager = \Drupal::service("breakpoint.manager");
+$base_breakpoints = $breakpoint_manager->getBreakpointsByGroup("emulsify");
+$theme_breakpoints = $breakpoint_manager->getBreakpointsByGroup($theme);
+foreach (["xsmall", "small", "medium"] as $size) {
+  $base_breakpoint = $base_breakpoints["emulsify.$size"] ?? NULL;
+  $theme_breakpoint = $theme_breakpoints["$theme.$size"] ?? NULL;
+  $checks["Teaser breakpoint: $size"] = $base_breakpoint && $theme_breakpoint && $base_breakpoint->getMediaQuery() === $theme_breakpoint->getMediaQuery();
+}
 // DDEV activates Local without persisting either split as enabled.
 $baseline = ["field_ui", "syslog", "views_ui"];
 $devTools = ["devel", "masquerade", "stage_file_proxy"];
@@ -72,6 +81,8 @@ sort($moderated_types);
 sort($installed_types);
 $checks["Moderated content types"] = $moderated_types === $installed_types;
 foreach ($node_types as $type => $node_type) {
+  $teaser = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.$type.teaser");
+  $checks["Landscape teaser: $type"] = $teaser?->getRenderer("field_teaser_image")?->getSetting("view_mode") === "content_teaser_landscape";
   $checks["Scheduling settings: $type"] = $node_type->getThirdPartySetting("scheduler", "publish_enable") && $node_type->getThirdPartySetting("scheduler", "unpublish_enable") && $node_type->getThirdPartySetting("scheduler", "fields_display_mode") === "vertical_tab";
   $form = \Drupal::entityTypeManager()->getStorage("entity_form_display")->load("node.$type.default");
   $checks["New content draft: $type"] = \Drupal\node\Entity\Node::create(["type" => $type])->moderation_state->value === "draft";

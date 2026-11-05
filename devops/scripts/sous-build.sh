@@ -6,7 +6,6 @@ set -eu
 sous_version='^2.0'
 # Keep one baseline list for selection, Composer and Drupal.
 baseline_recipes='sous-emulsify sous-admin sous-media sous-config-split sous-dev-tools sous-seo'
-included='Emulsify, Gin administration, Media, Config Split, publishing workflow, Dev Tools and SEO'
 
 # Check the required recipes and prepare the sides menu with one fetch.
 preflight_index() {
@@ -244,6 +243,9 @@ box() {
 
 kitchen_title='                  S O U S   K I T C H E N'
 ticket_rule='  --------------------------------------------------------'
+included=$(printf '    + %s\n' 'Emulsify' 'Gin administration' 'Media' 'Config Split' \
+  'publishing workflow' 'Dev Tools' 'SEO')
+prep_included=$(printf '%s\n' "$included" | sed 's/^/  /')
 sides='    None'
 if [ -n "$recipes" ]; then
   sides=$(for recipe in $recipes; do printf '    + %s\n' "$recipe"; done)
@@ -259,7 +261,7 @@ printf '\n'
   printf '%s\n\n  01  MAIN COURSE\n      %s\n\n  02  ON THE SIDE\n%s\n\n  03  SERVICE\n      %s\n\n  04  DESSERT\n      %s\n' \
     "$ticket_rule" "$content_label" "$prep_sides" "$ci_label" "$library_label"
   if [ -n "$library_repository" ]; then printf '      Ref: %s\n' "${library_ref:-repository default branch}"; fi
-  printf "\n  PANTRY STAPLES (INCLUDED)\n      %s\n\n%s\n       [x] RECEIVED       [ ] COOKING       [ ] READY\n\n                Aprons on. Let's get cooking!\n\n" "$included" "$ticket_rule"
+  printf "\n  PANTRY STAPLES (INCLUDED)\n%s\n\n%s\n       [x] RECEIVED       [ ] COOKING       [ ] READY\n\n                Aprons on. Let's get cooking!\n\n" "$prep_included" "$ticket_rule"
 } | box
 
 # Prevent nested tools from querying the terminal and leaking its replies.
@@ -418,10 +420,9 @@ printf '%s\n\n' "$orders_up"
   printf '%s\n\n' "$ticket_rule"
   printf '  %-12s %s\n' \
     'Project' "$project_name" 'Main course' "$content_label" \
-    'Service' "$ci_label" 'Dessert' "$library_label" \
-    'Included' "$included"
+    'Service' "$ci_label" 'Dessert' "$library_label"
   if [ -n "$library_repository" ]; then printf '  %-12s %s\n' 'Library ref' "$library_ref"; fi
-  printf '\n  ON THE SIDE\n%s\n\n  THE PREP SHEET\n\n' "$sides"
+  printf '\n  PANTRY STAPLES (INCLUDED)\n%s\n\n  ON THE SIDE\n%s\n\n  THE PREP SHEET\n\n' "$included" "$sides"
   printf '  %-12s %s\n' \
     'Drupal' "$drupal_version" 'PHP' "$php_version" \
     'Node.js' "$node_version" 'Theme' "$theme"

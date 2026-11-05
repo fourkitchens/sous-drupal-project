@@ -344,6 +344,21 @@ check_component_library() {
       exit(prep != 1 || pickup != 1)
     }
   ' "$artifacts/create-project.log"
+  # Both receipts list each included package on its own line.
+  # shellcheck disable=SC2016
+  step pantry-order awk '
+    BEGIN { count = split("Emulsify,Gin administration,Media,Config Split,publishing workflow,Dev Tools,SEO", labels, ",") }
+    $1 == "|" {
+      line = $0
+      sub(/^ *[|] */, "", line)
+      sub(/ *[|] *$/, "", line)
+      if (line == "PANTRY STAPLES (INCLUDED)") { pantry = 1; row = 0; next }
+      if (!pantry) next
+      if (line == "" && row == count) { done++; pantry = 0; next }
+      if (line != "+ " labels[++row]) exit 1
+    }
+    END { if (done != 2) exit 1 }
+  ' "$artifacts/create-project.log"
 }
 
 # Check that sites omit maintainer tooling and one-time theme setup files.

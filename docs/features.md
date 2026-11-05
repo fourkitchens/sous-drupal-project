@@ -10,7 +10,8 @@ Emulsify supplies the project theme; optionally install and compile a component 
 
 Review available types under Drupal's Structure → Content types screen.
 Page and Frontpage share titles, metadata, teaser fields, URL aliases and tags.
-Each has its own content browser display in the shared Page Browsers View.
+Each has its own content browser display in the shared Pages/Frontpage View.
+Packaged content types provide Full, Teaser and Admin Preview displays. The content browsers use Admin Preview.
 Content starts in Draft and can become Published or Archived; the sidebar schedules workflow changes through Drupal cron.
 Layout Paragraphs has no Body field; both component setups offer text/media, Accordion, Tabs, Quote, Embed and Table.
 Layout Paragraphs adds a field-free one–four column Layout and a library picker.
@@ -19,7 +20,8 @@ Navigation requires the Layout Builder module; content layouts are enabled only 
 
 ## Media
 
-Every setup includes File, Image and Video media types. Upload files and images through Drupal's Media Library form. Image editing includes Focal Point.
+Every setup includes File, Image, Video and Uploaded Video media types. Use Uploaded Video for approved MP4 or WebM uploads and Video for hosted video.
+Image editing includes Focal Point. Teasers use the landscape responsive image style, with portrait and square styles also available.
 
 ## Optional content types
 
