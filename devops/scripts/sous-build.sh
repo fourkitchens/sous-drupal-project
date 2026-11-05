@@ -369,6 +369,14 @@ fs.writeFileSync('AGENTS.md', fs.readFileSync('assets/installer/site-agents.md',
   .replaceAll('PROJECT_THEME', theme));
 fs.copyFileSync('assets/installer/workflow-facts.md', 'docs/agents/workflow-facts.md');
 
+// Group root and theme npm updates together.
+const dependabot = '.github/dependabot.yml';
+const config = fs.readFileSync(dependabot, 'utf8');
+fs.writeFileSync(dependabot, config.replace(
+  '    directories: [/]',
+  `    directories: [/, /web/themes/custom/${theme}]`
+));
+
 // The archive exclusion applies to the starter's agent brief.
 const attributes = fs.readFileSync('.gitattributes', 'utf8');
 fs.writeFileSync('.gitattributes', attributes.replace('/AGENTS.md export-ignore\n', ''));

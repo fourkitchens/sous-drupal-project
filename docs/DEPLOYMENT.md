@@ -44,6 +44,17 @@ Configure SSH keys and alias discovery for Drush, or define other hosts in `drus
 
 ## Update dependencies and configuration
 
+On GitHub, Dependabot checks GitHub Actions, npm and Composer every week.
+It groups minor and patch updates by ecosystem, with root and custom theme
+dependencies in the same npm group and Drupal core packages in their own group.
+Other major updates open individual pull requests. Dependabot skips Drupal core
+major updates so you can handle them as upgrade projects. Composer uses
+`increase-if-necessary` so compatible updates leave `composer.json` constraints alone.
+
+Remove `.github/dependabot.yml` from the default branch to stop scheduled version
+updates, or set `open-pull-requests-limit: 0` on an ecosystem to stop its updates.
+GitLab does not use this file.
+
 Review release notes on a branch and test with a database copy:
 
 ```sh
