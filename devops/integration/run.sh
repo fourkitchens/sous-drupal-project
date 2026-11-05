@@ -165,6 +165,7 @@ prepare_workspace() {
   project_name=$(printf 'site-smoke-%s' "${work_dir##*.}" | tr '[:upper:]' '[:lower:]')
   site_dir="$work_dir/$project_name"
   result_file="$artifacts/result.json"
+  checks_dir=.sous-smoke-checks
 
   export HUSKY=0 COMPOSER_NO_INTERACTION=1 SOUS_CONTENT="$option"
   export SOUS_RECIPES="$recipes" SOUS_CI="$ci"
@@ -188,6 +189,7 @@ finish() {
     chmod -R u+w "$work_dir"
     rm -rf "$work_dir" || exit_code=1
   else
+    rm -rf "${site_dir:?}/${checks_dir:?}" "${work_dir:?}/template/${checks_dir:?}" || exit_code=1
     echo "Keeping $site_dir"
   fi
 
@@ -259,19 +261,7 @@ create_site() {
 
 # Check that a stray local settings file cannot enable development settings on a host.
 check_host_settings() {
-  local settings_check
-  settings_check=$(cat <<'PHP'
-$app_root = getcwd() . "/web";
-$site_path = "sites/default";
-define("DRUPAL_ROOT", $app_root);
-include $app_root . "/" . $site_path . "/settings.php";
-if (($settings["rebuild_access"] ?? FALSE) === TRUE) {
-  throw new \RuntimeException("Local development settings loaded outside DDEV.");
-}
-echo "Local development settings stay in DDEV.\n";
-PHP
-  )
-  step host-settings ddev exec --raw env -u IS_DDEV_PROJECT php -r "$settings_check"
+  step host-settings ddev exec --raw env -u IS_DDEV_PROJECT php "/var/www/html/$checks_dir/host-settings.php"
 }
 
 # Check Drupal bootstrap and the public routes for the selected recipes.
@@ -298,177 +288,13 @@ check_site_responds() {
 
 # Check content, administrator accounts and the default custom theme in Drupal.
 check_composition() {
-  local composition_checks
   local chef_password
   local theme
   chef_password=$(awk '$1 == "|" && $2 == "Password" {print $3}' "$artifacts/create-project.log")
   theme=$(printf '%s' "$project_name" | tr -d '-')
-  composition_checks=$(cat <<'PHP'
-$option = getenv("SOUS_SMOKE_OPTION");
-$recipes = preg_split('/[\s,]+/', getenv("SOUS_SMOKE_RECIPES"), -1, PREG_SPLIT_NO_EMPTY);
-$page = \Drupal::entityTypeManager()->getStorage("node_type")->load("page");
-$display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.page.default");
-$uid1 = \Drupal\user\Entity\User::load(1);
-$chef = user_load_by_name("sous_chef");
-$checks = [
-  // UID 1 stays blocked while the separate chef account can sign in as Superuser.
-  "Blocked UID 1" => $uid1->isBlocked() && $uid1->getAccountName() === "superuser_1",
-  "Chef login" => $chef && $chef->isActive() && $chef->hasRole("superuser") && \Drupal::service("password")->check(getenv("SOUS_SMOKE_PASSWORD"), $chef->getPassword()),
-  // The generated project-named theme is the frontend default.
-  "Custom theme" => \Drupal::config("system.theme")->get("default") === getenv("SOUS_SMOKE_THEME"),
-  // Page is included in every composition except admin-only.
-  "Page" => (bool) $page === ($option !== "admin-only"),
-  // Paragraphs is enabled only for its content composition.
-  "Paragraphs" => \Drupal::moduleHandler()->moduleExists("paragraphs") === ($option === "paragraphs"),
-  "Paragraph types" => \Drupal::service("config.storage")->exists("paragraphs.paragraphs_type.text") === ($option === "paragraphs"),
-  // Layout Builder is enabled on the Page display only when selected.
-  "Layout Builder" => (bool) $display?->getThirdPartySetting("layout_builder", "enabled", FALSE) === ($option === "layout-builder"),
-  // Media and Config Split are applied to every main course.
-  "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split"),
-  "Split definitions" => \Drupal::service("config.storage")->exists("config_split.config_split.local") && \Drupal::service("config.storage")->exists("config_split.config_split.staging"),
-  "Media types" => count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video"])) === 3,
-];
-// DDEV activates Local without persisting either split as enabled.
-$baseline = ["field_ui", "syslog", "views_ui"];
-$optional = ["devel", "masquerade", "stage_file_proxy"];
-$devTools = in_array("sous-dev-tools", $recipes, TRUE);
-$sync = \Drupal::service("config.storage.sync");
-$export = $sync->read("core.extension");
-foreach (["local", "staging"] as $split) {
-  $name = "config_split.config_split.$split";
-  $raw = \Drupal::service("config.storage")->read($name);
-  $exported = $sync->read($name);
-  $local = $split === "local";
-  $expected = $local && $devTools ? array_merge($baseline, $optional) : $baseline;
-  $expected = array_fill_keys($expected, 0);
-  ksort($expected);
-  ksort($raw["module"]);
-  ksort($exported["module"]);
-  $checks["Split module lists: $split"] = $raw["module"] === $expected && $exported["module"] === $expected;
-  $checks["Split activation: $split"] = $raw["status"] === FALSE && $exported["status"] === FALSE && \Drupal::config($name)->get("status") === $local;
-  $splitStorage = new \Drupal\Core\Config\FileStorage(DRUPAL_ROOT . "/../config/$split");
-  $checks["Syslog defaults: $split"] = $splitStorage->exists("syslog.settings");
-  foreach ($optional as $module) {
-    $checks["Split defaults: $split/$module"] = $splitStorage->exists("$module.settings") === ($local && $devTools);
-  }
-}
-foreach (array_merge($baseline, $optional) as $module) {
-  $enabled = in_array($module, $baseline, TRUE) || $devTools;
-  $checks["Local tools: $module"] = \Drupal::moduleHandler()->moduleExists($module) === $enabled && !isset($export["module"][$module]);
-}
-$checks["DropzoneJS module absent"] = !\Drupal::moduleHandler()->moduleExists("dropzonejs");
-$checks["Nonbreaking-space filter"] = \Drupal::moduleHandler()->moduleExists("no_nbsp");
-// Every installed content type shares the publishing workflow and scheduling sidebar.
-$workflow = \Drupal\workflows\Entity\Workflow::load("editorial");
-$workflow_type = $workflow->getTypePlugin();
-$checks["Editorial states"] = array_map(static fn($state) => $state->label(), $workflow_type->getStates()) === ["draft" => "Draft", "published" => "Published", "archived" => "Archived"];
-$checks["Editorial default"] = $workflow->get("type_settings")["default_moderation_state"] === "draft";
-foreach (["workflows", "content_moderation", "scheduler", "scheduler_content_moderation_integration"] as $module) {
-  $checks["Publishing module: $module"] = \Drupal::moduleHandler()->moduleExists($module);
-}
-$node_types = \Drupal::entityTypeManager()->getStorage("node_type")->loadMultiple();
-$moderated_types = $workflow_type->getBundlesForEntityType("node");
-$installed_types = array_keys($node_types);
-sort($moderated_types);
-sort($installed_types);
-$checks["Moderated content types"] = $moderated_types === $installed_types;
-foreach ($node_types as $type => $node_type) {
-  $checks["Scheduling settings: $type"] = $node_type->getThirdPartySetting("scheduler", "publish_enable") && $node_type->getThirdPartySetting("scheduler", "unpublish_enable") && $node_type->getThirdPartySetting("scheduler", "fields_display_mode") === "vertical_tab";
-  $form = \Drupal::entityTypeManager()->getStorage("entity_form_display")->load("node.$type.default");
-  $checks["New content draft: $type"] = \Drupal\node\Entity\Node::create(["type" => $type])->moderation_state->value === "draft";
-  $checks["Published on hidden: $type"] = $form->getComponent("published_at") === NULL;
-  $checks["Metadata sidebar: $type"] = $form->getRenderer("field_metadata")->getPluginId() === "metatag_firehose" && $form->getRenderer("field_metadata")->getSetting("sidebar");
-  if (in_array($type, ["event", "news_post"], TRUE)) {
-    $checks["Menu settings: $type"] = $node_type->getThirdPartySetting("menu_ui", "available_menus") === [];
-    $taxonomy_field = $type === "event" ? "field_event_type" : "field_news_categories";
-    $groups = $form->getThirdPartySettings("field_group");
-    $checks["Organization tab: $type"] = $groups["group_organization"]["children"] === [$taxonomy_field] && !in_array($taxonomy_field, $groups["group_content"]["children"], TRUE);
-  }
-  foreach (["moderation_state" => "moderation_state_default", "publish_on" => "datetime_timestamp_no_default", "unpublish_on" => "datetime_timestamp_no_default", "publish_state" => "scheduler_moderation", "unpublish_state" => "scheduler_moderation"] as $field => $widget) {
-    $checks["Scheduling widget: $type.$field"] = $form->getRenderer($field)->getPluginId() === $widget;
-  }
-}
-$events = in_array("sous-events", $recipes, TRUE);
-$checks["Optional Events"] = (bool) \Drupal::entityTypeManager()->getStorage("node_type")->load("event") === $events;
-if ($events) {
-  // Events uses the selected composition without bringing in another one.
-  $event_display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.event.default");
-  $checks["Event layouts"] = (bool) $event_display->getThirdPartySetting("layout_builder", "enabled", FALSE) === ($option === "layout-builder");
-  $event_content = \Drupal\field\Entity\FieldConfig::loadByName("node", "event", "field_content");
-  $checks["Event paragraphs"] = (bool) $event_content === ($option === "paragraphs");
-  $checks["Event dates"] = \Drupal::moduleHandler()->moduleExists("smart_date_recur");
-  $event_view = \Drupal\views\Entity\View::load("events");
-  $checks["Event embeds"] = isset($event_view->get("display")["embed_upcoming"], $event_view->get("display")["embed_past"]);
-}
-$news = in_array("sous-news-post", $recipes, TRUE);
-$checks["Optional News"] = (bool) \Drupal::entityTypeManager()->getStorage("node_type")->load("news_post") === $news;
-if ($news) {
-  // News follows the same editor choice while keeping its own fields and listing.
-  $news_display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.news_post.default");
-  $checks["News layouts"] = (bool) $news_display->getThirdPartySetting("layout_builder", "enabled", FALSE) === ($option === "layout-builder");
-  $news_content = \Drupal\field\Entity\FieldConfig::loadByName("node", "news_post", "field_content");
-  $checks["News paragraphs"] = (bool) $news_content === ($option === "paragraphs");
-  $news_view = \Drupal\views\Entity\View::load("news");
-  $checks["Recent News embed"] = isset($news_view->get("display")["embed_recent"]);
-}
-$profile = in_array("sous-profile", $recipes, TRUE);
-$checks["Optional Profile"] = (bool) \Drupal::entityTypeManager()->getStorage("node_type")->load("profile") === $profile;
-if ($profile) {
-  // Use the real form and save hooks to verify the generated name and hidden title.
-  $account_switcher = \Drupal::service("account_switcher");
-  $account_switcher->switchTo($chef);
-  $person = \Drupal\node\Entity\Node::create(["type" => "profile", "field_first_name" => "Ada", "field_last_name" => "Lovelace"]);
-  try {
-    $profile_form = \Drupal::service("entity.form_builder")->getForm($person);
-    $checks["Profile hidden title"] = $profile_form["title"]["widget"][0]["value"]["#type"] === "hidden" && $profile_form["title"]["widget"][0]["value"]["#required"] === FALSE;
-    $checks["Profile names required"] = $person->getFieldDefinition("field_first_name")->isRequired() && $person->getFieldDefinition("field_last_name")->isRequired();
-    $person->save();
-    $checks["Profile automatic title"] = $person->label() === "Ada Lovelace";
-    $person->set("field_last_name", "Byron")->save();
-    $checks["Profile title updates"] = $person->label() === "Ada Byron";
-    $profile_form_display = \Drupal::entityTypeManager()->getStorage("entity_form_display")->load("node.profile.default");
-    $checks["Profile image"] = $person->getFieldDefinition("field_image")->getFieldStorageDefinition()->getCardinality() === 1 && $profile_form_display->getRenderer("field_image")->getPluginId() === "media_library_widget";
-    $checks["Profile Bio"] = $person->getFieldDefinition("field_description")->getType() === "text_long" && $person->getFieldDefinition("field_description")->getSetting("allowed_formats") === ["basic_html"];
-    $person->set("field_teaser_text", "Profile smoke teaser")->set("moderation_state", "published")->save();
-    $profile_view = \Drupal\views\Views::getView("profiles");
-    $checks["Profiles embed display"] = $profile_view->setDisplay("embed_profiles") && $profile_view->display_handler->getPluginId() === "embed";
-    $profile_view->setExposedInput(["profile_search" => "Byron"]);
-    $profile_view->execute();
-    $checks["Profiles searchable embed"] = count($profile_view->result) === 1 && (int) $profile_view->result[0]->_entity->id() === (int) $person->id();
-    $profile_output = $profile_view->render();
-    $checks["Profiles teaser rendering"] = str_contains((string) \Drupal::service("renderer")->renderInIsolation($profile_output), "Profile smoke teaser");
-  }
-  finally {
-    if (!$person->isNew()) {
-      $person->delete();
-    }
-    $account_switcher->switchBack();
-  }
-}
-foreach ([
-  "Alerts" => ["sous-alerts", "sous_sitewide_alert", "content_top", ["sitewide_alert", "sitewide_alert_block"]],
-  "Search" => ["sous-search", "sous_search_form", "header", ["search_api", "search_api_db", "facets", "facets_exposed_filters", "better_exposed_filters"]],
-] as $name => [$recipe, $block_id, $region, $modules]) {
-  $selected = in_array($recipe, $recipes, TRUE);
-  $block = \Drupal\block\Entity\Block::load($block_id);
-  $checks["Optional $name block"] = $selected
-    ? $block && $block->status() && $block->getTheme() === getenv("SOUS_SMOKE_THEME") && $block->getRegion() === $region
-    : !$block;
-  foreach ($modules as $module) {
-    $checks["Optional $name module: $module"] = \Drupal::moduleHandler()->moduleExists($module) === $selected;
-  }
-}
-foreach ($checks as $name => $passed) {
-  if (!$passed) {
-    throw new \RuntimeException("Unexpected composition: $name");
-  }
-}
-echo "Selected composition matches.\n";
-PHP
-  )
   step composition ddev exec --raw env SOUS_SMOKE_OPTION="$option" \
     SOUS_SMOKE_RECIPES="$recipes" SOUS_SMOKE_THEME="$theme" \
-    SOUS_SMOKE_PASSWORD="$chef_password" vendor/bin/drush php:eval "$composition_checks"
+    SOUS_SMOKE_PASSWORD="$chef_password" vendor/bin/drush php:script "/var/www/html/$checks_dir/composition.php"
 }
 
 # Load chosen libraries through the real CLI and require actual compiled output.
@@ -726,10 +552,13 @@ main() {
   if [ -n "$packages" ]; then
     use_local_packages
   fi
+  # Let Composer copy the checks into the site before DDEV starts syncing it.
+  step copy-checks cp -R "$source_root/devops/integration/checks" "$work_dir/template/$checks_dir"
   create_site
   check_host_settings
   check_site_responds
   check_composition
+  step remove-checks rm -r "$checks_dir" "$work_dir/template/$checks_dir"
   check_component_library
   check_product_files_absent
   check_agent_guidance
