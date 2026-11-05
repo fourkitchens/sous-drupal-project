@@ -7,6 +7,60 @@ sous_version='^2.0'
 # Keep one baseline list for selection, Composer and Drupal.
 baseline_recipes='sous-emulsify sous-admin sous-media sous-config-split'
 
+# Check the required recipes and prepare the sides menu with one fetch.
+preflight_index() {
+  # shellcheck disable=SC2016
+  php -r '
+    [, $url, $constraint, $required, $preset] = $argv;
+    $major = (int) ltrim($constraint, "^");
+    $context = stream_context_create(["http" => ["timeout" => 10]]);
+    $json = @file_get_contents($url, FALSE, $context);
+    if ($json === FALSE) {
+      echo "The index is unreachable.";
+      exit(1);
+    }
+    $index = json_decode($json, TRUE);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+      echo "The index is not JSON.";
+      exit(1);
+    }
+    $packages = $index["packages"] ?? [];
+    $matching_release = fn($metadata, $version) =>
+      is_array($metadata) && preg_match("/^{$major}[.][0-9]+[.][0-9]+$/D", (string) $version);
+    foreach (explode(" ", $required) as $recipe) {
+      $name = "fourkitchens/$recipe";
+      $versions = $packages[$name] ?? NULL;
+      if ($versions === NULL) {
+        echo "Missing package $name.";
+        exit(1);
+      }
+      if (!is_array($versions) || !array_filter($versions, $matching_release, ARRAY_FILTER_USE_BOTH)) {
+        echo "Missing a major $major release for $name.";
+        exit(1);
+      }
+    }
+    if ($preset === "x") { exit; }
+    ksort($packages);
+    foreach ($packages as $name => $versions) {
+      if (!is_array($versions)) { continue; }
+      $versions = array_filter($versions, fn($version) => (int) $version === $major, ARRAY_FILTER_USE_KEY);
+      uksort($versions, "version_compare");
+      $metadata = end($versions);
+      if (($metadata["extra"]["sous"]["menu"] ?? FALSE) === TRUE) {
+        echo substr($name, strlen("fourkitchens/")), "\t", $metadata["description"], "\n";
+      }
+    }
+  ' "$sous_index" "$sous_version" "$baseline_recipes sous-paragraphs sous-core-layout-builder" "${SOUS_RECIPES+x}"
+}
+
+sous_index=${SOUS_INDEX:-https://fourkitchens.github.io/sous-drupal-packages/packages.json}
+if ! recipe_menu=$(preflight_index); then
+  printf 'Sous package index: %s\n%s\n' "$sous_index" "$recipe_menu" >&2
+  printf '%s\n' 'Every Sous install needs the package index.' \
+    'For the SOUS_INDEX maintainer override, see https://github.com/fourkitchens/sous-drupal-project/blob/main/docs/maintainers/MAINTAINING.md#installer-choices' >&2
+  exit 1
+fi
+
 cat <<'MENU'
 
 ┌────────────────────────────────────────────────────────────┐
@@ -45,25 +99,8 @@ case "$SOUS_CONTENT" in
   *) echo 'SOUS_CONTENT must be admin-only, paragraphs, or layout-builder.' >&2; exit 2 ;;
 esac
 
-# Let each package decide whether it belongs in the optional recipe menu.
-recipe_menu=''
+# Offer sides from the preflight index when recipes were not preset.
 if [ "${SOUS_RECIPES+x}" != x ]; then
-  # shellcheck disable=SC2016
-  recipe_menu=$(php -r '
-    $major = (int) ltrim($argv[1], "^");
-    $index = json_decode(@file_get_contents($argv[2]) ?: "", TRUE);
-    if (!$index) { exit(1); }
-    ksort($index["packages"]);
-    foreach ($index["packages"] as $name => $versions) {
-      $versions = array_filter($versions, fn($version) => (int) $version === $major, ARRAY_FILTER_USE_KEY);
-      uksort($versions, "version_compare");
-      $metadata = end($versions);
-      if (($metadata["extra"]["sous"]["menu"] ?? FALSE) === TRUE) {
-        echo substr($name, strlen("fourkitchens/")), "\t", $metadata["description"], "\n";
-      }
-    }
-  ' "$sous_version" "${SOUS_INDEX:-https://fourkitchens.github.io/sous-drupal-packages/packages.json}") ||
-    echo "Couldn't reach the Sous package index; see docs/SETUP.md to add optional recipes later." >&2
   SOUS_RECIPES=''
   if [ -n "$recipe_menu" ]; then
     printf '\n  ON THE SIDE · Optional recipes\n\n'

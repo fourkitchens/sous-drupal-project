@@ -35,7 +35,7 @@ bash devops/integration/run.sh --ci github --artifacts /tmp/sous-admin
 ```
 
 Append `--packages /path/to/sous-drupal-packages` for unpublished recipes.
-It copies `PATH/packages/*` at version `2.0.0` and mounts that path read-only in DDEV.
+It copies `PATH/packages/*` at version `2.0.0`, mounts that path read-only in DDEV, and supplies a matching index for preflight.
 Omit the override to verify published ZIPs before release.
 Use `--library ui-kit` or `--library URL`, optionally with `--library-ref REF`, to verify library installation and compilation.
 The runner checks settings, bootstrap, HTTP, recipes, publishing workflows, scheduling widgets, generated guidance, site archives and deployment.
@@ -46,11 +46,13 @@ Logs and `result.json` stay in the artifacts directory; `--help` covers retentio
 
 The product [README](../../README.md#installation) documents content, recipe, CI and dessert choices. Preset `SOUS_CONTENT`, `SOUS_RECIPES`, `SOUS_CI` and `SOUS_LIBRARY` for unattended installs.
 Media, Config Split and the publishing workflow apply to every course; Paragraph Types belongs only to Paragraphs.
-The runner sets `SOUS_RECIPES`, so smoke tests never fetch the menu.
+Every install checks the index for the baseline and main-course recipes before prompting.
+The runner sets `SOUS_RECIPES` to skip the sides prompt.
 To inspect it interactively, leave that variable unset; the newest matching-major
 metadata offers packages with `extra.sous.menu: true`, including Dev Tools.
-`SOUS_INDEX` defaults to `https://fourkitchens.github.io/sous-drupal-packages/packages.json`;
-point it at a local build to inspect unpublished metadata:
+`SOUS_INDEX` is a maintainer override for the preflight and menu. It defaults to
+`https://fourkitchens.github.io/sous-drupal-packages/packages.json`. To inspect
+unpublished metadata, point it at a local build.
 
 ```sh
 SOUS_INDEX=/path/to/sous-drupal-packages/build/site/packages.json \

@@ -47,6 +47,41 @@ jobs:
         run: pipx install shellcheck-py==0.11.0.1
       - name: Check shell scripts
         run: find devops -name '*.sh' -print0 | xargs -0 shellcheck -x -P SCRIPTDIR
+      - name: Check installer index preflight
+        run: |
+          test_dir=$(mktemp -d "$RUNNER_TEMP/sous-preflight.XXXXXX")
+          trap 'rm -rf "$test_dir"' EXIT
+          mkdir "$test_dir/bin"
+          export PATH="$test_dir/bin:$PATH"
+          export DDEV_CALLS="$test_dir/ddev.calls"
+          cat > "$test_dir/bin/ddev" <<'SH'
+          #!/bin/sh
+          printf '%s\n' "$*" >> "$DDEV_CALLS"
+          exit 1
+          SH
+          chmod +x "$test_dir/bin/ddev"
+          jq -n '{packages: (
+            ["sous-emulsify", "sous-media", "sous-config-split", "sous-paragraphs", "sous-core-layout-builder"]
+            | map({key: ("fourkitchens/" + .), value: {"2.0.0": {version: "2.0.0"}}})
+            | from_entries
+          )}' > "$test_dir/packages.json"
+
+          check_preflight() {
+            local index=$1 reason=$2 log="$test_dir/preflight.log"
+            if SOUS_INDEX="$index" sh devops/scripts/sous-build.sh </dev/null >"$log" 2>&1; then
+              echo "Installer unexpectedly accepted $index."
+              exit 1
+            fi
+            cat "$log"
+            grep -Fxq "Sous package index: $index" "$log"
+            grep -Fxq "$reason" "$log"
+            grep -Fxq 'Every Sous install needs the package index.' "$log"
+            test ! -e "$DDEV_CALLS"
+          }
+
+          check_preflight "file://$test_dir/missing.json" 'The index is unreachable.'
+          SOUS_CONTENT=admin-only SOUS_RECIPES='' SOUS_CI=none SOUS_LIBRARY=none \
+            check_preflight "$test_dir/packages.json" 'Missing package fourkitchens/sous-admin.'
       - run: composer validate --no-check-publish
       - name: Parse site CI templates
         run: |

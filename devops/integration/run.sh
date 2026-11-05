@@ -227,7 +227,7 @@ export_template() {
     bash "$source_root" "$work_dir/template"
 }
 
-# Replace the published index with copied local packages visible to Composer and DDEV.
+# Point Composer and the index preflight at the same local packages.
 use_local_packages() {
   local package_versions
   package_versions=$(jq -s '
@@ -238,6 +238,10 @@ use_local_packages() {
       {type: "path", url: $url, options: {symlink: false, versions: $versions}}
   ' "$work_dir/template/composer.json" > "$work_dir/composer.json"
   mv "$work_dir/composer.json" "$work_dir/template/composer.json"
+  jq -n --argjson versions "$package_versions" '
+    {packages: ($versions | with_entries(.value = {(.value): {version: .value}}))}
+  ' > "$work_dir/packages.json"
+  export SOUS_INDEX="$work_dir/packages.json"
   jq -n --arg path "$packages" '
     {services: {web: {volumes: [
       {type: "bind", source: $path, target: $path, read_only: true}
