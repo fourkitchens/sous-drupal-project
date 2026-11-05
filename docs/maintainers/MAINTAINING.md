@@ -87,14 +87,14 @@ Only canonical `main` publishes after checks and without a packages override.
 
 ## Sous 8.0.0 release checklist
 
-Use [starter PR #132](https://github.com/fourkitchens/sous-drupal-project/pull/132) and [packages PR #2](https://github.com/fourkitchens/sous-drupal-packages/pull/2) to record the starter and companion commit IDs. Treat the PR description as historical where it lists Devel, Stage File Proxy or Masquerade as baseline. The final packages put all three in the optional local Dev Tools split.
+Use [starter PR #132](https://github.com/fourkitchens/sous-drupal-project/pull/132) for the current release summary, reviewer instructions and CI evidence. Use [packages PR #2](https://github.com/fourkitchens/sous-drupal-packages/pull/2) to confirm the companion revision and publication status.
 
 - [ ] Run the [source checks](#verify-changes) on the final starter candidate. Parse all three generated provider YAML templates. Record any validator that was unavailable.
 - [ ] Publish the companion `2.0.0` release, recipe ZIPs, and [public Composer index](https://fourkitchens.github.io/sous-drupal-packages/packages.json) first. Verify the index responds successfully and lists the `2.0.0` metadata and downloadable ZIPs for the baseline, composition, and optional recipes. Keep the published tags, archives, and index entries immutable.
 - [ ] Run the final starter commit against the public index with the matrix below. Leave `--packages` off and omit the workflow's `packages_ref`. For a 404, run the same matrix with `--packages` pointing to the reviewed companion checkout. Keep the public matrix open as a release blocker until it passes.
 - [ ] Check the empty scaffold, its project-owned asset build, and the installed library builds. Retain the runner results for retirement of recipe sources and setup metadata, the lockfile reinstall, and the clean deploy. Review the generated npm lockfiles as described below.
 - [ ] Record a build job URL and tested revision for each generated provider pipeline. Record local template checks and shared build commands separately.
-- [ ] Prepare the 7.x adoption notes below. After the release gates pass, merge PR #132 with its breaking `feat!:` title. Verify canonical `main` publishes `8.0.0`. Merging, tagging, and publishing are separate release actions.
+- [ ] Prepare the 7.x adoption notes. After the release gates pass, squash-merge PR #132 with its breaking `feat!:` title. Verify that canonical `main` tags `8.0.0` without a `v` prefix and that Packagist lists it.
 
 ### Final installation matrix
 
@@ -122,9 +122,9 @@ The Admin-only baseline runs `composer ci` with an empty scaffold and then build
 
 | Check | Evidence and release gate |
 | --- | --- |
-| Provider templates | Parse all three YAML templates and verify each generated checkout contains the selected provider's files. GitHub-hosted starter matrix [run 41533082588](https://github.com/fourkitchens/sous-drupal-project/actions/runs/41533082588) covered all four selections at `4406687`. |
+| Provider templates | Parse all three YAML templates and verify each generated checkout contains the selected provider's files. Starter fixture [run 41955643729](https://github.com/fourkitchens/sous-drupal-project/actions/runs/41955643729) passed all four rows at starter `7a93ac9` with `packages_ref=cd41bf2`. |
 | Shared build | The local runner exercises `composer ci` for Admin-only and selected-library rows. This verifies the shared command with the generated dependencies and assets. |
-| Starter GitHub Actions | PR #132 [run 41899742070](https://github.com/fourkitchens/sous-drupal-project/actions/runs/41899742070) passed source checks at `1778f31`. Its admin-only installation job hit the public index HTTP 404. Rerun the public matrix after packages publish. |
+| Starter GitHub Actions | See the [PR #132 test evidence](https://github.com/fourkitchens/sous-drupal-project/pull/132#functional-testing) for the latest PR run. Its Admin-only/GitHub row uses the public index. Rerun the full public matrix after packages publish. |
 | Generated GitHub Actions | Run `Site build` in a configured generated repository and record the job URL and revision. Available GitHub evidence is from the starter's workflow. |
 | Generated GitLab CI/CD | Run the generated `build` job in a configured GitLab project and record the pipeline URL and revision. Project access was unavailable during this check. |
 | Generated CircleCI | Run the generated `build` job in a configured CircleCI project and record the pipeline URL and revision. Project access was unavailable during this check. |
@@ -160,6 +160,8 @@ On November 4, 2026, the runner exported starter commit `513495a43d59c0b562132de
 Source checks passed with Node from `.nvmrc`, Composer validation, ShellCheck 0.11.0, and YAML parsing of all three provider templates. `actionlint` was unavailable locally. The macOS fixture runs used disposable DDEV mount settings and stopped the test site before rebuild. The public Composer index still returned HTTP 404, which blocks the published installation matrix.
 
 ### Adopting 8.0 from 7.0.1
+
+Sous 8.0 is for new sites. Existing 7.x sites adopt changes through site-owned updates and migrations. Starter fixes for 7.x go to [`sous-7.x`](https://github.com/fourkitchens/sous-drupal-project/tree/sous-7.x).
 
 | 7.0.1 main course | 8.0 equivalent |
 | --- | --- |
