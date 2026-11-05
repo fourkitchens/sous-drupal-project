@@ -297,6 +297,9 @@ touch web/modules/custom/.gitkeep
 # Generate the theme and install its tools before adding the chosen library.
 printf '\nSetting the table: preparing your custom theme and its tools.\n\n'
 ddev drush -y emulsify "$theme"
+# Give theme-local CLI commands the same patched Git dependency as the root CLI.
+simple_git_range=$(node -p 'require("./package.json").overrides["@emulsify/cli"]["simple-git"]')
+npm --prefix "web/themes/custom/$theme" pkg set "overrides.@emulsify/cli.simple-git=$simple_git_range"
 npm --prefix "web/themes/custom/$theme" install --include=dev
 theme_status='Scaffold and npm tools ready'
 if [ -n "$library_repository" ]; then
