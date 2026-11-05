@@ -25,7 +25,7 @@ Every setup includes File, Image and Video media types. Upload files and images 
 When selected, Event adds Smart Date with all-day and recurring schedules and an Event Type selector using Tagify.
 Events share Page-style teasers and month–year/type/title aliases; Upcoming and Past embeds keep ongoing events Upcoming until their end.
 A recurring series appears once per listing when different occurrences qualify for each.
-News Post adds a plain-text byline, multi-value News Categories and Page-style teasers.
+News Post adds a plain-text byline, multi-value News Categories, Page-style teasers and a Recent News embed.
 News aliases use `news/first-category/title`.
 Both use rendered teasers with exposed taxonomy and title/teaser-text search filters.
 Both use components with Paragraphs and layouts with Layout Builder.
@@ -36,6 +36,8 @@ Profile adds required first/last names, a hidden automatic title, one Profile Im
 Alerts displays site-wide banners at the top of every public page. Editors can schedule alerts and make them dismissible.
 
 Search adds a search box in the header and a `/search` results page with a Content type filter.
+
+SEO adds redirects for changed aliases, an XML sitemap at `/sitemap.xml`, and breadcrumbs that use page titles. It also adds Google Tag and Schema.org metadata integrations.
 
 ## User Roles and Permissions
 

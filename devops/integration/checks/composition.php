@@ -154,6 +154,11 @@ foreach ([
     $checks["Optional $name module: $module"] = \Drupal::moduleHandler()->moduleExists($module) === $selected;
   }
 }
+if (in_array("sous-seo", $recipes, TRUE)) {
+  foreach (["redirect", "simple_sitemap", "easy_breadcrumb", "google_tag", "schema_metatag"] as $module) {
+    $checks["SEO module: $module"] = \Drupal::moduleHandler()->moduleExists($module);
+  }
+}
 foreach ($checks as $name => $passed) {
   if (!$passed) {
     throw new \RuntimeException("Unexpected composition: $name");

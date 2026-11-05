@@ -68,7 +68,7 @@ The installer creates `AGENTS.md` and `docs/agents/workflow-facts.md` from `asse
 ## CI and releases
 
 PRs run admin-only with GitHub CI. Main pushes, nightly runs at 06:17 UTC
-and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. The admin-only/no CI case also selects Dev Tools. Layout Builder selects UI Kit by name. Paragraphs selects the same library by Git URL and ref.
+and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. Layout Builder/GitLab adds Alerts, Search and SEO. Admin-only/no CI adds Alerts, Search and Dev Tools. Layout Builder selects UI Kit by name. Paragraphs selects the same library by Git URL and ref.
 Manual `packages_ref` selects a full reviewed packages commit.
 Keep action SHAs pinned; checks read only, publishing writes after checks pass.
 
@@ -108,12 +108,12 @@ ui_kit_ref=codex/fix-drupal-theme-lint
 bash devops/integration/run.sh --option admin-only --ci github \
   --library none --artifacts /tmp/sous-8-admin
 bash devops/integration/run.sh --option layout-builder --ci gitlab \
-  --recipes "$sides" --library ui-kit --artifacts /tmp/sous-8-layout
+  --recipes "$sides,sous-alerts,sous-search,sous-seo" --library ui-kit --artifacts /tmp/sous-8-layout
 bash devops/integration/run.sh --option paragraphs --ci circleci \
   --recipes "$sides" --library "$ui_kit" --library-ref "$ui_kit_ref" \
   --artifacts /tmp/sous-8-paragraphs
 bash devops/integration/run.sh --option admin-only --ci none \
-  --recipes "$sides,sous-dev-tools" --library none --artifacts /tmp/sous-8-dev-tools
+  --recipes "$sides,sous-alerts,sous-search,sous-dev-tools" --library none --artifacts /tmp/sous-8-dev-tools
 ```
 
 The Admin-only baseline runs `composer ci` with an empty scaffold and then builds a disposable project-owned Sass entrypoint. The Dev Tools row verifies the opt-in packages and local split. Layout Builder tests named UI Kit. Paragraphs tests the custom Git URL and ref route with the same UI Kit repository. Keep the named and URL cases until a distinct, compatible fixture is reviewed.

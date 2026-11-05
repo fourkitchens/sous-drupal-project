@@ -284,6 +284,12 @@ check_site_responds() {
       --write-out '%{http_code}\n' "${http_url%/}/search"
     expect_line search-page 200
   fi
+  if [[ "$selected" == *,sous-seo,* ]]; then
+    step sitemap-generate ddev drush simple-sitemap:generate
+    step sitemap curl --silent --show-error --output /dev/null \
+      --write-out '%{http_code}\n' "${http_url%/}/sitemap.xml"
+    expect_line sitemap 200
+  fi
 }
 
 # Check content, administrator accounts and the default custom theme in Drupal.
