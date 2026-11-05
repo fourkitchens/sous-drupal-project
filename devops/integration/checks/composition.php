@@ -6,6 +6,7 @@ $page = \Drupal::entityTypeManager()->getStorage("node_type")->load("page");
 $display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.page.default");
 $uid1 = \Drupal\user\Entity\User::load(1);
 $chef = user_load_by_name("sous_chef");
+$editor = \Drupal\user\Entity\Role::load("site_editor");
 $checks = [
   // UID 1 stays blocked while the separate chef account can sign in as Superuser.
   "Blocked UID 1" => $uid1->isBlocked() && $uid1->getAccountName() === "superuser_1",
@@ -23,11 +24,11 @@ $checks = [
   "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split"),
   "Split definitions" => \Drupal::service("config.storage")->exists("config_split.config_split.local") && \Drupal::service("config.storage")->exists("config_split.config_split.staging"),
   "Media types" => count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video"])) === 3,
+  "Site Editor" => $editor?->label() === "Site Editor" && !$editor->isAdmin() && !$editor->hasPermission("administer site configuration"),
 ];
 // DDEV activates Local without persisting either split as enabled.
 $baseline = ["field_ui", "syslog", "views_ui"];
-$optional = ["devel", "masquerade", "stage_file_proxy"];
-$devTools = in_array("sous-dev-tools", $recipes, TRUE);
+$devTools = ["devel", "masquerade", "stage_file_proxy"];
 $sync = \Drupal::service("config.storage.sync");
 $export = $sync->read("core.extension");
 foreach (["local", "staging"] as $split) {
@@ -35,7 +36,7 @@ foreach (["local", "staging"] as $split) {
   $raw = \Drupal::service("config.storage")->read($name);
   $exported = $sync->read($name);
   $local = $split === "local";
-  $expected = $local && $devTools ? array_merge($baseline, $optional) : $baseline;
+  $expected = $local ? array_merge($baseline, $devTools) : $baseline;
   $expected = array_fill_keys($expected, 0);
   ksort($expected);
   ksort($raw["module"]);
@@ -44,16 +45,18 @@ foreach (["local", "staging"] as $split) {
   $checks["Split activation: $split"] = $raw["status"] === FALSE && $exported["status"] === FALSE && \Drupal::config($name)->get("status") === $local;
   $splitStorage = new \Drupal\Core\Config\FileStorage(DRUPAL_ROOT . "/../config/$split");
   $checks["Syslog defaults: $split"] = $splitStorage->exists("syslog.settings");
-  foreach ($optional as $module) {
-    $checks["Split defaults: $split/$module"] = $splitStorage->exists("$module.settings") === ($local && $devTools);
+  foreach ($devTools as $module) {
+    $checks["Split defaults: $split/$module"] = $splitStorage->exists("$module.settings") === $local;
   }
 }
-foreach (array_merge($baseline, $optional) as $module) {
-  $enabled = in_array($module, $baseline, TRUE) || $devTools;
-  $checks["Local tools: $module"] = \Drupal::moduleHandler()->moduleExists($module) === $enabled && !isset($export["module"][$module]);
+foreach (array_merge($baseline, $devTools) as $module) {
+  $checks["Local tools: $module"] = \Drupal::moduleHandler()->moduleExists($module) && !isset($export["module"][$module]);
 }
 $checks["DropzoneJS module absent"] = !\Drupal::moduleHandler()->moduleExists("dropzonejs");
 $checks["Nonbreaking-space filter"] = \Drupal::moduleHandler()->moduleExists("no_nbsp");
+foreach (["editoria11y", "gin_login", "twig_tweak", "role_delegation", "emulsify_tools"] as $module) {
+  $checks["Default module: $module"] = \Drupal::moduleHandler()->moduleExists($module) && isset($export["module"][$module]);
+}
 // Every installed content type shares the publishing workflow and scheduling sidebar.
 $workflow = \Drupal\workflows\Entity\Workflow::load("editorial");
 $workflow_type = $workflow->getTypePlugin();
@@ -154,10 +157,8 @@ foreach ([
     $checks["Optional $name module: $module"] = \Drupal::moduleHandler()->moduleExists($module) === $selected;
   }
 }
-if (in_array("sous-seo", $recipes, TRUE)) {
-  foreach (["redirect", "simple_sitemap", "easy_breadcrumb", "google_tag", "schema_metatag"] as $module) {
-    $checks["SEO module: $module"] = \Drupal::moduleHandler()->moduleExists($module);
-  }
+foreach (["redirect", "simple_sitemap", "easy_breadcrumb", "google_tag", "schema_metatag"] as $module) {
+  $checks["SEO module: $module"] = \Drupal::moduleHandler()->moduleExists($module);
 }
 foreach ($checks as $name => $passed) {
   if (!$passed) {

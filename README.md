@@ -7,7 +7,7 @@ Sous prepares the project; your site owns its code, dependencies and configurati
 
 ## Features and Configurations
 
-Choose the content model during installation; administration, the theme, Media, Config Split and a publishing workflow are always included.
+Choose the content model during installation. Every choice includes Gin administration, Emulsify, Media, Config Split, a publishing workflow, Dev Tools and SEO.
 
 | Choice | Content setup |
 | --- | --- |
@@ -15,7 +15,7 @@ Choose the content model during installation; administration, the theme, Media, 
 | `1` Paragraphs | Page and Frontpage with Layout Paragraphs components |
 | `2` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed and Table blocks |
 
-The package index advertises optional recipes such as Events, News Post, Profile, SEO, Alerts, Search and Dev Tools. Dev Tools adds Devel, Stage File Proxy and Masquerade locally. Paragraph Types belongs to the Paragraphs main course.
+The package index advertises optional recipes such as Events, News Post, Profile, Alerts and Search. Dev Tools adds Devel, Stage File Proxy and Masquerade locally. Paragraph Types belongs to the Paragraphs main course.
 See [features and configurations](docs/features.md) for the site's building blocks.
 
 # Installation

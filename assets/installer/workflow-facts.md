@@ -14,7 +14,7 @@ Run `ddev drush role:list` to discover the site's roles. See [user roles and per
 
 ## Public files
 
-If Dev Tools is installed, Stage File Proxy can fetch missing files locally. See [local settings and Config Split](../SETUP.md#local-settings-and-config-split) to set its origin.
+Stage File Proxy can fetch missing files locally. See [local settings and Config Split](../SETUP.md#local-settings-and-config-split) to set its origin.
 
 ## Git workflow
 

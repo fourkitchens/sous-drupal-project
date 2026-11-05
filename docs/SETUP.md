@@ -50,13 +50,13 @@ The `npm run confex` and `npm run confim` shortcuts call the same scripts. See [
 
 ## Add a recipe
 
-The starter removes the temporary Sous Composer repository when installation completes. Add the scoped index again before requiring another Sous recipe. This example adds the optional Dev Tools recipe to a local DDEV site.
+The starter removes the temporary Sous Composer repository when installation completes. Add the scoped index again before requiring another Sous recipe. This example adds the optional Alerts recipe to a local DDEV site.
 
 ```sh
 ddev composer config --json repositories.sous \
   '{"type":"composer","url":"https://fourkitchens.github.io/sous-drupal-packages/","only":["fourkitchens/sous-*"]}'
-ddev composer require 'fourkitchens/sous-dev-tools:^2.0'
-sh devops/scripts/install-recipe.sh fourkitchens/sous-dev-tools
+ddev composer require 'fourkitchens/sous-alerts:^2.0'
+sh devops/scripts/install-recipe.sh fourkitchens/sous-alerts
 sh devops/scripts/confex.sh
 ```
 
@@ -81,9 +81,9 @@ if (getenv('IS_DDEV_PROJECT') === 'true') {
 
 The local and staging splits include core Field UI, Syslog and Views UI. Their saved statuses are inactive. Local settings activate the local split in DDEV. On staging, set `$config['config_split.config_split.staging']['status'] = TRUE;` in host settings before importing configuration. Leave both overrides unset in production.
 
-The optional Dev Tools recipe adds Devel, Stage File Proxy and Masquerade to the local split. These modules stay disabled in staging and production. On a fresh site, Masquerade access comes from the Superuser role.
+The included Dev Tools recipe adds Devel, Stage File Proxy and Masquerade to the local split. These modules stay disabled in staging and production. On a fresh site, Masquerade access comes from the Superuser role.
 
-With Dev Tools installed, set Stage File Proxy's source URL in `settings.local.php` to fetch missing files locally.
+Set Stage File Proxy's source URL in `settings.local.php` to fetch missing files locally.
 
 ```php
 $config['stage_file_proxy.settings']['origin'] = 'https://production.example.com';

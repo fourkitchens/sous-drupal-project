@@ -284,12 +284,10 @@ check_site_responds() {
       --write-out '%{http_code}\n' "${http_url%/}/search"
     expect_line search-page 200
   fi
-  if [[ "$selected" == *,sous-seo,* ]]; then
-    step sitemap-generate ddev drush simple-sitemap:generate
-    step sitemap curl --silent --show-error --output /dev/null \
-      --write-out '%{http_code}\n' "${http_url%/}/sitemap.xml"
-    expect_line sitemap 200
-  fi
+  step sitemap-generate ddev drush simple-sitemap:generate
+  step sitemap curl --silent --show-error --output /dev/null \
+    --write-out '%{http_code}\n' "${http_url%/}/sitemap.xml"
+  expect_line sitemap 200
 }
 
 # Check content, administrator accounts and the default custom theme in Drupal.
@@ -466,7 +464,8 @@ check_lock_reinstall() {
   step save-lock cp composer.lock "$work_dir/reinstall.lock"
   step save-config cp -R config "$work_dir/reinstall-config"
   if [ -f NOTICE ]; then step save-notice cp NOTICE "$work_dir/reinstall-notice"; fi
-  step remove-dependencies rm -rf vendor web/core web/modules/contrib web/themes/contrib \
+  # Remove files where Composer runs so Mutagen cannot race the reinstall.
+  step remove-dependencies ddev exec --raw -- rm -rf vendor web/core web/modules/contrib web/themes/contrib \
     web/profiles/contrib web/libraries drush/contrib
   step reinstall ddev composer install --no-interaction
   step lock-preserved cmp "$work_dir/reinstall.lock" composer.lock
@@ -481,12 +480,11 @@ check_lock_reinstall() {
   step absent-dropzone-library test ! -e web/libraries/dropzone
   step locked-packages ddev composer show --locked --format=json --no-ansi
   # shellcheck disable=SC2016
-  step locked-selection jq -e --arg recipes "$recipes" '
+  step locked-selection jq -e '
     (.locked | map(.name)) as $names
-    | ($recipes | test("(^|[[:space:],])sous-dev-tools($|[[:space:],])")) as $dev_tools
     | all($names[]; test("^(fourkitchens/sous-|drupal/dropzonejs$|dropzone/dropzone$)") | not)
       and all(["drupal/devel", "drupal/masquerade", "drupal/stage_file_proxy"][];
-        . as $name | ($names | index($name) != null) == $dev_tools)
+        . as $name | $names | index($name) != null)
   ' "$artifacts/locked-packages.log"
 }
 

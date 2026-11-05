@@ -22,6 +22,18 @@
         }
       }
     ],
+    "drupal/paragraphs": [
+      {
+        "description": "Require configuration access for Paragraphs Library settings",
+        "url": "patches/paragraphs-library-settings-access-3340086.patch",
+        "sha256": "166625ed8bbcee5b3ed3ef81c79bb710d70ef499b81b83faf269c96169292286",
+        "depth": 1,
+        "extra": {
+          "issue-tracker-url": "https://www.drupal.org/project/paragraphs/issues/3340086",
+          "note": "Sous separates access to the settings form from managing reusable content."
+        }
+      }
+    ],
     "drupal/style_selector": [
       {
         "description": "Custom Drupal 11 field-default schema and library discovery compatibility",
