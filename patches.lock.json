@@ -1,0 +1,105 @@
+{
+    "_hash": "6a1b162bcab0a9ed538e8bd56c8f86d5e69748e19c7087212813935ebd487ce4",
+    "patches": {
+        "drupal/field_group": [
+            {
+                "package": "drupal/field_group",
+                "description": "Focus invalid required fields inside Field Group tabs",
+                "url": "patches/field-group-2969051.patch",
+                "sha256": "eb3492900b6f1b8376cb290ddb43a0a0acdc278c3bd93db82078e1a1ff228a2b",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/field_group/issues/2969051",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            }
+        ],
+        "drupal/layout_paragraphs": [
+            {
+                "package": "drupal/layout_paragraphs",
+                "description": "Improve Layout Paragraphs component selection",
+                "url": "patches/layout-paragraphs-component-list-3487314.patch",
+                "sha256": "1f41f7ef7024f9c4c88b98f8250539581357c62f2306b5b89b3368ac19d7ffaa",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/layout_paragraphs/issues/3487314",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            }
+        ],
+        "drupal/style_selector": [
+            {
+                "package": "drupal/style_selector",
+                "description": "Custom Drupal 11 field-default schema and library discovery compatibility",
+                "url": "patches/style-selector-drupal11-compatibility.patch",
+                "sha256": "39c6d214990c04690c5dd425e080a7410be8a248dedb81da9d63b3bd66d1809c",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/style_selector/issues/3589133",
+                    "note": "The issue covers library discovery; field-default schema fixes are custom pending upstream tracking.",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            }
+        ],
+        "drupal/tablefield": [
+            {
+                "package": "drupal/tablefield",
+                "description": "Check the output buffer before cleaning it (#3568619)",
+                "url": "patches/tablefield-ob-clean-3568619.patch",
+                "sha256": "6103b0602e5ba1d4a270fd81f8d4fe1bd5c1ed80c45821f10e66659232a9c2ff",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/tablefield/issues/3568619",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            },
+            {
+                "package": "drupal/tablefield",
+                "description": "Support formatted cells with allowed text formats (#3076448)",
+                "url": "patches/tablefield-wysiwyg-3076448.patch",
+                "sha256": "6c79d0557eff26a7e24fb348d6a5153053b419c394481430231250a651255073",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/tablefield/issues/3076448",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            },
+            {
+                "package": "drupal/tablefield",
+                "description": "Add a quick Add Column button (#3169198)",
+                "url": "patches/tablefield-add-column-3169198.patch",
+                "sha256": "4a2ea1608cb660096042d2fcbd99a0a9a2272d8ca5c6089ec83f9c81d6911676",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/tablefield/issues/3169198",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            },
+            {
+                "package": "drupal/tablefield",
+                "description": "Describe formatted table defaults for recipe validation (#3593703)",
+                "url": "patches/tablefield-default-value-schema-3593703.patch",
+                "sha256": "040390409de18fafb39fa0c5880363f6bc8e927659133a18fdf8fd68a341aaea",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/tablefield/issues/3593703",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            }
+        ],
+        "drupal/scheduler_content_moderation_integration": [
+            {
+                "package": "drupal/scheduler_content_moderation_integration",
+                "description": "Automatically select and hide the single scheduling state (#3270462)",
+                "url": "patches/scheduler-moderation-single-state-3270462.patch",
+                "sha256": "8a8306af2af31e76c6c638934140655ca1ccf61609894d3e2bc0a6f60bbad32c",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/scheduler_content_moderation_integration/issues/3270462",
+                    "note": "Narrow stable-3.0.5 adaptation; fixed hidden inputs keep selectors out of keyboard navigation.",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            }
+        ]
+    }
+}

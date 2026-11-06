@@ -1,0 +1,101 @@
+# Deployment
+
+Build from committed lockfiles and the complete configuration export.
+Use [Local Setup](SETUP.md) and [Build Tools](BUILD_TOOLS.md) for development.
+
+## Platform versions
+
+| Component | Source |
+| --- | --- |
+| Drupal / PHP | `composer.json`; DDEV PHP 8.4 |
+| Composer / Drush | Composer 2; Drush 13 |
+| DDEV / database | `.ddev/config.yaml` |
+| Node.js / npm | `.nvmrc` in the asset build environment; bundled npm |
+| Emulsify dependencies | Theme manifests and lockfile |
+
+## Build and deploy
+
+Use Composer and Node in CI or a build environment to assemble the production artifact and review release audits.
+
+```sh
+composer build-assets
+composer check-platform-reqs
+composer audit --abandoned=report
+npm audit
+npm --prefix "web/themes/custom/<theme>" audit
+```
+
+Ship `vendor/`, Drupal core, extensions, libraries, custom source, configuration and shared settings.
+Include the theme's `dist/` and generated `components/` when present; omit `node_modules`, local settings, caches and backups.
+Keep secrets and uploaded/private files on the host; serve `web/` and leave local/staging Config Split overrides off in production.
+Back up the destination and deliver the build. Run the shared deploy script with `sh` from the project root on the Drush-enabled host or from CI with a configured remote alias.
+
+```sh
+# On the host
+SOUS_PHP_RUNTIME=native sh devops/scripts/confim.sh --uri=https://www.example.com
+# In CI
+SOUS_PHP_RUNTIME=native sh devops/scripts/confim.sh @mysite.prod
+```
+
+`SOUS_PHP_RUNTIME=native` uses the current environment's PHP and `vendor/bin/drush`, even when DDEV and `.ddev/config.yaml` are present. The launcher also runs tools directly when DDEV is unavailable or the command runs inside DDEV. The same override works with `sh devops/scripts/confex.sh` and `sh devops/scripts/install-recipe.sh vendor/recipe`. These PHP operations only require the installed PHP tools and `sh`.
+Add deployment steps in `hook_deploy_NAME()`; verify pages, editing, assets, queues and logs afterward. Run Drupal cron to apply scheduled workflow changes.
+Acquia aliases come from `acli remote:aliases:download`; Pantheon aliases come from `terminus aliases`.
+Configure SSH keys and alias discovery for Drush, or define other hosts in `drush/sites/*.site.yml`.
+
+## Update dependencies and configuration
+
+On GitHub, Dependabot checks GitHub Actions, npm and Composer every week.
+It groups minor and patch updates by ecosystem, with root and custom theme
+dependencies in the same npm group and Drupal core packages in their own group.
+Other major updates open individual pull requests. Dependabot skips Drupal core
+major updates so you can handle them as upgrade projects. Composer uses
+`increase-if-necessary` so compatible updates leave `composer.json` constraints alone.
+
+Remove `.github/dependabot.yml` from the default branch to stop scheduled version
+updates, or set `open-pull-requests-limit: 0` on an ecosystem to stop its updates.
+GitLab does not use this file.
+
+Review release notes on a branch and test with a database copy:
+
+```sh
+ddev composer update vendor/package --with-all-dependencies
+ddev composer validate --no-check-publish
+ddev composer check-platform-reqs
+ddev composer audit
+npm run confim
+npm run confex
+git diff -- config
+```
+
+Commit lockfiles and the complete export. Recipes apply once and unpack; updates do not replay their configuration.
+Migrate stored content before changing fields, and uninstall modules before removing Composer requirements.
+Keep patch definitions in `patches/patches.json` and commit `patches.lock.json`.
+Run `ddev composer patches-relock` and `ddev composer patches-doctor` after patch changes.
+Use `ddev composer patches-repatch` to reinstall and verify them locally.
+
+## Set up site CI
+
+The repository's CI configuration runs `composer ci`: install dependencies, build available theme sources, lint and check PHP standards.
+Change these steps in `composer.json`; CI runs without DDEV.
+
+| Provider | Configuration |
+| --- | --- |
+| GitHub Actions | `.github/workflows/build.yml` |
+| GitLab CI/CD | `.gitlab-ci.yml` |
+| CircleCI | `.circleci/config.yml` |
+
+When changing providers, configure its file and update `release.config.js` for the chosen publisher.
+Keep action versions pinned. CircleCI should build pull requests and pushes to the default `main` branch.
+The commented deployment job can build assets, deliver them to the host and run Drush deploy with an alias.
+Make release depend on deployment when enabled so tags mark what is live.
+
+## Releases
+
+Conventional Commits merged to `main` publish `v`-prefixed tags and notes on the repository's Releases page.
+GitHub needs no setup. GitLab needs a project access token with `api` and `write_repository` scopes
+in a protected, masked `GL_TOKEN` CI/CD variable; CircleCI needs `GITHUB_TOKEN` in project settings.
+Preview with the appropriate token available locally:
+
+```sh
+npm run release:dry-run
+```

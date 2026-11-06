@@ -1,0 +1,21 @@
+Issue: https://www.drupal.org/project/scheduler_content_moderation_integration/issues/3270462
+Single-choice fix for SCMI 3.0.5; remove when a release provides automatic hidden states.
+
+diff --git a/src/Plugin/Field/FieldWidget/SchedulerModerationWidget.php b/src/Plugin/Field/FieldWidget/SchedulerModerationWidget.php
+--- a/src/Plugin/Field/FieldWidget/SchedulerModerationWidget.php
++++ b/src/Plugin/Field/FieldWidget/SchedulerModerationWidget.php
+@@ -71,6 +71,14 @@
+       }
+     }
+ 
++    // A single permitted state is automatic, so editors only enter dates.
++    $options = array_diff_key($element['#options'], ['_none' => '']);
++    if (($element['#access'] ?? TRUE) && count($options) === 1) {
++      $element['#type'] = 'hidden';
++      $element['#value'] = key($options);
++      unset($element['#title'], $element['#description']);
++    }
++
+     return $element;
+   }
+ 

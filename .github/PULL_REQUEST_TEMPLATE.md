@@ -4,7 +4,7 @@
 
 ### Ticket(s)
 
-- [Ticket-number: Title](https://app.clickup.com/t/36718269/SOUS-XXXX)
+- Link the relevant issue or ticket.
 
 ### Notes:
 

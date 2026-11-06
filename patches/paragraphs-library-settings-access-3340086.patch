@@ -1,0 +1,9 @@
+diff --git a/modules/paragraphs_library/paragraphs_library.routing.yml b/modules/paragraphs_library/paragraphs_library.routing.yml
+--- a/modules/paragraphs_library/paragraphs_library.routing.yml
++++ b/modules/paragraphs_library/paragraphs_library.routing.yml
+@@ -36,4 +36,4 @@
+     _form: '\Drupal\paragraphs_library\Form\LibraryItemSettingsForm'
+     _title: 'Paragraphs library item settings'
+   requirements:
+-    _permission: 'administer paragraphs library'
++    _permission: 'administer paragraphs library,administer paragraphs types'

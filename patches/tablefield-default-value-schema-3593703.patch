@@ -1,0 +1,58 @@
+--- a/config/schema/tablefield.schema.yml
++++ b/config/schema/tablefield.schema.yml
+@@ -67,3 +67,55 @@
+     column_header:
+       type: boolean
+       label: 'Display first column as a table header'
++
++field.value.tablefield:
++  type: mapping
++  label: 'Default value'
++  mapping:
++    caption:
++      type: string
++      label: 'Table caption'
++    rebuild:
++      type: mapping
++      label: 'Table structure'
++      mapping:
++        rows:
++          type: string
++          label: 'Number of rows'
++        cols:
++          type: string
++          label: 'Number of columns'
++    value:
++      type: sequence
++      label: 'Table data'
++      sequence:
++        type: tablefield.default_row.[%key]
++
++tablefield.default_row.*:
++  type: sequence
++  label: 'Table row'
++  sequence:
++    type: tablefield.default_cell.[%key].[%parent.%parent.%parent.%parent.%parent.settings.cell_processing]
++
++tablefield.default_row.caption:
++  type: string
++  label: 'Table caption'
++
++tablefield.default_cell.*.0:
++  type: text
++  label: 'Plain text cell'
++
++tablefield.default_cell.*.1:
++  type: mapping
++  label: 'Formatted cell'
++  mapping:
++    value:
++      type: text
++      label: 'Cell text'
++    format:
++      type: string
++      label: 'Text format'
++
++tablefield.default_cell.weight.*:
++  type: string
++  label: 'Row weight'

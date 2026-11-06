@@ -1,0 +1,317 @@
+diff --git a/config/schema/tablefield.schema.yml b/config/schema/tablefield.schema.yml
+index 127f4fb..4639be3 100644
+--- a/config/schema/tablefield.schema.yml
++++ b/config/schema/tablefield.schema.yml
+@@ -33,6 +33,11 @@ field.field_settings.tablefield:
+     cell_processing:
+       type: integer
+       label: 'Table cell processing'
++    allowed_formats:
++      type: sequence
++      label: 'Allowed text formats'
++      sequence:
++        type: string
+     empty_rules:
+       type: mapping
+       label: 'Rules for evaluating whether tablefield item should be considered empty'
+diff --git a/src/Element/Tablefield.php b/src/Element/Tablefield.php
+index 3dee85b..c7499b5 100644
+--- a/src/Element/Tablefield.php
++++ b/src/Element/Tablefield.php
+@@ -28,6 +28,8 @@ class Tablefield extends FormElementBase {
+       '#input_type' => 'textfield',
+       '#rebuild' => FALSE,
+       '#import' => FALSE,
++      '#editor' => FALSE,
++      '#allowed_formats' => [],
+       '#paste' => FALSE,
+       '#process' => [
+         [$class, 'processTablefield'],
+@@ -108,24 +110,36 @@ class Tablefield extends FormElementBase {
+       $draggable = TRUE;
+       for ($ii = 0; $ii < $cols; $ii++) {
+         if (!empty($element['#locked_cells'][$i][$ii]) && !empty($element['#lock'])) {
++          if (is_array($element['#locked_cells'][$i][$ii]) && isset($element['#locked_cells'][$i][$ii]['value']) && isset($element['#locked_cells'][$i][$ii]['format'])) {
++            $cell_value = $element['#locked_cells'][$i][$ii]['value'];
++            $cell_format = $element['#locked_cells'][$i][$ii]['format'];
++          }
++          else {
++            $cell_value = $element['#locked_cells'][$i][$ii];
++            $cell_format = 'component_mini_text';
++          }
++          $cell_rendered = !empty($cell_format) ? check_markup($cell_value, $cell_format) : $cell_value;
+           $draggable = FALSE;
+           $weightedRows[$i][$ii] = [
+             '#type' => 'item',
+-            '#value' => $element['#locked_cells'][$i][$ii],
+-            '#title' => $element['#locked_cells'][$i][$ii],
++            '#value' => $cell_rendered,
++            '#title' => $cell_rendered,
+           ];
+         }
+         else {
+           $cell_value = $value[$i][$ii] ?? '';
++          $cell_rendered = is_array($cell_value) && isset($cell_value['value']) ? $cell_value['value'] : $cell_value;
+           $weightedRows[$i][$ii] = [
+-            '#type' => $input_type,
++            '#type' => $element['#editor'] ? 'text_format' : $input_type,
+             '#maxlength' => 2048,
+             '#size' => 0,
+             '#attributes' => [
+               'class' => ['tablefield-row-' . $i, 'tablefield-col-' . $ii],
+               'style' => 'width:100%',
+             ],
+-            '#default_value' => $cell_value,
++            '#default_value' => $cell_rendered,
++            '#allowed_formats' => $element['#allowed_formats'],
++            '#format' => is_array($cell_value) && isset($cell_value['format']) ? $cell_value['format'] : NULL,
+           ];
+         }
+       }
+@@ -345,8 +359,7 @@ class Tablefield extends FormElementBase {
+     $parents = array_slice($triggering_element['#array_parents'], 0, -2, TRUE);
+     $rebuild = NestedArray::getValue($form, $parents);
+ 
+-    // We don't want to re-send the format/_weight options.
+-    unset($rebuild['format']);
++    // We don't want to re-send the _weight option.
+     unset($rebuild['_weight']);
+ 
+     // Set row value to default only if there is Add Row button clicked.
+@@ -388,6 +401,25 @@ class Tablefield extends FormElementBase {
+       $imported_tablefield = static::importCsv($id);
+ 
+       if ($imported_tablefield) {
++        $array_parents = array_slice($triggering_element['#array_parents'], 0, -2, TRUE);
++        $element = NestedArray::getValue($form, $array_parents);
++
++        $array_element_parents = array_slice($triggering_element['#array_parents'], 0, -3, TRUE);
++        $element_parents = NestedArray::getValue($form, $array_element_parents);
++
++        $value = $imported_tablefield['table'];
++        foreach ($value as $row => $row_value) {
++          foreach ($row_value as $col => $col_value) {
++            $col_el = $element['table'][$row][$col];
++            if ((empty($col_el) && $element_parents['#editor']) || (!empty($col_el) && $col_el['#type'] == 'text_format')) {
++              $imported_tablefield['table'][$row][$col] = [
++                'format' => $col_el['#format'],
++                'value' => $col_value
++              ];
++            }
++          }
++        }
++
+         $form_state->setValue($parents, $imported_tablefield);
+ 
+         $input = $form_state->getUserInput();
+diff --git a/src/Plugin/Field/FieldFormatter/TablefieldFormatter.php b/src/Plugin/Field/FieldFormatter/TablefieldFormatter.php
+index 3560711..675ba17 100644
+--- a/src/Plugin/Field/FieldFormatter/TablefieldFormatter.php
++++ b/src/Plugin/Field/FieldFormatter/TablefieldFormatter.php
+@@ -139,8 +139,10 @@ class TablefieldFormatter extends FormatterBase implements ContainerFactoryPlugi
+         foreach ($tabledata as $row_key => $row) {
+           foreach ($row as $col_key => $cell) {
+             if (is_numeric($col_key)) {
++              $value = is_array($cell) && isset($cell['value']) ? $cell['value'] : $cell;
++              $format = is_array($cell) && isset($cell['format']) ? $cell['format'] : NULL;
+               $tabledata[$row_key][$col_key] = [
+-                'data' => empty($table->format) ? $cell : check_markup($cell, $table->format),
++                'data' => empty($format) ? $value : check_markup($value, $format),
+                 'class' => ['row_' . $row_key, 'col_' . $col_key],
+               ];
+             }
+diff --git a/src/Plugin/Field/FieldType/TablefieldItem.php b/src/Plugin/Field/FieldType/TablefieldItem.php
+index 38fc2c9..551b1f4 100644
+--- a/src/Plugin/Field/FieldType/TablefieldItem.php
++++ b/src/Plugin/Field/FieldType/TablefieldItem.php
+@@ -35,15 +35,10 @@ class TablefieldItem extends FieldItemBase {
+           'size' => 'big',
+           'serialize' => TRUE,
+         ],
+-        'format' => [
+-          'type' => 'varchar',
+-          'length' => 255,
+-          'default value' => '',
+-        ],
+         'caption' => [
+           'type' => 'varchar',
+           'length' => 255,
+-          'default value' => '',
++          'default' => '',
+         ],
+       ],
+     ];
+@@ -63,6 +58,7 @@ class TablefieldItem extends FieldItemBase {
+         'ignore_table_structure' => 0,
+         'ignore_table_header' => 0,
+       ],
++      'allowed_formats' => [],
+     ];
+   }
+ 
+@@ -106,6 +102,13 @@ class TablefieldItem extends FieldItemBase {
+         $this->t('Filtered text (user selects input format)'),
+       ],
+     ];
++    $form['allowed_formats'] = [
++      '#type' => 'checkboxes',
++      '#title' => $this->t('Allowed text formats'),
++      '#options' => $this->getPossibleOptions(),
++      '#default_value' => $settings['allowed_formats'] ?? [],
++      '#description' => $this->t('Select the allowed text formats. If no formats are selected, all available text formats will be displayed to the user.'),
++    ];
+     $form['empty_rules'] = [
+       '#type' => 'details',
+       '#title' => $this->t('Rules for evaluating whether tablefield item should be considered empty'),
+@@ -128,6 +131,35 @@ class TablefieldItem extends FieldItemBase {
+   }
+ 
+   /**
++   * Builds an options list of all text formats configured on the site.
++   *
++   * Loads FilterFormat entities via the entity type manager and returns an
++   * associative array keyed by the format machine name (format ID) with values
++   * as the human-readable labels.
++   *
++   * Note: This returns all configured formats and is not permission-aware.
++   * If you need only formats usable by the current user, consider using
++   * filter_formats(\Drupal::currentUser()) instead.
++   *
++   * @return array<string,string> Associative array of format_id => label.
++   *
++   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
++   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
++   * @see \Drupal\filter\Entity\FilterFormat
++   */
++  private function getPossibleOptions(): array {
++    $storage = \Drupal::entityTypeManager()->getStorage('filter_format');
++    /** @var \Drupal\filter\Entity\FilterFormat[] $formats */
++    $formats = $storage->loadMultiple();
++    $options = [];
++    foreach ($formats as $format) {
++      $options[$format->id()] = $format->label();
++    }
++    asort($options, SORT_NATURAL | SORT_FLAG_CASE);
++    return $options;
++  }
++
++  /**
+    * {@inheritdoc}
+    */
+   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
+@@ -141,9 +173,6 @@ class TablefieldItem extends FieldItemBase {
+       ->setLabel(t('Table data'))
+       ->setDescription(t('Stores tabular data.'));
+ 
+-    $properties['format'] = DataDefinition::create('filter_format')
+-      ->setLabel(t('Text format'));
+-
+     $properties['caption'] = DataDefinition::create('string')
+       ->setLabel(t('Table Caption'));
+ 
+diff --git a/src/Plugin/Field/FieldWidget/TablefieldWidget.php b/src/Plugin/Field/FieldWidget/TablefieldWidget.php
+index b5ca81b..cc92c37 100644
+--- a/src/Plugin/Field/FieldWidget/TablefieldWidget.php
++++ b/src/Plugin/Field/FieldWidget/TablefieldWidget.php
+@@ -160,12 +160,12 @@ class TablefieldWidget extends WidgetBase implements ContainerFactoryPluginInter
+ 
+     // Allow the user to select input filters.
+     if (!empty($field_settings['cell_processing'])) {
+-      $element['#base_type'] = $element['#type'];
+-      $element['#type'] = 'text_format';
+-      $element['#format'] = $default_value->format ?? NULL;
+-      $element['#editor'] = FALSE;
++      $element['#editor'] = TRUE;
+     }
+ 
++    // Pass allowed formats.
++    $element['#allowed_formats'] = $field_settings['allowed_formats'] ?? [];
++
+     return $element;
+   }
+ 
+diff --git a/tablefield.post_update.php b/tablefield.post_update.php
+index c3c8e90..4f35ebd 100644
+--- a/tablefield.post_update.php
++++ b/tablefield.post_update.php
+@@ -25,6 +25,7 @@ function tablefield_post_update_implement_tablefield_field_config_schema(&$sandb
+       $settings['restrict_import'] = (bool) $settings['restrict_import'];
+       $settings['lock_values'] = (bool) $settings['lock_values'];
+       $settings['cell_processing'] = (int) $settings['cell_processing'];
++      $settings['allowed_formats'] = (array) $settings['allowed_formats'];
+       $settings['empty_rules']['ignore_table_structure'] = (bool) $settings['empty_rules']['ignore_table_structure'];
+       $settings['empty_rules']['ignore_table_header'] = (bool) $settings['empty_rules']['ignore_table_header'];
+       $fieldConfig->set('settings', $settings);
+@@ -40,7 +41,7 @@ function tablefield_post_update_implement_tablefield_entity_view_display_schema(
+     ->update($sandbox, 'entity_view_display', function (EntityViewDisplayInterface $entityViewDisplay) {
+       $updated = FALSE;
+       foreach ($entityViewDisplay->getComponents() as $key => $component) {
+-        if ($component['type'] === 'tablefield') {
++        if (isset($component['type']) && $component['type'] === 'tablefield') {
+           $component['settings']['row_header'] = (bool) $component['settings']['row_header'];
+           $component['settings']['column_header'] = (bool) $component['settings']['column_header'];
+           $entityViewDisplay->setComponent($key, $component);
+diff --git a/tests/src/Functional/TableValueFieldTest.php b/tests/src/Functional/TableValueFieldTest.php
+index 8264180..70d66a9 100644
+--- a/tests/src/Functional/TableValueFieldTest.php
++++ b/tests/src/Functional/TableValueFieldTest.php
+@@ -2,6 +2,7 @@
+ 
+ namespace Drupal\Tests\tablefield\Functional;
+ 
++use Drupal\field\Entity\FieldConfig;
+ use Drupal\Tests\BrowserTestBase;
+ 
+ /**
+@@ -21,7 +22,7 @@ class TableValueFieldTest extends BrowserTestBase {
+   /**
+    * {@inheritdoc}
+    */
+-  protected static $modules = ['node', 'tablefield'];
++  protected static $modules = ['node', 'tablefield', 'filter_test'];
+ 
+   /**
+    * {@inheritdoc}
+@@ -75,4 +76,42 @@ class TableValueFieldTest extends BrowserTestBase {
+     $assert_session->elementContains('css', 'table#tablefield-node-1-field_table-0 tbody tr td.row_2.col_2', 'Row 2-3');
+   }
+ 
++  /**
++   * Create a node with with a tablefield and cell processing enabled.
++   */
++  public function testTablefieldCellProcessing() {
++    // Enable cell processing.
++    $field_config = FieldConfig::loadByName('node', 'article', 'field_table');
++    $field_config->setSetting('cell_processing', TRUE)->save();
++
++    $this->drupalGet('node/add/article');
++    $this->submitForm([
++      'title[0][value]' => 'Llamas are cool',
++      'field_table[0][tablefield][table][0][0][value]' => '<strong>Bold text</strong>',
++      'field_table[0][tablefield][table][0][0][format]' => 'filtered_html',
++      'field_table[0][tablefield][table][0][1][value]' => '<u>Forbidden HTML</u>',
++      'field_table[0][tablefield][table][0][1][format]' => 'filtered_html',
++      'field_table[0][tablefield][table][0][2][value]' => '<u>Underlined text.</u>',
++      'field_table[0][tablefield][table][0][2][format]' => 'full_html',
++    ], 'Save');
++
++    $assert_session = $this->assertSession();
++    $assert_session->pageTextContains('Article Llamas are cool has been created.');
++
++    // The <strong> tag is allowed by the filtered_html format, so this should
++    // be shown.
++    $assert_session->elementContains('css', 'table#tablefield-node-1-field_table-0 thead th.row_0.col_0', '<strong>Bold text</strong>');
++    // The <u> tag is not allowed by the filtered_html format, so this tag
++    // should be removed.
++    $assert_session->elementContains('css', 'table#tablefield-node-1-field_table-0 thead th.row_0.col_1', 'Forbidden');
++    // All HTML is allowed by the full_html format.
++    $assert_session->elementContains('css', 'table#tablefield-node-1-field_table-0 thead th.row_0.col_2', '<u>Underlined text.</u>');
++
++    // Check that the submitted data is correctly saved in the database.
++    $node = $this->drupalGetNodeByTitle('Llamas are cool');
++    $this->assertEquals(['value' => '<strong>Bold text</strong>', 'format' => 'filtered_html'], $node->get('field_table')->value[0][0]);
++    $this->assertEquals(['value' => '<u>Forbidden HTML</u>', 'format' => 'filtered_html'], $node->get('field_table')->value[0][1]);
++    $this->assertEquals(['value' => '<u>Underlined text.</u>', 'format' => 'full_html'], $node->get('field_table')->value[0][2]);
++  }
++
+ }

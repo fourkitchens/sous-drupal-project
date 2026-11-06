@@ -1,123 +1,58 @@
-[![Sous](https://circleci.com/gh/fourkitchens/sous-drupal-project.svg?style=svg)](https://app.circleci.com/github/fourkitchens/sous-drupal-project/pipelines)
-
 # Features and Configurations
+
+The complete export in `config/default` records this site's enabled content model and configuration.
 
 ## Themes
 
-The installation process creates a starter [Emulsify](https://emulsify.info/) theme with your project name. This theme will
-be installed and enabled. It won't look like much at first, but it's ready for your delightful designs!
-
-The Gin Admin theme will be installed for your admin pages.
+Emulsify supplies the project theme; optionally install and compile a component library during creation, or add one later. Gin supplies the administrative interface. See [Build Tools](BUILD_TOOLS.md#theme) for development commands.
 
 ## Content types
 
-- **Frontpage**: A single use content type for creating a front page / home page of site.
-- **Page**: A general content type for all standard pages.
-
-There are three pieces of default content: a default homepage, an access denied page, and a page not found page.
+Review available types under Drupal's Structure → Content types screen.
+Page and Frontpage share titles, metadata, teaser fields, URL aliases and tags.
+Each has its own content browser display in the shared Pages/Frontpage View.
+Packaged content types provide Full, Teaser and Admin Preview displays. The content browsers use Admin Preview.
+Content starts in Draft and can become Published or Archived; the sidebar schedules workflow changes through Drupal cron.
+Layout Paragraphs has no Body field; both component setups offer text/media, Accordion, Tabs, Quote, Embed and Table.
+Layout Paragraphs adds a field-free one–four column Layout and a library picker.
+Tabs Item accepts all components except Layout. Layout Builder uses equivalent blocks, Inline Entity Form for nesting, and native column sections.
+Navigation requires the Layout Builder module; content layouts are enabled only for that option.
 
 ## Media
 
-All media types have fields for descriptions and tags.
+Every setup includes File, Image, Video and Uploaded Video media types. Use Uploaded Video for approved MP4 or WebM uploads and Video for hosted video.
+Image editing includes Focal Point. Teasers use the landscape responsive image style, with portrait and square styles also available.
 
-- **File**: For documents. Allowed file extensions are txt, doc, docx, pdf.
-- **Image**: Allowed file extensions are png, gif, jpg, jpeg. Has caption and copyright fields.
-- **Video**: For videos hosted on YouTube or Vimeo. Has caption, copyright, and transcript fields.
+## Optional content types
 
-### Paragraphs
+When selected, Event adds Smart Date with all-day and recurring schedules and an Event Type selector using Tagify.
+Events share Page-style teasers and month–year/type/title aliases; Upcoming and Past embeds keep ongoing events Upcoming until their end.
+A recurring series appears once per listing when different occurrences qualify for each.
+News Post adds a plain-text byline, multi-value News Categories, Page-style teasers and a Recent News embed.
+News aliases use `news/first-category/title`.
+Their teaser embeds link to listing pages with taxonomy and title/teaser-text search filters.
+Both use components with Paragraphs and layouts with Layout Builder.
+Profile adds required first/last names, a hidden automatic title, one Profile Image, a Basic HTML Bio and teasers. The Profiles embed sorts by last name. The listing page searches names and Bio. Profile aliases use `profile/title`.
+Event, News Post and Profile each add a content browser display to their existing listing View.
 
-The following paragraph types are available:
+## SEO
 
-- Image
-- Text
-- Text with Media
-- Video
+Every setup includes redirects for changed aliases, an XML sitemap at `/sitemap.xml`, and breadcrumbs that use page titles. It also includes Google Tag and Schema.org metadata integrations.
 
-There are also some utility modules to make paragraph widgets more user-friendly.
+## Optional site features
 
-### Entity Browsers
+Alerts displays site-wide banners at the top of every public page. Editors can schedule alerts and make them dismissible.
 
-Several entity browsers and associated views are set up, and used on fields where appropriate:
+Search adds a search box in the header and a `/search` results page with a Content type filter.
 
-- All Content Browser
-- All Media Browser
-- File Media Browser
-- Image Media Browser
-- Image Media Browser (Embedded)
-- Image/Video Media Browser
-- Video Media Browser
-
-### Text Formatting
-
-The following text formats come bundled with Drupal's default installation profile. Sous builds upon these defaults and gives them distinct configuration for specific purposes.
-
-- **Full HTML Filter**: An unrestricted filter that only corrects broken html and removes empty `p` tags when rendered.
-- **Basic HTML Filter**: General use filter that offers a broad range of formatting options. Ideal for most instances of formatted text.
-- **Restricted HTML Filter**: Limited access filter best used for specific scenarios where some formatting is appropriate.
-- **Plain Text Filter**: Rendered as a raw string.
+Content List combines hand-picked teasers and custom cards with a View listing.
+**Filter this list** lets editors narrow the bundled Events listings by event type and Recent News by news category. The Profiles listing offers an item limit.
+Content List requires Paragraphs or Layout Builder.
 
 ## User Roles and Permissions
 
-There is only one custom role: Super User. The installation process will block the regular user 1 account and create
-a new "sous_chef" user with this role. This improves security for the site.
-
-The Role Delegation module is enabled so that when you create custom roles, you can easily assign permissions for other
-roles to manage users without allowing them to create high level admins.
-
-## Contributed Modules
-
-Several contributed modules are installed with basic configuration. These add commonly used features to the site and
-improve the administrative experience.
-
-### Admin and authoring experience
-- Admin Toolbar
-- Allowed Formats
-- CKEditor Browser Context Menu
-- Embed
-- Enhanced Entity Browser
-- Entity Browser
-- Entity Browser IEF
-- Entity Embed
-- Entity Reference Revisions
-- Entity Usage
-- Field Group
-- Improve Line Breaks Filter
-- Inline Entity Form
-- Linkit
-- Taxonomy Manager
-
-### Theme related
-- Components
-- Emulsify Twig Extensions Module
-- jQuery UI
-- Twig Tweak
-
-### Media related
-- Blazy
-- Crop API
-- Dropzone JS
-- DropzoneJS Entity Browser Widget
-- Focal Point
-
-### Paragraphs related
-- Paragraphs
-- Paragraphs Collapsible
-- Paragraphs Editor Enhancements
-- Paragraphs Features
-
-### User related
-- Login History
-- Role Delegation
-
-### Other common utilities
-- Chaos Tools
-- Easy Breadcrumb
-- Google Tag Manager
-- Libraries
-- Menu Block
-- Metatag
-- Metatag: Open Graph
-- Metatag: Twitter Cards
-- Pathauto
-- Redirect
-- Token
+The local `sous_chef` uses the Superuser role and a random password shown in the order summary; UID 1 (`superuser_1`) stays blocked.
+Site Editors can manage and publish site content and delegate Site Editor from the Roles tab at `/user/{uid}/roles`.
+Superusers can assign any custom role on the account edit form. Drupal assigns Authenticated automatically.
+Review role permissions and account assignments when adding integrations or content workflows.
+Record site-specific extensions, content types and feature decisions here.
