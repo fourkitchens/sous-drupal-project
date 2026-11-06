@@ -15,7 +15,7 @@ Choose the content model during installation. Every choice includes Gin administ
 | `1` Paragraphs | Page and Frontpage with Layout Paragraphs components |
 | `2` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed and Table blocks |
 
-The package index advertises optional recipes such as Events, News Post, Profile, Alerts and Search. Dev Tools adds Devel, Stage File Proxy and Masquerade locally. Paragraph Types belongs to the Paragraphs main course.
+The package index advertises optional recipes such as Events, News Post, Profile, Alerts, Search and Content List. Choose Paragraphs or Layout Builder to use Content List. Dev Tools adds Devel, Stage File Proxy and Masquerade locally. Paragraph Types belongs to the Paragraphs main course.
 See [features and configurations](docs/features.md) for the site's building blocks.
 
 # Installation
@@ -35,7 +35,7 @@ Answer the content, optional recipe, CI and dessert questions before installatio
 For an unattended install, set every answer:
 
 ```sh
-SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-events,sous-news-post \
+SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-events,sous-news-post,sous-content-list \
   SOUS_CI=gitlab SOUS_LIBRARY=none \
   composer create-project fourkitchens/sous-drupal-project:^8.0 PROJECT_NAME
 ```
