@@ -11,7 +11,7 @@ baseline_recipes='sous-emulsify sous-admin sous-media sous-config-split sous-dev
 preflight_index() {
   # shellcheck disable=SC2016
   php -r '
-    [, $url, $constraint, $required, $preset] = $argv;
+    [, $url, $constraint, $required] = $argv;
     $major = (int) ltrim($constraint, "^");
     $context = stream_context_create(["http" => ["timeout" => 10]]);
     $json = @file_get_contents($url, FALSE, $context);
@@ -40,19 +40,19 @@ preflight_index() {
         exit(1);
       }
     }
-    if ($preset === "x") { exit; }
     ksort($packages);
     foreach ($packages as $name => $versions) {
       $recipe = substr($name, strlen("fourkitchens/"));
       if (!is_array($versions) || in_array($recipe, $required, TRUE)) { continue; }
-      $versions = array_filter($versions, fn($version) => (int) $version === $major, ARRAY_FILTER_USE_KEY);
+      $versions = array_filter($versions, $matching_release, ARRAY_FILTER_USE_BOTH);
       uksort($versions, "version_compare");
       $metadata = end($versions);
       if (($metadata["extra"]["sous"]["menu"] ?? FALSE) === TRUE) {
-        echo $recipe, "\t", $metadata["description"], "\n";
+        $component = ($metadata["extra"]["sous"]["component"] ?? FALSE) === TRUE ? "1" : "";
+        echo $recipe, "\t", $metadata["description"], "\t", $component, "\n";
       }
     }
-  ' "$sous_index" "$sous_version" "$baseline_recipes sous-workflow sous-paragraphs sous-core-layout-builder" "${SOUS_RECIPES+x}"
+  ' "$sous_index" "$sous_version" "$baseline_recipes sous-workflow sous-paragraphs sous-core-layout-builder"
 }
 
 sous_index=${SOUS_INDEX:-https://fourkitchens.github.io/sous-drupal-packages/packages.json}
@@ -101,12 +101,16 @@ case "$SOUS_CONTENT" in
   *) echo 'SOUS_CONTENT must be admin-only, paragraphs, or layout-builder.' >&2; exit 2 ;;
 esac
 
-# Offer sides from the preflight index when recipes were not preset.
+# Keep sides that require a main course out of the Admin only numbering.
+side_menu=$recipe_menu
+if [ -z "$content" ]; then
+  side_menu=$(printf '%s\n' "$recipe_menu" | awk -F '\t' '$3 != 1')
+fi
 if [ "${SOUS_RECIPES+x}" != x ]; then
   SOUS_RECIPES=''
-  if [ -n "$recipe_menu" ]; then
+  if [ -n "$side_menu" ]; then
     printf '\n  ON THE SIDE · Optional recipes\n\n'
-    printf '%s\n' "$recipe_menu" | awk -F '\t' '{printf "    [%d] %s\n        %s\n\n", NR, $1, $2}'
+    printf '%s\n' "$side_menu" | awk -F '\t' '{printf "    [%d] %s\n        %s\n\n", NR, $1, $2}'
     printf '  Add sides (numbers or names; spaces or commas; Enter for none): '
     read -r SOUS_RECIPES || SOUS_RECIPES=''
   fi
@@ -114,35 +118,42 @@ fi
 
 recipe_choices=$(printf '%s' "$SOUS_RECIPES" | tr ',' ' ')
 recipes=''
-# Resolve side choices in order so each recipe and its integration run once.
+component_recipes=''
+# Keep components last so they can extend fields created by other sides.
 set -f
 # shellcheck disable=SC2086
 for recipe in $recipe_choices; do
   case "$recipe" in
     *[!0-9]*) ;;
-    *) recipe=$(printf '%s\n' "$recipe_menu" | awk -F '\t' -v number="$recipe" 'NR == number {print $1}') ;;
+    *) recipe=$(printf '%s\n' "$side_menu" | awk -F '\t' -v number="$recipe" 'NR == number {print $1}') ;;
   esac
   if ! printf '%s\n' "$recipe" | grep -Eq '^sous-[a-z0-9-]+$'; then
     echo "Invalid recipe choice: $recipe" >&2
     exit 2
   fi
   # Admin brings Workflow, and replaying Emulsify would reset the project theme.
-  case " $baseline_recipes sous-workflow $content $recipes " in
+  case " $baseline_recipes sous-workflow $content $recipes $component_recipes " in
     *" $recipe "*) continue ;;
   esac
   # Content recipes belong to the main course and its bundled dependencies.
   case "$content:$recipe" in
     sous-paragraphs:sous-paragraph-types|sous-core-layout-builder:sous-content-types|sous-*:sous-content-base) continue ;;
   esac
-  case "$recipe" in
-    sous-paragraphs|sous-paragraph-types|sous-core-layout-builder|sous-content-types|sous-content-base)
+  component=$(printf '%s\n' "$recipe_menu" | awk -F '\t' -v recipe="$recipe" '$1 == recipe {print $3}')
+  case "$recipe:$content:$component" in
+    *::1|sous-paragraphs:*|sous-paragraph-types:*|sous-core-layout-builder:*|sous-content-types:*|sous-content-base:*)
       printf 'Recipe %s requires a compatible main course selected with SOUS_CONTENT.\n' "$recipe" >&2
       exit 2
       ;;
   esac
-  recipes="${recipes:+$recipes }$recipe"
+  if [ "$component" = 1 ]; then
+    component_recipes="${component_recipes:+$component_recipes }$recipe"
+  else
+    recipes="${recipes:+$recipes }$recipe"
+  fi
 done
 set +f
+recipes="$recipes${component_recipes:+${recipes:+ }$component_recipes}"
 
 if [ "${SOUS_CI+x}" != x ]; then
   cat <<'MENU'
