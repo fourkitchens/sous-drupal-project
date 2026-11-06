@@ -12,6 +12,13 @@
                 "fourkitchens/sous-*"
             ]
         },
+        "viewsreference-sift": {
+            "type": "git",
+            "url": "https://github.com/fourkitchens/viewsreference_sift.git",
+            "only": [
+                "fourkitchens/viewsreference_sift"
+            ]
+        },
         "drupal": {
             "type": "composer",
             "url": "https://packages.drupal.org/8"
@@ -39,7 +46,7 @@
     "conflict": {
         "drupal/drupal": "*"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,

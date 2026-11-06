@@ -11,6 +11,11 @@ Edit the template, installer, settings scaffold, CI templates and site guides he
 Reusable recipes live in [sous-drupal-packages](https://github.com/fourkitchens/sous-drupal-packages).
 The starter's `patches/` mirrors `sous-drupal-packages/patches`; update both in the same release.
 Generated sites own custom source, dependencies, complete configuration and deployment.
+
+Content List resolves Views Reference Sift from GitHub tags. The root Composer
+project accepts beta dependencies for upstream Views Reference and prefers
+stable versions wherever a compatible one is available.
+
 Keep `config/default` empty except `.gitkeep`; recipe config omits site UUIDs.
 Admin owns roles and Formats owns Linkit defaults; preserve existing project customization.
 
@@ -50,6 +55,11 @@ Every install checks the index for the baseline and main-course recipes before p
 The runner sets `SOUS_RECIPES` to skip the sides prompt.
 To inspect it interactively, leave that variable unset; the newest matching-major
 metadata offers optional packages with `extra.sous.menu: true`.
+Sides marked `extra.sous.component: true` apply after the other sides so they
+can extend the Content fields those recipes create. Admin only hides component
+sides in the menu and refuses them in `SOUS_RECIPES`.
+Keep the beta minimum stability in the root `composer.json` so it applies
+when Composer resolves a side's dependencies.
 `SOUS_INDEX` is a maintainer override for the preflight and menu. It defaults to
 `https://fourkitchens.github.io/sous-drupal-packages/packages.json`. To inspect
 unpublished metadata, point it at a local build.
@@ -68,8 +78,8 @@ The installer creates `AGENTS.md` and `docs/agents/workflow-facts.md` from `asse
 ## CI and releases
 
 PRs run admin-only with GitHub CI. Main pushes, nightly runs at 06:17 UTC
-and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. Layout Builder/GitLab and admin-only/no CI add Alerts and Search. Every row includes SEO and Dev Tools. Layout Builder selects UI Kit by name. Paragraphs selects the same library by Git URL and ref.
-Manual `packages_ref` selects a full reviewed packages commit.
+and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. The Layout Builder and Paragraphs rows also add Content List. Layout Builder/GitLab and admin-only/no CI add Alerts and Search. Every row includes SEO and Dev Tools. Layout Builder selects UI Kit by name. Paragraphs selects the same library by Git URL and ref.
+Manual `packages_ref` selects a packages branch, tag or commit.
 Keep action SHAs pinned; checks read only, publishing writes after checks pass.
 
 Release notes live on [GitHub Releases](https://github.com/fourkitchens/sous-drupal-project/releases).
