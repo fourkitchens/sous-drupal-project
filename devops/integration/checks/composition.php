@@ -121,6 +121,18 @@ if ($news) {
   $news_view = \Drupal\views\Entity\View::load("news");
   $checks["Recent News embed"] = isset($news_view->get("display")["embed_recent"]);
 }
+$content_list = in_array("sous-content-list", $recipes, TRUE);
+$config_storage = \Drupal::service("config.storage");
+$checks["Content List paragraph"] = $config_storage->exists("paragraphs.paragraphs_type.content_list") === ($content_list && $option === "paragraphs");
+$checks["Content List block"] = $config_storage->exists("block_content.type.content_list") === ($content_list && $option === "layout-builder");
+if ($content_list && $option === "paragraphs") {
+  foreach (["page" => TRUE, "event" => $events, "news_post" => $news] as $type => $installed) {
+    if ($installed) {
+      $field = \Drupal\field\Entity\FieldConfig::loadByName("node", $type, "field_content");
+      $checks["Content List allowed on $type"] = isset($field?->getSetting("handler_settings")["target_bundles"]["content_list"]);
+    }
+  }
+}
 $profile = in_array("sous-profile", $recipes, TRUE);
 $checks["Optional Profile"] = (bool) \Drupal::entityTypeManager()->getStorage("node_type")->load("profile") === $profile;
 if ($profile) {

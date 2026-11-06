@@ -232,23 +232,41 @@ export_template() {
 # Point Composer and the index preflight at the same local packages.
 use_local_packages() {
   local package_versions
-  package_versions=$(jq -s '
-    map({key: .name, value: "2.0.0"}) | from_entries
-  ' "$packages"/packages/*/composer.json)
+  jq -s '
+    {packages: (map({key: .name, value: {"2.0.0": (. + {version: "2.0.0"})}}) | from_entries)}
+  ' "$packages"/packages/*/composer.json > "$work_dir/packages.json"
+  package_versions=$(jq '.packages | map_values(keys[0])' "$work_dir/packages.json")
+  # Pin Sift in disposable previews until beta1 is available from Packagist.
   jq --arg url "$packages/packages/*" --argjson versions "$package_versions" '
     .repositories.sous =
       {type: "path", url: $url, options: {symlink: false, versions: $versions}}
+    | if $versions | has("fourkitchens/sous-content-list") then
+        "39aea3c5fc21dcf42e4f90d76058a79cdb4d58a3" as $sift
+        | .repositories["sift-preview"] = {type: "package", package: {
+            name: "fourkitchens/viewsreference_sift", version: "1.0.0-beta1", type: "drupal-module",
+            dist: {type: "zip", url: ("https://api.github.com/repos/fourkitchens/viewsreference_sift/zipball/" + $sift), reference: $sift},
+            require: {"drupal/core": "^10.3 || ^11", "drupal/viewsreference": "^2.0"}
+          }}
+      else . end
   ' "$work_dir/template/composer.json" > "$work_dir/composer.json"
   mv "$work_dir/composer.json" "$work_dir/template/composer.json"
-  jq -n --argjson versions "$package_versions" '
-    {packages: ($versions | with_entries(.value = {(.value): {version: .value}}))}
-  ' > "$work_dir/packages.json"
   export SOUS_INDEX="$work_dir/packages.json"
   jq -n --arg path "$packages" '
     {services: {web: {volumes: [
       {type: "bind", source: $path, target: $path, read_only: true}
     ]}}}
   ' > "$work_dir/template/.ddev/docker-compose.recipes.yaml"
+}
+
+# Run the installer in an empty directory to catch setup before refusal.
+check_admin_rejects_content_list() {
+  local status=0 reject_dir="$work_dir/rejected/$project_name"
+  mkdir -p "$reject_dir"
+  step reject-content-list env -C "$reject_dir" SOUS_CONTENT=admin-only \
+    SOUS_RECIPES=sous-content-list sh "$work_dir/template/devops/scripts/sous-build.sh" </dev/null || status=$?
+  test "$status" -eq 2
+  expect_line reject-content-list 'Recipe sous-content-list requires a compatible main course selected with SOUS_CONTENT.'
+  test -z "$(ls -A "$reject_dir")"
 }
 
 # Run the real project installer against the exported template, then enter the site.
@@ -570,6 +588,9 @@ main() {
   step absent-starter-agent-brief test ! -e "$work_dir/template/AGENTS.md"
   if [ -n "$packages" ]; then
     use_local_packages
+    if [ "$option" = admin-only ] && [ -f "$packages/packages/sous-content-list/composer.json" ]; then
+      check_admin_rejects_content_list
+    fi
   fi
   # Let Composer copy the checks into the site before DDEV starts syncing it.
   step copy-checks cp -R "$source_root/devops/integration/checks" "$work_dir/template/$checks_dir"
