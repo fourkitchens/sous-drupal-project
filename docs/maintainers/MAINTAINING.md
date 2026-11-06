@@ -12,9 +12,9 @@ Reusable recipes live in [sous-drupal-packages](https://github.com/fourkitchens/
 The starter's `patches/` mirrors `sous-drupal-packages/patches`; update both in the same release.
 Generated sites own custom source, dependencies, complete configuration and deployment.
 
-The root Composer project accepts beta dependencies so Content List can use
-Views Reference. With `prefer-stable: true`, Composer still selects a stable
-version wherever a compatible one is available.
+Content List resolves Views Reference Sift from GitHub tags. The root Composer
+project accepts beta dependencies for upstream Views Reference and prefers
+stable versions wherever a compatible one is available.
 
 Keep `config/default` empty except `.gitkeep`; recipe config omits site UUIDs.
 Admin owns roles and Formats owns Linkit defaults; preserve existing project customization.

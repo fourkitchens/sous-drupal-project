@@ -236,18 +236,9 @@ use_local_packages() {
     {packages: (map({key: .name, value: {"2.0.0": (. + {version: "2.0.0"})}}) | from_entries)}
   ' "$packages"/packages/*/composer.json > "$work_dir/packages.json"
   package_versions=$(jq '.packages | map_values(keys[0])' "$work_dir/packages.json")
-  # Pin Sift in disposable previews until beta1 is available from Packagist.
   jq --arg url "$packages/packages/*" --argjson versions "$package_versions" '
     .repositories.sous =
       {type: "path", url: $url, options: {symlink: false, versions: $versions}}
-    | if $versions | has("fourkitchens/sous-content-list") then
-        "39aea3c5fc21dcf42e4f90d76058a79cdb4d58a3" as $sift
-        | .repositories["sift-preview"] = {type: "package", package: {
-            name: "fourkitchens/viewsreference_sift", version: "1.0.0-beta1", type: "drupal-module",
-            dist: {type: "zip", url: ("https://api.github.com/repos/fourkitchens/viewsreference_sift/zipball/" + $sift), reference: $sift},
-            require: {"drupal/core": "^10.3 || ^11", "drupal/viewsreference": "^2.0"}
-          }}
-      else . end
   ' "$work_dir/template/composer.json" > "$work_dir/composer.json"
   mv "$work_dir/composer.json" "$work_dir/template/composer.json"
   export SOUS_INDEX="$work_dir/packages.json"

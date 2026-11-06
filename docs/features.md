@@ -46,7 +46,7 @@ Alerts displays site-wide banners at the top of every public page. Editors can s
 Search adds a search box in the header and a `/search` results page with a Content type filter.
 
 Content List combines hand-picked teasers and custom cards with a View listing.
-Views Reference Sift lets editors narrow supported listings by taxonomy terms.
+**Filter this list** lets editors narrow the bundled Events listings by event type and Recent News by news category. The Profiles listing offers an item limit.
 Content List requires Paragraphs or Layout Builder.
 
 ## User Roles and Permissions
