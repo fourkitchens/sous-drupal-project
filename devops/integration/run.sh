@@ -288,11 +288,6 @@ check_site_responds() {
       --write-out '%{http_code}\n' "${http_url%/}/sitewide_alert/load"
     expect_line alerts-load 200
   fi
-  if [[ "$selected" == *,sous-search,* ]]; then
-    step search-page curl --silent --show-error --output /dev/null \
-      --write-out '%{http_code}\n' "${http_url%/}/search"
-    expect_line search-page 200
-  fi
   step sitemap-generate ddev drush simple-sitemap:generate
   step sitemap curl --silent --show-error --output /dev/null \
     --write-out '%{http_code}\n' "${http_url%/}/sitemap.xml"
@@ -479,8 +474,8 @@ check_lock_reinstall() {
   step composer-scripts ddev composer run-script --list --no-ansi
   if grep -E '^[[:space:]]*post-create-project-cmd([[:space:]]|$)' "$artifacts/composer-scripts.log"; then return 1; fi
 
-  # The fixture is mounted during setup only, so it cannot satisfy this install.
-  if [ -n "$packages" ]; then
+  # A local Composer path install of the runtime module still needs its source.
+  if [ -n "$packages" ] && ! jq -e '.packages[] | select(.name == "fourkitchens/sous-component-support" and .dist.type == "path")' composer.lock >/dev/null; then
     step remove-package-mount rm .ddev/docker-compose.recipes.yaml
     step restart-without-packages ddev restart
     step absent-package-mount ddev exec --raw -- test ! -e "$packages/packages"
@@ -506,7 +501,7 @@ check_lock_reinstall() {
   # shellcheck disable=SC2016
   step locked-selection jq -e '
     (.locked | map(.name)) as $names
-    | all($names[]; test("^(fourkitchens/sous-|drupal/dropzonejs$|dropzone/dropzone$)") | not)
+    | all($names[]; . == "fourkitchens/sous-component-support" or (test("^(fourkitchens/sous-|drupal/dropzonejs$|dropzone/dropzone$)") | not))
       and all(["drupal/devel", "drupal/masquerade", "drupal/stage_file_proxy"][];
         . as $name | $names | index($name) != null)
   ' "$artifacts/locked-packages.log"

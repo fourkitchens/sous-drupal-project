@@ -134,6 +134,9 @@ if ($content_list && $option === "paragraphs") {
     }
   }
 }
+$gallery = in_array("sous-gallery", $recipes, TRUE);
+$checks["Gallery paragraph"] = $config_storage->exists("paragraphs.paragraphs_type.gallery") === ($gallery && $option === "paragraphs");
+$checks["Gallery block"] = $config_storage->exists("block_content.type.gallery") === ($gallery && $option === "layout-builder");
 $profile = in_array("sous-profile", $recipes, TRUE);
 $checks["Optional Profile"] = (bool) \Drupal::entityTypeManager()->getStorage("node_type")->load("profile") === $profile;
 if ($profile) {
@@ -168,15 +171,17 @@ if ($profile) {
     $account_switcher->switchBack();
   }
 }
+$alerts = in_array("sous-alerts", $recipes, TRUE);
+$alert = \Drupal\block\Entity\Block::load("sous_sitewide_alert");
+$checks["Optional Alerts block"] = $alerts
+  ? $alert && $alert->status() && $alert->getTheme() === $theme && $alert->getRegion() === "content_top"
+  : !$alert;
+$search = in_array("sous-search", $recipes, TRUE);
+$checks["Optional Search view"] = $config_storage->exists("views.view.search") === $search;
 foreach ([
-  "Alerts" => ["sous-alerts", "sous_sitewide_alert", "content_top", ["sitewide_alert", "sitewide_alert_block"]],
-  "Search" => ["sous-search", "sous_search_form", "header", ["search_api", "search_api_db", "facets", "facets_exposed_filters", "better_exposed_filters"]],
-] as $name => [$recipe, $block_id, $region, $modules]) {
-  $selected = in_array($recipe, $recipes, TRUE);
-  $block = \Drupal\block\Entity\Block::load($block_id);
-  $checks["Optional $name block"] = $selected
-    ? $block && $block->status() && $block->getTheme() === getenv("SOUS_SMOKE_THEME") && $block->getRegion() === $region
-    : !$block;
+  "Alerts" => [$alerts, ["sitewide_alert", "sitewide_alert_block"]],
+  "Search" => [$search, ["search_api", "search_api_db", "facets", "facets_exposed_filters", "better_exposed_filters"]],
+] as $name => [$selected, $modules]) {
   foreach ($modules as $module) {
     $checks["Optional $name module: $module"] = \Drupal::moduleHandler()->moduleExists($module) === $selected;
   }

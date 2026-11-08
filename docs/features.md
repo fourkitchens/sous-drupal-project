@@ -30,9 +30,9 @@ Events share Page-style teasers and month–year/type/title aliases; Upcoming an
 A recurring series appears once per listing when different occurrences qualify for each.
 News Post adds a plain-text byline, multi-value News Categories, Page-style teasers and a Recent News embed.
 News aliases use `news/first-category/title`.
-Their teaser embeds link to listing pages with taxonomy and title/teaser-text search filters.
+Placeable Event and News listing blocks offer taxonomy and title or teaser-text filters.
 Both use components with Paragraphs and layouts with Layout Builder.
-Profile adds required first/last names, a hidden automatic title, one Profile Image, a Basic HTML Bio and teasers. The Profiles embed sorts by last name. The listing page searches names and Bio. Profile aliases use `profile/title`.
+Profile adds required first/last names, a hidden automatic title, one Profile Image, a Basic HTML Bio and teasers. The Profiles embed sorts by last name. The placeable listing block searches names and Bio. Profile aliases use `profile/title`.
 Event, News Post and Profile each add a content browser display to their existing listing View.
 
 ## SEO
@@ -43,11 +43,13 @@ Every setup includes redirects for changed aliases, an XML sitemap at `/sitemap.
 
 Alerts displays site-wide banners at the top of every public page. Editors can schedule alerts and make them dismissible.
 
-Search adds a search box in the header and a `/search` results page with a Content type filter.
+Search provides a placeable results block with a keyword field and a Content type filter.
 
-Content List combines teasers from existing content and custom teasers with a View listing.
+Content List combines hand-picked teasers with a View listing. Each Content List Item can reference existing content or use a custom image, heading, text, and link.
 **Filter this list** lets editors narrow the bundled Events listings by event type and Recent News by news category. The Profiles listing offers an item limit.
 Content List requires Paragraphs or Layout Builder.
+
+Gallery adds a Paragraphs or Layout Builder component for any number of images and hosted videos, with an optional heading and introduction.
 
 ## User Roles and Permissions
 
