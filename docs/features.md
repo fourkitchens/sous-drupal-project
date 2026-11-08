@@ -9,7 +9,7 @@ Emulsify supplies the project theme; optionally install and compile a component 
 ## Content types
 
 Review available types under Drupal's Structure → Content types screen.
-Page and Frontpage share titles, metadata, teaser fields, URL aliases and tags.
+Page and Frontpage share titles, metadata, teaser fields and URL aliases.
 Each has its own content browser display in the shared Pages/Frontpage View.
 Packaged content types provide Full, Teaser and Admin Preview displays. The content browsers use Admin Preview.
 Content starts in Draft and can become Published or Archived; the sidebar schedules workflow changes through Drupal cron.
@@ -20,7 +20,7 @@ Navigation requires the Layout Builder module; content layouts are enabled only 
 
 ## Media
 
-Every setup includes File, Image, Video and Uploaded Video media types. Use Uploaded Video for approved MP4 or WebM uploads and Video for hosted video.
+Every setup includes File, Image, Video and Video File media types. Use Video File for approved MP4 or WebM uploads and Video for YouTube or Vimeo embeds.
 Image editing includes Focal Point. Teasers use the landscape responsive image style, with portrait and square styles also available.
 
 ## Optional content types
@@ -45,7 +45,7 @@ Alerts displays site-wide banners at the top of every public page. Editors can s
 
 Search adds a search box in the header and a `/search` results page with a Content type filter.
 
-Content List combines hand-picked teasers and custom cards with a View listing.
+Content List combines teasers from existing content and custom teasers with a View listing.
 **Filter this list** lets editors narrow the bundled Events listings by event type and Recent News by news category. The Profiles listing offers an item limit.
 Content List requires Paragraphs or Layout Builder.
 

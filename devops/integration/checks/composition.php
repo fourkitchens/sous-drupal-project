@@ -8,6 +8,7 @@ $display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load
 $uid1 = \Drupal\user\Entity\User::load(1);
 $chef = user_load_by_name("sous_chef");
 $editor = \Drupal\user\Entity\Role::load("site_editor");
+$media_types = \Drupal::entityTypeManager()->getStorage("media_type");
 $checks = [
   // UID 1 stays blocked while the separate chef account can sign in as Superuser.
   "Blocked UID 1" => $uid1->isBlocked() && $uid1->getAccountName() === "superuser_1",
@@ -24,7 +25,7 @@ $checks = [
   // Media and Config Split are applied to every main course.
   "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split"),
   "Split definitions" => \Drupal::service("config.storage")->exists("config_split.config_split.local") && \Drupal::service("config.storage")->exists("config_split.config_split.staging"),
-  "Media types" => count(\Drupal::entityTypeManager()->getStorage("media_type")->loadMultiple(["file", "image", "video", "uploaded_video"])) === 4,
+  "Media types" => count($media_types->loadMultiple(["file", "image", "video"])) === 3 && count($media_types->loadByProperties(["source" => "video_file"])) === 1,
   "Site Editor" => $editor?->label() === "Site Editor" && !$editor->isAdmin() && !$editor->hasPermission("administer site configuration"),
 ];
 $breakpoint_manager = \Drupal::service("breakpoint.manager");
