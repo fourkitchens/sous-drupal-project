@@ -100,8 +100,8 @@ jobs:
           ${{ fromJSON(github.event_name == 'pull_request' &&
           '[{"option":"admin-only","ci":"github"}]' ||
           '[{"option":"admin-only","ci":"github"},
-          {"option":"layout-builder","ci":"gitlab","recipes":"sous-content-list,sous-events,sous-news-post,sous-profile,sous-alerts,sous-search","library":"ui-kit"},
-          {"option":"paragraphs","ci":"circleci","recipes":"sous-content-list,sous-events,sous-news-post,sous-profile","library":"https://github.com/emulsify-ds/emulsify-ui-kit.git","library_ref":"codex/fix-drupal-theme-lint"},
+          {"option":"layout-builder","ci":"gitlab","recipes":"sous-content-list,sous-gallery,sous-events,sous-news-post,sous-profile,sous-alerts,sous-search","library":"ui-kit"},
+          {"option":"paragraphs","ci":"circleci","recipes":"sous-content-list,sous-gallery,sous-events,sous-news-post,sous-profile","library":"https://github.com/emulsify-ds/emulsify-ui-kit.git","library_ref":"codex/fix-drupal-theme-lint"},
           {"option":"admin-only","ci":"none","recipes":"sous-events,sous-news-post,sous-profile,sous-alerts,sous-search"}]') }}
     steps:
       - name: Initialize diagnostic artifacts

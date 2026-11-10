@@ -78,7 +78,7 @@ The installer creates `AGENTS.md` and `docs/agents/workflow-facts.md` from `asse
 ## CI and releases
 
 PRs run admin-only with GitHub CI. Main pushes, nightly runs at 06:17 UTC
-and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. The Layout Builder and Paragraphs rows also add Content List. Layout Builder/GitLab and admin-only/no CI add Alerts and Search. Every row includes SEO and Dev Tools. Layout Builder selects UI Kit by name. Paragraphs selects the same library by Git URL and ref.
+and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. The Layout Builder and Paragraphs rows also add Content List and Gallery. Layout Builder/GitLab and admin-only/no CI add Alerts and Search. Every row includes SEO and Dev Tools. Layout Builder selects UI Kit by name. Paragraphs selects the same library by Git URL and ref.
 Manual `packages_ref` selects a packages branch, tag or commit.
 Keep action SHAs pinned; checks read only, publishing writes after checks pass.
 
@@ -114,15 +114,16 @@ Run these from the starter root with the final candidate checked out. For local 
 
 ```sh
 sides=sous-events,sous-news-post,sous-profile
+components=sous-content-list,sous-gallery
 ui_kit=https://github.com/emulsify-ds/emulsify-ui-kit.git
 ui_kit_ref=codex/fix-drupal-theme-lint
 
 bash devops/integration/run.sh --option admin-only --ci github \
-  --library none --artifacts /tmp/sous-8-admin
+  --recipes '' --library none --artifacts /tmp/sous-8-admin
 bash devops/integration/run.sh --option layout-builder --ci gitlab \
-  --recipes "$sides,sous-alerts,sous-search" --library ui-kit --artifacts /tmp/sous-8-layout
+  --recipes "$components,$sides,sous-alerts,sous-search" --library ui-kit --artifacts /tmp/sous-8-layout
 bash devops/integration/run.sh --option paragraphs --ci circleci \
-  --recipes "$sides" --library "$ui_kit" --library-ref "$ui_kit_ref" \
+  --recipes "$components,$sides" --library "$ui_kit" --library-ref "$ui_kit_ref" \
   --artifacts /tmp/sous-8-paragraphs
 bash devops/integration/run.sh --option admin-only --ci none \
   --recipes "$sides,sous-alerts,sous-search" --library none --artifacts /tmp/sous-8-optional
@@ -134,12 +135,14 @@ The Admin-only baseline runs `composer ci` with an empty scaffold and then build
 
 | Check | Evidence and release gate |
 | --- | --- |
-| Provider templates | Parse all three YAML templates and verify each generated checkout contains the selected provider's files. Starter fixture [run 41955643729](https://github.com/fourkitchens/sous-drupal-project/actions/runs/41955643729) passed all four rows at starter `7a93ac9` with `packages_ref=cd41bf2`. |
+| Provider templates | Parse all three YAML templates and verify each generated checkout contains the selected provider's files. |
 | Shared build | The local runner exercises `composer ci` for Admin-only and selected-library rows. This verifies the shared command with the generated dependencies and assets. |
 | Starter GitHub Actions | See the [PR #132 test evidence](https://github.com/fourkitchens/sous-drupal-project/pull/132#functional-testing) for the latest PR run. Its Admin-only/GitHub row uses the public index. Rerun the full public matrix after packages publish. |
 | Generated GitHub Actions | Run `Site build` in a configured generated repository and record the job URL and revision. Available GitHub evidence is from the starter's workflow. |
 | Generated GitLab CI/CD | Run the generated `build` job in a configured GitLab project and record the pipeline URL and revision. Project access was unavailable during this check. |
 | Generated CircleCI | Run the generated `build` job in a configured CircleCI project and record the pipeline URL and revision. Project access was unavailable during this check. |
+
+Record fresh fixture evidence at release time.
 
 Use a test branch or pull request for provider build checks. Provider runner provisioning, caches, and release jobs require evidence from the actual provider.
 
@@ -157,19 +160,6 @@ Before these fixes, all four November 4, 2026 fixture rows reported the same hig
 Semantic-release 25.0.9 replaces its default plugin list with the configured list and imports only the selected plugins. Running its loader against the GitHub and GitLab configs loaded the commit analyzer, release notes generator and the corresponding publisher. The npm plugin stays installed as a dependency of semantic-release. Nested npm scripts can still reach its bundled CLI via `node_modules/.bin/npm`, so the lock refresh also covers that tooling path. [Config loader](https://github.com/semantic-release/semantic-release/blob/v25.0.9/lib/get-config.js#L62-L92) · [Plugin loader](https://github.com/semantic-release/semantic-release/blob/v25.0.9/lib/plugins/index.js#L13-L28)
 
 The installer runs the root CLI with its override and copies that rule into the generated theme before its first npm install. Site deployment ships compiled theme assets and omits `node_modules`. The upstream CLI fix has merged, and npm still served `@emulsify/cli@2.4.1` on November 4, 2026. Remove the root override and the installer’s theme override once npm publishes `@emulsify/cli@2.4.2` or later and `@emulsify/core` depends on a fixed version. Re-run both audits after removing them. [Emulsify CLI fix](https://github.com/emulsify-ds/emulsify-cli/pull/377)
-
-### Recorded fixture verification
-
-On November 4, 2026, the runner exported starter commit `513495a43d59c0b562132defa592e4f26a63d71a` and used packages commit `432da88e8feb76b1604ae2a73889a2da2fc01733`. All four installations passed their clean lockfile reinstall and configuration deploy after the fixture mount was removed. The lockfiles stayed byte-identical, and Drush reported an empty configuration diff.
-
-| Matrix row | Verified evidence |
-| --- | --- |
-| Admin only with GitHub template | Baseline dependencies and splits, empty scaffold `composer ci`, project-owned Sass output, backup, restore, and rebuild. |
-| Layout Builder with GitLab template | Named UI Kit installed and compiled, optional recipe integrations, and shared `composer ci`. |
-| Paragraphs with CircleCI template | UI Kit installed and compiled through its custom Git URL and ref, optional recipe integrations, shared `composer ci`, and retained MIT attribution. |
-| Admin only with Dev Tools and no CI template | Opt-in dependencies, local-only module activation and split exports, shared `composer ci`, and project-owned Sass output. |
-
-Source checks passed with Node from `.nvmrc`, Composer validation, ShellCheck 0.11.0, and YAML parsing of all three provider templates. `actionlint` was unavailable locally. The macOS fixture runs used disposable DDEV mount settings and stopped the test site before rebuild. The public Composer index still returned HTTP 404, which blocks the published installation matrix.
 
 ### Adopting 8.0 from 7.0.1
 
