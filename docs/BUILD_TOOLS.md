@@ -18,7 +18,7 @@ To load the stylesheet in Drupal, list the compiled path in the theme's `.librar
 
 ### Install a component library later
 
-Use the Emulsify CLI to install UI Kit or an external library. For UI Kit, use the upstream lint-fix branch until a released version passes lint and build. [Emulsify CLI usage](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage) · [UI Kit lint fix](https://github.com/emulsify-ds/emulsify-ui-kit/pull/189)
+Use the Emulsify CLI to install UI Kit or an external library. For UI Kit, use the upstream lint-fix branch until UI Kit 2.0 ships. [Emulsify CLI usage](https://www.emulsify.info/docs/supporting-projects/emulsify-cli/emulsify-cli-usage) · [UI Kit lint fix](https://github.com/emulsify-ds/emulsify-ui-kit/pull/189)
 
 ```sh
 (

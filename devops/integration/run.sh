@@ -260,6 +260,19 @@ check_admin_rejects_content_list() {
   test -z "$(ls -A "$reject_dir")"
 }
 
+# Check that a missing library ref stops before setup creates files.
+check_rejects_missing_library_ref() {
+  local status=0 reject_dir="$work_dir/rejected-library/$project_name"
+  mkdir -p "$reject_dir"
+  step reject-library-ref env -C "$reject_dir" SOUS_CONTENT=admin-only SOUS_RECIPES='' SOUS_CI=none \
+    SOUS_LIBRARY=ui-kit SOUS_LIBRARY_REF=sous-missing-ref \
+    sh "$work_dir/template/devops/scripts/sous-build.sh" </dev/null || status=$?
+  test "$status" -eq 2
+  expect_line reject-library-ref 'Cannot resolve component library ref "sous-missing-ref" in https://github.com/emulsify-ds/emulsify-ui-kit.git.'
+  expect_line reject-library-ref 'Set SOUS_LIBRARY_REF to an existing branch or tag.'
+  test -z "$(ls -A "$reject_dir")"
+}
+
 # Run the real project installer against the exported template, then enter the site.
 create_site() {
   step create-project composer create-project fourkitchens/sous-drupal-project \
@@ -576,6 +589,7 @@ main() {
     use_local_packages
     if [ "$option" = admin-only ] && [ -f "$packages/packages/sous-content-list/composer.json" ]; then
       check_admin_rejects_content_list
+      check_rejects_missing_library_ref
     fi
   fi
   # Let Composer copy the checks into the site before DDEV starts syncing it.

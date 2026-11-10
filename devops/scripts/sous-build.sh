@@ -4,6 +4,8 @@
 set -eu
 
 sous_version='^2.0'
+# Keep this lint fix until UI Kit 2.0 ships (https://github.com/emulsify-ds/emulsify-ui-kit/pull/189).
+ui_kit_ref='codex/fix-drupal-theme-lint'
 # Keep one baseline list for selection, Composer and Drupal.
 baseline_recipes='sous-emulsify sous-admin sous-media sous-config-split sous-dev-tools sous-seo'
 
@@ -227,8 +229,7 @@ case "$SOUS_LIBRARY" in
   ui-kit|'Emulsify UI Kit'|1)
     library_repository=https://github.com/emulsify-ds/emulsify-ui-kit.git
     library_label='Emulsify UI Kit'
-    # Use upstream's lint fix until a release includes it: https://github.com/emulsify-ds/emulsify-ui-kit/pull/189.
-    library_ref=${library_ref:-codex/fix-drupal-theme-lint}
+    library_ref=${library_ref:-$ui_kit_ref}
     ;;
   https://*.git|http://*.git|ssh://*.git|git://*.git|file://*.git|*@*:*.git)
     library_repository=$SOUS_LIBRARY
@@ -239,6 +240,25 @@ case "$SOUS_LIBRARY" in
     exit 2
     ;;
 esac
+
+# Resolve the library ref before any setup commands run.
+library_ref_label=${library_ref:-repository default branch}
+if [ -n "$library_repository" ]; then
+  if [ -z "$library_ref" ]; then
+    library_head=$(GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh -o BatchMode=yes}" \
+      git ls-remote --symref "$library_repository" HEAD </dev/null) || library_head=''
+    library_ref=$(printf '%s\n' "$library_head" | awk '$1 == "ref:" && sub(/^refs\/heads\//, "", $2) {print $2; exit}')
+  elif ! library_refs=$(GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh -o BatchMode=yes}" \
+    git ls-remote --exit-code --refs "$library_repository" "refs/heads/$library_ref" "refs/tags/$library_ref" </dev/null) ||
+    ! printf '%s\n' "$library_refs" | cut -f2 | grep -Fqx -e "refs/heads/$library_ref" -e "refs/tags/$library_ref"; then
+    library_ref=''
+  fi
+  if [ -z "$library_ref" ]; then
+    printf 'Cannot resolve component library ref "%s" in %s.\nSet SOUS_LIBRARY_REF to an existing branch or tag.\n' \
+      "$library_ref_label" "$library_repository" >&2
+    exit 2
+  fi
+fi
 
 # Box both kitchen tickets at their widest line so long values stay intact.
 box() {
@@ -271,7 +291,7 @@ printf '\n'
   printf '  TICKET #%-8s                       ORDER RECEIVED\n' "$order_number"
   printf '%s\n\n  01  MAIN COURSE\n      %s\n\n  02  ON THE SIDE\n%s\n\n  03  SERVICE\n      %s\n\n  04  DESSERT\n      %s\n' \
     "$ticket_rule" "$content_label" "$prep_sides" "$ci_label" "$library_label"
-  if [ -n "$library_repository" ]; then printf '      Ref: %s\n' "${library_ref:-repository default branch}"; fi
+  if [ -n "$library_repository" ]; then printf '      Ref: %s\n' "$library_ref_label"; fi
   printf "\n  PANTRY STAPLES (INCLUDED)\n%s\n\n%s\n       [x] RECEIVED       [ ] COOKING       [ ] READY\n\n                Aprons on. Let's get cooking!\n\n" "$prep_included" "$ticket_rule"
 } | box
 
@@ -320,11 +340,6 @@ npm --prefix "web/themes/custom/$theme" install --include=dev
 theme_status='Scaffold and npm tools ready'
 if [ -n "$library_repository" ]; then
   printf '\nBaking dessert: adding your component library and compiling the theme.\n\n'
-  if [ -z "$library_ref" ]; then
-    library_head=$(GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh -o BatchMode=yes}" \
-      git ls-remote --symref "$library_repository" HEAD </dev/null)
-    library_ref=$(printf '%s\n' "$library_head" | awk '$1 == "ref:" {sub(/^refs\/heads\//, "", $2); print $2; exit}')
-  fi
   emulsify_cli="$PWD/node_modules/.bin/emulsify"
   (
     cd "web/themes/custom/$theme"

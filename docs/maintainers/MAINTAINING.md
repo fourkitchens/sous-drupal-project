@@ -108,6 +108,8 @@ Use [starter PR #132](https://github.com/fourkitchens/sous-drupal-project/pull/1
 
 ### Final installation matrix
 
+When UI Kit 2.0 is tagged, update the `ui_kit_ref` setting in `devops/scripts/sous-build.sh`, the Paragraphs/CircleCI row in `.github/workflows/ci.yml`, the install example in `docs/BUILD_TOOLS.md`, and `ui_kit_ref` in the matrix commands below.
+
 Run these from the starter root with the final candidate checked out. For local fixture coverage, append `--packages "$packages"` to each command, with `packages` set to the absolute path of the reviewed companion checkout. Keep each row's artifacts separate.
 
 ```sh

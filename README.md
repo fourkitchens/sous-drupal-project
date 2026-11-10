@@ -45,6 +45,7 @@ SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-events,sous-news-post,sous-content
 Set `SOUS_RECIPES=''` for no extras, or supply names separated by spaces or commas.
 `SOUS_LIBRARY` accepts `none` (default), `ui-kit` or an Emulsify-compatible Git URL ending in `.git`.
 `SOUS_LIBRARY_REF` optionally selects a branch or tag; custom repositories otherwise use their default branch.
+The installer checks the library ref before it starts setting up the site.
 The final order summary shows the local URL and a generated password for `sous_chef`; UID 1 stays blocked.
 
 If a fresh install fails partway through, keep the partial directory for troubleshooting and fix the reported error. Run `composer create-project` again in a fresh directory with a different name so DDEV creates a separate database. To reuse the original name, remove the failed DDEV project and move the partial directory aside first. The installer starts from a fresh database and theme scaffold on each run.
