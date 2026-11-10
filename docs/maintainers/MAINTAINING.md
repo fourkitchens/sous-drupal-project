@@ -163,7 +163,7 @@ The installer runs the root CLI with its override and copies that rule into the 
 
 ### Adopting 8.0 from 7.0.1
 
-Sous 8.0 is for new sites. Existing 7.x sites adopt changes through site-owned updates and migrations. Starter fixes for 7.x go to [`sous-7.x`](https://github.com/fourkitchens/sous-drupal-project/tree/sous-7.x).
+Sous 8.0 is for new sites. Existing 7.x sites adopt changes through site-owned updates and migrations.
 
 | 7.0.1 main course | 8.0 equivalent |
 | --- | --- |
