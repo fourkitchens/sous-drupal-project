@@ -324,7 +324,7 @@ check_dashboard_login() {
   local http_url chef_password form_build_id
   http_url=$(ddev describe -j | jq -er '.raw.httpurl')
   chef_password=$(awk '$1 == "|" && $2 == "Password" {print $3}' "$artifacts/create-project.log")
-  step dashboard-login-form curl --silent --show-error --fail \
+  step dashboard-login-form curl --silent --show-error --fail --location \
     --cookie-jar "$work_dir/dashboard.cookies" --output "$work_dir/login.html" \
     "${http_url%/}/user/login"
   form_build_id=$(sed -n 's/.*name="form_build_id" value="\([^"]*\)".*/\1/p' "$work_dir/login.html")
