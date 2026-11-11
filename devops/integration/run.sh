@@ -321,7 +321,7 @@ check_composition() {
 
 # Sign in through the real form; one-time login links skip Dashboard's redirect.
 check_dashboard_login() {
-  local http_url chef_password form_build_id
+  local http_url chef_password form_build_id login_url
   http_url=$(ddev describe -j | jq -er '.raw.httpurl')
   chef_password=$(awk '$1 == "|" && $2 == "Password" {print $3}' "$artifacts/create-project.log")
   step dashboard-login-form curl --silent --show-error --fail --location \
@@ -337,7 +337,8 @@ check_dashboard_login() {
     --write-out '%{http_code}\n%{url_effective}\n' "${http_url%/}/user/login" \
     < <(printf '%s' "$chef_password")
   expect_line dashboard-login 200
-  expect_line dashboard-login "${http_url%/}/admin/dashboard"
+  login_url=$(tail -n 1 "$artifacts/dashboard-login.log")
+  test "${login_url%%\?*}" = "${http_url%/}/admin/dashboard"
   step dashboard-site-admin grep -Fq 'Site admin' "$work_dir/dashboard.html"
   step dashboard-editor-tab grep -Fq 'href="/admin/dashboard/editor"' "$work_dir/dashboard.html"
 }
