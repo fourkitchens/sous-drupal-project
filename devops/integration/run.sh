@@ -340,7 +340,9 @@ check_dashboard_login() {
   login_url=$(tail -n 1 "$artifacts/dashboard-login.log")
   test "${login_url%%\?*}" = "${http_url%/}/admin/dashboard"
   step dashboard-site-admin grep -Fq 'Site admin' "$work_dir/dashboard.html"
-  step dashboard-editor-tab grep -Fq 'href="/admin/dashboard/editor"' "$work_dir/dashboard.html"
+  # BigPipe may stream the tabs as an escaped HTML fragment.
+  step dashboard-editor-tab grep -Fq -e 'href="/admin/dashboard/editor"' \
+    -e 'href=\u0022\/admin\/dashboard\/editor\u0022' "$work_dir/dashboard.html"
 }
 
 # Load chosen libraries through the real CLI and require actual compiled output.
