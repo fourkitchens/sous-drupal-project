@@ -7,7 +7,7 @@ sous_version='^2.0'
 # Keep this lint fix until UI Kit 2.0 ships (https://github.com/emulsify-ds/emulsify-ui-kit/pull/189).
 ui_kit_ref='codex/fix-drupal-theme-lint'
 # Keep one baseline list for selection, Composer and Drupal.
-baseline_recipes='sous-emulsify sous-admin sous-media sous-config-split sous-dev-tools sous-seo'
+baseline_recipes='sous-emulsify sous-admin sous-media sous-formats sous-dashboard sous-config-split sous-dev-tools sous-seo'
 
 # Check the required recipes and prepare the sides menu with one fetch.
 preflight_index() {
@@ -274,7 +274,7 @@ box() {
 
 kitchen_title='                  S O U S   K I T C H E N'
 ticket_rule='  --------------------------------------------------------'
-included=$(printf '    + %s\n' 'Emulsify' 'Gin administration' 'Media' 'Config Split' \
+included=$(printf '    + %s\n' 'Emulsify' 'Gin administration' 'Media' 'Text formats' 'Dashboards' 'Config Split' \
   'publishing workflow' 'Dev Tools' 'SEO')
 prep_included=$(printf '%s\n' "$included" | sed 's/^/  /')
 sides='    None'

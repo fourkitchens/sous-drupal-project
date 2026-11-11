@@ -92,7 +92,7 @@ Set Stage File Proxy's source URL in `settings.local.php` to fetch missing files
 $config['stage_file_proxy.settings']['origin'] = 'https://production.example.com';
 ```
 
-Use `ddev drush uli --name=sous_chef` for a local login after setup.
+Use `ddev drush uli --name=sous_chef admin/dashboard` for a local login after setup.
 
 ## Adapt an existing site to Lando
 

@@ -38,17 +38,18 @@ Checks, in order:
      UID 1 stays blocked, sous_chef can
      sign in, and the default custom theme has tools. A chosen component library
      loads through Emulsify and has compiled assets; none leaves an empty scaffold.
-  5. Maintainer tooling, one-time theme setup files and assets/ci are absent;
+  5. Signing in through the login form opens Site admin with an Editor tab.
+  6. Maintainer tooling, one-time theme setup files and assets/ci are absent;
      site agent guidance has working links and survives a site archive.
      Only the selected provider's CI files remain.
      The generated release configuration loads in Node. Applied Sous recipes,
      their setup repository and the creation hook are retired.
-  6. Composer reinstalls from the unchanged lock without the Sous repository;
+  7. Composer reinstalls from the unchanged lock without the Sous repository;
      configuration and notices survive. Configuration scripts work through DDEV and native tools;
      Drush deploy succeeds and config:status reports no changes.
-  7. Run Composer CI for admin-only or a chosen library. For admin-only without
+  8. Run Composer CI for admin-only or a chosen library. For admin-only without
      a library, build a project-owned Sass entrypoint after the empty build.
-  8. For admin-only, back up, restore with npm run setup and reset with npm run
+  9. For admin-only, back up, restore with npm run setup and reset with npm run
      rebuild, checking bootstrap.
 
 The artifacts directory keeps each step's log, config-status.stderr,
@@ -318,6 +319,29 @@ check_composition() {
     SOUS_SMOKE_PASSWORD="$chef_password" vendor/bin/drush php:script "/var/www/html/$checks_dir/composition.php"
 }
 
+# Sign in through the real form; one-time login links skip Dashboard's redirect.
+check_dashboard_login() {
+  local http_url chef_password form_build_id
+  http_url=$(ddev describe -j | jq -er '.raw.httpurl')
+  chef_password=$(awk '$1 == "|" && $2 == "Password" {print $3}' "$artifacts/create-project.log")
+  step dashboard-login-form curl --silent --show-error --fail \
+    --cookie-jar "$work_dir/dashboard.cookies" --output "$work_dir/login.html" \
+    "${http_url%/}/user/login"
+  form_build_id=$(sed -n 's/.*name="form_build_id" value="\([^"]*\)".*/\1/p' "$work_dir/login.html")
+  test -n "$form_build_id"
+  step dashboard-login curl --silent --show-error --location \
+    --cookie "$work_dir/dashboard.cookies" --cookie-jar "$work_dir/dashboard.cookies" \
+    --data-urlencode name=sous_chef --data-urlencode pass@- \
+    --data-urlencode "form_build_id=$form_build_id" --data-urlencode form_id=user_login_form \
+    --data-urlencode 'op=Log in' --output "$work_dir/dashboard.html" \
+    --write-out '%{http_code}\n%{url_effective}\n' "${http_url%/}/user/login" \
+    < <(printf '%s' "$chef_password")
+  expect_line dashboard-login 200
+  expect_line dashboard-login "${http_url%/}/admin/dashboard"
+  step dashboard-site-admin grep -Fq 'Site admin' "$work_dir/dashboard.html"
+  step dashboard-editor-tab grep -Fq 'href="/admin/dashboard/editor"' "$work_dir/dashboard.html"
+}
+
 # Load chosen libraries through the real CLI and require actual compiled output.
 check_component_library() {
   local theme_path
@@ -364,7 +388,7 @@ check_component_library() {
   # Both receipts list each included package on its own line.
   # shellcheck disable=SC2016
   step pantry-order awk '
-    BEGIN { count = split("Emulsify,Gin administration,Media,Config Split,publishing workflow,Dev Tools,SEO", labels, ",") }
+    BEGIN { count = split("Emulsify,Gin administration,Media,Text formats,Dashboards,Config Split,publishing workflow,Dev Tools,SEO", labels, ",") }
     $1 == "|" {
       line = $0
       sub(/^ *[|] */, "", line)
@@ -598,6 +622,7 @@ main() {
   check_host_settings
   check_site_responds
   check_composition
+  check_dashboard_login
   step remove-checks rm -r "$checks_dir" "$work_dir/template/$checks_dir"
   check_component_library
   check_product_files_absent

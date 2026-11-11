@@ -38,6 +38,7 @@ Event, News Post and Profile each add a content browser display to their existin
 ## SEO
 
 Every setup includes redirects for changed aliases, an XML sitemap at `/sitemap.xml`, and breadcrumbs that use page titles. It also includes Google Tag and Schema.org metadata integrations.
+Redirect 404 logging records missing pages, and Superusers can review Top missing pages on the Site admin dashboard.
 
 ## Optional site features
 
@@ -56,5 +57,9 @@ Gallery adds a Paragraphs or Layout Builder component for any number of images a
 The local `sous_chef` uses the Superuser role and a random password shown in the order summary; UID 1 (`superuser_1`) stays blocked.
 Site Editors can manage and publish site content and delegate Site Editor from the Roles tab at `/user/{uid}/roles`.
 Superusers can assign any custom role on the account edit form. Drupal assigns Authenticated automatically.
+
+After signing in, Superusers land on Site admin with site status, recent errors, sign-ins and new accounts, and can switch to the Editor tab; Site Editors land on Editor with drafts, scheduled changes, recently updated content and accessibility alerts.
+Only Superusers can rearrange dashboard blocks at Structure → Dashboard. Other roles land on their account page.
+
 Review role permissions and account assignments when adding integrations or content workflows.
 Record site-specific extensions, content types and feature decisions here.
