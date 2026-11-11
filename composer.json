@@ -36,7 +36,6 @@
         "drupal/core-recipe-unpack": "^11.4.11",
         "drupal/core-recommended": "^11.4.11",
         "drupal/core-vendor-hardening": "^11.4.11",
-        "drupal/login_destination": "^2.0.0-beta10@beta",
         "drush/drush": "^13.8.0",
         "oomphinc/composer-installers-extender": "^2.0.1",
         "php": "^8.4",

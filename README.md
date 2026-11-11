@@ -7,7 +7,7 @@ Sous prepares the project; your site owns its code, dependencies and configurati
 
 ## Features and Configurations
 
-Choose the content model during installation. Every choice includes Gin administration, Emulsify, Media, Config Split, a publishing workflow, Dev Tools and SEO.
+Choose the content model during installation. Every choice includes Gin administration, Emulsify, Media, text formats, dashboards, Config Split, a publishing workflow, Dev Tools and SEO.
 
 | Choice | Content setup |
 | --- | --- |

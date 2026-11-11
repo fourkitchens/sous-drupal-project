@@ -63,9 +63,21 @@ foreach (array_merge($baseline, $devTools) as $module) {
   $checks["Local tools: $module"] = \Drupal::moduleHandler()->moduleExists($module) && !isset($export["module"][$module]);
 }
 $checks["DropzoneJS module absent"] = !\Drupal::moduleHandler()->moduleExists("dropzonejs");
+$checks["Login Destination absent"] = !\Drupal::moduleHandler()->moduleExists("login_destination");
 $checks["Nonbreaking-space filter"] = \Drupal::moduleHandler()->moduleExists("no_nbsp");
-foreach (["editoria11y", "gin_login", "twig_tweak", "role_delegation", "emulsify_tools"] as $module) {
+foreach (["dashboard", "editoria11y", "gin_login", "twig_tweak", "role_delegation", "emulsify_tools"] as $module) {
   $checks["Default module: $module"] = \Drupal::moduleHandler()->moduleExists($module) && isset($export["module"][$module]);
+}
+// Dashboard selection follows the signed-in account's roles.
+$account_switcher = \Drupal::service("account_switcher");
+foreach (["Chef dashboard" => [$chef, "site_admin"], "Site Editor dashboard" => [new \Drupal\Core\Session\UserSession(["uid" => 1000, "roles" => ["authenticated", "site_editor"]]), "editor"]] as $name => [$account, $dashboard]) {
+  $account_switcher->switchTo($account);
+  try {
+    $checks[$name] = \Drupal::service("dashboard.manager")->getDefaultDashboard()?->id() === $dashboard;
+  }
+  finally {
+    $account_switcher->switchBack();
+  }
 }
 // Every installed content type shares the publishing workflow and scheduling sidebar.
 $workflow = \Drupal\workflows\Entity\Workflow::load("editorial");
