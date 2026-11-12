@@ -321,7 +321,7 @@ check_composition() {
 
 # Sign in through the real form; one-time login links skip Dashboard's redirect.
 check_dashboard_login() {
-  local http_url chef_password form_build_id login_url
+  local http_url chef_password form_build_id login_url selected
   http_url=$(ddev describe -j | jq -er '.raw.httpurl')
   chef_password=$(awk '$1 == "|" && $2 == "Password" {print $3}' "$artifacts/create-project.log")
   step dashboard-login-form curl --silent --show-error --fail --location \
@@ -343,6 +343,10 @@ check_dashboard_login() {
   # BigPipe may stream the tabs as an escaped HTML fragment.
   step dashboard-editor-tab grep -Fq -e 'href="/admin/dashboard/editor"' \
     -e 'href=\u0022\/admin\/dashboard\/editor\u0022' "$work_dir/dashboard.html"
+  selected=",${recipes//[[:space:]]/,},"
+  if [[ "$selected" == *,sous-alerts,* ]]; then
+    step dashboard-alerts-block grep -Fq 'data-sitewide-alert' "$work_dir/dashboard.html"
+  fi
 }
 
 # Load chosen libraries through the real CLI and require actual compiled output.
