@@ -46,7 +46,6 @@ Event, News Post and Profile each add a content browser display to their existin
 ## SEO
 
 Every setup includes redirects for changed aliases, an XML sitemap at `/sitemap.xml`, and breadcrumbs that use page titles. It also includes Google Tag and Schema.org metadata integrations.
-Redirect 404 logging records missing pages, and Superusers can review Top missing pages on the Site admin dashboard.
 
 ## Optional site features
 
