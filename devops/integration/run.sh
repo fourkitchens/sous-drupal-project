@@ -530,8 +530,7 @@ check_lock_reinstall() {
   step composer-scripts ddev composer run-script --list --no-ansi
   if grep -E '^[[:space:]]*post-create-project-cmd([[:space:]]|$)' "$artifacts/composer-scripts.log"; then return 1; fi
 
-  # A local Composer path install of the runtime module still needs its source.
-  if [ -n "$packages" ] && ! jq -e '.packages[] | select(.name == "fourkitchens/sous-component-support" and .dist.type == "path")' composer.lock >/dev/null; then
+  if [ -n "$packages" ]; then
     step remove-package-mount rm .ddev/docker-compose.recipes.yaml
     step restart-without-packages ddev restart
     step absent-package-mount ddev exec --raw -- test ! -e "$packages/packages"
@@ -557,7 +556,7 @@ check_lock_reinstall() {
   # shellcheck disable=SC2016
   step locked-selection jq -e '
     (.locked | map(.name)) as $names
-    | all($names[]; . == "fourkitchens/sous-component-support" or (test("^(fourkitchens/sous-|drupal/dropzonejs$|dropzone/dropzone$)") | not))
+    | all($names[]; (test("^(fourkitchens/sous-|drupal/dropzonejs$|dropzone/dropzone$)") | not))
       and all(["drupal/devel", "drupal/masquerade", "drupal/stage_file_proxy"][];
         . as $name | $names | index($name) != null)
   ' "$artifacts/locked-packages.log"
