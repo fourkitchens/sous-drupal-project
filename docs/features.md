@@ -47,9 +47,16 @@ Event, News Post and Profile each add a content browser display to their existin
 
 Every setup includes redirects for changed aliases, an XML sitemap at `/sitemap.xml`, and breadcrumbs that use page titles. It also includes Google Tag and Schema.org metadata integrations.
 
+## Menus
+
+Every setup includes Menu Block, whose menu blocks can start at a chosen parent link, follow the current page or expand every link.
+Only Superusers manage menus.
+To let another role manage one menu, such as Main navigation, grant `Administer <menu> menu items` at People › Permissions; keep Administration, Content, Create, Tools and User account menu Superuser-only.
+Navigation's Content section links to Menus for anyone who can manage a menu and hides Blocks and Files from everyone; those remain tabs on the Content page.
+
 ## Optional site features
 
-Alerts displays site-wide banners at the top of every public page and at the top of both Site admin and Editor dashboards. Editors can schedule alerts, make them dismissible and limit them to pages. To show an alert only on dashboards, limit it to `/admin/dashboard` and `/admin/dashboard/*`. All published alerts are public, even when limited to dashboard pages; keep confidential information out of them.
+Alerts displays site-wide banners at the top of every public page and at the top of both Site admin and Editor dashboards. Editors can schedule alerts, make them dismissible and limit them to pages. To show an alert only on dashboards, limit it to `/admin/dashboard` and `/admin/dashboard/*`. All published alerts are public, even when limited to dashboard pages; keep confidential information out of them. Alerts adds Alert to the Editor's Create block and under Create in Navigation, and an Alerts link to Navigation's Content section.
 
 Search provides a placeable results block with a keyword field and a Content type filter.
 
