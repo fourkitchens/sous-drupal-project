@@ -1,5 +1,5 @@
 {
-    "_hash": "6a1b162bcab0a9ed538e8bd56c8f86d5e69748e19c7087212813935ebd487ce4",
+    "_hash": "ac90aea9ee80cd76c3579ddfc4513f91f5dfa6335a5f967cf69b0ecee3ff725d",
     "patches": {
         "drupal/field_group": [
             {
@@ -23,6 +23,20 @@
                 "depth": 1,
                 "extra": {
                     "issue-tracker-url": "https://www.drupal.org/project/layout_paragraphs/issues/3487314",
+                    "provenance": "patches-file:patches/patches.json"
+                }
+            }
+        ],
+        "drupal/paragraphs": [
+            {
+                "package": "drupal/paragraphs",
+                "description": "Require configuration access for Paragraphs Library settings",
+                "url": "patches/paragraphs-library-settings-access-3340086.patch",
+                "sha256": "166625ed8bbcee5b3ed3ef81c79bb710d70ef499b81b83faf269c96169292286",
+                "depth": 1,
+                "extra": {
+                    "issue-tracker-url": "https://www.drupal.org/project/paragraphs/issues/3340086",
+                    "note": "Sous separates access to the settings form from managing reusable content.",
                     "provenance": "patches-file:patches/patches.json"
                 }
             }
