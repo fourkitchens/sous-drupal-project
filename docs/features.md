@@ -50,8 +50,8 @@ Every setup includes redirects for changed aliases, an XML sitemap at `/sitemap.
 ## Menus
 
 Every setup includes Menu Block, whose menu blocks can start at a chosen parent link, follow the current page or expand every link.
-Only Superusers manage menus.
-To let another role manage one menu, such as Main navigation, grant `Administer <menu> menu items` at People › Permissions; keep Administration, Content, Create, Tools and User account menu Superuser-only.
+Superusers manage every menu; Site Admins manage only Footer and Main navigation.
+To give a role access to a specific menu, grant `Administer <menu> menu items` at People › Permissions; keep Administration, Content, Create, Tools and User account menu Superuser-only.
 Navigation's Content section links to Menus for anyone who can manage a menu and hides Blocks and Files from everyone; those remain tabs on the Content page.
 
 ## Optional site features
@@ -63,10 +63,11 @@ Search provides a placeable results block with a keyword field and a Content typ
 ## User Roles and Permissions
 
 The local `sous_chef` uses the Superuser role and a random password shown in the order summary; UID 1 (`superuser_1`) stays blocked.
-Site Editors can manage and publish site content and delegate Site Editor from the Roles tab at `/user/{uid}/roles`.
+Site Admins can manage users and publish site content. They can assign or remove only Site Admin on the account edit form; they cannot assign or remove Superuser.
+User administration includes editing Superuser account details; Role Delegation limits role changes.
 Superusers can assign any custom role on the account edit form. Drupal assigns Authenticated automatically.
 
-After signing in, Superusers land on Site admin with site status, recent errors, sign-ins and new accounts, and can switch to the Editor tab; Site Editors land on Editor with Create links for each content and media type they can create, followed by drafts, scheduled changes, recently updated content and accessibility alerts.
+After signing in, Superusers land on Site admin with site status, recent errors, sign-ins and new accounts, and can switch to the Editor tab; Site Admins land on Editor with Create links for each content and media type they can create, followed by drafts, scheduled changes, recently updated content and accessibility alerts.
 Superusers can edit Create links at Structure → Menus → Create. Only Superusers can rearrange dashboard blocks at Structure → Dashboard. Other roles land on their account page.
 
 Review role permissions and account assignments when adding integrations or content workflows.

@@ -26,7 +26,7 @@ $checks = [
   "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split"),
   "Split definitions" => \Drupal::service("config.storage")->exists("config_split.config_split.local") && \Drupal::service("config.storage")->exists("config_split.config_split.staging"),
   "Media types" => count($media_types->loadMultiple(["file", "image", "video"])) === 3 && count($media_types->loadByProperties(["source" => "video_file"])) === 1,
-  "Site Editor" => $editor?->label() === "Site Editor" && !$editor->isAdmin() && !$editor->hasPermission("administer site configuration"),
+  "Site Admin" => $editor?->label() === "Site Admin" && !$editor->isAdmin() && $editor->hasPermission("administer users") && !$editor->hasPermission("administer site configuration") && !$editor->hasPermission("administer permissions") && !$editor->hasPermission("assign all roles") && !$editor->hasPermission("assign superuser role"),
 ];
 $breakpoint_manager = \Drupal::service("breakpoint.manager");
 $base_breakpoints = $breakpoint_manager->getBreakpointsByGroup("emulsify");
@@ -70,7 +70,7 @@ foreach (["dashboard", "editoria11y", "gin_login", "twig_tweak", "role_delegatio
 }
 // Dashboard selection follows the signed-in account's roles.
 $account_switcher = \Drupal::service("account_switcher");
-foreach (["Chef dashboard" => [$chef, "site_admin"], "Site Editor dashboard" => [new \Drupal\Core\Session\UserSession(["uid" => 1000, "roles" => ["authenticated", "site_editor"]]), "editor"]] as $name => [$account, $dashboard]) {
+foreach (["Chef dashboard" => [$chef, "site_admin"], "Site Admin dashboard" => [new \Drupal\Core\Session\UserSession(["uid" => 1000, "roles" => ["authenticated", "site_editor"]]), "editor"]] as $name => [$account, $dashboard]) {
   $account_switcher->switchTo($account);
   try {
     $checks[$name] = \Drupal::service("dashboard.manager")->getDefaultDashboard()?->id() === $dashboard;
