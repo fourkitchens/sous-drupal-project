@@ -134,7 +134,7 @@ if ($news) {
   $news_view = \Drupal\views\Entity\View::load("news");
   $checks["Recent News embed"] = isset($news_view->get("display")["embed_recent"]);
 }
-$content_list = in_array("sous-content-list", $recipes, TRUE);
+$content_list = $option !== "admin-only";
 $config_storage = \Drupal::service("config.storage");
 $checks["Content List paragraph"] = $config_storage->exists("paragraphs.paragraphs_type.content_list") === ($content_list && $option === "paragraphs");
 $checks["Content List block"] = $config_storage->exists("block_content.type.content_list") === ($content_list && $option === "layout-builder");
@@ -146,7 +146,7 @@ if ($content_list && $option === "paragraphs") {
     }
   }
 }
-$gallery = in_array("sous-gallery", $recipes, TRUE);
+$gallery = $option !== "admin-only";
 $checks["Gallery paragraph"] = $config_storage->exists("paragraphs.paragraphs_type.gallery") === ($gallery && $option === "paragraphs");
 $checks["Gallery block"] = $config_storage->exists("block_content.type.gallery") === ($gallery && $option === "layout-builder");
 $profile = in_array("sous-profile", $recipes, TRUE);

@@ -8,6 +8,8 @@ sous_version='^2.0'
 ui_kit_ref='codex/fix-drupal-theme-lint'
 # Keep one baseline list for selection, Composer and Drupal.
 baseline_recipes='sous-emulsify sous-admin sous-media sous-formats sous-dashboard sous-config-split sous-dev-tools sous-seo'
+# Apply these after the sides so their integrations can extend the sides' Content fields.
+main_course_components='sous-content-list sous-gallery'
 
 # Check the required recipes and prepare the sides menu with one fetch.
 preflight_index() {
@@ -50,11 +52,10 @@ preflight_index() {
       uksort($versions, "version_compare");
       $metadata = end($versions);
       if (($metadata["extra"]["sous"]["menu"] ?? FALSE) === TRUE) {
-        $component = ($metadata["extra"]["sous"]["component"] ?? FALSE) === TRUE ? "1" : "";
-        echo $recipe, "\t", $metadata["description"], "\t", $component, "\n";
+        echo $recipe, "\t", $metadata["description"], "\n";
       }
     }
-  ' "$sous_index" "$sous_version" "$baseline_recipes sous-workflow sous-paragraphs sous-core-layout-builder"
+  ' "$sous_index" "$sous_version" "$baseline_recipes $main_course_components sous-workflow sous-paragraphs sous-core-layout-builder"
 }
 
 sous_index=${SOUS_INDEX:-https://fourkitchens.github.io/sous-drupal-packages/packages.json}
@@ -103,16 +104,14 @@ case "$SOUS_CONTENT" in
   *) echo 'SOUS_CONTENT must be admin-only, paragraphs, or layout-builder.' >&2; exit 2 ;;
 esac
 
-# Keep sides that require a main course out of the Admin only numbering.
-side_menu=$recipe_menu
 if [ -z "$content" ]; then
-  side_menu=$(printf '%s\n' "$recipe_menu" | awk -F '\t' '$3 != 1')
+  main_course_components=''
 fi
 if [ "${SOUS_RECIPES+x}" != x ]; then
   SOUS_RECIPES=''
-  if [ -n "$side_menu" ]; then
+  if [ -n "$recipe_menu" ]; then
     printf '\n  ON THE SIDE · Optional recipes\n\n'
-    printf '%s\n' "$side_menu" | awk -F '\t' '{printf "    [%d] %s\n        %s\n\n", NR, $1, $2}'
+    printf '%s\n' "$recipe_menu" | awk -F '\t' '{printf "    [%d] %s\n        %s\n\n", NR, $1, $2}'
     printf '  Add sides (numbers or names; spaces or commas; Enter for none): '
     read -r SOUS_RECIPES || SOUS_RECIPES=''
   fi
@@ -120,42 +119,34 @@ fi
 
 recipe_choices=$(printf '%s' "$SOUS_RECIPES" | tr ',' ' ')
 recipes=''
-component_recipes=''
-# Keep components last so they can extend fields created by other sides.
 set -f
 # shellcheck disable=SC2086
 for recipe in $recipe_choices; do
   case "$recipe" in
     *[!0-9]*) ;;
-    *) recipe=$(printf '%s\n' "$side_menu" | awk -F '\t' -v number="$recipe" 'NR == number {print $1}') ;;
+    *) recipe=$(printf '%s\n' "$recipe_menu" | awk -F '\t' -v number="$recipe" 'NR == number {print $1}') ;;
   esac
   if ! printf '%s\n' "$recipe" | grep -Eq '^sous-[a-z0-9-]+$'; then
     echo "Invalid recipe choice: $recipe" >&2
     exit 2
   fi
   # Admin brings Workflow, and replaying Emulsify would reset the project theme.
-  case " $baseline_recipes sous-workflow $content $recipes $component_recipes " in
+  case " $baseline_recipes sous-workflow $content $recipes $main_course_components " in
     *" $recipe "*) continue ;;
   esac
   # Content recipes belong to the main course and its bundled dependencies.
   case "$content:$recipe" in
     sous-paragraphs:sous-paragraph-types|sous-core-layout-builder:sous-content-types|sous-*:sous-content-base) continue ;;
   esac
-  component=$(printf '%s\n' "$recipe_menu" | awk -F '\t' -v recipe="$recipe" '$1 == recipe {print $3}')
-  case "$recipe:$content:$component" in
-    *::1|sous-paragraphs:*|sous-paragraph-types:*|sous-core-layout-builder:*|sous-content-types:*|sous-content-base:*)
+  case "$recipe:$content" in
+    sous-content-list:|sous-gallery:|sous-paragraphs:*|sous-paragraph-types:*|sous-core-layout-builder:*|sous-content-types:*|sous-content-base:*)
       printf 'Recipe %s requires a compatible main course selected with SOUS_CONTENT.\n' "$recipe" >&2
       exit 2
       ;;
   esac
-  if [ "$component" = 1 ]; then
-    component_recipes="${component_recipes:+$component_recipes }$recipe"
-  else
-    recipes="${recipes:+$recipes }$recipe"
-  fi
+  recipes="${recipes:+$recipes }$recipe"
 done
 set +f
-recipes="$recipes${component_recipes:+${recipes:+ }$component_recipes}"
 
 if [ "${SOUS_CI+x}" != x ]; then
   cat <<'MENU'
@@ -274,8 +265,11 @@ box() {
 
 kitchen_title='                  S O U S   K I T C H E N'
 ticket_rule='  --------------------------------------------------------'
-included=$(printf '    + %s\n' 'Emulsify' 'Gin administration' 'Media' 'Text formats' 'Dashboards' 'Config Split' \
-  'publishing workflow' 'Dev Tools' 'SEO')
+included=$(
+  printf '    + %s\n' 'Emulsify' 'Gin administration' 'Media' 'Text formats' 'Dashboards' 'Config Split' \
+    'publishing workflow' 'Dev Tools' 'SEO'
+  if [ -n "$content" ]; then printf '    + %s\n' 'Content List' 'Gallery'; fi
+)
 prep_included=$(printf '%s\n' "$included" | sed 's/^/  /')
 sides='    None'
 if [ -n "$recipes" ]; then
@@ -316,7 +310,7 @@ if [ -f composer.lock ]; then ddev composer update --lock --no-install --no-inte
 printf '\nStocking the pantry: installing project tools.\n\n'
 ddev composer install
 set --
-for recipe in $baseline_recipes $content $recipes; do
+for recipe in $baseline_recipes $content $recipes $main_course_components; do
   set -- "$@" "fourkitchens/$recipe:$sous_version"
 done
 # Drupal's Composer plugin unpacks dependencies and leaves recipe sources to apply.
@@ -367,7 +361,7 @@ printf '\nAdding your chosen recipes to the pot.\n\n'
 if [ -n "$content" ]; then
   sh devops/scripts/install-recipe.sh "fourkitchens/$content"
 fi
-for recipe in $recipes; do
+for recipe in $recipes $main_course_components; do
   sh devops/scripts/install-recipe.sh "fourkitchens/$recipe"
   integration="web/recipes/$recipe/recipes/${content#sous-}"
   if [ -n "$content" ] && [ -d "$integration" ]; then
