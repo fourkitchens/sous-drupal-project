@@ -268,7 +268,6 @@ ticket_rule='  --------------------------------------------------------'
 included=$(
   printf '    + %s\n' 'Emulsify' 'Gin administration' 'Media' 'Text formats' 'Dashboards' 'Config Split' \
     'publishing workflow' 'Dev Tools' 'SEO'
-  if [ -n "$content" ]; then printf '    + %s\n' 'Content List' 'Gallery'; fi
 )
 prep_included=$(printf '%s\n' "$included" | sed 's/^/  /')
 sides='    None'
