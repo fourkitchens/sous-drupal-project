@@ -6,7 +6,7 @@ Setup, rebuild, import-data and local-data-bak remain local DDEV operations.
 
 ## Theme
 
-Run `ddev drush config:get system.theme default` to find the active theme. The root `package.json` selects the build target through `config.theme`. In `web/themes/custom/<theme>`, read the theme's `AGENTS.md` for scoped guidance and its `package.json` for frontend commands.
+Run `ddev drush config:get system.theme default` to find the active theme. The root `package.json` selects the build target through `config.theme`. In `web/themes/custom/<theme>`, read the theme's `README.md` and its `package.json` for frontend commands.
 
 The installer enables the generated Emulsify theme and installs its npm dependencies. You can start with project assets or install a component library later.
 

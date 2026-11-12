@@ -423,29 +423,27 @@ check_product_files_absent() {
 # Check the installed site's guidance, navigation and archive contents.
 check_agent_guidance() {
   local facts=docs/agents/workflow-facts.md
-  local theme heading
+  local theme
   theme=$(printf '%s' "$project_name" | tr -d '-')
   step agent-heading grep -Fx "# $project_name agent instructions" AGENTS.md
+  step agent-claude grep -Fx '@AGENTS.md' CLAUDE.md
   step facts-heading grep -Fx '# Workflow facts' "$facts"
   step facts-sections grep '^## ' "$facts"
-  for heading in Sites 'Database refresh' 'Test roles' 'Public files' 'Git workflow' 'Review and deploy'; do
-    expect_line facts-sections "## $heading"
-  done
-  step agent-theme-link grep -F "(web/themes/custom/$theme/AGENTS.md)" AGENTS.md
-  step agent-package-link grep -F '(package.json)' AGENTS.md
+  step agent-theme-path grep -F '`web/themes/custom/'"$theme"'`' AGENTS.md
   step agent-workflow-pointer grep -Fx -- \
     '- Workflow facts: Read [the workflow facts](docs/agents/workflow-facts.md) before debugging, implementing, reviewing, or deploying a change.' AGENTS.md
-  step agent-project-discovery grep -F 'ddev describe' "$facts"
-  step agent-site-facts grep -F 'ddev drush status --fields=uri,db-name' "$facts"
+  step agent-site-uri ddev drush status --field=uri
+  step agent-no-trailing-whitespace bash -c '! grep -nE " +$" "$@"' bash AGENTS.md CLAUDE.md "$facts"
 
   # Resolve the relative file links and Markdown heading anchors used here.
   # shellcheck disable=SC2016
-  step agent-links node -e '
+  step agent-links env SOUS_SMOKE_URI="$(cat "$artifacts/agent-site-uri.log")" node -e '
     const fs = require("node:fs");
     const { pathToFileURL } = require("node:url");
-    for (const document of process.argv.slice(1)) {
+    const documents = process.argv.slice(1);
+    for (const document of documents) {
       const contents = fs.readFileSync(document, "utf8");
-      if (/\b(?:PROJECT_NAME|PROJECT_THEME|LOCAL_URL|LOCAL_DATABASE)\b|^# Sous coding agent brief$/m.test(contents)) {
+      if (/\b(?:PROJECT_NAME|PROJECT_THEME|LOCAL_URL|LOCAL_DATABASE|INSTALL_DATE|CI_FACTS)\b|^# Sous coding agent brief$/m.test(contents)) {
         throw new Error(`Unrendered starter guidance in ${document}`);
       }
       const base = pathToFileURL(document);
@@ -465,15 +463,27 @@ check_agent_guidance() {
         }
       }
     }
-  ' AGENTS.md "$facts"
+    const sections = fs.readFileSync(documents[1], "utf8").split(/^## /m).slice(1);
+    const expected = ["Sites", "Database refresh", "Test roles", "Public files", "Browser testing", "Git workflow", "Review and deploy"];
+    if (JSON.stringify(sections.map(section => section.split("\n")[0])) !== JSON.stringify(expected)) {
+      throw new Error("Workflow facts must contain the required sections in order");
+    }
+    if (sections.some(section => !section.includes("(source:"))) {
+      throw new Error("Every workflow facts section must cite its source");
+    }
+    if (!sections[0].includes(`| default | ${process.env.SOUS_SMOKE_URI} |`)) {
+      throw new Error("Workflow facts Sites URL does not match Drush");
+    }
+  ' AGENTS.md "$facts" CLAUDE.md README.md
 
   # Archive a staged tree to check export rules without committing to the site.
   # shellcheck disable=SC2016
   step agent-archive env GIT_INDEX_FILE="$work_dir/agent-archive.index" bash -e -o pipefail -c '
     git add -- .gitattributes "$@"
     git archive "$(git write-tree)" | tar -tf -
-  ' bash AGENTS.md "$facts"
+  ' bash AGENTS.md CLAUDE.md "$facts"
   expect_line agent-archive AGENTS.md
+  expect_line agent-archive CLAUDE.md
   expect_line agent-archive "$facts"
 }
 

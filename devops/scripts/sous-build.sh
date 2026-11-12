@@ -302,7 +302,7 @@ npm install --package-lock-only --ignore-scripts --offline
 ddev composer config name "project/$project_name"
 # Begin the generated site with its own instructions and Git history.
 [ ! -f PROJECT-README.md ] || mv PROJECT-README.md README.md
-node -e 'const fs = require("node:fs"); fs.writeFileSync("README.md", fs.readFileSync("README.md", "utf8").replaceAll("PROJECT_NAME", process.argv[1]));' "$project_name"
+node -e 'const fs = require("node:fs"); fs.writeFileSync("README.md", fs.readFileSync("README.md", "utf8").replaceAll("PROJECT_NAME", process.argv[1]).replaceAll("PROJECT_THEME", process.argv[2]));' "$project_name" "$theme"
 [ -e .git ] || git init -b main
 
 # Renaming Composer's root package invalidates its lock hash.
@@ -394,17 +394,29 @@ drupal_version=$(ddev drush status --field=drupal-version)
 php_version=$(ddev drush status --field=php-version)
 node_version=$(node --version)
 local_url=$(ddev drush status --field=uri)
+local_database=$(ddev drush status --field=db-name)
+install_date=$(date +%F)
 
 # Write the site's agent instructions before removing the installer templates.
 mkdir -p docs/agents
-node - "$project_name" "$theme" <<'JS'
+node - "$project_name" "$theme" "$local_url" "$local_database" "$install_date" "$ci" <<'JS'
 const fs = require('node:fs');
-const [name, theme] = process.argv.slice(2);
+const [name, theme, localUrl, database, installDate, ci] = process.argv.slice(2);
 
 fs.writeFileSync('AGENTS.md', fs.readFileSync('assets/installer/site-agents.md', 'utf8')
   .replaceAll('PROJECT_NAME', name)
   .replaceAll('PROJECT_THEME', theme));
-fs.copyFileSync('assets/installer/workflow-facts.md', 'docs/agents/workflow-facts.md');
+const ciFacts = {
+  github: "GitHub Actions runs `composer ci` on pull requests and pushes to `main`, then publishes a release from `main`; its deploy job is commented out until hosting is set up (source: `.github/workflows/build.yml`). Pull requests use `.github/PULL_REQUEST_TEMPLATE.md` (source: `.github/PULL_REQUEST_TEMPLATE.md`).",
+  gitlab: "GitLab CI/CD runs `composer ci` for merge requests and branches, and publishes a release from `main` when `GL_TOKEN` is set; its deploy job is commented out (source: `.gitlab-ci.yml`). Merge requests use `.gitlab/merge_request_templates/Default.md` (source: `.gitlab/merge_request_templates/Default.md`).",
+  circleci: "CircleCI runs `composer ci` for the project's triggers, and publishes a release from `main` when `GITHUB_TOKEN` is set; its deploy job is commented out (source: `.circleci/config.yml`). Pull requests use `.github/PULL_REQUEST_TEMPLATE.md` (source: `.github/PULL_REQUEST_TEMPLATE.md`).",
+  none: "No CI runs; run `composer ci` before review (source: `SOUS_CI=none` selected at installation and `docs/DEPLOYMENT.md#set-up-site-ci`). Pull requests use `.github/PULL_REQUEST_TEMPLATE.md` (source: `.github/PULL_REQUEST_TEMPLATE.md`).",
+}[ci];
+fs.writeFileSync('docs/agents/workflow-facts.md', fs.readFileSync('assets/installer/workflow-facts.md', 'utf8')
+  .replaceAll('LOCAL_URL', localUrl)
+  .replaceAll('LOCAL_DATABASE', database)
+  .replaceAll('INSTALL_DATE', installDate)
+  .replaceAll('CI_FACTS', ciFacts));
 
 // Group root and theme npm updates together.
 const dependabot = '.github/dependabot.yml';

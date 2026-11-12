@@ -74,7 +74,7 @@ Successful installation retires starter-only code and metadata; shared site guid
 Composer unpacks recipe dependencies during `require`. Keep recipe sources through application and integrations, then retire the applied sources, the setup repository and the creation hook. The generated lockfile must install without the setup repository.
 The theme builds when a library is selected; `SOUS_LIBRARY=none` keeps the scaffold only. `SOUS_LIBRARY_REF` selects a branch/tag; UI Kit temporarily uses the [upstream lint-fix branch](https://github.com/emulsify-ds/emulsify-ui-kit/pull/189) until a released version passes lint and build.
 Keep product CI, maintainer docs and the starter's agent brief scoped to the starter.
-The installer creates `AGENTS.md` and `docs/agents/workflow-facts.md` from `assets/installer/`, then retires the inputs.
+The root `CLAUDE.md` ships with generated sites and imports `AGENTS.md`; the installer renders `AGENTS.md` and `docs/agents/workflow-facts.md` from `assets/installer/`, then retires the inputs.
 
 ## CI and releases
 

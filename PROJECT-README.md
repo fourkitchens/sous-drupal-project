@@ -9,7 +9,7 @@ Content management system built on Drupal. Record project URLs, contacts and acc
 | Local Environment | [DDEV](https://ddev.com/) |
 | Drupal / PHP | Drupal 11.4 / PHP 8.4 |
 | Node.js | Version in `.nvmrc`, installed on your computer |
-| Theme | Emulsify theme; directory recorded in `package.json` → `config.theme` |
+| Theme | Emulsify in [`web/themes/custom/PROJECT_THEME`](web/themes/custom/PROJECT_THEME/README.md); build target recorded in `package.json` → `config.theme` |
 | Included | Media, Config Split and a publishing workflow with scheduling |
 | Deployment | `composer build-assets`, then Drush deploy |
 | CI | Repository configuration; see [Deployment](docs/DEPLOYMENT.md#set-up-site-ci) |
@@ -26,6 +26,12 @@ Content management system built on Drupal. Record project URLs, contacts and acc
 After `composer create-project` completes, open the local URL shown in the installer summary. Run `ddev start` from the project root if the site is stopped.
 
 For a clone of an existing site or a database refresh, see [Local Setup](docs/SETUP.md). For theme development, see [the theme build commands](docs/BUILD_TOOLS.md#theme).
+
+## Working with AI agents
+
+Start with [AGENTS.md](AGENTS.md). [CLAUDE.md](CLAUDE.md) imports the same instructions for Claude Code. Before debugging, implementing, reviewing or deploying a change, agents read [the workflow facts](docs/agents/workflow-facts.md).
+
+The installer records facts for the fresh local site. Once hosting, issue tracking and review environments exist, run the `drupal-setup-agents` skill in repair mode to update the guidance and workflow facts.
 
 ## Documentation
 
