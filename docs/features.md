@@ -49,7 +49,7 @@ Every setup includes redirects for changed aliases, an XML sitemap at `/sitemap.
 
 ## Optional site features
 
-Alerts displays site-wide banners at the top of every public page. Editors can schedule alerts and make them dismissible.
+Alerts displays site-wide banners at the top of every public page and at the top of both Site admin and Editor dashboards. Editors can schedule alerts, make them dismissible and limit them to pages. To show an alert only on dashboards, limit it to `/admin/dashboard` and `/admin/dashboard/*`. All published alerts are public, even when limited to dashboard pages; keep confidential information out of them.
 
 Search provides a placeable results block with a keyword field and a Content type filter.
 
