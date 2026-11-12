@@ -65,7 +65,7 @@ foreach (array_merge($baseline, $devTools) as $module) {
 $checks["DropzoneJS module absent"] = !\Drupal::moduleHandler()->moduleExists("dropzonejs");
 $checks["Login Destination absent"] = !\Drupal::moduleHandler()->moduleExists("login_destination");
 $checks["Nonbreaking-space filter"] = \Drupal::moduleHandler()->moduleExists("no_nbsp");
-foreach (["dashboard", "editoria11y", "gin_login", "twig_tweak", "role_delegation", "emulsify_tools"] as $module) {
+foreach (["dashboard", "editoria11y", "gin_login", "twig_tweak", "role_delegation", "emulsify_tools", "menu_admin_per_menu", "menu_block"] as $module) {
   $checks["Default module: $module"] = \Drupal::moduleHandler()->moduleExists($module) && isset($export["module"][$module]);
 }
 // Dashboard selection follows the signed-in account's roles.
