@@ -50,8 +50,8 @@ Every setup includes redirects for changed aliases, an XML sitemap at `/sitemap.
 ## Menus
 
 Every setup includes Menu Block, whose menu blocks can start at a chosen parent link, follow the current page or expand every link.
-Only Superusers manage menus.
-To let another role manage one menu, such as Main navigation, grant `Administer <menu> menu items` at People › Permissions; keep Administration, Content, Create, Tools and User account menu Superuser-only.
+Superusers manage every menu; Site Editors manage only Footer and Main navigation.
+To give a role access to a specific menu, grant `Administer <menu> menu items` at People › Permissions; keep Administration, Content, Create, Tools and User account menu Superuser-only.
 Navigation's Content section links to Menus for anyone who can manage a menu and hides Blocks and Files from everyone; those remain tabs on the Content page.
 
 ## Optional site features
