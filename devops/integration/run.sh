@@ -394,13 +394,9 @@ check_component_library() {
   ' "$artifacts/create-project.log"
   # Both receipts list each included package on its own line.
   # shellcheck disable=SC2016
-  step pantry-order awk -v option="$option" '
+  step pantry-order awk '
     BEGIN {
       count = split("Emulsify,Gin administration,Media,Text formats,Dashboards,Config Split,publishing workflow,Dev Tools,SEO", labels, ",")
-      if (option != "admin-only") {
-        labels[++count] = "Content List"
-        labels[++count] = "Gallery"
-      }
     }
     $1 == "|" {
       line = $0
