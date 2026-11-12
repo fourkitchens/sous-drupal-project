@@ -6,11 +6,13 @@ Setup, rebuild, import-data and local-data-bak remain local DDEV operations.
 
 ## Theme
 
-Run `ddev drush config:get system.theme default` to find the active theme. The root `package.json` selects the build target through `config.theme`. In `web/themes/custom/<theme>`, read the theme's `AGENTS.md` for scoped guidance and its `package.json` for frontend commands.
+Run `ddev drush config:get system.theme default` to find the active theme. The root `package.json` selects the build target through `config.theme`. In `web/themes/custom/<theme>`, read the theme's `README.md` and its `package.json` for frontend commands.
 
 The installer enables the generated Emulsify theme and installs its npm dependencies. You can start with project assets or install a component library later.
 
 ### Author project assets
+
+For Sous sites without a component library, use the project-assets path below. The generated theme's README and development guide describe the component-library path; their library prerequisite does not apply to project-owned `src/` entrypoints.
 
 Add a Sass or JavaScript entrypoint under the theme's `src/` directory and run `npm run theme-build` from the project root. For example, in the generated theme, `src/base/site.scss` builds to `dist/global/base/site.css`.
 
