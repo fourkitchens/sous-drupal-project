@@ -377,16 +377,6 @@ ddev drush config-split:status-override staging active
 printf '\nFinal taste test: exporting configuration and checking the project.\n\n'
 ddev drush -y config:export
 ddev drush config-split:status-override staging default
-# Retain only the repository entry needed to update the installed module.
-if ddev composer show --locked fourkitchens/sous-component-support >/dev/null 2>&1; then
-  # shellcheck disable=SC2016
-  runtime_repository=$(php -r '
-    $repository = json_decode(file_get_contents("composer.json"), TRUE)["repositories"]["sous"];
-    $repository["only"] = ["fourkitchens/sous-component-support"];
-    echo json_encode($repository);
-  ')
-  ddev composer config --json repositories.sous-runtime "$runtime_repository"
-fi
 ddev composer config --unset repositories.sous
 ddev composer update --lock --no-install --no-interaction
 ddev composer validate --no-check-publish
