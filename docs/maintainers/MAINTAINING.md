@@ -55,9 +55,10 @@ Every install checks the index for the baseline and main-course recipes before p
 The runner sets `SOUS_RECIPES` to skip the sides prompt.
 To inspect it interactively, leave that variable unset; the newest matching-major
 metadata offers optional packages with `extra.sous.menu: true`.
-Sides marked `extra.sous.component: true` apply after the other sides so they
-can extend the Content fields those recipes create. Admin only hides component
-sides in the menu and refuses them in `SOUS_RECIPES`.
+The Paragraphs and Layout Builder main courses include Content List and Gallery.
+The installer applies optional sides and their composition integrations first,
+then these components and their integrations, so the components can extend the
+Content fields the sides create. Admin only includes neither component.
 Keep the beta minimum stability in the root `composer.json` so it applies
 when Composer resolves a side's dependencies.
 `SOUS_INDEX` is a maintainer override for the preflight and menu. It defaults to
@@ -78,7 +79,7 @@ The installer creates `AGENTS.md` and `docs/agents/workflow-facts.md` from `asse
 ## CI and releases
 
 PRs run admin-only with GitHub CI. Main pushes, nightly runs at 06:17 UTC
-and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. The Layout Builder and Paragraphs rows also add Content List and Gallery. Layout Builder/GitLab and admin-only/no CI add Alerts and Search. Every row includes SEO and Dev Tools. Layout Builder selects UI Kit by name. Paragraphs selects the same library by Git URL and ref.
+and manual runs add Events, News Post and Profile to Layout Builder/GitLab, Paragraphs/CircleCI and admin-only/no CI. The Layout Builder and Paragraphs main courses include Content List and Gallery. Layout Builder/GitLab and admin-only/no CI add Alerts and Search. Every row includes SEO and Dev Tools. Layout Builder selects UI Kit by name. Paragraphs selects the same library by Git URL and ref.
 Manual `packages_ref` selects a packages branch, tag or commit.
 Keep action SHAs pinned; checks read only, publishing writes after checks pass.
 
@@ -114,16 +115,15 @@ Run these from the starter root with the final candidate checked out. For local 
 
 ```sh
 sides=sous-events,sous-news-post,sous-profile
-components=sous-content-list,sous-gallery
 ui_kit=https://github.com/emulsify-ds/emulsify-ui-kit.git
 ui_kit_ref=codex/fix-drupal-theme-lint
 
 bash devops/integration/run.sh --option admin-only --ci github \
   --recipes '' --library none --artifacts /tmp/sous-8-admin
 bash devops/integration/run.sh --option layout-builder --ci gitlab \
-  --recipes "$components,$sides,sous-alerts,sous-search" --library ui-kit --artifacts /tmp/sous-8-layout
+  --recipes "$sides,sous-alerts,sous-search" --library ui-kit --artifacts /tmp/sous-8-layout
 bash devops/integration/run.sh --option paragraphs --ci circleci \
-  --recipes "$components,$sides" --library "$ui_kit" --library-ref "$ui_kit_ref" \
+  --recipes "$sides" --library "$ui_kit" --library-ref "$ui_kit_ref" \
   --artifacts /tmp/sous-8-paragraphs
 bash devops/integration/run.sh --option admin-only --ci none \
   --recipes "$sides,sous-alerts,sous-search" --library none --artifacts /tmp/sous-8-optional

@@ -18,6 +18,14 @@ Layout Paragraphs adds a field-free one–four column Layout and a library picke
 Tabs Item accepts all components except Layout. Layout Builder uses equivalent blocks, Inline Entity Form for nesting, and native column sections.
 Navigation requires the Layout Builder module; content layouts are enabled only for that option.
 
+The Paragraphs and Layout Builder main courses include Content List and Gallery; Admin only includes neither.
+The installer applies optional sides and their composition integrations first, then the included components and their integrations, so the components can extend the Content fields the sides create.
+
+Content List combines hand-picked teasers with a View listing. Each Content List Item can reference existing content or use a custom image, heading, text, and link.
+**Filter this list** lets editors narrow the bundled Events listings by event type and Recent News by news category. The Profiles listing offers an item limit.
+
+Gallery adds a component for any number of images and hosted videos, with an optional heading and introduction.
+
 ## Media
 
 Every setup includes File, Image, Video and Video File media types. Use Video File for approved MP4 or WebM uploads and Video for YouTube or Vimeo embeds.
@@ -45,12 +53,6 @@ Redirect 404 logging records missing pages, and Superusers can review Top missin
 Alerts displays site-wide banners at the top of every public page. Editors can schedule alerts and make them dismissible.
 
 Search provides a placeable results block with a keyword field and a Content type filter.
-
-Content List combines hand-picked teasers with a View listing. Each Content List Item can reference existing content or use a custom image, heading, text, and link.
-**Filter this list** lets editors narrow the bundled Events listings by event type and Recent News by news category. The Profiles listing offers an item limit.
-Content List requires Paragraphs or Layout Builder.
-
-Gallery adds a Paragraphs or Layout Builder component for any number of images and hosted videos, with an optional heading and introduction.
 
 ## User Roles and Permissions
 

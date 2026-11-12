@@ -7,15 +7,15 @@ Sous prepares the project; your site owns its code, dependencies and configurati
 
 ## Features and Configurations
 
-Choose the content model during installation. Every choice includes Gin administration, Emulsify, Media, text formats, dashboards, Config Split, a publishing workflow, Dev Tools and SEO.
+Choose the content model during installation. Every choice includes Gin administration, Emulsify, Media, text formats, dashboards, Config Split, a publishing workflow, Dev Tools and SEO. Paragraphs and Layout Builder also include Content List and Gallery.
 
 | Choice | Content setup |
 | --- | --- |
 | `0` Admin only | Administration and theme without Page or Frontpage |
-| `1` Paragraphs | Page and Frontpage with Layout Paragraphs components |
-| `2` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed and Table blocks |
+| `1` Paragraphs | Page and Frontpage with Layout Paragraphs components, Content List and Gallery |
+| `2` Layout Builder | Page and Frontpage with native layouts and text, media, Accordion, Tabs, Quote, Embed, Table, Content List and Gallery blocks |
 
-The package index advertises optional recipes such as Events, News Post, Profile, Alerts, Search, Content List and Gallery. Content List and Gallery require Paragraphs or Layout Builder. Dev Tools adds Devel, Stage File Proxy and Masquerade locally. Paragraph Types belongs to the Paragraphs main course.
+The package index advertises optional recipes such as Events, News Post, Profile, Alerts and Search. The installer applies the included components and their matching integrations after the optional sides, so they can extend the Content fields the sides create. Admin only includes neither component. Dev Tools adds Devel, Stage File Proxy and Masquerade locally. Paragraph Types belongs to the Paragraphs main course.
 See [features and configurations](docs/features.md) for the site's building blocks.
 
 # Installation
@@ -35,7 +35,7 @@ Answer the content, optional recipe, CI and dessert questions before installatio
 For an unattended install, set every answer:
 
 ```sh
-SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-events,sous-news-post,sous-content-list \
+SOUS_CONTENT=layout-builder SOUS_RECIPES=sous-events,sous-news-post \
   SOUS_CI=gitlab SOUS_LIBRARY=none \
   composer create-project fourkitchens/sous-drupal-project:^8.0 PROJECT_NAME
 ```
