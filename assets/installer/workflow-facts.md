@@ -17,7 +17,7 @@ No remote database source is configured: `devops/scripts/get-db.sh` exits 1 unti
 
 ## Test roles
 
-Test editorial work as Site Admin (`site_editor`). Superuser (`superuser`) is an admin role with every permission, so testing as it proves nothing about access (source: `cat config/default/user.role.site_editor.yml`, `cat config/default/user.role.superuser.yml`).
+Test editorial work as Site Admin (`site_admin`). Superuser (`superuser`) is an admin role with every permission, so testing as it proves nothing about access (source: `cat config/default/user.role.site_admin.yml`, `cat config/default/user.role.superuser.yml`).
 A throwaway user needs only its role: the site has no Domain, Group or Workbench Access modules (source: `cat config/default/core.extension.yml`).
 See [user roles and permissions](../features.md#user-roles-and-permissions) for the `sous_chef` and UID 1 accounts (source: `docs/features.md#user-roles-and-permissions`).
 

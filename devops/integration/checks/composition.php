@@ -7,7 +7,7 @@ $page = \Drupal::entityTypeManager()->getStorage("node_type")->load("page");
 $display = \Drupal::entityTypeManager()->getStorage("entity_view_display")->load("node.page.default");
 $uid1 = \Drupal\user\Entity\User::load(1);
 $chef = user_load_by_name("sous_chef");
-$editor = \Drupal\user\Entity\Role::load("site_editor");
+$editor = \Drupal\user\Entity\Role::load("site_admin");
 $media_types = \Drupal::entityTypeManager()->getStorage("media_type");
 $checks = [
   // UID 1 stays blocked while the separate chef account can sign in as Superuser.
@@ -26,8 +26,11 @@ $checks = [
   "Config Split" => \Drupal::moduleHandler()->moduleExists("config_split"),
   "Split definitions" => \Drupal::service("config.storage")->exists("config_split.config_split.local") && \Drupal::service("config.storage")->exists("config_split.config_split.staging"),
   "Media types" => count($media_types->loadMultiple(["file", "image", "video"])) === 3 && count($media_types->loadByProperties(["source" => "video_file"])) === 1,
-  "Site Admin" => $editor?->label() === "Site Admin" && !$editor->isAdmin() && $editor->hasPermission("administer users") && !$editor->hasPermission("administer site configuration") && !$editor->hasPermission("administer permissions") && !$editor->hasPermission("assign all roles") && !$editor->hasPermission("assign superuser role"),
+  "Site Admin" => $editor?->label() === "Site Admin" && !$editor->isAdmin() && !$editor->hasPermission("administer users") && !$editor->hasPermission("administer site configuration") && !$editor->hasPermission("administer permissions") && !$editor->hasPermission("assign all roles") && !$editor->hasPermission("assign superuser role"),
 ];
+foreach (["access users overview", "create users", "edit users by role", "cancel users by role", "assign site_admin role"] as $permission) {
+  $checks["Site Admin permission: $permission"] = $editor?->hasPermission($permission) === TRUE;
+}
 $breakpoint_manager = \Drupal::service("breakpoint.manager");
 $base_breakpoints = $breakpoint_manager->getBreakpointsByGroup("emulsify");
 $theme_breakpoints = $breakpoint_manager->getBreakpointsByGroup($theme);
@@ -70,7 +73,7 @@ foreach (["dashboard", "editoria11y", "gin_login", "twig_tweak", "role_delegatio
 }
 // Dashboard selection follows the signed-in account's roles.
 $account_switcher = \Drupal::service("account_switcher");
-foreach (["Chef dashboard" => [$chef, "site_admin"], "Site Admin dashboard" => [new \Drupal\Core\Session\UserSession(["uid" => 1000, "roles" => ["authenticated", "site_editor"]]), "editor"]] as $name => [$account, $dashboard]) {
+foreach (["Chef dashboard" => [$chef, "site_admin"], "Site Admin dashboard" => [new \Drupal\Core\Session\UserSession(["uid" => 1000, "roles" => ["authenticated", "site_admin"]]), "editor"]] as $name => [$account, $dashboard]) {
   $account_switcher->switchTo($account);
   try {
     $checks[$name] = \Drupal::service("dashboard.manager")->getDefaultDashboard()?->id() === $dashboard;
