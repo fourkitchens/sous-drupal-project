@@ -1,28 +1,34 @@
-**This PR does the following:**
-- Adds functionality bullet item
-- Fixes this or that bullet item
+## Purpose
+- Description of PR
 
 ### Ticket(s)
+[TICKET-ID](https://link-to-ticket/TICKET-ID)
 
-- [Ticket-number: Title](https://app.clickup.com/t/36718269/SOUS-XXXX)
+### Acceptance Criteria
+- [ ] _Criterion from the ticket_ — _the change that meets it and the testing step that proves it_
 
-### Notes:
+### Pull Request Deployment
+See linked environment in comments.
 
-- (optional) Document any intentionally unfinished parts or known issues within this PR
+### Functional Testing
+- [ ] Step 1
+- [ ] Step 2
+- [ ] Step 3
 
-### Functional Testing:
-
-- [ ] Document steps that allow someone to fully test your code changes. Include screenshot and links when appropriate.
+### Evidence
+- **Before:** _Failing test, error output, or screenshot_
+- **After:** _Passing test, clean output, or screenshot_
 
 ### Security
-
-_Security checks that should be reviewed_
+No security impact. / Or: list specific checks.
 
 ### Accessibility
+No accessibility impact. / Or: list specific checks.
 
-_Should this be checked for this feature?_
+### Merge Danger
+**Door:** One-way / two-way — _the change that decides it_
 
-### Pull Request Deployment:
+**Blast radius:** _One word_ — _what else could break_
 
-- (optional) Document any unique steps required to deploy this PR (if any)
-- Example: Once PR is merged and deployed to remote environment go to [page link] and manually sync data from Live25.
+### Notes
+_Additional notes_

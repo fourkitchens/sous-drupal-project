@@ -1,0 +1,55 @@
+diff --git a/config/schema/style_selector.schema.yml b/config/schema/style_selector.schema.yml
+--- a/config/schema/style_selector.schema.yml
++++ b/config/schema/style_selector.schema.yml
+@@ -74,6 +74,14 @@
+       type: string
+       label: 'Allowed values function'
+ 
++field.value.style_selector_css_class:
++  type: field.value.list_string
++  label: 'Default style value'
++
++field.value.style_selector_css_color:
++  type: field.value.list_string
++  label: 'Default color value'
++
+ # Shared advanced settings for widgets.
+ advanced_settings:
+   type: mapping
+diff --git a/src/Form/ModuleConfigForm.php b/src/Form/ModuleConfigForm.php
+--- a/src/Form/ModuleConfigForm.php
++++ b/src/Form/ModuleConfigForm.php
+@@ -4,7 +4,7 @@
+ 
+ use Drupal\Component\Utility\Html;
+ use Drupal\Component\Utility\Xss;
+-use Drupal\Core\Asset\LibraryDiscovery;
++use Drupal\Core\Asset\LibraryDiscoveryInterface;
+ use Drupal\Core\Config\ConfigFactoryInterface;
+ use Drupal\Core\Config\TypedConfigManagerInterface;
+ use Drupal\Core\Form\ConfigFormBase;
+@@ -21,7 +21,7 @@
+   /**
+    * The injected library discovery service.
+    *
+-   * @var Drupal\Core\Asset\LibraryDiscovery
++   * @var \Drupal\Core\Asset\LibraryDiscoveryInterface
+    */
+   protected $libraryDiscovery;
+ 
+@@ -39,13 +39,13 @@
+    *   The config factory service.
+    * @param \Drupal\Core\Config\TypedConfigManagerInterface $typedConfigManager
+    *   The typed config manager.
+-   * @param \Drupal\Core\Asset\LibraryDiscovery $library_discovery
++   * @param \Drupal\Core\Asset\LibraryDiscoveryInterface $library_discovery
+    *   The Library Discovery service.
+    */
+   public function __construct(
+     ConfigFactoryInterface $config_factory,
+     TypedConfigManagerInterface $typedConfigManager,
+-    LibraryDiscovery $library_discovery
++    LibraryDiscoveryInterface $library_discovery
+   ) {
+     parent::__construct($config_factory, $typedConfigManager);
+     $this->libraryDiscovery = $library_discovery;

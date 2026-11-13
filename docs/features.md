@@ -1,123 +1,76 @@
-[![Sous](https://circleci.com/gh/fourkitchens/sous-drupal-project.svg?style=svg)](https://app.circleci.com/github/fourkitchens/sous-drupal-project/pipelines)
-
 # Features and Configurations
+
+The complete export in `config/default` records this site's enabled content model and configuration.
 
 ## Themes
 
-The installation process creates a starter [Emulsify](https://emulsify.info/) theme with your project name. This theme will
-be installed and enabled. It won't look like much at first, but it's ready for your delightful designs!
-
-The Gin Admin theme will be installed for your admin pages.
+Emulsify supplies the project theme; optionally install and compile a component library during creation, or add one later. Gin supplies the administrative interface. See [Build Tools](BUILD_TOOLS.md#theme) for development commands.
 
 ## Content types
 
-- **Frontpage**: A single use content type for creating a front page / home page of site.
-- **Page**: A general content type for all standard pages.
+Review available types under Drupal's Structure → Content types screen.
+Page and Frontpage share titles, metadata, teaser fields and URL aliases.
+Each has its own content browser display in the shared Pages/Frontpage View.
+Packaged content types provide Full, Teaser and Admin Preview displays. The content browsers use Admin Preview.
+Content starts in Draft and can become Published or Archived; the sidebar schedules workflow changes through Drupal cron.
+Layout Paragraphs has no Body field; both component setups offer text/media, Accordion, Tabs, Quote, Embed and Table.
+Layout Paragraphs adds a field-free one–four column Layout and a library picker.
+Tabs Item accepts all components except Layout. Layout Builder uses equivalent blocks, Inline Entity Form for nesting, and native column sections.
+Navigation requires the Layout Builder module; content layouts are enabled only for that option.
 
-There are three pieces of default content: a default homepage, an access denied page, and a page not found page.
+The Paragraphs and Layout Builder main courses include Content List and Gallery; Admin only includes neither.
+The installer applies optional sides and their composition integrations first, then the included components and their integrations, so the components can extend the Content fields the sides create.
+
+Content List combines hand-picked teasers with a View listing. Each Content List Item can reference existing content or use a custom image, heading, text, and link.
+**Filter this list** lets editors narrow the bundled Events listings by event type and Recent News by news category. The Profiles listing offers an item limit.
+
+Gallery adds a component for any number of images and hosted videos, with an optional heading and introduction.
 
 ## Media
 
-All media types have fields for descriptions and tags.
+Every setup includes File, Image, Video and Video File media types. Use Video File for approved MP4 or WebM uploads and Video for YouTube or Vimeo embeds.
+Image editing includes Focal Point. Teasers use the landscape responsive image style, with portrait and square styles also available.
 
-- **File**: For documents. Allowed file extensions are txt, doc, docx, pdf.
-- **Image**: Allowed file extensions are png, gif, jpg, jpeg. Has caption and copyright fields.
-- **Video**: For videos hosted on YouTube or Vimeo. Has caption, copyright, and transcript fields.
+## Optional content types
 
-### Paragraphs
+When selected, Event adds Smart Date with all-day and recurring schedules and an Event Type selector using Tagify.
+Events share Page-style teasers and month–year/type/title aliases; Upcoming and Past embeds keep ongoing events Upcoming until their end.
+A recurring series appears once per listing when different occurrences qualify for each.
+News Post adds a plain-text byline, multi-value News Categories, Page-style teasers and a Recent News embed.
+News aliases use `news/first-category/title`.
+Placeable Event and News listing blocks offer taxonomy and title or teaser-text filters.
+Both use components with Paragraphs and layouts with Layout Builder.
+Profile adds required first/last names, a hidden automatic title, one Profile Image, a Basic HTML Bio and teasers. The Profiles embed sorts by last name. The placeable listing block searches names and Bio. Profile aliases use `profile/title`.
+Event, News Post and Profile each add a content browser display to their existing listing View.
 
-The following paragraph types are available:
+## SEO
 
-- Image
-- Text
-- Text with Media
-- Video
+Every setup includes redirects for changed aliases, an XML sitemap at `/sitemap.xml`, and breadcrumbs that use page titles. It also includes Google Tag and Schema.org metadata integrations.
 
-There are also some utility modules to make paragraph widgets more user-friendly.
+## Menus
 
-### Entity Browsers
+Every setup includes Menu Block, whose menu blocks can start at a chosen parent link, follow the current page or expand every link.
+Superusers manage every menu; Site Admins manage only Footer and Main navigation.
+To give a role access to a specific menu, grant `Administer <menu> menu items` at People › Permissions; keep Administration, Content, Create, Tools and User account menu Superuser-only.
+Navigation's Content section links to Menus for anyone who can manage a menu and hides Blocks and Files from everyone; those remain tabs on the Content page.
 
-Several entity browsers and associated views are set up, and used on fields where appropriate:
+## Optional site features
 
-- All Content Browser
-- All Media Browser
-- File Media Browser
-- Image Media Browser
-- Image Media Browser (Embedded)
-- Image/Video Media Browser
-- Video Media Browser
+Alerts displays site-wide banners at the top of every public page and at the top of both Site admin and Editor dashboards. Editors can schedule alerts, make them dismissible and limit them to pages. To show an alert only on dashboards, limit it to `/admin/dashboard` and `/admin/dashboard/*`. All published alerts are public, even when limited to dashboard pages; keep confidential information out of them. Alerts adds Alert to the Editor's Create block and under Create in Navigation, and an Alerts link to Navigation's Content section.
 
-### Text Formatting
-
-The following text formats come bundled with Drupal's default installation profile. Sous builds upon these defaults and gives them distinct configuration for specific purposes.
-
-- **Full HTML Filter**: An unrestricted filter that only corrects broken html and removes empty `p` tags when rendered.
-- **Basic HTML Filter**: General use filter that offers a broad range of formatting options. Ideal for most instances of formatted text.
-- **Restricted HTML Filter**: Limited access filter best used for specific scenarios where some formatting is appropriate.
-- **Plain Text Filter**: Rendered as a raw string.
+Search provides a placeable results block with a keyword field and a Content type filter.
 
 ## User Roles and Permissions
 
-There is only one custom role: Super User. The installation process will block the regular user 1 account and create
-a new "sous_chef" user with this role. This improves security for the site.
+The local `sous_chef` uses the Superuser role and a random password shown in the order summary; UID 1 (`superuser_1`) stays blocked.
+Site Admins can create team accounts and edit, block or cancel accounts that are authenticated-only or Site Admin.
+They cannot edit, block or cancel any account with the Superuser role, including accounts that also have Site Admin; the People list hides those accounts.
+On the account edit form they can assign or remove only Site Admin; the separate Roles page is Superuser-only.
+A project's new roles stay unmanaged until a Superuser marks them Safe (shown as Allowed) at Configuration › People › Administer Users by Role and grants Site Admin `Assign <role> role`.
+Superusers can assign any custom role on the account edit form. Drupal assigns Authenticated automatically.
 
-The Role Delegation module is enabled so that when you create custom roles, you can easily assign permissions for other
-roles to manage users without allowing them to create high level admins.
+After signing in, Superusers land on Site admin with site status, recent errors, sign-ins and new accounts, and can switch to the Editor tab; Site Admins land on Editor with Create links for each content and media type they can create, followed by drafts, scheduled changes, recently updated content and accessibility alerts.
+Superusers can edit Create links at Structure → Menus → Create. Only Superusers can rearrange dashboard blocks at Structure → Dashboard. Other roles land on their account page.
 
-## Contributed Modules
-
-Several contributed modules are installed with basic configuration. These add commonly used features to the site and
-improve the administrative experience.
-
-### Admin and authoring experience
-- Admin Toolbar
-- Allowed Formats
-- CKEditor Browser Context Menu
-- Embed
-- Enhanced Entity Browser
-- Entity Browser
-- Entity Browser IEF
-- Entity Embed
-- Entity Reference Revisions
-- Entity Usage
-- Field Group
-- Improve Line Breaks Filter
-- Inline Entity Form
-- Linkit
-- Taxonomy Manager
-
-### Theme related
-- Components
-- Emulsify Twig Extensions Module
-- jQuery UI
-- Twig Tweak
-
-### Media related
-- Blazy
-- Crop API
-- Dropzone JS
-- DropzoneJS Entity Browser Widget
-- Focal Point
-
-### Paragraphs related
-- Paragraphs
-- Paragraphs Collapsible
-- Paragraphs Editor Enhancements
-- Paragraphs Features
-
-### User related
-- Login History
-- Role Delegation
-
-### Other common utilities
-- Chaos Tools
-- Easy Breadcrumb
-- Google Tag Manager
-- Libraries
-- Menu Block
-- Metatag
-- Metatag: Open Graph
-- Metatag: Twitter Cards
-- Pathauto
-- Redirect
-- Token
+Review role permissions and account assignments when adding integrations or content workflows.
+Record site-specific extensions, content types and feature decisions here.

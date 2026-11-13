@@ -1,10 +1,9 @@
 #!/bin/sh
+# Install Node dependencies and build the theme before resetting a fresh clone.
+# Run npm run setup [-- backup] from the project root.
+set -eu
 
-# If this is an existing cloned repository, rebuild against local data.
-if [ -d .git ]; then
-  ddev start
-  ./devops/scripts/rebuild.sh
-else
-  # Fresh create-project install path.
-  ./devops/scripts/sous-build.sh
-fi
+npm ci
+npm run theme-ci
+npm run theme-build
+sh devops/scripts/rebuild.sh "$@"

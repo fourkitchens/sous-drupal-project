@@ -1,0 +1,1303 @@
+diff --git a/config/install/layout_paragraphs.widget_settings.yml b/config/install/layout_paragraphs.widget_settings.yml
+new file mode 100644
+index 0000000..d189602
+--- /dev/null
++++ b/config/install/layout_paragraphs.widget_settings.yml
+@@ -0,0 +1,4 @@
++show_search: true
++show_icons: true
++show_description: true
++display_mode: list
+diff --git a/config/schema/layout_paragraphs.schema.yml b/config/schema/layout_paragraphs.schema.yml
+index 0915285..91b781a 100644
+--- a/config/schema/layout_paragraphs.schema.yml
++++ b/config/schema/layout_paragraphs.schema.yml
+@@ -64,6 +64,23 @@ layout_paragraphs.modal_settings:
+       label: 'Modal autoresize'
+       description: 'If checked modal forms will automatically resize.'
+ 
++layout_paragraphs.widget_settings:
++  type: config_object
++  label: 'Layout Paragraphs widget settings'
++  mapping:
++    show_search:
++      type: boolean
++      label: 'Show search'
++    show_icons:
++      type: boolean
++      label: 'Show icons'
++    show_description:
++      type: boolean
++      label: 'Show description'
++    display_mode:
++      type: string
++      label: 'Display mode'
++
+ layout_paragraphs.builder_settings:
+   type: config_object
+   label: 'Layout Paragraphs builder settings'
+@@ -112,6 +129,12 @@ field.formatter.settings.layout_paragraphs_builder:
+     conversion:
+       type: boolean
+       label: 'Allow paragraph conversion'
++    widget_settings_source:
++      type: string
++      label: 'Widget settings source'
++    widget_settings:
++      type: layout_paragraphs.widget_settings
++      label: 'Widget settings'
+ 
+ field.widget.settings.layout_paragraphs:
+   type: mapping
+@@ -138,6 +161,12 @@ field.widget.settings.layout_paragraphs:
+     conversion:
+       type: boolean
+       label: 'Allow paragraph conversion'
++    widget_settings_source:
++      type: string
++      label: 'Widget settings source'
++    widget_settings:
++      type: layout_paragraphs.widget_settings
++      label: 'Widget settings'
+ 
+ paragraphs.behavior.settings.layout_paragraphs:
+   type: paragraphs.behavior.settings_base
+diff --git a/css/component-list.css b/css/component-list.css
+index 81efc9b..aa05df2 100644
+--- a/css/component-list.css
++++ b/css/component-list.css
+@@ -1,20 +1,159 @@
+-.lpb-component-list__group > * {
++.ui-dialog-content:has(> .lpb-component-list) {
++  padding: 1.5rem;
++}
++
++.lpb-component-list__search {
++  margin-bottom: 1rem;
++}
++
++.lpb-component-list__search > * {
++  box-sizing: border-box;
++  width: 100%;
++}
++
++.lpb-component-list__group > ul {
+   display: flex;
+   flex-wrap: wrap;
+   width: 100%;
++  padding: 1rem 0;
++  border-top: 1px solid currentColor;
++  container-type: inline-size;
++  margin: 0;
++  list-style: none;
+ }
+ 
+-.lpb-component-list__group > div > div {
+-  width: 100%;
++[data-widget-display='grid'] .lpb-component-list__group > ul {
++  gap: 1rem 0;
+ }
+ 
+-.lpb-component-list__item a {
++.lpb-component-list__group > ul:first-child {
++  border-top: none;
++  padding-top: 0;
++}
++
++.lpb-component-list__group > ul:only-child {
++  padding-bottom: 0;
++}
++
++.lpb-component-list__group .lpb-component-list__item {
+   display: flex;
++  box-sizing: border-box;
++  min-width: 0;
++}
++
++.lpb-component-list__group .lpb-component-list__item[hidden] {
++  display: none;
++}
++
++[data-widget-display='list'] .lpb-component-list__item {
++  flex: 1 1 50%;
++  padding: 0.25rem;
++}
++
++[data-widget-display='grid'] .lpb-component-list__item {
++  flex: 1 1 50%;
++}
++
++@container (min-width: 540px) {
++  [data-widget-display='grid'] .lpb-component-list__item {
++    flex: 1 1 33%;
++  }
++}
++
++@container (min-width: 840px) {
++  [data-widget-display='grid'] .lpb-component-list__item {
++    flex: 1 1 25%;
++  }
++}
++
++@container (max-width: 360px) {
++  [data-widget-display] .lpb-component-list__item {
++    flex-basis: 100%;
++  }
++}
++
++.lpb-component-list__item a {
++  box-sizing: border-box;
++  gap: 0 1rem;
+   align-items: center;
++  align-content: center;
+   width: 100%;
+-  margin-top: 10px;
++  min-width: 0;
++  border-radius: 0.5rem;
++  line-height: 1.5;
++  overflow-wrap: anywhere;
+ }
++
++.lpb-component-list__item a:focus-visible {
++  outline: 2px solid currentColor;
++  outline-offset: 2px;
++}
++
++[data-widget-display='list'] .lpb-component-list__item a {
++  display: grid;
++  grid-template-columns: auto minmax(0, 1fr);
++  grid-template-rows: 1fr;
++  gap: 0 1rem;
++  grid-template-areas: "image content";
++  padding: 0.5rem 0;
++}
++
++[data-widget-display='list'] .lpb-component-list__item a:not(:has(> img)) {
++  grid-template-columns: minmax(0, 1fr);
++  grid-template-areas: "content";
++}
++
++[data-widget-display='grid'] .lpb-component-list__item a {
++  display: flex;
++  flex-flow: column nowrap;
++  text-align: center;
++  padding: 1rem;
++}
++
++[data-widget-display='list'] .lpb-component-list__item_content {
++  display: grid;
++  grid-template-columns: auto;
++  grid-template-rows: auto;
++  gap: 0;
++  grid-template-areas:
++    "title"
++    "description";
++  grid-area: content;
++}
++
++[data-widget-display='grid'] .lpb-component-list__item_content {
++  order: 1;
++  display: flex;
++  flex-flow: column nowrap;
++}
++
++.lpb-component-list__label:not(:last-child) {
++  margin-bottom: 0.25rem;
++}
++
++[data-widget-display='list'] .lpb-component-list__label {
++  grid-area: title;
++}
++
++.lpb-component-list__description {
++  text-wrap: balance;
++}
++
++[data-widget-display='list'] .lpb-component-list__description {
++  grid-area: description;
++  margin: 0;
++}
++
+ .lpb-component-list__item img {
+-  max-width: 24px;
+-  margin-right: 10px;
++  max-width: 2.5rem;
++  margin-bottom: 0;
++}
++
++[data-widget-display='list'] .lpb-component-list__item img {
++  grid-area: image;
++}
++
++[data-widget-display='grid'] .lpb-component-list__item img {
++  order: 0;
++  margin-bottom: 0.5rem;
+ }
+diff --git a/js/component-list.js b/js/component-list.js
+index c0e2d6f..8102383 100644
+--- a/js/component-list.js
++++ b/js/component-list.js
+@@ -1,20 +1,22 @@
+-(($, Drupal) => {
++(($, Drupal, once) => {
+   Drupal.behaviors.layoutParagraphsComponentList = {
+     attach: function attach(context) {
+-      $('.lpb-component-list-search-input', context).keyup((e) => {
+-        const v = e.currentTarget.value;
+-        const pattern = new RegExp(v, 'i');
++      $(
++        once(
++          'lpb-component-list-search',
++          '.lpb-component-list-search-input',
++          context,
++        ),
++      ).on('input', (e) => {
++        const value = e.currentTarget.value.trim().toLocaleLowerCase();
+         const $list = $(e.currentTarget)
+           .closest('.lpb-component-list')
+           .find('.lpb-component-list__item');
+         $list.each((i, item) => {
+-          if (pattern.test(item.innerText)) {
+-            item.removeAttribute('style');
+-          } else {
+-            item.style.display = 'none';
+-          }
++          const label = item.querySelector('.lpb-component-list__label') || item;
++          item.hidden = !label.textContent.toLocaleLowerCase().includes(value);
+         });
+       });
+     },
+   };
+-})(jQuery, Drupal);
++})(jQuery, Drupal, once);
+diff --git a/layout_paragraphs.install b/layout_paragraphs.install
+index dbe10b4..0529716 100644
+--- a/layout_paragraphs.install
++++ b/layout_paragraphs.install
+@@ -66,3 +66,18 @@ function layout_paragraphs_update_9002(&$sandbox) {
+     ->clear('theme_display')
+     ->save();
+ }
++
++/**
++ * Add default widget settings configuration.
++ */
++function layout_paragraphs_update_9003() {
++  $config = \Drupal::configFactory()->getEditable('layout_paragraphs.widget_settings');
++  if ($config->isNew()) {
++    $config
++      ->set('show_search', TRUE)
++      ->set('show_icons', TRUE)
++      ->set('show_description', TRUE)
++      ->set('display_mode', 'list')
++      ->save();
++  }
++}
+diff --git a/layout_paragraphs.libraries.yml b/layout_paragraphs.libraries.yml
+index 2809da3..4ee842d 100644
+--- a/layout_paragraphs.libraries.yml
++++ b/layout_paragraphs.libraries.yml
+@@ -12,6 +12,8 @@ component_list:
+     js/component-list.js: {}
+   dependencies:
+     - core/jquery
++    - core/drupal
++    - core/once
+ 
+ builder:
+   css:
+diff --git a/layout_paragraphs.links.task.yml b/layout_paragraphs.links.task.yml
+index fde5907..ab78b0a 100644
+--- a/layout_paragraphs.links.task.yml
++++ b/layout_paragraphs.links.task.yml
+@@ -9,6 +9,12 @@ layout_paragraphs.section_settings:
+   base_route: layout_paragraphs.label_settings
+   weight: 100
+ 
++layout_paragraphs.widget_settings:
++  route_name: layout_paragraphs.widget_settings
++  title: 'Widget Settings'
++  base_route: layout_paragraphs.label_settings
++  weight: 150
++
+ layout_paragraphs.modal_settings:
+   route_name: layout_paragraphs.modal_settings
+   title: 'Modal Settings'
+diff --git a/layout_paragraphs.module b/layout_paragraphs.module
+index 7616cf7..d639cad 100644
+--- a/layout_paragraphs.module
++++ b/layout_paragraphs.module
+@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
+ use Drupal\paragraphs\ParagraphInterface;
+ use Drupal\Core\Routing\RouteMatchInterface;
+ use Drupal\layout_paragraphs\Utility\Dialog;
++use Drupal\layout_paragraphs\Utility\WidgetSettings;
+ use Drupal\paragraphs\Entity\ParagraphsType;
+ use Drupal\Core\Entity\FieldableEntityInterface;
+ use Drupal\layout_builder\Plugin\Block\FieldBlock;
+@@ -92,11 +93,27 @@ function layout_paragraphs_theme() {
+         'types' => NULL,
+         'empty_message' => NULL,
+         'status_messages' => NULL,
++        'widget_settings' => [],
+       ],
+     ],
+   ];
+ }
+ 
++/**
++ * Implements hook_theme_registry_alter().
++ */
++function layout_paragraphs_theme_registry_alter(array &$theme_registry) {
++  $base_hook = 'layout_paragraphs_builder_component_menu';
++  $template_path = WidgetSettings::getCustomTemplatePath();
++  if ($template_path && isset($theme_registry[$base_hook])) {
++    $theme_registry[$base_hook . '__custom'] = [
++      'base hook' => $base_hook,
++      'template' => basename($template_path, '.html.twig'),
++      'path' => dirname($template_path),
++    ] + $theme_registry[$base_hook];
++  }
++}
++
+ /**
+  * Implements hook_theme_suggestions().
+  */
+diff --git a/layout_paragraphs.routing.yml b/layout_paragraphs.routing.yml
+index fcbb5a2..dcfb0dd 100644
+--- a/layout_paragraphs.routing.yml
++++ b/layout_paragraphs.routing.yml
+@@ -14,6 +14,14 @@ layout_paragraphs.section_settings:
+   requirements:
+     _permission: 'administer site configuration'
+ 
++layout_paragraphs.widget_settings:
++  path: '/admin/config/content/layout_paragraphs/widget'
++  defaults:
++    _form: '\Drupal\layout_paragraphs\Form\LayoutParagraphsWidgetSettingsForm'
++    _title: 'Layout Paragraphs Widget Settings'
++  requirements:
++    _permission: 'administer site configuration'
++
+ layout_paragraphs.modal_settings:
+   path: '/admin/config/content/layout_paragraphs/modal-settings'
+   defaults:
+diff --git a/src/Controller/ChooseComponentController.php b/src/Controller/ChooseComponentController.php
+index f9f2190..be0ae8e 100644
+--- a/src/Controller/ChooseComponentController.php
++++ b/src/Controller/ChooseComponentController.php
+@@ -8,7 +8,9 @@ use Drupal\Core\Template\Attribute;
+ use Drupal\Core\Ajax\AjaxHelperTrait;
+ use Drupal\Core\Ajax\OpenDialogCommand;
+ use Drupal\Core\Controller\ControllerBase;
++use Drupal\Core\Cache\CacheableMetadata;
+ use Drupal\layout_paragraphs\Utility\Dialog;
++use Drupal\layout_paragraphs\Utility\WidgetSettings;
+ use Symfony\Component\HttpFoundation\Request;
+ use Drupal\layout_paragraphs\LayoutParagraphsLayout;
+ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+@@ -104,7 +106,7 @@ class ChooseComponentController extends ControllerBase {
+       return $this->componentForm(key($types), $layout_paragraphs_layout, $context);
+     }
+     else {
+-      return $this->componentMenu($types);
++      return $this->componentMenu($types, $layout_paragraphs_layout);
+     }
+   }
+ 
+@@ -156,11 +158,13 @@ class ChooseComponentController extends ControllerBase {
+    *
+    * @param array $types
+    *   The component types.
++   * @param \Drupal\layout_paragraphs\LayoutParagraphsLayout $layout_paragraphs_layout
++   *   The layout paragraphs layout object.
+    *
+    * @return array
+    *   The component menu render array.
+    */
+-  protected function componentMenu(array $types) {
++  protected function componentMenu(array $types, LayoutParagraphsLayout $layout_paragraphs_layout) {
+     foreach ($types as &$type) {
+       $type['url'] = $type['url_object']->toString();
+       $type['link_attributes'] = new Attribute([
+@@ -175,11 +179,22 @@ class ChooseComponentController extends ControllerBase {
+     });
+     $empty_message = $this->config('layout_paragraphs.settings')->get('empty_message') ??
+       $this->t('No components to add.');
++    $widget_settings = WidgetSettings::resolve($layout_paragraphs_layout->getSettings());
++    $theme = 'layout_paragraphs_builder_component_menu';
++    if ($widget_settings['display_mode'] === 'custom') {
++      if (WidgetSettings::getCustomTemplatePath()) {
++        $theme .= '__custom';
++      }
++      else {
++        $widget_settings['display_mode'] = 'list';
++      }
++    }
+     $component_menu = [
+       '#title' => $this->t('Choose a component'),
+-      '#theme' => 'layout_paragraphs_builder_component_menu',
++      '#theme' => $theme,
+       '#attributes' => [
+         'class' => ['lpb-component-list'],
++        'data-widget-display' => $widget_settings['display_mode'],
+       ],
+       '#empty_message' => $empty_message,
+       '#status_messages' => ['#type' => 'status_messages'],
+@@ -187,12 +202,17 @@ class ChooseComponentController extends ControllerBase {
+         'layout' => $section_components,
+         'content' => $content_components,
+       ],
++      '#widget_settings' => $widget_settings,
+       '#attached' => [
+         'library' => [
+           'layout_paragraphs/component_list',
+         ],
+       ],
+     ];
++    CacheableMetadata::createFromRenderArray($component_menu)
++      ->addCacheableDependency($this->config('layout_paragraphs.widget_settings'))
++      ->addCacheableDependency($this->config('system.theme'))
++      ->applyTo($component_menu);
+     return $component_menu;
+   }
+ 
+diff --git a/src/Element/LayoutParagraphsBuilder.php b/src/Element/LayoutParagraphsBuilder.php
+index 1a0ccc5..cf0c324 100644
+--- a/src/Element/LayoutParagraphsBuilder.php
++++ b/src/Element/LayoutParagraphsBuilder.php
+@@ -21,6 +21,7 @@ use Drupal\layout_paragraphs\LayoutParagraphsComponent;
+ use Drupal\layout_paragraphs\LayoutParagraphsLayoutTempstoreRepository;
+ use Drupal\layout_paragraphs\LayoutParagraphsSection;
+ use Drupal\layout_paragraphs\Utility\Dialog;
++use Drupal\layout_paragraphs\Utility\WidgetSettings;
+ use Drupal\paragraphs\ParagraphInterface;
+ use Drupal\paragraphs\ParagraphsConversionManager;
+ use Symfony\Component\DependencyInjection\ContainerInterface;
+@@ -264,6 +265,7 @@ class LayoutParagraphsBuilder extends RenderElementBase implements ContainerFact
+     ];
+     CacheableMetadata::createFromRenderArray($element)
+       ->addCacheableDependency($builder_settings)
++      ->addCacheableDependency($this->configFactory->get('layout_paragraphs.widget_settings'))
+       ->applyTo($element);
+     $element['#is_empty'] = $this->layoutParagraphsLayout->isEmpty();
+     $element['#empty_message'] = $this->layoutParagraphsLayout->getSetting('empty_message', $this->t('Start adding content.'));
+@@ -506,6 +508,16 @@ class LayoutParagraphsBuilder extends RenderElementBase implements ContainerFact
+     if ($this->buttonLabels['enable_tooltips'] ?? FALSE) {
+       $classes[] = 'use-tooltip';
+     }
++    $widget_settings = WidgetSettings::resolve($this->layoutParagraphsLayout->getSettings());
++    $dialog_options = [
++      'target' => Dialog::dialogId($this->layoutParagraphsLayout),
++      'modal' => TRUE,
++      'drupalAutoButtons' => FALSE,
++      'dialogClass' => 'lpb-dialog',
++    ];
++    if ($widget_settings['display_mode'] === 'grid') {
++      $dialog_options['width'] = 'min(900px, 90vw)';
++    }
+     return [
+       '#theme' => 'layout_paragraphs_insert_component_btn',
+       '#title' => $this->insertComponentButtonTitle($query_params['parent_uuid'] ?? NULL),
+@@ -513,12 +525,7 @@ class LayoutParagraphsBuilder extends RenderElementBase implements ContainerFact
+       '#attributes' => [
+         'class' => array_merge(['lpb-btn--add', 'use-ajax'], $classes),
+         'data-dialog-type' => 'dialog',
+-        'data-dialog-options' => Json::encode([
+-          'target' => Dialog::dialogId($this->layoutParagraphsLayout),
+-          'modal' => TRUE,
+-          'drupalAutoButtons' => FALSE,
+-          'dialogClass' => 'lpb-dialog',
+-        ]),
++        'data-dialog-options' => Json::encode($dialog_options),
+       ],
+       '#url' => Url::fromRoute('layout_paragraphs.builder.choose_component', $route_params, ['query' => $query_params]),
+       '#access' => $this->layoutParagraphsLayout->layoutChangeAccess(),
+diff --git a/src/Form/LayoutParagraphsWidgetSettingsForm.php b/src/Form/LayoutParagraphsWidgetSettingsForm.php
+new file mode 100644
+index 0000000..a1d8fd9
+--- /dev/null
++++ b/src/Form/LayoutParagraphsWidgetSettingsForm.php
+@@ -0,0 +1,74 @@
++<?php
++
++namespace Drupal\layout_paragraphs\Form;
++
++use Drupal\Core\Form\ConfigFormBase;
++use Drupal\Core\Form\FormStateInterface;
++use Drupal\layout_paragraphs\Utility\WidgetSettings;
++
++/**
++ * Defines a form for Layout Paragraphs widget settings.
++ */
++class LayoutParagraphsWidgetSettingsForm extends ConfigFormBase {
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getFormId() {
++    return 'layout_paragraphs_widget_settings';
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function getEditableConfigNames() {
++    return ['layout_paragraphs.widget_settings'];
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function buildForm(array $form, FormStateInterface $form_state) {
++    $settings = WidgetSettings::getDefaults();
++    foreach ([
++      'show_search' => $this->t('Show search'),
++      'show_icons' => $this->t('Show icons'),
++      'show_description' => $this->t('Show description'),
++    ] as $key => $title) {
++      $form[$key] = [
++        '#type' => 'checkbox',
++        '#title' => $title,
++        '#default_value' => $settings[$key],
++      ];
++    }
++    $form['display_mode'] = [
++      '#type' => 'select',
++      '#title' => $this->t('Display mode'),
++      '#options' => [
++        'list' => $this->t('List'),
++        'grid' => $this->t('Grid'),
++        'custom' => $this->t('Custom'),
++      ],
++      '#default_value' => $settings['display_mode'],
++      '#description' => $this->t('Custom uses <code>layout-paragraphs-builder-component-menu.html.twig</code> from the default theme. If no template is found, the list display is used.'),
++    ];
++    if ($settings['display_mode'] === 'custom' && !WidgetSettings::getCustomTemplatePath()) {
++      $this->messenger()->addWarning($this->t('The default theme does not provide a <code>layout-paragraphs-builder-component-menu.html.twig</code> template. The list display will be used.'));
++    }
++    return parent::buildForm($form, $form_state);
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function submitForm(array &$form, FormStateInterface $form_state) {
++    $this->config('layout_paragraphs.widget_settings')
++      ->set('show_search', (bool) $form_state->getValue('show_search'))
++      ->set('show_icons', (bool) $form_state->getValue('show_icons'))
++      ->set('show_description', (bool) $form_state->getValue('show_description'))
++      ->set('display_mode', $form_state->getValue('display_mode'))
++      ->save();
++    parent::submitForm($form, $form_state);
++  }
++
++}
+diff --git a/src/Plugin/Field/FieldWidget/LayoutParagraphsWidget.php b/src/Plugin/Field/FieldWidget/LayoutParagraphsWidget.php
+index 66e3087..487d140 100644
+--- a/src/Plugin/Field/FieldWidget/LayoutParagraphsWidget.php
++++ b/src/Plugin/Field/FieldWidget/LayoutParagraphsWidget.php
+@@ -13,6 +13,8 @@ use Drupal\Core\Field\FieldDefinitionInterface;
+ use Drupal\Core\Entity\EntityRepositoryInterface;
+ use Drupal\Core\Entity\EntityTypeManagerInterface;
+ use Drupal\layout_paragraphs\LayoutParagraphsLayout;
++use Drupal\layout_paragraphs\Utility\WidgetSettings;
++use Drupal\Core\Url;
+ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+ use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
+ use Symfony\Component\DependencyInjection\ContainerInterface;
+@@ -421,6 +423,48 @@ class LayoutParagraphsWidget extends WidgetBase implements ContainerFactoryPlugi
+       '#description' => $this->t('Allow editors to convert paragraphs using Paragraphs Conversion plugins.'),
+       '#default_value' => $this->getSetting('conversion'),
+     ];
++    $element['widget_settings_source'] = [
++      '#type' => 'select',
++      '#title' => $this->t('Widget settings'),
++      '#options' => [
++        'default' => $this->t('Use defaults from module configuration'),
++        'custom' => $this->t('Use custom settings for this field'),
++      ],
++      '#default_value' => $this->getSetting('widget_settings_source'),
++      '#description' => $this->t('Defaults are configured at <a href=":url">Layout Paragraphs Widget Settings</a>.', [
++        ':url' => Url::fromRoute('layout_paragraphs.widget_settings')->toString(),
++      ]),
++    ];
++    $source_selector = ':input[name="fields[' . $this->fieldDefinition->getName() . '][settings_edit_form][settings][widget_settings_source]"]';
++    $element['widget_settings'] = [
++      '#type' => 'details',
++      '#title' => $this->t('Custom widget settings'),
++      '#open' => TRUE,
++      '#states' => ['visible' => [$source_selector => ['value' => 'custom']]],
++    ];
++    $widget_settings = ($this->getSetting('widget_settings') ?: []) + WidgetSettings::getDefaults();
++    foreach ([
++      'show_search' => $this->t('Show search'),
++      'show_icons' => $this->t('Show icons'),
++      'show_description' => $this->t('Show description'),
++    ] as $key => $title) {
++      $element['widget_settings'][$key] = [
++        '#type' => 'checkbox',
++        '#title' => $title,
++        '#default_value' => $widget_settings[$key],
++      ];
++    }
++    $element['widget_settings']['display_mode'] = [
++      '#type' => 'select',
++      '#title' => $this->t('Display mode'),
++      '#options' => [
++        'list' => $this->t('List'),
++        'grid' => $this->t('Grid'),
++        'custom' => $this->t('Custom'),
++      ],
++      '#default_value' => $widget_settings['display_mode'],
++      '#description' => $this->t('Custom uses <code>layout-paragraphs-builder-component-menu.html.twig</code> from the default theme. If no template is found, the list display is used.'),
++    ];
+     return $element;
+   }
+ 
+@@ -446,6 +490,9 @@ class LayoutParagraphsWidget extends WidgetBase implements ContainerFactoryPlugi
+     $summary[] = $this->getSetting('conversion')
+       ? $this->t('Paragraph conversion: <b>enabled</b>')
+       : $this->t('Paragraph conversion: <b>disabled</b>');
++    $summary[] = $this->t('Widget settings: @source', [
++      '@source' => $this->getSetting('widget_settings_source') === 'custom' ? $this->t('Custom') : $this->t('Module defaults'),
++    ]);
+     return $summary;
+   }
+ 
+@@ -465,6 +512,8 @@ class LayoutParagraphsWidget extends WidgetBase implements ContainerFactoryPlugi
+       'nesting_depth' => 0,
+       'require_layouts' => 0,
+       'conversion' => TRUE,
++      'widget_settings_source' => 'default',
++      'widget_settings' => [],
+     ];
+     return $defaults;
+   }
+diff --git a/src/Utility/WidgetSettings.php b/src/Utility/WidgetSettings.php
+new file mode 100644
+index 0000000..6ead088
+--- /dev/null
++++ b/src/Utility/WidgetSettings.php
+@@ -0,0 +1,86 @@
++<?php
++
++namespace Drupal\layout_paragraphs\Utility;
++
++/**
++ * Resolves component menu settings and the default theme's custom template.
++ */
++class WidgetSettings {
++
++  /**
++   * Returns normalized module defaults for the component menu.
++   *
++   * @return array
++   *   The component menu settings.
++   */
++  public static function getDefaults(): array {
++    $settings = \Drupal::config('layout_paragraphs.widget_settings')->getRawData() + [
++      'show_search' => TRUE,
++      'show_icons' => TRUE,
++      'show_description' => TRUE,
++      'display_mode' => 'list',
++    ];
++    return static::normalize($settings);
++  }
++
++  /**
++   * Resolves field overrides, when enabled, against the module defaults.
++   *
++   * @param array $settings
++   *   The field widget or formatter settings.
++   *
++   * @return array
++   *   The effective component menu settings.
++   */
++  public static function resolve(array $settings): array {
++    $defaults = static::getDefaults();
++    $overrides = $settings['widget_settings_source'] ?? 'default';
++    return static::normalize($overrides === 'custom' ? ($settings['widget_settings'] ?? []) + $defaults : $defaults);
++  }
++
++  /**
++   * Normalizes the display mode shared by the menu and its dialog.
++   *
++   * @param array $settings
++   *   The component menu settings.
++   *
++   * @return array
++   *   The normalized settings.
++   */
++  protected static function normalize(array $settings): array {
++    if (!in_array($settings['display_mode'], ['list', 'grid', 'custom'], TRUE)) {
++      $settings['display_mode'] = 'list';
++    }
++    return $settings;
++  }
++
++  /**
++   * Finds a custom menu template in the default theme or its base themes.
++   *
++   * @return string|null
++   *   The Drupal-root-relative template path, or NULL when none exists.
++   */
++  public static function getCustomTemplatePath(): ?string {
++    $theme_name = \Drupal::config('system.theme')->get('default');
++    $themes = \Drupal::service('theme_handler')->listInfo();
++    while (isset($themes[$theme_name])) {
++      $theme = $themes[$theme_name];
++      unset($themes[$theme_name]);
++      $directory = DRUPAL_ROOT . '/' . $theme->getPath() . '/templates';
++      if (is_dir($directory)) {
++        $filename = 'layout-paragraphs-builder-component-menu.html.twig';
++        if (is_file($directory . '/' . $filename)) {
++          return $theme->getPath() . '/templates/' . $filename;
++        }
++        $files = \Drupal::service('file_system')->scanDirectory($directory, '/^layout-paragraphs-builder-component-menu\.html\.twig$/');
++        if ($files) {
++          ksort($files);
++          return substr(reset($files)->uri, strlen(DRUPAL_ROOT) + 1);
++        }
++      }
++      $theme_name = $theme->info['base theme'] ?? '';
++    }
++    return NULL;
++  }
++
++}
+diff --git a/templates/layout-paragraphs-builder-component-menu.html.twig b/templates/layout-paragraphs-builder-component-menu.html.twig
+index a89e559..685fd3d 100644
+--- a/templates/layout-paragraphs-builder-component-menu.html.twig
++++ b/templates/layout-paragraphs-builder-component-menu.html.twig
+@@ -1,37 +1,64 @@
++{% set settings = widget_settings|default({}) %}
+ {% set all_types = types.layout|merge(types.content) %}
++{% set display_mode = settings.display_mode|default('list') %}
++{% set attributes = attributes.setAttribute('data-widget-display', display_mode) %}
++{% set heading_id = 'lpb-component-list-heading'|clean_unique_id %}
++{% set search_id = 'lpb-component-list-search'|clean_unique_id %}
+ {{ status_messages }}
+-<div{{ attributes }}>
+-  <h4 class="visually-hidden">{{ 'Add Item'|t }}</h4>
++<div{{ attributes.setAttribute('aria-labelledby', heading_id) }}>
++  <h2 id="{{ heading_id }}" class="visually-hidden">{{ 'Add Item'|t }}</h2>
++
+   {% if all_types|length > 1 %}
+-  <div class="lpb-component-list__search">
+-    <input class="lpb-component-list-search-input" type="text" placeholder="{{ 'Filter items...'|t }}" />
+-  </div>
++  {% if settings.show_search|default(false) %}
++    <div class="lpb-component-list__search">
++      <label class="visually-hidden" for="{{ search_id }}">{{ 'Filter items'|t }}</label>
++      <input id="{{ search_id }}" class="lpb-component-list-search-input form-element form-element--type-text" type="text" placeholder="{{ 'Filter items...'|t }}" />
++    </div>
++  {% endif %}
+   <div class="lpb-component-list__group">
++
+     {% if types.layout %}
+-    <div class="lpb-component-list__group--layout">
++    <ul class="lpb-component-list__group--layout" aria-label="{{ 'Layout components'|t }}">
+     {% endif %}
+     {% for type in types.layout %}
+-      <div class="lpb-component-list__item type-{{type.id}} is-layout">
+-        <a{{ type.link_attributes.setAttribute('href', type.url) }}>{% if type.image %}<img src="{{ type.image }}" alt ="" />{% endif %}{{ type.label }}</a>
+-      </div>
++      <li class="lpb-component-list__item type-{{type.id}} is-layout">
++        <a{{ type.link_attributes.setAttribute('href', type.url) }}>
++          <span class="lpb-component-list__item_content">
++            <span class="lpb-component-list__label">{{ type.label }}</span>
++            {% if settings.show_description|default(false) and type.description %}
++              <span class="lpb-component-list__description form-item__description">{{ type.description }}</span>
++            {% endif %}
++          </span>
++          {% if settings.show_icons|default(false) and type.image %}<img src="{{ type.image }}" alt="" />{% endif %}
++        </a>
++      </li>
+     {% endfor %}
+     {% if types.layout %}
+-    </div>
++    </ul>
+     {% endif %}
++
+     {% if types.content %}
+-    <div class="lpb-component-list__group--content">
++    <ul class="lpb-component-list__group--content" aria-label="{{ 'Content components'|t }}">
+     {% endif %}
+     {% for type in types.content %}
+-      <div class="lpb-component-list__item type-{{type.id}}">
+-        <a{{ type.link_attributes.setAttribute('href', type.url) }}>{% if type.image %}<img src="{{ type.image }}" alt ="" />{% endif %}{{ type.label }}</a>
+-      </div>
++      <li class="lpb-component-list__item type-{{type.id}}">
++        <a{{ type.link_attributes.setAttribute('href', type.url) }}>
++          <span class="lpb-component-list__item_content">
++            <span class="lpb-component-list__label">{{ type.label }}</span>
++            {% if settings.show_description|default(false) and type.description %}
++              <span class="lpb-component-list__description form-item__description">{{ type.description }}</span>
++            {% endif %}
++          </span>
++          {% if settings.show_icons|default(false) and type.image %}<img src="{{ type.image }}" alt="" />{% endif %}
++        </a>
++      </li>
+     {% endfor %}
+     {% if types.content %}
+-    </div>
++    </ul>
+     {% endif %}
+   </div>
+   {% else %}
+-  <div class="lpb-component-list__empty-message">
++  <div class="lpb-component-list__empty-message" aria-live="polite">
+   {{ empty_message }}
+   </div>
+   {% endif %}
+diff --git a/tests/src/Kernel/WidgetCustomTemplateTest.php b/tests/src/Kernel/WidgetCustomTemplateTest.php
+new file mode 100644
+index 0000000..6cae06e
+--- /dev/null
++++ b/tests/src/Kernel/WidgetCustomTemplateTest.php
+@@ -0,0 +1,109 @@
++<?php
++
++declare(strict_types=1);
++
++namespace Drupal\Tests\layout_paragraphs\Kernel;
++
++use Drupal\KernelTests\KernelTestBase;
++use Drupal\layout_paragraphs\Utility\WidgetSettings;
++use PHPUnit\Framework\Attributes\Group;
++use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
++
++/**
++ * Tests custom component menus through the normal theme renderer.
++ *
++ * @group layout_paragraphs
++ */
++#[RunTestsInSeparateProcesses]
++#[Group('layout_paragraphs')]
++class WidgetCustomTemplateTest extends KernelTestBase {
++
++  /**
++   * {@inheritdoc}
++   */
++  protected static $modules = [
++    'system',
++    'user',
++    'field',
++    'entity_reference_revisions',
++    'paragraphs',
++    'file',
++    'node',
++    'layout_discovery',
++    'layout_paragraphs',
++  ];
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function setUp(): void {
++    parent::setUp();
++    $this->container->get('theme_installer')->install([
++      'stark',
++      'layout_paragraphs_widget_test',
++      'layout_paragraphs_widget_test_subtheme',
++    ]);
++  }
++
++  /**
++   * Tests the frontend template while an administration theme is active.
++   */
++  public function testCustomTemplateWithAdminTheme(): void {
++    $this->config('system.theme')
++      ->set('default', 'layout_paragraphs_widget_test')
++      ->set('admin', 'stark')
++      ->save();
++    $this->activateTheme('stark');
++
++    $this->assertStringEndsWith('/templates/components/layout-paragraphs-builder-component-menu.html.twig', WidgetSettings::getCustomTemplatePath());
++    $build = $this->buildMenu();
++    $output = (string) $this->container->get('renderer')->renderRoot($build);
++
++    $this->assertStringContainsString('custom-component-menu', $output);
++    $this->assertStringContainsString('data-test="custom-menu"', $output);
++    $this->assertStringContainsString('No components to add.', $output);
++    $this->assertContains('layout_paragraphs_widget_test/component_menu', $build['#attached']['library']);
++    $this->assertSame('stark', $this->container->get('theme.manager')->getActiveTheme()->getName());
++  }
++
++  /**
++   * Tests inherited templates and normal base-theme preprocessing.
++   */
++  public function testBaseThemeTemplateAndPreprocess(): void {
++    $this->config('system.theme')
++      ->set('default', 'layout_paragraphs_widget_test_subtheme')
++      ->save();
++    $this->activateTheme('layout_paragraphs_widget_test_subtheme');
++
++    $this->assertStringContainsString('/layout_paragraphs_widget_test/templates/components/', WidgetSettings::getCustomTemplatePath());
++    $build = $this->buildMenu();
++    $output = (string) $this->container->get('renderer')->renderRoot($build);
++
++    $this->assertStringContainsString('custom-component-menu', $output);
++    $this->assertStringContainsString('data-widget-preprocessed="true"', $output);
++    $this->assertContains('layout_paragraphs_widget_test/component_menu', $build['#attached']['library']);
++  }
++
++  /**
++   * Activates a theme and rebuilds its registry.
++   */
++  protected function activateTheme(string $theme): void {
++    $this->container->get('theme.manager')->setActiveTheme($this->container->get('theme.initialization')->getActiveThemeByName($theme));
++    $this->container->get('theme.registry')->reset();
++  }
++
++  /**
++   * Builds an empty menu, including the normal status message render element.
++   */
++  protected function buildMenu(): array {
++    return [
++      '#theme' => 'layout_paragraphs_builder_component_menu__custom',
++      '#attributes' => ['data-test' => 'custom-menu'],
++      '#types' => ['layout' => [], 'content' => []],
++      '#empty_message' => 'No components to add.',
++      '#status_messages' => ['#type' => 'status_messages'],
++      '#widget_settings' => WidgetSettings::getDefaults(),
++    ];
++  }
++
++}
+diff --git a/tests/src/Kernel/WidgetSettingsTest.php b/tests/src/Kernel/WidgetSettingsTest.php
+new file mode 100644
+index 0000000..a57b5c0
+--- /dev/null
++++ b/tests/src/Kernel/WidgetSettingsTest.php
+@@ -0,0 +1,268 @@
++<?php
++
++declare(strict_types=1);
++
++namespace Drupal\Tests\layout_paragraphs\Kernel;
++
++use Drupal\Core\Entity\Entity\EntityFormDisplay;
++use Drupal\Core\Entity\Entity\EntityViewDisplay;
++use Drupal\Core\Form\FormState;
++use Drupal\Core\Url;
++use Drupal\Component\Serialization\Json;
++use Drupal\field\Entity\FieldConfig;
++use Drupal\field\Entity\FieldStorageConfig;
++use Drupal\KernelTests\KernelTestBase;
++use Drupal\layout_paragraphs\Controller\ChooseComponentController;
++use Drupal\layout_paragraphs\Form\LayoutParagraphsWidgetSettingsForm;
++use Drupal\layout_paragraphs\LayoutParagraphsLayout;
++use Drupal\layout_paragraphs\Utility\WidgetSettings;
++use Drupal\node\Entity\Node;
++use Drupal\node\Entity\NodeType;
++use Drupal\Tests\SchemaCheckTestTrait;
++use PHPUnit\Framework\Attributes\Group;
++use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
++
++/**
++ * Tests component menu configuration, field overrides and rendering.
++ *
++ * @group layout_paragraphs
++ */
++#[RunTestsInSeparateProcesses]
++#[Group('layout_paragraphs')]
++class WidgetSettingsTest extends KernelTestBase {
++
++  use SchemaCheckTestTrait;
++
++  /**
++   * {@inheritdoc}
++   */
++  protected static $modules = [
++    'system',
++    'user',
++    'field',
++    'entity_reference_revisions',
++    'paragraphs',
++    'file',
++    'node',
++    'layout_discovery',
++    'layout_paragraphs',
++  ];
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function setUp(): void {
++    parent::setUp();
++    $this->installEntitySchema('user');
++    $this->installEntitySchema('node');
++    $this->installEntitySchema('paragraph');
++    $this->installConfig(['system', 'layout_paragraphs']);
++    $this->container->get('theme_installer')->install(['stark']);
++    $this->config('system.theme')->set('default', 'stark')->save();
++
++    NodeType::create(['type' => 'lp_test', 'name' => 'LP Test'])->save();
++    FieldStorageConfig::create([
++      'field_name' => 'field_lp',
++      'entity_type' => 'node',
++      'type' => 'entity_reference_revisions',
++      'cardinality' => -1,
++      'settings' => ['target_type' => 'paragraph'],
++    ])->save();
++    FieldConfig::create([
++      'field_name' => 'field_lp',
++      'entity_type' => 'node',
++      'bundle' => 'lp_test',
++    ])->save();
++  }
++
++  /**
++   * Tests installation and upgrading without overwriting existing settings.
++   */
++  public function testInstallAndUpdate(): void {
++    $defaults = [
++      'show_search' => TRUE,
++      'show_icons' => TRUE,
++      'show_description' => TRUE,
++      'display_mode' => 'list',
++    ];
++    $this->assertSame($defaults, array_intersect_key(WidgetSettings::getDefaults(), $defaults));
++    $this->assertConfigSchemaByName('layout_paragraphs.widget_settings');
++
++    $this->container->get('module_handler')->loadInclude('layout_paragraphs', 'install');
++    $this->config('layout_paragraphs.widget_settings')->delete();
++    layout_paragraphs_update_9003();
++    $this->assertSame($defaults, array_intersect_key(WidgetSettings::getDefaults(), $defaults));
++    $this->assertConfigSchemaByName('layout_paragraphs.widget_settings');
++
++    $this->config('layout_paragraphs.widget_settings')
++      ->set('show_search', FALSE)
++      ->set('display_mode', 'grid')
++      ->save();
++    layout_paragraphs_update_9003();
++    $this->assertFalse(WidgetSettings::getDefaults()['show_search']);
++    $this->assertSame('grid', WidgetSettings::getDefaults()['display_mode']);
++  }
++
++  /**
++   * Tests that unchecked settings persist as false through the settings form.
++   */
++  public function testSettingsForm(): void {
++    $form_state = (new FormState())->setValues([
++      'show_search' => NULL,
++      'show_icons' => NULL,
++      'show_description' => NULL,
++      'display_mode' => 'grid',
++    ]);
++    $this->container->get('form_builder')->submitForm(LayoutParagraphsWidgetSettingsForm::class, $form_state);
++    $this->assertSame([], $form_state->getErrors());
++    $settings = WidgetSettings::getDefaults();
++    $this->assertFalse($settings['show_search']);
++    $this->assertFalse($settings['show_icons']);
++    $this->assertFalse($settings['show_description']);
++    $this->assertSame('grid', $settings['display_mode']);
++  }
++
++  /**
++   * Tests both field displays accept inherited and custom settings in config.
++   */
++  public function testFieldDisplaySchema(): void {
++    $form_display = EntityFormDisplay::create([
++      'targetEntityType' => 'node',
++      'bundle' => 'lp_test',
++      'mode' => 'default',
++      'status' => TRUE,
++    ]);
++    $view_display = EntityViewDisplay::create([
++      'targetEntityType' => 'node',
++      'bundle' => 'lp_test',
++      'mode' => 'default',
++      'status' => TRUE,
++    ]);
++    foreach (['default', 'custom'] as $source) {
++      $settings = [
++        'widget_settings_source' => $source,
++        'widget_settings' => $source === 'custom' ? [
++          'show_search' => FALSE,
++          'show_icons' => FALSE,
++          'show_description' => FALSE,
++          'display_mode' => 'grid',
++        ] : [],
++      ];
++      $form_display->setComponent('field_lp', ['type' => 'layout_paragraphs', 'settings' => $settings])->save();
++      $view_display->setComponent('field_lp', ['type' => 'layout_paragraphs_builder', 'settings' => $settings])->save();
++      foreach ([$form_display, $view_display] as $display) {
++        $this->assertConfigSchemaByName($display->getConfigDependencyName());
++        $component = $display->getComponent('field_lp');
++        $this->assertSame($settings['widget_settings'], $component['settings']['widget_settings']);
++      }
++    }
++  }
++
++  /**
++   * Tests rendered menu visibility and field settings precedence.
++   */
++  public function testMenuRenderingAndOverrides(): void {
++    $this->config('layout_paragraphs.widget_settings')
++      ->set('show_search', FALSE)
++      ->set('show_icons', FALSE)
++      ->set('show_description', FALSE)
++      ->set('display_mode', 'grid')
++      ->save();
++
++    // Unused custom values must not override the selected module defaults.
++    $menu = $this->buildMenu([
++      'widget_settings_source' => 'default',
++      'widget_settings' => ['show_icons' => TRUE, 'display_mode' => 'list'],
++    ]);
++    $this->assertSame('grid', $menu['#widget_settings']['display_mode']);
++    $this->assertContains('config:layout_paragraphs.widget_settings', $menu['#cache']['tags']);
++    $markup = (string) $this->container->get('renderer')->renderRoot($menu);
++    $this->assertStringContainsString('data-widget-display="grid"', $markup);
++    $this->assertStringContainsString('Text component', $markup);
++    $this->assertStringNotContainsString('lpb-component-list-search-input', $markup);
++    $this->assertStringNotContainsString('<img', $markup);
++    $this->assertStringNotContainsString('Description of text', $markup);
++
++    // A field's custom list overrides the module's custom display mode.
++    $this->config('layout_paragraphs.widget_settings')->set('display_mode', 'custom')->save();
++    $menu = $this->buildMenu([
++      'widget_settings_source' => 'custom',
++      'widget_settings' => [
++        'show_search' => TRUE,
++        'show_icons' => TRUE,
++        'show_description' => TRUE,
++        'display_mode' => 'list',
++      ],
++    ]);
++    $this->assertSame('layout_paragraphs_builder_component_menu', $menu['#theme']);
++    $markup = (string) $this->container->get('renderer')->renderRoot($menu);
++    $this->assertStringContainsString('data-widget-display="list"', $markup);
++    $this->assertStringContainsString('lpb-component-list-search-input', $markup);
++    $this->assertStringContainsString('<img', $markup);
++    $this->assertStringContainsString('Description of text', $markup);
++  }
++
++  /**
++   * Tests custom mode falls back to the list without a theme template.
++   */
++  public function testMissingCustomTemplate(): void {
++    $this->config('layout_paragraphs.widget_settings')->set('display_mode', 'custom')->save();
++    $this->assertNull(WidgetSettings::getCustomTemplatePath());
++    $menu = $this->buildMenu();
++    $this->assertSame('layout_paragraphs_builder_component_menu', $menu['#theme']);
++    $this->assertSame('list', $menu['#widget_settings']['display_mode']);
++  }
++
++  /**
++   * Tests that dialog sizing uses the same effective settings as the menu.
++   */
++  public function testGridDialogSettings(): void {
++    $this->config('layout_paragraphs.widget_settings')->set('display_mode', 'grid')->save();
++    $node = Node::create(['type' => 'lp_test', 'title' => 'Test node']);
++    $layout = new LayoutParagraphsLayout($node->field_lp);
++    $builder = $this->container->get('plugin.manager.element_info')->createInstance('layout_paragraphs_builder');
++    (new \ReflectionProperty($builder, 'layoutParagraphsLayout'))->setValue($builder, $layout);
++    $method = new \ReflectionMethod($builder, 'insertComponentButton');
++
++    $button = $method->invoke($builder);
++    $options = Json::decode($button['#attributes']['data-dialog-options']);
++    $this->assertSame('min(900px, 90vw)', $options['width']);
++
++    $layout->setSettings([
++      'widget_settings_source' => 'custom',
++      'widget_settings' => ['display_mode' => 'list'],
++    ]);
++    $button = $method->invoke($builder);
++    $options = Json::decode($button['#attributes']['data-dialog-options']);
++    $this->assertArrayNotHasKey('width', $options);
++  }
++
++  /**
++   * Builds a component menu with two available types.
++   *
++   * @param array $settings
++   *   The field widget settings.
++   *
++   * @return array
++   *   The component menu render array.
++   */
++  protected function buildMenu(array $settings = []): array {
++    $node = Node::create(['type' => 'lp_test', 'title' => 'Test node']);
++    $layout = new LayoutParagraphsLayout($node->field_lp, $settings);
++    $types = [];
++    foreach (['text', 'image'] as $id) {
++      $types[$id] = [
++        'id' => $id,
++        'label' => ucfirst($id) . ' component',
++        'description' => 'Description of ' . $id,
++        'image' => '/test-' . $id . '.svg',
++        'is_section' => FALSE,
++        'url_object' => Url::fromUri('https://example.com/add/' . $id),
++      ];
++    }
++    $controller = ChooseComponentController::create($this->container);
++    $method = new \ReflectionMethod($controller, 'componentMenu');
++    return $method->invoke($controller, $types, $layout);
++  }
++
++}
+diff --git a/tests/themes/layout_paragraphs_widget_test/layout_paragraphs_widget_test.info.yml b/tests/themes/layout_paragraphs_widget_test/layout_paragraphs_widget_test.info.yml
+new file mode 100644
+index 0000000..c22a621
+--- /dev/null
++++ b/tests/themes/layout_paragraphs_widget_test/layout_paragraphs_widget_test.info.yml
+@@ -0,0 +1,5 @@
++name: Layout Paragraphs widget test
++type: theme
++description: 'Tests custom component menu templates.'
++core_version_requirement: '^10 || ^11'
++base theme: false
+diff --git a/tests/themes/layout_paragraphs_widget_test/layout_paragraphs_widget_test.libraries.yml b/tests/themes/layout_paragraphs_widget_test/layout_paragraphs_widget_test.libraries.yml
+new file mode 100644
+index 0000000..0f30802
+--- /dev/null
++++ b/tests/themes/layout_paragraphs_widget_test/layout_paragraphs_widget_test.libraries.yml
+@@ -0,0 +1,3 @@
++component_menu:
++  dependencies:
++    - core/drupal
+diff --git a/tests/themes/layout_paragraphs_widget_test/layout_paragraphs_widget_test.theme b/tests/themes/layout_paragraphs_widget_test/layout_paragraphs_widget_test.theme
+new file mode 100644
+index 0000000..d8f82e7
+--- /dev/null
++++ b/tests/themes/layout_paragraphs_widget_test/layout_paragraphs_widget_test.theme
+@@ -0,0 +1,13 @@
++<?php
++
++/**
++ * @file
++ * Theme hooks for the custom component menu test.
++ */
++
++/**
++ * Implements hook_preprocess_HOOK() for component menus.
++ */
++function layout_paragraphs_widget_test_preprocess_layout_paragraphs_builder_component_menu(array &$variables): void {
++  $variables['attributes']['data-widget-preprocessed'] = 'true';
++}
+diff --git a/tests/themes/layout_paragraphs_widget_test/templates/components/layout-paragraphs-builder-component-menu.html.twig b/tests/themes/layout_paragraphs_widget_test/templates/components/layout-paragraphs-builder-component-menu.html.twig
+new file mode 100644
+index 0000000..9f16ae3
+--- /dev/null
++++ b/tests/themes/layout_paragraphs_widget_test/templates/components/layout-paragraphs-builder-component-menu.html.twig
+@@ -0,0 +1,5 @@
++{{ attach_library('layout_paragraphs_widget_test/component_menu') }}
++{{ status_messages }}
++<section{{ attributes.addClass('custom-component-menu') }}>
++  {{ empty_message }}
++</section>
+diff --git a/tests/themes/layout_paragraphs_widget_test_subtheme/layout_paragraphs_widget_test_subtheme.info.yml b/tests/themes/layout_paragraphs_widget_test_subtheme/layout_paragraphs_widget_test_subtheme.info.yml
+new file mode 100644
+index 0000000..0be54c7
+--- /dev/null
++++ b/tests/themes/layout_paragraphs_widget_test_subtheme/layout_paragraphs_widget_test_subtheme.info.yml
+@@ -0,0 +1,5 @@
++name: Layout Paragraphs widget test subtheme
++type: theme
++description: 'Tests inherited custom component menu templates.'
++core_version_requirement: '^10 || ^11'
++base theme: layout_paragraphs_widget_test

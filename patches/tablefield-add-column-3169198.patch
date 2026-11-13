@@ -1,0 +1,114 @@
+diff --git a/src/Element/Tablefield.php b/src/Element/Tablefield.php
+--- a/src/Element/Tablefield.php
++++ b/src/Element/Tablefield.php
+@@ -36,6 +36,7 @@
+       ],
+       '#theme_wrappers' => ['form_element'],
+       '#addrow' => FALSE,
++      '#addcol' => FALSE,
+     ];
+   }
+ 
+@@ -54,7 +55,7 @@
+ 
+     // This is being set in rebuild and import ajax calls.
+     $storage = NestedArray::getValue($form_state->getStorage(), $element['#parents']);
+-    // Fetch addrow value.
++    // Fetch addrow/addcol value.
+     if ($storage && isset($storage['tablefield']['rebuild'])) {
+       $element['#cols'] = $storage['tablefield']['rebuild']['cols'];
+       $element['#rows'] = $storage['tablefield']['rebuild']['rows'];
+@@ -186,6 +187,36 @@
+       ];
+     }
+ 
++    // To change number of columns.
++    if (!empty($element['#addcol'])) {
++      $element['tablefield']['addcol']['col_value'] = [
++        '#title' => t('How many columns'),
++        '#type' => 'hidden',
++        '#default_value' => $rows,
++        '#value' => $rows,
++      ];
++      $element['tablefield']['addcol']['addcol'] = [
++        '#type' => 'submit',
++        '#value' => t('Add Column'),
++        '#name' => 'tablefield-addcol-' . $id,
++        '#attributes' => [
++          'class' => ['tablefield-addcol'],
++        ],
++        '#submit' => [[get_called_class(), 'submitCallbackRebuild']],
++        '#limit_validation_errors' => [
++          array_merge($parents, ['tablefield', 'rebuild', 'cols']),
++          array_merge($parents, ['tablefield', 'rebuild', 'rows']),
++          array_merge($parents, ['tablefield', 'rebuild', 'rebuild']),
++        ],
++        '#ajax' => [
++          'callback' => [get_called_class(), 'ajaxCallbackRebuild'],
++          'progress' => ['type' => 'throbber', 'message' => NULL],
++          'wrapper' => 'tablefield-' . $id . '-wrapper',
++          'effect' => 'fade',
++        ],
++      ];
++    }
++
+     // If no rebuild, we pass along the rows/cols as a value. Otherwise, we will
+     // provide form elements to specify the size and ajax rebuild.
+     if (empty($element['#rebuild'])) {
+@@ -362,10 +393,13 @@
+     // We don't want to re-send the _weight option.
+     unset($rebuild['_weight']);
+ 
+-    // Set row value to default only if there is Add Row button clicked.
++    // Set values to default only if the Add Row/Col button was clicked.
+     $op = (string) $triggering_element['#value'];
+     if ($op === 'Add Row') {
+       $rebuild['rebuild']['rows']['#value'] = $rebuild['rebuild']['rows']['#default_value'];
++    }
++    elseif ($op === 'Add Column') {
++      $rebuild['rebuild']['cols']['#value'] = $rebuild['rebuild']['cols']['#default_value'];
+     }
+ 
+     return $rebuild;
+@@ -387,10 +421,18 @@
+     $parents = array_slice($triggering_element['#parents'], 0, -2, TRUE);
+     $value = $form_state->getValue($parents);
+ 
+-    if (isset($triggering_element['#name']) && $triggering_element['#name'] == 'tablefield-rebuild-' . $id || isset($triggering_element['#name']) && $triggering_element['#name'] == 'tablefield-addrow-' . $id) {
++    $rebuild_names = [
++      'tablefield-rebuild-' . $id,
++      'tablefield-addrow-' . $id,
++      'tablefield-addcol-' . $id,
++    ];
++    if (isset($triggering_element['#name']) && in_array($triggering_element['#name'], $rebuild_names)) {
+       $parents[] = 'rebuild';
+-      if (isset($triggering_element['#name']) && $triggering_element['#name'] == 'tablefield-addrow-' . $id) {
++      if ($triggering_element['#name'] == 'tablefield-addrow-' . $id) {
+         $value['rebuild']['rows']++;
++      }
++      elseif ($triggering_element['#name'] == 'tablefield-addcol-' . $id) {
++        $value['rebuild']['cols']++;
+       }
+       NestedArray::setValue($form_state->getStorage(), $parents, $value['rebuild']);
+ 
+diff --git a/src/Plugin/Field/FieldWidget/TablefieldWidget.php b/src/Plugin/Field/FieldWidget/TablefieldWidget.php
+--- a/src/Plugin/Field/FieldWidget/TablefieldWidget.php
++++ b/src/Plugin/Field/FieldWidget/TablefieldWidget.php
+@@ -148,6 +148,7 @@
+       '#paste' => $this->currentUser->hasPermission('paste tablefield'),
+     // Add permission.
+       '#addrow' => $this->currentUser->hasPermission('addrow tablefield'),
++      '#addcol' => $this->currentUser->hasPermission('addcol tablefield'),
+     ] + $element;
+ 
+     if ($is_field_settings_default_widget_form) {
+diff --git a/tablefield.permissions.yml b/tablefield.permissions.yml
+--- a/tablefield.permissions.yml
++++ b/tablefield.permissions.yml
+@@ -15,3 +15,6 @@
+ 
+ addrow tablefield:
+   title: 'To change row in tablefield'
++
++addcol tablefield:
++  title: 'Dynamically add columns to tablefields'

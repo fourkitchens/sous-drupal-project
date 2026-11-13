@@ -2,88 +2,112 @@
 
 ## Requirements
 
-### Terminus
+Install DDEV, Docker, Git, PHP 8.4, Composer 2 and Node.js from `.nvmrc` on your computer.
+Run project commands from the checkout root.
 
-Pantheon's Terminus is an almost-essential command-line tool for managing sites. The CLI is required to run many of the scripts for building, updating, and deploying changes between the local development environment and the Pantheon platform.
+## Fresh Composer installation
 
-1. [Install Terminus](https://pantheon.io/docs/terminus/install/)
-2. [Setup a valid machine token](https://pantheon.io/docs/machine-tokens)
-3. Log in to terminus using the machine token\
-   `terminus auth:login --email=<email@example.com> --machine-token=<machine_token>`
-4. [Review documentation](https://pantheon.io/docs/terminus/) to get started with the CLI
-
-### Local Development Environment
-
-This project supports development with **Ddev**. Choose your own adventure!
-
-#### Ddev
-
-[Download and install the latest release](https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/)
-
-Increase Docker resources: Locate the 'Resources' section in your Docker preferences. For most architectures, this project requires at least 3GB of memory and 3 CPUs. Additional CPUs and memory may be helpful but should stay under the halfway mark of your total available resources. Also disable the _'Start Docker when you log in'_ setting under the 'General' tab.
-
-#### Fire
-
-This project is using the FIRE tool, this will provide you with all the required commands to easily setup and work with this site, to see available commands just run: fire list of visit the [fire projects page](https://github.com/fourkitchens/fire)
-
-### Additional tools
-
-- [Fire launcher](https://github.com/fourkitchens/fire-launcher/releases/tag/v0.0.1)
-- [Composer](https://getcomposer.org/download/): PHP package manager. Version 2.x.
-- [NVM](https://github.com/nvm-sh/nvm#install--update-script): Recommended for installing and switching between Node versions.
-- Node.js (>=20). We recommend installing via NVM.
+`composer create-project` starts DDEV, installs dependencies and creates the local Drupal site. Open the local URL from the installer summary. Run `ddev start` from the project root if the site is stopped.
 
 ## Project setup script
 
-This project has a streamline setup script that builds a local instance of the site that is ready for active development. Below is the setup command that will only need to be ran once on your local machine.
+For a clone of an existing site, obtain its database backup and uploaded files, then run:
 
-```bash
-# Executing the setup script will prepare the local development environment.
-npm run setup
+```sh
+npm run setup -- reference/site-db.sql.gz
 ```
 
-## Alternative manual setup instructions
+Setup installs Node dependencies, builds available theme sources, replaces the local database with the backup, sanitizes copied accounts and deploys configuration.
 
-A detailed explanation of the setup script appears below.
+## Restore or refresh locally
 
-### Step 1: Clone this repository and enter the project directory
-
-```bash
-git clone git@github.com:fourkitchens/sous-project.git && cd sous-project
+```sh
+npm run rebuild -- reference/site-db.sql.gz
+npm run import-data -- reference/site-db.sql.gz
+npm run local-data-bak
 ```
 
-### Step 2: Start Ddev and build your dependencies
+`rebuild` and `import-data` both replace the local database from the backup and sanitize copied accounts. `rebuild` also installs Composer dependencies and deploys configuration.
+The default backup is `reference/site-db.sql.gz`; `.sql` also works.
+The restore runs `devops/scripts/get-db.sh` only when you omit the backup path and the default file is missing. Edit that script to download the default backup, or configure `ddev pull`.
+The backup must be readable and nonempty. Gzip files are checked before the local database is replaced.
+Sanitization sets passwords to `admin` and emails to `user-%uid@example.com`.
+Add local adjustments in `import-data.sh`; deployment steps belong in `hook_deploy_NAME()`.
 
-For ddev...
+## Shared Drupal commands
 
-```bash
+From a laptop with DDEV installed and `.ddev/config.yaml` present, the shared PHP launcher uses that checkout's DDEV web container. Inside the container, it runs the installed tools directly.
+
+```sh
 ddev start
-ddev composer install
-ddev npm install
-ddev npm --prefix ./web/themes/custom/sous-project install
+sh devops/scripts/confex.sh
+sh devops/scripts/confim.sh --uri=https://mysite.ddev.site
+# Run the export from inside the web container.
+ddev exec --raw -- sh devops/scripts/confex.sh
 ```
 
-### Step 3: Import the remote database and sync config
+The `npm run confex` and `npm run confim` shortcuts call the same scripts. See [Deployment](DEPLOYMENT.md#build-and-deploy) for native execution in CI and on hosts.
 
-For ddev...
+## Add a recipe
 
-```bash
-terminus backup:get sous-project.live --element=db --to=reference/site-db.sql.gz
-ddev import-db --file=reference/site-db.sql.gz
-ddev drush cache-rebuild
-ddev drush updatedb -y
-ddev drush cache-rebuild
-ddev drush config-import --source="../config/_splits" --partial -y
-ddev drush cache-rebuild
-ddev drush config-import -y
+The starter removes the temporary Sous Composer repository when installation completes. Add the scoped index again before requiring another Sous recipe. This example adds the optional Alerts recipe to a local DDEV site.
+
+```sh
+ddev composer config --json repositories.sous \
+  '{"type":"composer","url":"https://fourkitchens.github.io/sous-drupal-packages/","only":["fourkitchens/sous-*"]}'
+ddev composer require 'fourkitchens/sous-alerts:^2.0'
+sh devops/scripts/install-recipe.sh fourkitchens/sous-alerts
+sh devops/scripts/confex.sh
 ```
 
-### Step 4: Log in as our sous_chef superuser
+Drupal's Composer plugin unpacks dependencies during `composer require` and leaves the recipe source available for Drupal to apply. Keep the source through application and any composition integrations. Review and commit the Composer files and complete configuration export.
 
-For ddev...
+To remove the setup index again, run `ddev composer config --unset repositories.sous` and `ddev composer update --lock --no-install` after applying the recipe.
 
-```bash
-ddev drush user:login --name=sous_chef
+Recipes that add content or media types also add their links to the Editor dashboard's Create menu. If you add a type by hand, add its link at Structure → Menus → Create. Delete the link when deleting the type.
+
+Sites generated by the starter keep the `viewsreference-sift` GitHub repository for installing Content List and updating its dependencies. Keep beta stability enabled for upstream Views Reference.
+
+On a Paragraphs site, if you add a content recipe after installation, open Structure → Content types → (type) → Manage fields → Content. Allow Content List and Gallery on the new content type's Content field. The component integrations extend only the Content fields that exist when they run.
+
+## Local settings and Config Split
+
+The starter loads local overrides in DDEV. Keep `settings.local.php` untracked.
+
+```php
+if (getenv('IS_DDEV_PROJECT') === 'true') {
+  if (file_exists($app_root . '/' . $site_path . '/settings.ddev.php')) {
+    include $app_root . '/' . $site_path . '/settings.ddev.php';
+  }
+  if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+    include $app_root . '/' . $site_path . '/settings.local.php';
+  }
+}
 ```
 
-Visit the local ddev site [https://sous-project.ddev.site](https://sous-project.ddev.site) or run `fire drush user:login --name=sous_chef` to obtain a login link.
+The local and staging splits include core Field UI, Syslog and Views UI. Their saved statuses are inactive. Local settings activate the local split in DDEV. On staging, set `$config['config_split.config_split.staging']['status'] = TRUE;` in host settings before importing configuration. Leave both overrides unset in production.
+
+The included Dev Tools recipe adds Devel, Stage File Proxy and Masquerade to the local split. These modules stay disabled in staging and production. On a fresh site, Masquerade access comes from the Superuser role.
+
+Set Stage File Proxy's source URL in `settings.local.php` to fetch missing files locally.
+
+```php
+$config['stage_file_proxy.settings']['origin'] = 'https://production.example.com';
+```
+
+Use `ddev drush uli --name=sous_chef admin/dashboard` for a local login after setup.
+
+## Adapt an existing site to Lando
+
+Add a project-owned `.lando.yml` with the `drupal11` recipe, PHP 8.4, `web` as the webroot and a compatible database such as `mariadb:10.11`. Run `lando start` and `lando composer install`. [Lando Drupal configuration](https://docs.lando.dev/plugins/drupal/config.html)
+
+Keep the DDEV settings includes scoped to DDEV. In `settings.php`, include the untracked `settings.local.php` for the Lando service as well, using a Lando-only guard such as `getenv('LANDO_INFO')`. In that local file, use the internal database connection details from `lando info` and set `$config['config_split.config_split.local']['status'] = TRUE;`. [Lando service environment](https://docs.lando.dev/config/env.html)
+
+Use `lando db-import reference/site-db.sql.gz` and `lando db-export` for Lando databases. After importing a copy, sanitize accounts with `lando drush sql:sanitize -y`. The starter installer and bundled local database scripts use DDEV. [Lando Drupal tooling](https://docs.lando.dev/plugins/drupal/tooling.html)
+
+For Lando 3, open a shell in the PHP service and run the shared command from the mounted project root. [Lando shell command](https://docs.lando.dev/cli/ssh.html)
+
+```sh
+lando ssh --service appserver
+SOUS_PHP_RUNTIME=native sh devops/scripts/confim.sh --uri=https://mysite.lndo.site
+```
