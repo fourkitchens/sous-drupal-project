@@ -63,8 +63,10 @@ Search provides a placeable results block with a keyword field and a Content typ
 ## User Roles and Permissions
 
 The local `sous_chef` uses the Superuser role and a random password shown in the order summary; UID 1 (`superuser_1`) stays blocked.
-Site Admins can manage users and publish site content. They can assign or remove only Site Admin on the account edit form; they cannot assign or remove Superuser.
-User administration includes editing Superuser account details; Role Delegation limits role changes.
+Site Admins can create team accounts and edit, block or cancel accounts that are authenticated-only or Site Admin.
+They cannot edit, block or cancel any account with the Superuser role, including accounts that also have Site Admin; the People list hides those accounts.
+On the account edit form they can assign or remove only Site Admin; the separate Roles page is Superuser-only.
+A project's new roles stay unmanaged until a Superuser marks them Safe (shown as Allowed) at Configuration › People › Administer Users by Role and grants Site Admin `Assign <role> role`.
 Superusers can assign any custom role on the account edit form. Drupal assigns Authenticated automatically.
 
 After signing in, Superusers land on Site admin with site status, recent errors, sign-ins and new accounts, and can switch to the Editor tab; Site Admins land on Editor with Create links for each content and media type they can create, followed by drafts, scheduled changes, recently updated content and accessibility alerts.
