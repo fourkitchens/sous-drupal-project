@@ -95,6 +95,8 @@ Set Stage File Proxy's source URL in `settings.local.php` to fetch missing files
 $config['stage_file_proxy.settings']['origin'] = 'https://production.example.com';
 ```
 
+Open `/user/login?name=sous_chef` to prefill the Username field, then enter the password normally. The starter enables `sous_login_prefill` in every environment: it supplies only a username default and grants no access. Names are trimmed and limited to Drupal’s maximum username length; submitted credentials are never replaced by query parameters.
+
 Use `ddev drush uli --name=sous_chef admin/dashboard` for a local login after setup.
 
 ## Adapt an existing site to Lando

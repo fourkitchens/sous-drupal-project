@@ -319,14 +319,25 @@ check_composition() {
     SOUS_SMOKE_PASSWORD="$chef_password" vendor/bin/drush php:script "/var/www/html/$checks_dir/composition.php"
 }
 
-# Sign in through the real form; one-time login links skip Dashboard's redirect.
+# Check prefill and sign in through the real form to exercise Dashboard's redirect.
 check_dashboard_login() {
   local http_url chef_password form_build_id login_url selected
   http_url=$(ddev describe -j | jq -er '.raw.httpurl')
   chef_password=$(awk '$1 == "|" && $2 == "Password" {print $3}' "$artifacts/create-project.log")
+  step login-prefill ddev drush php:script "/var/www/html/$checks_dir/login-prefill.php"
   step dashboard-login-form curl --silent --show-error --fail --location \
+    --get --data-urlencode 'name= sous_chef ' \
     --cookie-jar "$work_dir/dashboard.cookies" --output "$work_dir/login.html" \
     "${http_url%/}/user/login"
+  # shellcheck disable=SC2016
+  step dashboard-login-prefill php -r '
+    $document = new DOMDocument();
+    @$document->loadHTML(file_get_contents($argv[1]));
+    $fields = new DOMXPath($document);
+    if ($fields->evaluate("string(//input[@name=\"name\"]/@value)") !== "sous_chef") {
+      throw new RuntimeException("The HTTP login form did not prefill sous_chef.");
+    }
+  ' "$work_dir/login.html"
   form_build_id=$(sed -n 's/.*name="form_build_id" value="\([^"]*\)".*/\1/p' "$work_dir/login.html")
   test -n "$form_build_id"
   step dashboard-login curl --silent --show-error --location \
@@ -334,7 +345,7 @@ check_dashboard_login() {
     --data-urlencode name=sous_chef --data-urlencode pass@- \
     --data-urlencode "form_build_id=$form_build_id" --data-urlencode form_id=user_login_form \
     --data-urlencode 'op=Log in' --output "$work_dir/dashboard.html" \
-    --write-out '%{http_code}\n%{url_effective}\n' "${http_url%/}/user/login" \
+    --write-out '%{http_code}\n%{url_effective}\n' "${http_url%/}/user/login?name=wrong-query-name" \
     < <(printf '%s' "$chef_password")
   expect_line dashboard-login 200
   login_url=$(tail -n 1 "$artifacts/dashboard-login.log")

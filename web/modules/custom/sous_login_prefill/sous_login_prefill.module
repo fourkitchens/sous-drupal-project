@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * @file
+ * Supplies username defaults for sign-in links.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\UserInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function sous_login_prefill_form_user_login_form_alter(array &$form, FormStateInterface $form_state, $form_id): void {
+  $form['#cache']['contexts'][] = 'url.query_args:name';
+  $request = \Drupal::request();
+  if ($form_state->isSubmitted() || !$request->isMethod('GET')) {
+    return;
+  }
+
+  $name = $request->query->get('name');
+  if (is_string($name)) {
+    $form['name']['#default_value'] = mb_substr(trim($name), 0, UserInterface::USERNAME_MAX_LENGTH);
+  }
+}

@@ -1,0 +1,7 @@
+name: Sous login prefill
+type: module
+description: Prefills the username on login links without changing authentication.
+package: Sous
+core_version_requirement: ^11
+dependencies:
+  - drupal:user

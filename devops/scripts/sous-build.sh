@@ -368,6 +368,9 @@ for recipe in $recipes $main_course_components; do
   fi
 done
 
+# Keep username-prefilled sign-in links available in every environment.
+ddev drush -y pm:enable sous_login_prefill
+
 # Export core module defaults to both splits.
 ddev drush -y pm:enable field_ui syslog views_ui
 ddev drush config-split:status-override staging active
